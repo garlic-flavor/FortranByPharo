@@ -10,7 +10,7 @@ Class {
 { #category : #initialization }
 SWTranspilerOfFortran >> initialize [
 	super initialize. 
-	targetVersion := #f90.
+
 ]
 
 { #category : #'code generation' }

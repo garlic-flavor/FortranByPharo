@@ -4,78 +4,78 @@ A SWProjectTest is a test class for testing the behavior of SWProject
 Class {
 	#name : #SWProjectTest,
 	#superclass : #TestCase,
-	#category : #'SWFortranByPharo-Client-Tests'
+	#instVars : [
+		'project',
+		'client'
+	],
+	#category : #'SWFortranByPharo-Client-Tests-Client'
 }
 
-{ #category : #tests }
-SWProjectTest class >> testCodeGeneration2 [
-	<sampleInstance>
-	|project|
+{ #category : #running }
+SWProjectTest >> setUp [
+	super setUp.
+	SWServer start.
+	client := SWClientView new.
 	project := SWProject new
-			name: 'helloworld';
-			description: 'My first Hello, World project.';
-			source: SWTestHelloWorld new.
-	^ project generate
+		classes: { SWTestHelloWorld  };
+		client: client;
+		yourself.
+	"Put here a common initialization logic for tests"
 ]
 
-{ #category : #tests }
-SWProjectTest class >> testCodeGenerationOfRuby [
-	<sampleInstance>
-	|project|
-	project := SWProject new
-			name: 'helloworld';
-			description: 'My first Hello, World project.';
-			source: (SWTestHelloWorld new type: #rb).
-	^ project generate
+{ #category : #running }
+SWProjectTest >> tearDown [
+	super tearDown.
+	client socket close.
+	SWServer stop.
+]
+
+{ #category : #test }
+SWProjectTest >> testCompileAll [
+	project
+		putAll;
+		compileAll.
 
 ]
 
-{ #category : #tests }
-SWProjectTest class >> testDomestic [
-	<sampleInstance>
-	|project|
-	project := SWProject new
-			name: 'helloworld';
-			description: 'My first Hello, World project.';
-			source: SWTestHelloWorld new.
-
-	^ project goDomestic
+{ #category : #test }
+SWProjectTest >> testGo [
+	|res|
+	res := project go.
+	self assert: (res at: #code) equals: 200.
+	self assert: (res at: #stdout) equals: ' Hello, World!', String lf.
 ]
 
-{ #category : #tests }
-SWProjectTest class >> testRequsestDatabaseCreation [
-	<sampleInstance>
-	|project codes|
-	project := SWProject new
-			name: 'helloworld';
-			description: 'My first Hello, World project.';
-			source: SWTestHelloWorld new.
-	codes := project generate.
-	^ project createRequestingDatabaseOf: codes.
+{ #category : #test }
+SWProjectTest >> testGoDomestic [
+	|res|
+	res := project goDomestic.
+	self assert: res equals: 'Hello, World!'.
 ]
 
-{ #category : #tests }
-SWProjectTest >> testCodeGeneration [
-	|project gen|
-	project := SWProject new
-			name: 'helloworld';
-			description: 'My first Hello, World project.';
-			source: SWTestHelloWorld new.
-	gen := project generate.
-	self assert: (gen at: 1) code equals: 'program HelloWorld
-    print *, ''Hello, World!''
-end program HelloWorld
-'.
+{ #category : #test }
+SWProjectTest >> testLinkAll [
+	project
+		putAll;
+		compileAll;
+		linkAll.
+
 ]
 
-{ #category : #tests }
-SWProjectTest >> testOfHelloWorld [
-	|project|
-	project := SWProject new
-		name: 'helloworld';
-		description: 'My first Hello, World project.';
-		source: SWTestHelloWorld new.
+{ #category : #test }
+SWProjectTest >> testPutAll [
+	project putAll.
 
-	self assert: (project goDomestic) equals: (project go).
+]
 
+{ #category : #test }
+SWProjectTest >> testRun [
+	|res|
+	res := project
+		putAll;
+		compileAll;
+		linkAll;
+		run.
+	self assert: (res at: #code) equals: 200.
+	self assert: (res at: #stdout) equals: ' Hello, World!', String lf.
 ]

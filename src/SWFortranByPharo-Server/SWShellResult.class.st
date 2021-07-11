@@ -34,3 +34,12 @@ SWShellResult >> message: anObject [
 
 	message := anObject
 ]
+
+{ #category : #printing }
+SWShellResult >> toString [
+	^ String streamContents: [ :s |
+		s
+			<< (self isSuccess ifTrue: [ 'Succeeded' ] ifFalse: [ 'Failed' ]); cr;
+			<< self message; cr.
+	]
+]
