@@ -1,132 +1,167 @@
-"
-This contains the information to building a project at client side.
-"
 Class {
 	#name : #SWProject,
 	#superclass : #Object,
 	#instVars : [
-		'name',
-		'description',
-		'source',
-		'view'
+		'client',
+		'classes',
+		'sources',
+		'objs',
+		'exeName'
 	],
-	#category : #'SWFortranByPharo-Client-Project'
+	#category : #'SWFortranByPharo-Client-Client'
 }
 
-{ #category : #running }
-SWProject >> build: database [
-	|buildresult|
-	self flag: #TODO.
-	buildresult := SWClientOfProjectBuilder build: database.
-	self halt.
+{ #category : #accessing }
+SWProject >> classes [
+
+	^ classes
 ]
 
-{ #category : #translating }
-SWProject >> createRequestingDatabaseOf: codes [
-	|requestdb|
-	requestdb := SWProjectDatabase generateDatabaseFilePathOf: self.
-	SWSQLite3Connection on: (requestdb fullName) do: [ :connection |
-		|projectId|
-		SWProjectDatabase createBuildingRequestTableOn: connection.
-		projectId := SWProjectDatabase addProject: self on: connection.
-		codes do: [ :each |
-			SWProjectDatabase addSource: each toProject: projectId on: connection
+{ #category : #accessing }
+SWProject >> classes: anObject [
+
+	classes := anObject
+]
+
+{ #category : #accessing }
+SWProject >> client [
+
+	^ client
+]
+
+{ #category : #accessing }
+SWProject >> client: anObject [
+
+	client := anObject
+]
+
+{ #category : #execution }
+SWProject >> compileAll [
+	self objs: (self sources collect: [ :aSource ||objname res|
+		objname := String streamContents: [ :s |
+			s << 'obj/'; << (aSource at: #class) name; << '/'; << (aSource at: #hash); << '.o'
 		].
-	].
-	^ requestdb
+		res := client post: objname with: {
+			'action' -> 'compile'.
+			'type' -> (aSource at: #type).
+			'sources' -> {aSource at: #Location}.
+		}.
+		self assert: [ res at: #success ].
+		(Dictionary newFrom: aSource)
+			at: #source put: (aSource at: #Location);
+			at: #Location put: (res at: #Location);
+			yourself.
+	])
 ]
 
 { #category : #accessing }
-SWProject >> description [
+SWProject >> exeName [
 
-	^ description
+	^ exeName ifNil: [
+		exeName := String streamContents: [ :s |
+			s << 'exe/';
+				<< (self classes isNotEmpty ifTrue: [ (self classes at: 1) name ] ifFalse: [ 'a' ]);
+				<< '.out'
+		]
+	]
 ]
 
 { #category : #accessing }
-SWProject >> description: anObject [
+SWProject >> exeName: anObject [
 
-	description := anObject
+	exeName := anObject
 ]
 
-{ #category : #running }
-SWProject >> execute [
-	self flag: #TODO.
-	^ 'Hello, world!
-'
-]
-
-{ #category : #translating }
-SWProject >> generate [
-	|codes transpiler|
-	codes := OrderedCollection new.
-	transpiler := SWTranspiler transpile: source.
-	
-	codes add: (SWTranspiledCode new 
-		filename: (self source class asString, '.', source type);
-		type: source type;
-		description: source description;
-		code: transpiler contents).
-	
-	^ codes
-]
-
-{ #category : #running }
+{ #category : #navigating }
 SWProject >> go [
-	|codes database buildresult|
-	self flag: #TODO. "under construction"
-	codes := self generate.
-	database := self createRequestingDatabaseOf: codes.
-	buildresult := self build: database.
-	self halt.
-	^ self execute.
-
+	^ self
+		putAll;
+		compileAll;
+		linkAll;
+		run.
 ]
 
 { #category : #running }
 SWProject >> goDomestic [
-	source
-		view: self view;
-		program.
-	^ self view
-		label: 'done.';
-		progress: 1;
-		disableAborting;
-		contents
-
-]
-
-{ #category : #accessing }
-SWProject >> name [
-
-	^ name
-]
-
-{ #category : #accessing }
-SWProject >> name: anObject [
-
-	name := anObject
-]
-
-{ #category : #accessing }
-SWProject >> source [
-
-	^ source
-]
-
-{ #category : #accessing }
-SWProject >> source: anObject [
-
-	source := anObject
-]
-
-{ #category : #accessing }
-SWProject >> view [
-
-	^ view ifNil: [
-		view := SWProjectView new
-			title: self name;
-			label: 'preparing...';
-			openWithSpec;
-			yourself
+	^ String streamContents: [ :s |
+		self classes do: [ :aClass ||instance|
+			instance := aClass new.
+			instance view: s.
+			instance program.
+		]
 	]
+]
+
+{ #category : #initialization }
+SWProject >> initialize [
+	super initialize.
+
+]
+
+{ #category : #execution }
+SWProject >> linkAll [
+	|res|
+	res := self client post: self exeName with: { 
+		'action' -> 'link'.
+		'type' -> 'f90'.
+		'sources' -> (self objs collect: [:each | (each at: #Location) asString ]).
+	}.
+	self assert: [ res at: #success ].
+	self exeName: (res at: #Location).
+
+]
+
+{ #category : #accessing }
+SWProject >> objs [
+
+	^ objs
+]
+
+{ #category : #accessing }
+SWProject >> objs: anObject [
+
+	objs := anObject
+]
+
+{ #category : #execution }
+SWProject >> putAll [
+	self sources: (self classes collect: [ :aClass ||instance contents hash filename res|
+		instance := aClass new.
+		contents := instance readTranspiledStream contents.
+		hash := (SHA256 hashMessage: contents) hex.
+		filename := String streamContents: [ :s |
+			s << 'src/'; << aClass name; << '/'; << hash; << '.'; << instance type
+		].
+		res := client put: filename contents: contents.	
+		self assert: [ res at: #success ].
+		Dictionary new
+			at: #Location put: (res at: #Location);
+			at: #hash put: hash;
+			at: #type put: instance type;
+			at: #class put: aClass;
+			yourself.
+	])
+]
+
+{ #category : #execution }
+SWProject >> run [
+	|res|
+	res := self client post: self exeName with: {
+		'action' -> 'execute'.
+		'arguments' -> {  }
+	}.
+	(res at: #success) ifFalse: [ Error signal. ].
+	^ res
+]
+
+{ #category : #accessing }
+SWProject >> sources [
+
+	^ sources
+]
+
+{ #category : #accessing }
+SWProject >> sources: anObject [
+
+	sources := anObject
 ]

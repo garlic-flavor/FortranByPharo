@@ -56,11 +56,11 @@ SWTranspiler >> incIndent [
 { #category : #initialization }
 SWTranspiler >> initialize [
 	super initialize.
-	stream := String new writeStream.
+	stream := ReadWriteStream on: String new.
 	indent := 0.
 	indentShifter := 0.
 	isNewline := true.
-	newline := Character cr.
+	newline := String cr, String lf.
 ]
 
 { #category : #'code generation' }
@@ -159,9 +159,20 @@ SWTranspiler >> putMessage: receiver call: selector with: arguments [
 	var := self variables at: receiver name ifAbsent: [ 
 		^ self error: 'no variables.'
 	].
-	sel := (selector asString copyReplaceAll: ':' with: '_'), 'with:using:'.
-	var perform: (self type, '_', sel) with: arguments with: self.
+	sel := String streamContents: [ :s |
+		s << self type; << '_'; << (selector asString copyReplaceAll: ':' with: '_'); << 'with:using:'
+	].
+	(var respondsTo: sel) ifTrue: [
+		var perform: sel with: arguments with: self.
+	] ifFalse: [
+		^ self error: 'no implementation.'
+	]
 
+]
+
+{ #category : #accessing }
+SWTranspiler >> readStream [
+	^ stream readStream
 ]
 
 { #category : #'public API' }

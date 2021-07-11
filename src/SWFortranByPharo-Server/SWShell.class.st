@@ -33,3 +33,19 @@ SWShell class >> execute: exe arguments: list [
 
 	^ result
 ]
+
+{ #category : #execution }
+SWShell class >> ls: path [
+	^ Dictionary new
+		at: #isDirectory put: path isDirectory;
+		at: #basename put: path basename;
+		at: #path put: (path relativeTo: FileLocator imageDirectory) fullName;
+		at: #creationTime put: path creationTime prettyPrint;
+		at: #children put: (path isDirectory
+			ifTrue: [(path children collect: [ :each | self ls: each ])]
+			ifFalse: [ { } ]
+		);
+		yourself.
+
+
+]

@@ -18,8 +18,10 @@ BaselineOfSWFortranByPharo >> baseline: spec [
 
 		"Packages"
 		spec
-			package: 'SWFortranByPharo-Server' with: [ spec requires: #('OSSubprocess') ];
-			package: 'SWFortranByPharo-Client' with: [ spec requires: #('SQLite3-Core') ];
+			package: 'SWFortranByPharo-Base';
+			package: 'SWFortranByPharo-Client' with: [ spec requires: #('SQLite3-Core' 'SWFortranByPharo-Base') ];
+			package: 'SWFortranByPharo-Server' with: [ spec requires: #('OSSubprocess' 'SWFortranByPharo-Base' 'SWFortranByPharo-Client') ];
+			package: 'SWFortranByPharo-Base-Test' with: [ spec requires: #('SWFortranByPharo-Base') ];
 			package: 'SWFortranByPharo-Server-Test' with: [ spec requires: #('SWFortranByPharo-Server') ];
 			package: 'SWFortranByPharo-Client-Test' with: [ spec requires: #('SWFortranByPharo-Client') ].
 		

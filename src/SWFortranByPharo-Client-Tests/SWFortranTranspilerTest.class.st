@@ -7,7 +7,7 @@ Class {
 	#instVars : [
 		'transpiler'
 	],
-	#category : #'SWFortranByPharo-Client-Tests'
+	#category : #'SWFortranByPharo-Client-Tests-Transpiler'
 }
 
 { #category : #private }

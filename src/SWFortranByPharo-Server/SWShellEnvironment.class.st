@@ -4,6 +4,11 @@ This contains the information about development environment.
 Class {
 	#name : #SWShellEnvironment,
 	#superclass : #Object,
+	#instVars : [
+		'exeFileExtension',
+		'objFileExtension',
+		'fortranCompilerAdapterClass'
+	],
 	#classVars : [
 		'default'
 	],
@@ -12,26 +17,60 @@ Class {
 
 { #category : #accessing }
 SWShellEnvironment class >> default [
-	default ifNil: [ 
-		OSPlatform current isMacOS ifTrue: [ 
-			^ default := SWShellEnvironmentOnMac new
-		].
-		self error: 'This machine is not supported.'.
-	].
-	^ default
+	^ default ifNil: [ default := self newDefault ]
+
 ]
 
-{ #category : #accessing }
-SWShellEnvironment >> compilerName [
-	^ SubclassResponsibility
+{ #category : #'instance creation' }
+SWShellEnvironment class >> newDefault [
+	OSPlatform current isMacOS ifTrue: [ 
+		^ self newMacDefault
+	].
+	self error: 'This machine is not supported.'.
+
+]
+
+{ #category : #'instance creation' }
+SWShellEnvironment class >> newMacDefault [
+	^ self new
+		fortranCompilerAdapterClass: SWGFortranCompilerAdapter;
+		exeFileExtension: #out;
+		objFileExtension: #o;
+		yourself.
 ]
 
 { #category : #accessing }
 SWShellEnvironment >> exeFileExtension [
-	^ SubclassResponsibility
+
+	^ exeFileExtension
+]
+
+{ #category : #accessing }
+SWShellEnvironment >> exeFileExtension: anObject [
+
+	exeFileExtension := anObject
+]
+
+{ #category : #accessing }
+SWShellEnvironment >> fortranCompilerAdapterClass [
+
+	^ fortranCompilerAdapterClass
+]
+
+{ #category : #accessing }
+SWShellEnvironment >> fortranCompilerAdapterClass: anObject [
+
+	fortranCompilerAdapterClass := anObject
 ]
 
 { #category : #accessing }
 SWShellEnvironment >> objFileExtension [
-	^ SubclassResponsibility 
+
+	^ objFileExtension
+]
+
+{ #category : #accessing }
+SWShellEnvironment >> objFileExtension: anObject [
+
+	objFileExtension := anObject
 ]

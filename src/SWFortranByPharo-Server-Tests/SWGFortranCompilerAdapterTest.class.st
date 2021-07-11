@@ -12,7 +12,7 @@ Class {
 { #category : #running }
 SWGFortranCompilerAdapterTest >> setUp [
 	super setUp.
-	gf := SWGFortranCompilerAdapter new.
+	gf := SWGFortranCompilerAdapter.
 	fm := SWFileManager new
 		add: 'src' withRuleOf: [ :file | (Path * file) extension asLowercase beginsWith: 'f' ];
 		add: 'obj' withRuleOf: [ :file | #( 'o' 'obj' ) includes: (Path * file) extension asLowercase ];
@@ -24,7 +24,7 @@ SWGFortranCompilerAdapterTest >> setUp [
 ]
 
 { #category : #tests }
-SWGFortranCompilerAdapterTest >> testCompilingFortranFile [
+SWGFortranCompilerAdapterTest >> testCompileFortranFile [
 	|src obj res path|
 	"ready the source to build."
 	path := fm dispatch: source.
@@ -37,16 +37,16 @@ SWGFortranCompilerAdapterTest >> testCompilingFortranFile [
 
 	src := fm dispatch: source.
 	obj := fm dispatch: ((Path * source) withExtension: 'o') fullName.
-	res := gf compileFortranFile: src to: obj.
+	res := gf compileFortranFiles: {src} to: obj.
 	self assert: res isSuccess.
 ]
 
 { #category : #tests }
 SWGFortranCompilerAdapterTest >> testCompilingOptionsForTo [
 	|src obj|
-	src := fm getReferenceOf: 'native/helloworld.f90'.
-	obj := fm getReferenceOf: 'helloworld.o'.
-	self assert: (gf compilingOptionsFor: src to: obj) equals: {'-c'. src fullName. '-o'. obj fullName}.
+	src := fm dispatch: 'native/helloworld.f90'.
+	obj := fm dispatch: 'helloworld.o'.
+	self assert: (gf compilingOptionsFor: {src} to: obj) equals: {'-c'. src fullName. '-o'. obj fullName}.
 ]
 
 { #category : #tests }
@@ -63,15 +63,15 @@ SWGFortranCompilerAdapterTest >> testLinkingFortranFile [
 SWGFortranCompilerAdapterTest >> testLinkingOptionsForTo [
 	|src1 src2 list exe|
 	
-	src1 := fm getReferenceOf: 'native/test1.f90'.
-	src2 := fm getReferenceOf: 'test2.f90'.
-	exe := fm getReferenceOf: 'a.out'.
+	src1 := fm dispatch: 'native/test1.f90'.
+	src2 := fm dispatch: 'test2.f90'.
+	exe := fm dispatch: 'a.out'.
 	list := { src1. src2 }.
 	self assert: (gf linkingOptionsFor: list to: exe) equals: { src1 fullName. src2 fullName. '-o'. exe fullName }
 ]
 
 { #category : #tests }
-SWGFortranCompilerAdapterTest >> testQueryingVersion [
+SWGFortranCompilerAdapterTest >> testQueryVersion [
 	|v|
 	v := gf queryVersion.
 	self assert: (1 < v major). 
@@ -92,7 +92,7 @@ warranty; not even for MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.'.
 ]
 
 { #category : #tests }
-SWGFortranCompilerAdapterTest >> testRunningExe [
+SWGFortranCompilerAdapterTest >> testRunExe [
 	|exe res|
 	exe := fm dispatch: 'a.out'.
 	exe exists ifFalse: [ self error: 'please do testLinkingFortranFile first.' ].

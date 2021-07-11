@@ -6,6 +6,7 @@ Class {
 	#superclass : #Object,
 	#instVars : [
 		'name',
+		'type',
 		'major',
 		'minor',
 		'patch',
@@ -72,4 +73,16 @@ SWCompilerSpec >> patch [
 SWCompilerSpec >> patch: anObject [
 
 	patch := anObject
+]
+
+{ #category : #accessing }
+SWCompilerSpec >> type [
+
+	^ type
+]
+
+{ #category : #accessing }
+SWCompilerSpec >> type: anObject [
+
+	type := anObject
 ]

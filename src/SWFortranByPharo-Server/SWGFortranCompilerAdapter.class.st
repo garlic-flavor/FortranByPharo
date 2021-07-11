@@ -3,59 +3,61 @@ This implements gfortran handler.
 "
 Class {
 	#name : #SWGFortranCompilerAdapter,
-	#superclass : #SWFortranCompilerAdapter,
+	#superclass : #Object,
 	#category : #'SWFortranByPharo-Server-CompilerAdapter'
 }
 
-{ #category : #execution }
-SWGFortranCompilerAdapter >> compileFortranFile: src to: obj [
-	^ SWShell execute: self compiler arguments: (self compilingOptionsFor: src to: obj).
+{ #category : #compiling }
+SWGFortranCompilerAdapter class >> compileFortranFiles: srcs to: obj [
+	^ SWShell execute: self compilerName arguments: (self compilingOptionsFor: srcs to: obj).
 	
 ]
 
 { #category : #accessing }
-SWGFortranCompilerAdapter >> compiler [
+SWGFortranCompilerAdapter class >> compilerName [
 	^ 'gfortran'
 ]
 
 { #category : #private }
-SWGFortranCompilerAdapter >> compilingOptionsFor: src to: obj [
-	^ { '-c'. src fullName. '-o'. obj fullName }
+SWGFortranCompilerAdapter class >> compilingOptionsFor: srcs to: obj [
+	^ (srcs collect: [:each | {'-c'. each fullName}]) flattened, { '-o'. obj fullName}
+
 ]
 
 { #category : #execution }
-SWGFortranCompilerAdapter >> linkObjs: objs to: exe [
-	^ SWShell execute: self compiler arguments: (self linkingOptionsFor: objs to: exe)
+SWGFortranCompilerAdapter class >> linkObjs: objs to: exe [
+	^ SWShell execute: self compilerName arguments: (self linkingOptionsFor: objs to: exe)
 ]
 
 { #category : #private }
-SWGFortranCompilerAdapter >> linkingOptionsFor: srcs to: exe [
+SWGFortranCompilerAdapter class >> linkingOptionsFor: srcs to: exe [
 	^ (srcs collect: [:one | one fullName]), { '-o'. exe fullName }
 ]
 
 { #category : #querying }
-SWGFortranCompilerAdapter >> queryVersion [ 
+SWGFortranCompilerAdapter class >> queryVersion [ 
 	| result spec re |
 	spec := SWCompilerSpec new name: 'N/A'.
-	result := SWShell execute: 'gfortran' arguments: #('--version').
+	result := SWShell execute: self compilerName arguments: #('--version').
 	result isSuccess ifFalse: [ self error: 'gfortran not found. ', result message ].
 	re := self regexOfVersionDetection.
 	(re matchesPrefix: result message) ifFalse: [ self error: 'unknown version: ', result message ].
-	^
-	spec
+	^ spec
 		name: 'GNU Fortran';
+		type: 'f';
 		major: (re subexpression: 2) asInteger;
 		minor: (re subexpression: 3) asInteger;
-		patch: (re subexpression: 4) asInteger.
+		patch: (re subexpression: 4) asInteger;
+		yourself.
 
 ]
 
 { #category : #private }
-SWGFortranCompilerAdapter >> regexOfVersionDetection [
+SWGFortranCompilerAdapter class >> regexOfVersionDetection [
 	^ '^GNU Fortran \([^)]+\)\s+(\d+)\.(\d+)\.(\d+)' asRegex
 ]
 
 { #category : #execution }
-SWGFortranCompilerAdapter >> runExe: exe [
+SWGFortranCompilerAdapter class >> runExe: exe [
 	^ SWShell execute: exe fullName arguments: #()
 ]

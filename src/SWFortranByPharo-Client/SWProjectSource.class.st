@@ -13,11 +13,6 @@ Class {
 }
 
 { #category : #accessing }
-SWProjectSource >> code [
-	^ SWTranspiler transpile: self
-]
-
-{ #category : #accessing }
 SWProjectSource >> description [
 	^ description
 ]
@@ -27,7 +22,7 @@ SWProjectSource >> description: aObject [
 	description := aObject
 ]
 
-{ #category : #printing }
+{ #category : #translating }
 SWProjectSource >> f90_print_with: arguments using: transpiler [
 	transpiler put: 'print *, '; putArgumentsOf: #print with: arguments.
 
@@ -56,9 +51,15 @@ SWProjectSource >> program [
 	^ self subclassResponsibility
 ]
 
-{ #category : #printing }
+{ #category : #translating }
 SWProjectSource >> rb_print_with: arguments using: transpiler [
 	transpiler putFunctionCallOf: 'puts' with: arguments.
+
+]
+
+{ #category : #building }
+SWProjectSource >> readTranspiledStream [
+	^ (SWTranspiler transpile: self) readStream.
 
 ]
 
