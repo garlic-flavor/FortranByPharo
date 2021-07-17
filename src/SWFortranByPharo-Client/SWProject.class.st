@@ -97,10 +97,10 @@ SWProject >> go [
 { #category : #running }
 SWProject >> goDomestic [
 	^ String streamContents: [ :s |
-		self classes do: [ :aClass ||instance|
-			instance := aClass new.
-			instance view: s.
-			instance program.
+		self programs do: [ :program |
+			program
+				view: s;
+				program
 		]
 	]
 ]

@@ -15,3 +15,11 @@ SmallInteger >> rb_opMul_with: args using: transpiler [
 		putArgumentsOf: #* with: args.
 	^ self
 ]
+
+{ #category : #'*SWFortranByPharo-Client' }
+SmallInteger >> rb_opPow_with: args using: transpiler [
+	transpiler
+		put: ' ** ';
+		putArgumentsOf: #** with: args.
+	^ self
+]

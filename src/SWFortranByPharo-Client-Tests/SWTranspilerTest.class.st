@@ -32,10 +32,14 @@ SWTranspilerTest >> testPutMessageCallWith [
 	self test: #program equals: {'puts(''Hello, World!'')'}.
 	rbt reset.
 	self test: #program2 equals: {
-	    ''.
 		'a = 1 + 2'.
 		'puts(a)'
 	}.
+	rbt reset.
+	self test: #program3 equals: { 
+		'a = 1 + (2 * 3)'.
+		'puts(a)'
+	}
 ]
 
 { #category : #tests }

@@ -37,9 +37,9 @@ SWProjectSource >> initialize [
 { #category : #streaming }
 SWProjectSource >> print: message [
 	view ifNotNil: [
-		view << message 
+		view << message asString; cr
 	] ifNil: [
-		Transcript show: message; cr.
+		Transcript show: message; cr
 	]
 
 ]

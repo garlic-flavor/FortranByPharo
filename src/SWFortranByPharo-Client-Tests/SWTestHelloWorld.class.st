@@ -19,6 +19,13 @@ SWTestHelloWorld >> program2 [
 	self print: a
 ]
 
+{ #category : #'as yet unclassified' }
+SWTestHelloWorld >> program3 [
+	|a|
+	a := 1 + (2 * 3).
+	self print: a
+]
+
 { #category : #accessing }
 SWTestHelloWorld >> programName [
 	^ 'HelloWorld'

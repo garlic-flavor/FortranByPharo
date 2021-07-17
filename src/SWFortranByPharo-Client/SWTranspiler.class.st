@@ -13,7 +13,8 @@ Class {
 		'isNewline',
 		'variables',
 		'newline',
-		'messageNest'
+		'messageNest',
+		'preventNewline'
 	],
 	#classVars : [
 		'selectorName'
@@ -32,7 +33,11 @@ SWTranspiler class >> selectorName [
 	^ selectorName ifNil: [
 		selectorName := Dictionary new
 			at: '+' put: 'opAdd_';
+			at: '-' put: 'opSub_';
 			at: '*' put: 'opMul_';
+			at: '/' put: 'opDiv_';
+			at: '%' put: 'opRem_';
+			at: '**' put: 'opPow_';
 			yourself
 	]
 ]
@@ -47,9 +52,9 @@ SWTranspiler class >> selectorNameOf: selector [
 
 { #category : #'code generation' }
 SWTranspiler >> assign: key with: value [
-	self variables at: key put: value value.
 	self put: key; put: ' = '.
-	^ value transpileUsing: self.
+	^ self variables at: key put: (value transpileUsing: self)
+
 ]
 
 { #category : #accessing }
@@ -114,6 +119,7 @@ SWTranspiler >> initialize [
 	isNewline := true.
 	newline := String cr, String lf.
 	messageNest := 0.
+	preventNewline := false.
 ]
 
 { #category : #'code generation' }
@@ -132,6 +138,11 @@ SWTranspiler >> newline [
 SWTranspiler >> newline: anObject [
 
 	newline := anObject
+]
+
+{ #category : #accessing }
+SWTranspiler >> preventNewline [
+	preventNewline := true
 ]
 
 { #category : #accessing }
@@ -165,6 +176,15 @@ SWTranspiler >> putArray: anArray [
 
 ]
 
+{ #category : #'as yet unclassified' }
+SWTranspiler >> putArrayLiteral: anArray [
+	self
+		put: '[ ';
+		putArray: anArray;
+		put: ' ]'.
+	^ anArray
+]
+
 { #category : #'code generation' }
 SWTranspiler >> putFunctionCallFooterOf: selector [
 	^ self subclassResponsibility 
@@ -193,8 +213,13 @@ SWTranspiler >> putIndent [
 
 { #category : #'code generation' }
 SWTranspiler >> putLine [
-	stream << newline.
-	isNewline := true.
+	preventNewline
+		ifTrue: [ preventNewline := false ]
+		ifFalse: [
+			stream << newline.
+			isNewline := true.
+		].
+
 ]
 
 { #category : #'code generation' }
@@ -233,8 +258,19 @@ SWTranspiler >> putMessage: receiver call: selector with: arguments [
 ]
 
 { #category : #'as yet unclassified' }
+SWTranspiler >> putString: aString [
+	self
+		put: '"';
+		put: aString;
+		put: '"'
+]
+
+{ #category : #'as yet unclassified' }
 SWTranspiler >> putVariable: aVariable named: name [
-	aVariable ifNil: [ ^ aVariable ].
+	aVariable ifNil: [
+		self preventNewline.
+		^ aVariable
+	].
 	(aVariable class inheritsFrom: SWProjectSource) ifTrue: [ 
 		^ aVariable
 	].
@@ -252,6 +288,7 @@ SWTranspiler >> reset [
 	stream resetToStart.
 	messageNest := 0.
 	self variables: nil.
+	preventNewline := false.
 ]
 
 { #category : #accessing }

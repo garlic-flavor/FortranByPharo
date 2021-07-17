@@ -2,6 +2,10 @@ Extension { #name : #RBLiteralValueNode }
 
 { #category : #'*SWFortranByPharo-Client' }
 RBLiteralValueNode >> transpileUsing: transpiler [
-	transpiler put: self sourceText.
+	self value isString ifTrue: [
+		transpiler putString: self value
+	] ifFalse: [
+		transpiler put: self sourceText.
+	].
 	^ self value
 ]
