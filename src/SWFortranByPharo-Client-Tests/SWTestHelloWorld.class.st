@@ -12,6 +12,13 @@ SWTestHelloWorld >> program [
 	self print: 'Hello, World!'
 ]
 
+{ #category : #'as yet unclassified' }
+SWTestHelloWorld >> program2 [
+	|a|
+	a := 1 + 2.
+	self print: a
+]
+
 { #category : #accessing }
 SWTestHelloWorld >> programName [
 	^ 'HelloWorld'

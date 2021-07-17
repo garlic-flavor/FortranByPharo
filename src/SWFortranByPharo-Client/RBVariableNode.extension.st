@@ -2,5 +2,6 @@ Extension { #name : #RBVariableNode }
 
 { #category : #'*SWFortranByPharo-Client' }
 RBVariableNode >> transpileUsing: transpiler [
-	self flag: #TODO. "under construction."
+	^ transpiler putVariable: (transpiler getVariable: self name) named: self name
+
 ]

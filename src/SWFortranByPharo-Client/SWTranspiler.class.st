@@ -6,25 +6,50 @@ Class {
 	#superclass : #Object,
 	#instVars : [
 		'type',
+		'source',
 		'stream',
 		'indent',
 		'indentShifter',
 		'isNewline',
 		'variables',
-		'newline'
+		'newline',
+		'messageNest'
+	],
+	#classVars : [
+		'selectorName'
 	],
 	#category : #'SWFortranByPharo-Client-Transpiler'
 }
 
-{ #category : #compiling }
-SWTranspiler class >> transpile: source [
-	source type = #f90 ifTrue: [ 
-		^ (SWTranspilerOfFortran new) type: source type; transpileProgram: source.
-	].
-	source type = #rb ifTrue: [
-		^ (SWTranspilerOfRuby new) type: source type; transpileProgram: source.
-	].
-	self error: 'not implemented yet for transpiling.'.
+{ #category : #initialization }
+SWTranspiler class >> resetSelectorName [
+	<script>
+	selectorName := nil.
+]
+
+{ #category : #'as yet unclassified' }
+SWTranspiler class >> selectorName [
+	^ selectorName ifNil: [
+		selectorName := Dictionary new
+			at: '+' put: 'opAdd_';
+			at: '*' put: 'opMul_';
+			yourself
+	]
+]
+
+{ #category : #'as yet unclassified' }
+SWTranspiler class >> selectorNameOf: selector [
+	^ self selectorName at: selector ifAbsent: [|sel|
+		sel := selector asString copyReplaceAll: ':' with: '_'.
+		sel last = $_ ifTrue: [ sel ] ifFalse: [ sel, '_' ]
+	]
+]
+
+{ #category : #'code generation' }
+SWTranspiler >> assign: key with: value [
+	self variables at: key put: value value.
+	self put: key; put: ' = '.
+	^ value transpileUsing: self.
 ]
 
 { #category : #accessing }
@@ -38,19 +63,46 @@ SWTranspiler >> decIndent [
 	indent < 0 ifTrue: [ self error: 'Indentation clauses mismatch.' ]
 ]
 
-{ #category : #copying }
-SWTranspiler >> duplicate [
-	^ self class new variables: self variables copy.
+{ #category : #accessing }
+SWTranspiler >> decMessageNest [
+
+	messageNest := {messageNest - 1. 0} max.
+	0 < messageNest ifTrue: [ self put: ')' ]
 ]
 
 { #category : #'code generation' }
 SWTranspiler >> enterBlock [
-	self incIndent
+	self incIndent.
+	self variables push.
+]
+
+{ #category : #'code generation' }
+SWTranspiler >> getVariable: name [
+	^ self variables at: name ifAbsent: [ nil ]
+
 ]
 
 { #category : #'code generation' }
 SWTranspiler >> incIndent [
 	indent := indent + 1.
+]
+
+{ #category : #'as yet unclassified' }
+SWTranspiler >> incMessageNest [
+	messageNest := messageNest + 1.
+	1 < messageNest ifTrue: [ self put: '(' ].
+]
+
+{ #category : #accessing }
+SWTranspiler >> indentShifter [
+
+	^ indentShifter
+]
+
+{ #category : #accessing }
+SWTranspiler >> indentShifter: anObject [
+
+	indentShifter := anObject
 ]
 
 { #category : #initialization }
@@ -61,11 +113,13 @@ SWTranspiler >> initialize [
 	indentShifter := 0.
 	isNewline := true.
 	newline := String cr, String lf.
+	messageNest := 0.
 ]
 
 { #category : #'code generation' }
 SWTranspiler >> leaveBlock [
-	self decIndent
+	self decIndent.
+	self variables pop.
 ]
 
 { #category : #accessing }
@@ -78,6 +132,16 @@ SWTranspiler >> newline [
 SWTranspiler >> newline: anObject [
 
 	newline := anObject
+]
+
+{ #category : #accessing }
+SWTranspiler >> programName [ 
+	self assert: (self source isNotNil).
+	^ (self source respondsTo: #programName) ifTrue: [
+		self source programName.
+	] ifFalse: [ 
+		self source class asString.
+	]
 ]
 
 { #category : #'code generation' }
@@ -93,7 +157,12 @@ SWTranspiler >> putArgumentsOf: selector with: artuments [
 
 { #category : #'code generation' }
 SWTranspiler >> putArray: anArray [
-	^ self subclassResponsibility 
+	anArray do: [:each |
+		each transpileUsing: self.
+	] separatedBy: [
+		self put: ', '
+	]
+
 ]
 
 { #category : #'code generation' }
@@ -148,26 +217,29 @@ SWTranspiler >> putMainProgramHeaderOf: project [
 { #category : #'code generation' }
 SWTranspiler >> putMessage: receiver call: selector with: arguments [
 	|var sel|
-	self flag: #TODO. "Under construction"
-	(receiver name at: 1) isUppercase ifTrue: [
-		|r|
-		r := Smalltalk globals at: receiver name asSymbol.
-		r transpile: selector with: arguments using: self.
-		^ self
-	].
-
-	var := self variables at: receiver name ifAbsent: [ 
-		^ self error: 'no variables.'
-	].
-	sel := String streamContents: [ :s |
-		s << self type; << '_'; << (selector asString copyReplaceAll: ':' with: '_'); << 'with:using:'
-	].
-	(var respondsTo: sel) ifTrue: [
-		var perform: sel with: arguments with: self.
+	self flag: #toImplement.
+	self incMessageNest.
+	var := receiver transpileUsing: self.
+	self assert: [var isNotNil].
+	sel := self transformSelector: selector.
+	(var respondsTo: sel) ifTrue: [|res|
+		res := var perform: sel with: arguments with: self.
+		self decMessageNest.
+		^ res
 	] ifFalse: [
-		^ self error: 'no implementation.'
-	]
+		self error: 'NO IMPLEMENTATION.'
+	].
 
+]
+
+{ #category : #'as yet unclassified' }
+SWTranspiler >> putVariable: aVariable named: name [
+	aVariable ifNil: [ ^ aVariable ].
+	(aVariable class inheritsFrom: SWProjectSource) ifTrue: [ 
+		^ aVariable
+	].
+	self put: name.
+	^ aVariable
 ]
 
 { #category : #accessing }
@@ -175,26 +247,49 @@ SWTranspiler >> readStream [
 	^ stream readStream
 ]
 
-{ #category : #'public API' }
-SWTranspiler >> transpileProgram: source [
-	| programName|
-	programName := (source respondsTo: #programName) ifTrue: [
-		source programName.
-	] ifFalse: [ 
-		source class asString.
-	].
-	self variables at: #self put: source.
+{ #category : #initialization }
+SWTranspiler >> reset [
+	stream resetToStart.
+	messageNest := 0.
+	self variables: nil.
+]
 
-	self putMainProgramHeaderOf: programName.
-	(source class>>#program) transpileUsing: self.
-	self putMainProgramFooterOf: programName.
+{ #category : #accessing }
+SWTranspiler >> source [
+
+	^ source
+]
+
+{ #category : #accessing }
+SWTranspiler >> source: anObject [
+
+	source := anObject
+]
+
+{ #category : #'as yet unclassified' }
+SWTranspiler >> transformSelector: aSelector [
+	^ (String streamContents: [ :s |
+		s << self type; << '_'; << (self class selectorNameOf: aSelector); << 'with:using:'
+	]) asSymbol.
 
 ]
 
+{ #category : #'as yet unclassified' }
+SWTranspiler >> transpileMethod: aMethod [
+	|res|
+	self variables push.
+	res := (self source class >> aMethod) transpileUsing: self.
+	self variables pop.
+	^ res
+]
+
 { #category : #'public API' }
-SWTranspiler >> transpiledOf: aObject [
-	aObject transpileUsing: self.
-	^ self contents
+SWTranspiler >> transpileProgram [
+	|res|
+	self putMainProgramHeaderOf: self programName.
+	res := self transpileMethod: #program.
+	self putMainProgramFooterOf: self programName.
+	^ res
 ]
 
 { #category : #accessing }
@@ -212,7 +307,11 @@ SWTranspiler >> type: anObject [
 { #category : #accessing }
 SWTranspiler >> variables [
 
-	^ variables ifNil: [ variables := Dictionary new ]
+	^ variables ifNil: [
+		variables := VariableStack new
+			at: #self put: self source;
+			yourself
+	]
 ]
 
 { #category : #accessing }

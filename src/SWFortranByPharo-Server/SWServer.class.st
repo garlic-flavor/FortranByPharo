@@ -67,7 +67,7 @@ SWServer >> env: anObject [
 SWServer >> exec: target with: msg on: socket [
 	|result|
 	
-	result := SWGFortranCompilerAdapter runExe: target.
+	result := SWShell execute: target fullName arguments: (msg at: #arguments ifAbsent: {}).
 	^ result isSuccess ifTrue: [
 		socket sendResponseOk: {
 			'status' -> 'ok'.
@@ -116,7 +116,6 @@ SWServer >> head: target with: msg on: socket [
 { #category : #initialization }
 SWServer >> initialize [
 	super initialize.
-	self type: #rb.
 	self description: 'This is a server.'
 ]
 

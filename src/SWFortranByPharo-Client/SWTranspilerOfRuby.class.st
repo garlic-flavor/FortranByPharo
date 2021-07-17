@@ -7,16 +7,15 @@ Class {
 	#category : #'SWFortranByPharo-Client-Transpiler'
 }
 
-{ #category : #'code generation' }
-SWTranspilerOfRuby >> putArgumentsOf: selector with: arguments [
-	self putArray: arguments.
+{ #category : #initialization }
+SWTranspilerOfRuby >> initialize [
+	super initialize.
+	self type: #rb.
 ]
 
 { #category : #'code generation' }
-SWTranspilerOfRuby >> putArray: anArray [
-	self put: (', ' join: (anArray collect: [:each |
-		self duplicate transpiledOf: each
-	]))
+SWTranspilerOfRuby >> putArgumentsOf: selector with: arguments [
+	self putArray: arguments.
 ]
 
 { #category : #'code generation' }
@@ -38,4 +37,11 @@ SWTranspilerOfRuby >> putMainProgramFooterOf: project [
 SWTranspilerOfRuby >> putMainProgramHeaderOf: project [
 	self putLine: '#!/usr/bin/ruby'.
 	indentShifter := -1
+]
+
+{ #category : #'public API' }
+SWTranspilerOfRuby >> transpileProgram [
+	self indentShifter: -1.
+	^ super transpileProgram.
+	
 ]
