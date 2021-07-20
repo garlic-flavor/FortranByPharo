@@ -8,30 +8,36 @@ Class {
 }
 
 { #category : #execution }
+SWShell class >> execute: command [
+	"I execute 'exe' with 'list', then return its result."
+	^ self executeProcess: (OSSUnixSubprocess new
+			shellCommand: command;
+			redirectStdout;
+			redirectStderr)
+
+]
+
+{ #category : #execution }
 SWShell class >> execute: exe arguments: list [
 	"I execute 'exe' with 'list', then return its result."
-	| result |
-	result := SWShellResult new isSuccess: false.
-	[
-		| process |
-		process := OSSUnixSubprocess new
+	^ self executeProcess: (OSSUnixSubprocess new
 			command: exe;
 			arguments: list;
 			redirectStdout;
-			redirectStderr.
-		[
-			process runAndWait.
-			process isSuccess
-					ifTrue: [ result isSuccess: true; message: process stdoutStream upToEnd ]
-					ifFalse: [ result message: process stderrStream upToEnd ].
-		] ensure: [ process ifNotNil: [ process closeAndCleanStreams ] ]
-	] on: Error do: [ :ex |
-		result message: ex printString.
-		ex isResumable
-			ifTrue: [ ex resume ]
-	].
+			redirectStderr)
 
-	^ result
+]
+
+{ #category : #execution }
+SWShell class >> executeProcess: process [
+	"I execute 'exe' with 'list', then return its result."
+	[
+		process runAndWait.
+		process isSuccess
+				ifTrue: [ ^ process stdoutStream upToEnd ]
+				ifFalse: [ self error: process stderrStream upToEnd ].
+	] ensure: [ process ifNotNil: [ process closeAndCleanStreams ] ]
+
 ]
 
 { #category : #execution }

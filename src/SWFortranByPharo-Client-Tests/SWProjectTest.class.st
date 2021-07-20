@@ -17,7 +17,7 @@ SWProjectTest >> setUp [
 	SWServer start.
 	client := SWClientView new.
 	project := SWProject new
-		classes: { SWTestHelloWorld  };
+		programs: { SWTestHelloWorld new  };
 		client: client;
 		yourself.
 	"Put here a common initialization logic for tests"
@@ -31,7 +31,7 @@ SWProjectTest >> tearDown [
 ]
 
 { #category : #test }
-SWProjectTest >> testCompileAll [
+SWProjectTest >> testCompileAllAsFortran [
 	project
 		putAll;
 		compileAll.
@@ -47,6 +47,15 @@ SWProjectTest >> testGo [
 ]
 
 { #category : #test }
+SWProjectTest >> testGo2 [
+	|res|
+	project type: #rb.
+	res := project go.
+	self assert: (res at: #code) equals: 200.
+	self assert: (res at: #stdout) equals: 'Hello, World!', String lf.
+]
+
+{ #category : #test }
 SWProjectTest >> testGoDomestic [
 	|res|
 	res := project goDomestic.
@@ -54,7 +63,7 @@ SWProjectTest >> testGoDomestic [
 ]
 
 { #category : #test }
-SWProjectTest >> testLinkAll [
+SWProjectTest >> testLinkAllAsFortran [
 	project
 		putAll;
 		compileAll;

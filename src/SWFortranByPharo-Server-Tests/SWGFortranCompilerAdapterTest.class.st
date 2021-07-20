@@ -13,13 +13,7 @@ Class {
 SWGFortranCompilerAdapterTest >> setUp [
 	super setUp.
 	gf := SWGFortranCompilerAdapter.
-	fm := SWFileManager new
-		add: 'src' withRuleOf: [ :file | (Path * file) extension asLowercase beginsWith: 'f' ];
-		add: 'obj' withRuleOf: [ :file | #( 'o' 'obj' ) includes: (Path * file) extension asLowercase ];
-		add: 'exe' withRuleOf: [ :file | #( '' 'out' 'exe' ) includes:(Path * file) extension asLowercase ];
-		add: '' withRuleOf: [ :file | true ];
-		yourself.
-	source := 'native/helloworld.f90'.
+	source := 'src/native/helloworld.f90'.
 	
 ]
 
@@ -38,7 +32,7 @@ SWGFortranCompilerAdapterTest >> testCompileFortranFile [
 	src := fm dispatch: source.
 	obj := fm dispatch: ((Path * source) withExtension: 'o') fullName.
 	res := gf compileFortranFiles: {src} to: obj.
-	self assert: res isSuccess.
+	res inspect.
 ]
 
 { #category : #tests }
@@ -56,7 +50,7 @@ SWGFortranCompilerAdapterTest >> testLinkingFortranFile [
 	obj exists ifFalse: [ self error: 'please do "testCompilingFortranFile first.' ].
 	exe := fm dispatch: 'a.out'.
 	res := gf linkObjs: { obj } to: exe.
-	self assert: res isSuccess.
+	res inspect.
 ]
 
 { #category : #tests }

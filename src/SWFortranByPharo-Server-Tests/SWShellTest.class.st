@@ -12,5 +12,5 @@ SWShellTest >> testExecution [
 	"This test assumes that GFortran is on the path."
 	|res|
 	res := SWShell execute: 'gfortran' arguments: #('--version').
-	self assert: (res message beginsWith: 'GNU Fortran').
+	self assert: (res beginsWith: 'GNU Fortran').
 ]

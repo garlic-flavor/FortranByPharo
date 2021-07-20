@@ -29,6 +29,19 @@ SWServer class >> stop [
 	ZnServer default stop.
 ]
 
+{ #category : #tests }
+SWServer class >> transpile [
+	<script>
+	|instance contents|
+	instance := self new.
+	contents := SWTranspilerOfRuby new 
+		source: instance;
+		transpileProgram;
+		contents.
+	contents inspect.
+
+]
+
 { #category : #dispatching }
 SWServer >> dispatch: message on: socket [
 	|obj method target|
@@ -67,18 +80,11 @@ SWServer >> env: anObject [
 SWServer >> exec: target with: msg on: socket [
 	|result|
 	
-	result := SWGFortranCompilerAdapter runExe: target.
-	^ result isSuccess ifTrue: [
-		socket sendResponseOk: {
-			'status' -> 'ok'.
-			'stdout' -> result message.
-		}
-	] ifFalse: [
-		socket sendResponseInternalServerError: {
-			'status' -> 'failed'.
-			'stdout' -> result message
-		}
-	]
+	result := SWShell execute: target fullName arguments: (msg at: #arguments ifAbsent: {}).
+	socket sendResponseOk: {
+		'status' -> 'ok'.
+		'stdout' -> result.
+	}
 
 ]
 
@@ -116,7 +122,6 @@ SWServer >> head: target with: msg on: socket [
 { #category : #initialization }
 SWServer >> initialize [
 	super initialize.
-	self type: #rb.
 	self description: 'This is a server.'
 ]
 
@@ -128,18 +133,11 @@ SWServer >> make: target by: method with: msg on: socket [
 		|sources result|
 		sources := (msg at: #sources ifAbsent: {}) collect: [ :each | self filePathOf: each ].
 		result := self env fortranCompilerAdapterClass perform: method with: sources with: target.
-		^ result isSuccess ifTrue: [
-			socket sendResponseOk: {
-				'status' -> 'succeeded'.
-				'stdout' -> result message.
-				'Location' -> target rel fullName.
-			}
-		] ifFalse: [
-			socket sendResponseInternalServerError: {
-				'status' -> 'failed'.
-				'stdout' -> result message
-			}
-		]
+		socket sendResponseOk: {
+			'status' -> 'succeeded'.
+			'stdout' -> result.
+			'Location' -> target rel fullName.
+		}
 	].
 	self error: 'no implementation'
 

@@ -10,19 +10,12 @@ Class {
 { #category : #initialization }
 SWTranspilerOfFortran >> initialize [
 	super initialize. 
-
+	self type: #f90.
 ]
 
 { #category : #'code generation' }
 SWTranspilerOfFortran >> putArgumentsOf: selector with: arguments [
-	self putArray: arguments
-]
-
-{ #category : #'code generation' }
-SWTranspilerOfFortran >> putArray: anArray [
-	self put: (', ' join: (anArray collect: [:each |
-		self duplicate transpiledOf: each
-	]))
+	^ self putArray: arguments
 ]
 
 { #category : #'code generation' }
@@ -48,4 +41,12 @@ SWTranspilerOfFortran >> putMainProgramHeaderOf: project [
 	self
 		put: 'program ';
 		putLine: project.
+]
+
+{ #category : #'as yet unclassified' }
+SWTranspilerOfFortran >> putString: aString [
+	self
+		put: '''';
+		put: aString;
+		put: ''''.
 ]

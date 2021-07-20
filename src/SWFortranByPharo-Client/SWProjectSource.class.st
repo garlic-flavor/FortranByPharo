@@ -5,7 +5,6 @@ Class {
 	#name : #SWProjectSource,
 	#superclass : #Object,
 	#instVars : [
-		'type',
 		'description',
 		'view'
 	],
@@ -28,10 +27,14 @@ SWProjectSource >> f90_print_with: arguments using: transpiler [
 
 ]
 
+{ #category : #'as yet unclassified' }
+SWProjectSource >> functionDeclarations [
+	^ #()
+]
+
 { #category : #initialization }
 SWProjectSource >> initialize [
 	super initialize.
-	type := #f90.
 	description := 'This code is generated using Pharo.'.
 
 ]
@@ -39,7 +42,7 @@ SWProjectSource >> initialize [
 { #category : #streaming }
 SWProjectSource >> print: message [
 	view ifNotNil: [
-		view << message 
+		view << message asString; lf.
 	] ifNil: [
 		Transcript show: message; cr.
 	]
@@ -55,22 +58,6 @@ SWProjectSource >> program [
 SWProjectSource >> rb_print_with: arguments using: transpiler [
 	transpiler putFunctionCallOf: 'puts' with: arguments.
 
-]
-
-{ #category : #building }
-SWProjectSource >> readTranspiledStream [
-	^ (SWTranspiler transpile: self) readStream.
-
-]
-
-{ #category : #accessing }
-SWProjectSource >> type [
-	^ type
-]
-
-{ #category : #accessing }
-SWProjectSource >> type: aObject [
-	type := aObject
 ]
 
 { #category : #accessing }

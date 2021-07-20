@@ -19,7 +19,12 @@ SWProjectSourceTest >> setUp [
 
 { #category : #tests }
 SWProjectSourceTest >> testCodeGeneration [
-	self assert: (hello readTranspiledStream contents) equals: (String crlf join: {
+	|contents|
+	contents := SWTranspilerOfFortran new
+		source: hello;
+		transpileProgram;
+		contents.
+	self assert: contents equals: (String crlf join: {
 		'program HelloWorld'.
 		'    print *, ''Hello, World!'''.
 		'end program HelloWorld'.
@@ -30,10 +35,14 @@ SWProjectSourceTest >> testCodeGeneration [
 
 { #category : #tests }
 SWProjectSourceTest >> testCodeGenerationOfRuby [
-	hello type: #rb.
-	self assert: hello readTranspiledStream contents equals: (String crlf join: {
+	|contents|
+	contents := SWTranspilerOfRuby new
+		source: hello;
+		transpileProgram;
+		contents.
+	self assert: contents equals: (String crlf join: {
 		'#!/usr/bin/ruby'.
-		'puts(''Hello, World!'')'.
+		'puts("Hello, World!")'.
 		''
 	})
 ]

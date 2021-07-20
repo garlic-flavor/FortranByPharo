@@ -39,9 +39,8 @@ SWGFortranCompilerAdapter class >> queryVersion [
 	| result spec re |
 	spec := SWCompilerSpec new name: 'N/A'.
 	result := SWShell execute: self compilerName arguments: #('--version').
-	result isSuccess ifFalse: [ self error: 'gfortran not found. ', result message ].
 	re := self regexOfVersionDetection.
-	(re matchesPrefix: result message) ifFalse: [ self error: 'unknown version: ', result message ].
+	(re matchesPrefix: result) ifFalse: [ self error: 'unknown version: ', result message ].
 	^ spec
 		name: 'GNU Fortran';
 		type: 'f';

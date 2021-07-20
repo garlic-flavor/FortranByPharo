@@ -7,16 +7,21 @@ Class {
 	#category : #'SWFortranByPharo-Client-Transpiler'
 }
 
+{ #category : #initialization }
+SWTranspilerOfRuby >> initialize [
+	super initialize.
+	self type: #rb.
+]
+
 { #category : #'code generation' }
 SWTranspilerOfRuby >> putArgumentsOf: selector with: arguments [
 	self putArray: arguments.
 ]
 
-{ #category : #'code generation' }
-SWTranspilerOfRuby >> putArray: anArray [
-	self put: (', ' join: (anArray collect: [:each |
-		self duplicate transpiledOf: each
-	]))
+{ #category : #'as yet unclassified' }
+SWTranspilerOfRuby >> putFileHeaderOf: filename [
+	self putLine: '#!/usr/bin/ruby'.
+
 ]
 
 { #category : #'code generation' }
@@ -29,6 +34,22 @@ SWTranspilerOfRuby >> putFunctionCallHeaderOf: selector [
 	self put: selector; put: '('.
 ]
 
+{ #category : #'as yet unclassified' }
+SWTranspilerOfRuby >> putFunctionDefinitionFooterOf: aMethodName [
+	self putLine: 'end'
+]
+
+{ #category : #'as yet unclassified' }
+SWTranspilerOfRuby >> putFunctionDefinitionHeaderOf: aMethodName [
+	self
+		put: 'def ';
+		put: (self class selectorNameOf: aMethodName);
+		put: '(';
+		putArray: (self source class >>aMethodName) argumentNames;
+		put: ')';
+		putLine.
+]
+
 { #category : #'code generation' }
 SWTranspilerOfRuby >> putMainProgramFooterOf: project [
 	indentShifter := 0
@@ -36,6 +57,22 @@ SWTranspilerOfRuby >> putMainProgramFooterOf: project [
 
 { #category : #'code generation' }
 SWTranspilerOfRuby >> putMainProgramHeaderOf: project [
-	self putLine: '#!/usr/bin/ruby'.
 	indentShifter := -1
+]
+
+{ #category : #tests }
+SWTranspilerOfRuby >> transpile [
+	^ self
+		putFileHeaderOf: self programName;
+		transpileDeclaredFunctions;
+		transpileProgram;
+		yourself
+		
+]
+
+{ #category : #'public API' }
+SWTranspilerOfRuby >> transpileProgram [
+	self indentShifter: -1.
+	^ super transpileProgram.
+	
 ]

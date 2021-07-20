@@ -49,7 +49,7 @@ SWServerTest >> testExecWithOn [
 	res := client readResponse.
 	self assert: (res at: #code) equals: 200.
 	self assert: (res at: #status) equals: 'ok'.
-	self assert: (res at: #stdout) equals: ' Hello, world!', String lf.
+	self assert: (res at: #stdout) equals: ' Hello, World!', String lf.
 
 
 ]

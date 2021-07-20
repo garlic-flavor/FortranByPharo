@@ -23,17 +23,6 @@ SWFortranTranspilerTest >> setUp [
 ]
 
 { #category : #tests }
-SWFortranTranspilerTest >> testHelloworld [
-	self assert: ([
-		SWF print: 'Hello, world!'.
-	] transpileUsing: transpiler asMainOf: 'helloworld') equals: (self joinWithLf: {
-		'program helloworld'.
-		'    print *, ''Hello, world!'''.
-		'end program helloworld'. ''
-	}).
-]
-
-{ #category : #tests }
 SWFortranTranspilerTest >> testHelloworldClass [
 	self assert: (transpiler transpile: SWTestHelloWorld) equals: (self joinWithLf: {
 'program helloworld'.

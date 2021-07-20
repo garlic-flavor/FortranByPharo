@@ -2,9 +2,11 @@ Extension { #name : #RBSequenceNode }
 
 { #category : #'*SWFortranByPharo-Client' }
 RBSequenceNode >> transpileUsing: transpiler [
-	self flag: #TODO. "under construction."
+	|res|
 	self children do: [ :one|
-		one transpileUsing: transpiler.
+		res := one transpileUsing: transpiler.
 		transpiler putLine: ''
-	]
+	].
+	^ res
+
 ]
