@@ -28,6 +28,20 @@ SWTranspilerTest >> test: aMethod equals: sourceLines [
 ]
 
 { #category : #test }
+SWTranspilerTest >> testPutCodeWith [
+	rbt putCode: '\
+		put("%value%")
+		return 100
+	\' with: { '%value%' -> 'Hello, world' }.
+	self assert: rbt contents equals: ( String crlf join: {
+		'put("Hello, world")'.
+		'return 100'.
+		''
+	})
+
+]
+
+{ #category : #test }
 SWTranspilerTest >> testPutMessageCallWith [
 	self test: #program equals: {'puts("Hello, World!")'}.
 	rbt reset.

@@ -2,7 +2,7 @@
 I am a base class of the class that implements a project.s
 "
 Class {
-	#name : #SWProjectSource,
+	#name : #SWSource,
 	#superclass : #Object,
 	#instVars : [
 		'description',
@@ -11,36 +11,40 @@ Class {
 	#category : #'SWFortranByPharo-Client-Transpiler'
 }
 
+{ #category : #'as yet unclassified' }
+SWSource >> declare: aSymbolName asKindOf: dummyInstance [
+]
+
 { #category : #accessing }
-SWProjectSource >> description [
+SWSource >> description [
 	^ description
 ]
 
 { #category : #accessing }
-SWProjectSource >> description: aObject [
+SWSource >> description: aObject [
 	description := aObject
 ]
 
 { #category : #translating }
-SWProjectSource >> f90_print_with: arguments using: transpiler [
+SWSource >> f90_print_with: arguments using: transpiler [
 	transpiler put: 'print *, '; putArgumentsOf: #print with: arguments.
 
 ]
 
 { #category : #'as yet unclassified' }
-SWProjectSource >> functionDeclarations [
+SWSource >> functionDeclarations [
 	^ #()
 ]
 
 { #category : #initialization }
-SWProjectSource >> initialize [
+SWSource >> initialize [
 	super initialize.
 	description := 'This code is generated using Pharo.'.
 
 ]
 
 { #category : #streaming }
-SWProjectSource >> print: message [
+SWSource >> print: message [
 	view ifNotNil: [
 		view << message asString; lf.
 	] ifNil: [
@@ -50,24 +54,31 @@ SWProjectSource >> print: message [
 ]
 
 { #category : #running }
-SWProjectSource >> program [
+SWSource >> program [
 	^ self subclassResponsibility
 ]
 
+{ #category : #'as yet unclassified' }
+SWSource >> rb_declare_asKindOf_with: arguments using: transpiler [
+	transpiler preventNewline.
+	^ transpiler variables at: (arguments at: 1) value put: (arguments at: 2) value.
+
+]
+
 { #category : #translating }
-SWProjectSource >> rb_print_with: arguments using: transpiler [
+SWSource >> rb_print_with: arguments using: transpiler [
 	transpiler putFunctionCallOf: 'puts' with: arguments.
 
 ]
 
 { #category : #accessing }
-SWProjectSource >> view [
+SWSource >> view [
 
 	^ view
 ]
 
 { #category : #accessing }
-SWProjectSource >> view: anObject [
+SWSource >> view: anObject [
 
 	view := anObject
 ]

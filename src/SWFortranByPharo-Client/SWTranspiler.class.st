@@ -64,35 +64,29 @@ SWTranspiler >> contents [
 	^ stream contents
 ]
 
-{ #category : #'code generation' }
+{ #category : #'code generation - protected' }
 SWTranspiler >> decIndent [
 	indent := indent - 1.
 	indent < 0 ifTrue: [ self error: 'Indentation clauses mismatch.' ]
 ]
 
-{ #category : #accessing }
+{ #category : #'code generation - protected' }
 SWTranspiler >> decMessageNest [
 
 	messageNest := {messageNest - 1. 0} max.
 	0 < messageNest ifTrue: [ self put: ')' ]
 ]
 
-{ #category : #'code generation' }
+{ #category : #'code generation - protected' }
 SWTranspiler >> enterBlock [
 	self incIndent.
 	self variables push.
 ]
 
-{ #category : #accessing }
+{ #category : #'code generation - protected' }
 SWTranspiler >> functionDeclarations [
 
 	^ functionDeclarations ifNil: [ functionDeclarations := Dictionary new ]
-]
-
-{ #category : #accessing }
-SWTranspiler >> functionDeclarations: anObject [
-
-	functionDeclarations := anObject
 ]
 
 { #category : #'code generation' }
@@ -101,24 +95,24 @@ SWTranspiler >> getVariable: name [
 
 ]
 
-{ #category : #'code generation' }
+{ #category : #'code generation - protected' }
 SWTranspiler >> incIndent [
 	indent := indent + 1.
 ]
 
-{ #category : #'as yet unclassified' }
+{ #category : #'code generation - protected' }
 SWTranspiler >> incMessageNest [
 	messageNest := messageNest + 1.
 	1 < messageNest ifTrue: [ self put: '(' ].
 ]
 
-{ #category : #accessing }
+{ #category : #'code generation - protected' }
 SWTranspiler >> indentShifter [
 
 	^ indentShifter
 ]
 
-{ #category : #accessing }
+{ #category : #'code generation - protected' }
 SWTranspiler >> indentShifter: anObject [
 
 	indentShifter := anObject
@@ -136,25 +130,25 @@ SWTranspiler >> initialize [
 	preventNewline := false.
 ]
 
-{ #category : #'code generation' }
+{ #category : #'code generation - protected' }
 SWTranspiler >> leaveBlock [
 	self decIndent.
 	self variables pop.
 ]
 
-{ #category : #accessing }
+{ #category : #'code generation' }
 SWTranspiler >> newline [
 
 	^ newline
 ]
 
-{ #category : #accessing }
+{ #category : #'code generation' }
 SWTranspiler >> newline: anObject [
 
 	newline := anObject
 ]
 
-{ #category : #accessing }
+{ #category : #'code generation - protected' }
 SWTranspiler >> preventNewline [
 	preventNewline := true
 ]
@@ -190,21 +184,40 @@ SWTranspiler >> putArray: anArray [
 
 ]
 
-{ #category : #'as yet unclassified' }
+{ #category : #'code generation' }
 SWTranspiler >> putArrayFooter [
 	self put: ' ]'
 ]
 
-{ #category : #'as yet unclassified' }
+{ #category : #'code generation' }
 SWTranspiler >> putArrayHeader [
 	self put: '[ '.
 ]
 
 { #category : #'as yet unclassified' }
+SWTranspiler >> putCode: code [
+	^ self putCode: code with: {  }
+]
+
+{ #category : #'code generation' }
+SWTranspiler >> putCode: code with: anAssociationArray [
+	(({ code }, anAssociationArray) reduce: [ :acc :assoc|
+		acc copyReplaceAll: assoc key with: assoc value
+	]) linesDo: [ :aLine ||trimmed|
+		trimmed := aLine trimBoth.
+		(trimmed endsWith: '\') ifTrue: [
+			self put: (trimmed trimRight: [ :c | c = $\ ])
+		] ifFalse: [
+			self putLine: aLine trimBoth.
+		]
+	]
+]
+
+{ #category : #'code generation' }
 SWTranspiler >> putFileFooterOf: filename [
 ]
 
-{ #category : #'as yet unclassified' }
+{ #category : #'code generation' }
 SWTranspiler >> putFileHeaderOf: filename [
 	
 	
@@ -228,17 +241,17 @@ SWTranspiler >> putFunctionCallOf: selector with: arguments [
 		putFunctionCallFooterOf: selector
 ]
 
-{ #category : #'as yet unclassified' }
+{ #category : #'code generation' }
 SWTranspiler >> putFunctionDefinitionFooterOf: aMethodName [.
 	^ self subclassResponsibility 
 ]
 
-{ #category : #'as yet unclassified' }
+{ #category : #'code generation' }
 SWTranspiler >> putFunctionDefinitionHeaderOf: aMethodName [
 	^ self subclassResponsibility 
 ]
 
-{ #category : #'code generation' }
+{ #category : #'code generation - protected' }
 SWTranspiler >> putIndent [
 	isNewline ifFalse: [ ^ self ].
 	stream nextPutAll: (' ' repeat: {0. (4 * (indent + indentShifter))} max).
@@ -297,7 +310,17 @@ SWTranspiler >> putMessage: receiver call: selector with: arguments [
 	self error: 'NO IMPLEMENTATION.'
 ]
 
-{ #category : #'as yet unclassified' }
+{ #category : #'code generation' }
+SWTranspiler >> putParameters: anArray [
+	anArray do: [:each |
+		self put: each asString
+	] separatedBy: [
+		self put: ', '
+	]
+
+]
+
+{ #category : #'code generation' }
 SWTranspiler >> putString: aString [
 	self
 		put: '"';
@@ -305,7 +328,7 @@ SWTranspiler >> putString: aString [
 		put: '"'.
 ]
 
-{ #category : #'as yet unclassified' }
+{ #category : #'code generation' }
 SWTranspiler >> putVariable: aVariable named: name [
 	name first isUppercase ifTrue: [ 
 		^ Smalltalk globals at: name
@@ -314,7 +337,7 @@ SWTranspiler >> putVariable: aVariable named: name [
 		self preventNewline.
 		^ aVariable
 	].
-	(aVariable class inheritsFrom: SWProjectSource) ifTrue: [ 
+	(aVariable class inheritsFrom: SWSource) ifTrue: [ 
 		^ aVariable
 	].
 	self put: name.
@@ -346,12 +369,7 @@ SWTranspiler >> source: anObject [
 	source := anObject
 ]
 
-{ #category : #'as yet unclassified' }
-SWTranspiler >> transformFunctionName: name [
-	^ self class selectorNameOf: name 
-]
-
-{ #category : #'as yet unclassified' }
+{ #category : #'code generation - protected' }
 SWTranspiler >> transformSelector: aSelector [
 	^ (String streamContents: [ :s |
 		s << self type; << '_'; << (self class selectorNameOf: aSelector); << 'with:using:'
@@ -359,12 +377,12 @@ SWTranspiler >> transformSelector: aSelector [
 
 ]
 
-{ #category : #tests }
+{ #category : #'public API' }
 SWTranspiler >> transpile [
 	^ self subclassResponsibility		
 ]
 
-{ #category : #'as yet unclassified' }
+{ #category : #'code generation' }
 SWTranspiler >> transpileDeclaredFunctions [
 	self source functionDeclarations do: [ :each ||name ret|
 		name := self class selectorNameOf: each.
@@ -376,7 +394,7 @@ SWTranspiler >> transpileDeclaredFunctions [
 	]
 ]
 
-{ #category : #'as yet unclassified' }
+{ #category : #'code generation' }
 SWTranspiler >> transpileFunctionDefinition: aMethodName [
 	|res|
 	self putFunctionDefinitionHeaderOf: aMethodName.
@@ -386,7 +404,7 @@ SWTranspiler >> transpileFunctionDefinition: aMethodName [
 	
 ]
 
-{ #category : #'as yet unclassified' }
+{ #category : #'code generation' }
 SWTranspiler >> transpileMethod: aMethod [
 	|res|
 	self variables push.
@@ -395,7 +413,7 @@ SWTranspiler >> transpileMethod: aMethod [
 	^ res
 ]
 
-{ #category : #'public API' }
+{ #category : #'code generation' }
 SWTranspiler >> transpileProgram [
 	|res|
 	self putMainProgramHeaderOf: self programName.

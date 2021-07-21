@@ -45,7 +45,7 @@ SWTranspilerOfRuby >> putFunctionDefinitionHeaderOf: aMethodName [
 		put: 'def ';
 		put: (self class selectorNameOf: aMethodName);
 		put: '(';
-		putArray: (self source class >>aMethodName) argumentNames;
+		putParameters: (self source class >>aMethodName) argumentNames;
 		put: ')';
 		putLine.
 ]

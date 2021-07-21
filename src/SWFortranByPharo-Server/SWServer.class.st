@@ -3,7 +3,7 @@ This is a WebSocket server.
 "
 Class {
 	#name : #SWServer,
-	#superclass : #SWProjectSource,
+	#superclass : #SWSource,
 	#instVars : [
 		'env'
 	],
@@ -36,7 +36,7 @@ SWServer class >> transpile [
 	instance := self new.
 	contents := SWTranspilerOfRuby new 
 		source: instance;
-		transpileProgram;
+		transpile;
 		contents.
 	contents inspect.
 
@@ -95,6 +95,11 @@ SWServer >> filePathOf: name [
 	result := relname ifNotEmpty: [ FileLocator imageDirectory / relname ] ifEmpty: [ FileLocator imageDirectory ].
 	result parent ensureCreateDirectory.
 	^ result
+]
+
+{ #category : #'code generation - protected' }
+SWServer >> functionDeclarations [
+	^ #(startOn:)
 ]
 
 { #category : #responses }
