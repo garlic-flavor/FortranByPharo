@@ -32,6 +32,11 @@ SWSource >> f90_print_with: arguments using: transpiler [
 ]
 
 { #category : #'as yet unclassified' }
+SWSource >> fileHeaders [
+	^ {  }
+]
+
+{ #category : #'as yet unclassified' }
 SWSource >> functionDeclarations [
 	^ #()
 ]
@@ -59,6 +64,12 @@ SWSource >> program [
 ]
 
 { #category : #'as yet unclassified' }
+SWSource >> putCode: code with: anAssociationArray of: type for: aBlock [
+	^ aBlock value
+
+]
+
+{ #category : #'as yet unclassified' }
 SWSource >> rb_declare_asKindOf_with: arguments using: transpiler [
 	transpiler preventNewline.
 	^ transpiler variables at: (arguments at: 1) value put: (arguments at: 2) value.
@@ -69,6 +80,12 @@ SWSource >> rb_declare_asKindOf_with: arguments using: transpiler [
 SWSource >> rb_print_with: arguments using: transpiler [
 	transpiler putFunctionCallOf: 'puts' with: arguments.
 
+]
+
+{ #category : #'as yet unclassified' }
+SWSource >> rb_putCode_with_of_for_with: arguments using: transpiler [
+	(arguments at: 3) evaluate = #rb ifFalse: [ ^ self ].
+	^ transpiler putCode: (arguments at: 1) evaluate with: (arguments at: 2) evaluate
 ]
 
 { #category : #accessing }

@@ -99,7 +99,7 @@ SWServer >> filePathOf: name [
 
 { #category : #'code generation - protected' }
 SWServer >> functionDeclarations [
-	^ #(startOn:)
+	^ #()
 ]
 
 { #category : #responses }
@@ -186,6 +186,13 @@ SWServer >> put: target with: msg on: socket [
 	].
 	^ socket sendResponseCreated: target rel fullName with: {  }
 
+]
+
+{ #category : #'as yet unclassified' }
+SWServer >> rb_startOn_with: arguments using: transpiler [
+	|portNumber|
+	portNumber := (arguments at: 1) evaluate.
+	self halt.
 ]
 
 { #category : #public }

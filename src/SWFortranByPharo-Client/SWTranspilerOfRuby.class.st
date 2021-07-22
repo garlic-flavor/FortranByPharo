@@ -64,6 +64,7 @@ SWTranspilerOfRuby >> putMainProgramHeaderOf: project [
 SWTranspilerOfRuby >> transpile [
 	^ self
 		putFileHeaderOf: self programName;
+		putFileHeaders;
 		transpileDeclaredFunctions;
 		transpileProgram;
 		yourself

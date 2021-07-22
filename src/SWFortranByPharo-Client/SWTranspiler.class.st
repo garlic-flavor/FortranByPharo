@@ -13,9 +13,7 @@ Class {
 		'isNewline',
 		'variables',
 		'newline',
-		'messageNest',
-		'preventNewline',
-		'functionDeclarations'
+		'preventNewline'
 	],
 	#classVars : [
 		'selectorName'
@@ -72,21 +70,16 @@ SWTranspiler >> decIndent [
 
 { #category : #'code generation - protected' }
 SWTranspiler >> decMessageNest [
+	|nest|
+	nest := self variables at: '%messageNest%' put: {(self variables at: '%messageNest%' ifAbsentPut: 0) - 1. 0} max.
+	0 < nest ifTrue: [ self put: ')' ].
 
-	messageNest := {messageNest - 1. 0} max.
-	0 < messageNest ifTrue: [ self put: ')' ]
 ]
 
 { #category : #'code generation - protected' }
 SWTranspiler >> enterBlock [
 	self incIndent.
 	self variables push.
-]
-
-{ #category : #'code generation - protected' }
-SWTranspiler >> functionDeclarations [
-
-	^ functionDeclarations ifNil: [ functionDeclarations := Dictionary new ]
 ]
 
 { #category : #'code generation' }
@@ -102,8 +95,9 @@ SWTranspiler >> incIndent [
 
 { #category : #'code generation - protected' }
 SWTranspiler >> incMessageNest [
-	messageNest := messageNest + 1.
-	1 < messageNest ifTrue: [ self put: '(' ].
+	|nest|
+	nest := self variables at: '%messageNest%' put: (self variables at: '%messageNest%' ifAbsentPut: 0) + 1.
+	1 < nest ifTrue: [ self put: '(' ].
 ]
 
 { #category : #'code generation - protected' }
@@ -126,7 +120,6 @@ SWTranspiler >> initialize [
 	indentShifter := 0.
 	isNewline := true.
 	newline := String cr, String lf.
-	messageNest := 0.
 	preventNewline := false.
 ]
 
@@ -194,7 +187,7 @@ SWTranspiler >> putArrayHeader [
 	self put: '[ '.
 ]
 
-{ #category : #'as yet unclassified' }
+{ #category : #accessing }
 SWTranspiler >> putCode: code [
 	^ self putCode: code with: {  }
 ]
@@ -208,7 +201,7 @@ SWTranspiler >> putCode: code with: anAssociationArray [
 		(trimmed endsWith: '\') ifTrue: [
 			self put: (trimmed trimRight: [ :c | c = $\ ])
 		] ifFalse: [
-			self putLine: aLine trimBoth.
+			self putLine: trimmed.
 		]
 	]
 ]
@@ -221,6 +214,13 @@ SWTranspiler >> putFileFooterOf: filename [
 SWTranspiler >> putFileHeaderOf: filename [
 	
 	
+]
+
+{ #category : #'code generation' }
+SWTranspiler >> putFileHeaders [
+	self source fileHeaders do: [ :header|
+		self putCode: header
+	]
 ]
 
 { #category : #'code generation' }
@@ -292,21 +292,21 @@ SWTranspiler >> putMessage: receiver call: selector with: arguments [
 	|var sel|
 	self flag: #toImplement.
 	self incMessageNest.
-	var := receiver transpileUsing: self.
-	self assert: [var isNotNil].
-	sel := self transformSelector: selector.
-	(var respondsTo: sel) ifTrue: [|res|
-		res := var perform: sel with: arguments with: self.
-		self decMessageNest.
-		^ res
-	].
-	var = self source ifTrue: [ |funcname func|
-			funcname := self class selectorNameOf: selector.
-			func := self functionDeclarations at: funcname ifAbsent: [ nil ].
-			func ifNotNil: [
-				^ func value: arguments value: self.
-			]
-	].
+	[
+		var := receiver transpileUsing: self.
+		self assert: [var isNotNil].
+		sel := self transformSelector: selector.
+		(var respondsTo: sel) ifTrue: [
+			^ var perform: sel with: arguments with: self.
+		].
+		var = self source ifTrue: [ |funcname func|
+				funcname := self class selectorNameOf: selector.
+				func := self variables at: funcname ifAbsent: [ nil ].
+				func ifNotNil: [
+					^ func value: arguments value: self.
+				]
+		].
+	] ensure: [ self decMessageNest ].
 	self error: 'NO IMPLEMENTATION.'
 ]
 
@@ -352,7 +352,6 @@ SWTranspiler >> readStream [
 { #category : #initialization }
 SWTranspiler >> reset [
 	stream resetToStart.
-	messageNest := 0.
 	self variables: nil.
 	preventNewline := false.
 ]
@@ -387,7 +386,7 @@ SWTranspiler >> transpileDeclaredFunctions [
 	self source functionDeclarations do: [ :each ||name ret|
 		name := self class selectorNameOf: each.
 		ret := self transpileFunctionDefinition: each.
-		self functionDeclarations at: name put: [ :args :transpiler |
+		self variables at: name put: [ :args :transpiler |
 			transpiler putFunctionCallOf: name with: args.
 			ret
 		]

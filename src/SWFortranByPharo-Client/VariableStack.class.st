@@ -43,10 +43,13 @@ VariableStack >> pop [
 { #category : #'API-remotes' }
 VariableStack >> push [
 	^ stack push: (stack ifNotEmpty: [
-		stack top copy
+		(stack top copy)
+			at: '%messageNest%' put: 0;
+			yourself
 	] ifEmpty: [
 		Dictionary new
-	]); yourself
+	]);
+	yourself
 
 ]
 
