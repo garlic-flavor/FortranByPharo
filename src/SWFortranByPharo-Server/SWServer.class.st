@@ -189,10 +189,19 @@ SWServer >> put: target with: msg on: socket [
 ]
 
 { #category : #'as yet unclassified' }
+SWServer >> rb_fileHeaders [
+	^ {
+		'require ''em-websocket'''
+	}
+]
+
+{ #category : #'as yet unclassified' }
 SWServer >> rb_startOn_with: arguments using: transpiler [
 	|portNumber|
 	portNumber := (arguments at: 1) evaluate.
-	self halt.
+	transpiler putCode: 'EM.run{'.
+	transpiler putCode: '}'.
+
 ]
 
 { #category : #public }

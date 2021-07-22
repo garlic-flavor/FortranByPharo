@@ -32,11 +32,6 @@ SWSource >> f90_print_with: arguments using: transpiler [
 ]
 
 { #category : #'as yet unclassified' }
-SWSource >> fileHeaders [
-	^ {  }
-]
-
-{ #category : #'as yet unclassified' }
 SWSource >> functionDeclarations [
 	^ #()
 ]

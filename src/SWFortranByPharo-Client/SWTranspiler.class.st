@@ -218,9 +218,14 @@ SWTranspiler >> putFileHeaderOf: filename [
 
 { #category : #'code generation' }
 SWTranspiler >> putFileHeaders [
-	self source fileHeaders do: [ :header|
-		self putCode: header
+	|sel|
+	sel := (self type, '_fileHeaders') asSymbol.
+	(self source respondsTo: sel) ifTrue: [
+		(self source perform: sel) do: [ :header |
+			self putCode: header
+		]
 	]
+
 ]
 
 { #category : #'code generation' }
@@ -306,8 +311,9 @@ SWTranspiler >> putMessage: receiver call: selector with: arguments [
 					^ func value: arguments value: self.
 				]
 		].
+		self error: 'NO IMPLEMENTATION.'
 	] ensure: [ self decMessageNest ].
-	self error: 'NO IMPLEMENTATION.'
+
 ]
 
 { #category : #'code generation' }
@@ -382,13 +388,43 @@ SWTranspiler >> transpile [
 ]
 
 { #category : #'code generation' }
+SWTranspiler >> transpileDeclaredFunction: dict [
+		|symbol name ret argtype|
+		symbol := dict at: #name.
+		name := dict at: #transpiledName.
+		argtype := dict at: #argtype ifAbsent: [ #position ].
+		ret := self transpileFunctionDefinition: symbol.
+
+		argtype = #position ifTrue: [
+			^ [ :args :transpiler |
+				transpiler putFunctionCallOf: name with: args.
+				ret.
+			]
+		].
+		argtype = #named ifTrue: [
+			self error: 'no implementation'
+		].
+		argtype = #dict ifTrue: [ 
+			self error: 'no implementation'
+		]
+
+]
+
+{ #category : #'code generation' }
 SWTranspiler >> transpileDeclaredFunctions [
-	self source functionDeclarations do: [ :each ||name ret|
-		name := self class selectorNameOf: each.
-		ret := self transpileFunctionDefinition: each.
-		self variables at: name put: [ :args :transpiler |
-			transpiler putFunctionCallOf: name with: args.
-			ret
+	self source functionDeclarations do: [ :each ||dict name|
+		dict := each isArray ifTrue: [
+			Dictionary newFrom: each
+		] ifFalse: [
+			Dictionary new
+				at: #name put: each;
+				yourself
+		].
+		name := dict at: #transpiledName ifAbsentPut: [ self class selectorNameOf: (dict at: #name) ].
+		(dict at: #foreign ifAbsent: [ false ]) ifTrue: [
+			self variables at: name put: (dict at: #return ifAbsent: [nil])
+		] ifFalse: [
+			self variables at: name put: (self transpileDeclaredFunction: dict)
 		]
 	]
 ]
@@ -408,6 +444,7 @@ SWTranspiler >> transpileMethod: aMethod [
 	|res|
 	self variables push.
 	res := (self source class >> aMethod) transpileUsing: self.
+	res := variables at: '%returnValue%' ifAbsent: [ res ].
 	self variables pop.
 	^ res
 ]
