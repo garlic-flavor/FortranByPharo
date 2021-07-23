@@ -62,13 +62,14 @@ SWTranspilerOfRuby >> putMainProgramHeaderOf: project [
 
 { #category : #tests }
 SWTranspilerOfRuby >> transpile [
-	^ self
-		putFileHeaderOf: self programName;
-		putFileHeaders;
-		transpileDeclaredFunctions;
-		transpileProgram;
-		yourself
-		
+	self classes do: [ :aClass |
+		self putClassDefinition: aClass
+	].
+	self mainClass ifNotNil: [
+		self putCode: '\
+			(%mainClass%.new).main_(ARGV)
+		\' with: { '%mainClass%' -> self mainClass }
+	]
 ]
 
 { #category : #'public API' }

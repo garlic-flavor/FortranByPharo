@@ -6,7 +6,8 @@ Class {
 	#superclass : #Object,
 	#instVars : [
 		'type',
-		'source',
+		'classes',
+		'mainClass',
 		'stream',
 		'indent',
 		'indentShifter',
@@ -28,11 +29,27 @@ SWTranspiler class >> transpiledNameOf: selector [
 	
 ]
 
+{ #category : #'as yet unclassified' }
+SWTranspiler >> addClass: aClass [
+	self classes add: aClass
+]
+
+{ #category : #'as yet unclassified' }
+SWTranspiler >> addMainClass: aClass [
+	self addClass: aClass.
+	mainClass := aClass.
+]
+
 { #category : #'code generation' }
 SWTranspiler >> assign: key with: value [
 	self put: key; put: ' = '.
 	^ self variables at: key put: (value transpileUsing: self).
 
+]
+
+{ #category : #accessing }
+SWTranspiler >> classes [
+	^ classes ifNil: [ classes := OrderedCollection new ]
 ]
 
 { #category : #accessing }
@@ -102,6 +119,11 @@ SWTranspiler >> leaveBlock [
 
 ]
 
+{ #category : #accessing }
+SWTranspiler >> mainClass [
+	^ mainClass
+]
+
 { #category : #'code generation' }
 SWTranspiler >> newline [
 
@@ -157,17 +179,20 @@ SWTranspiler >> putArrayHeader [
 ]
 
 { #category : #'as yet unclassified' }
-SWTranspiler >> putClass: aClass [
+SWTranspiler >> putClassDefinition: aClass [
+	|decls|
 	self put: 'class '.
 	self put: aClass name.
 	(aClass superclass = Object) ifFalse: [
-		self put: ' > '; put: aClass superclass name
+		self put: ' < '; put: aClass superclass name
 	].
 	self putLine.
 	self incIndent.
-
+	
 	aClass methods do: [ :aMethod |
-		self putMethod: aMethod ofClass: aClass
+		(aClass declarations anySatisfy: [:each | each = aMethod selector]) ifTrue: [
+			self putMethod: aMethod ofClass: aClass
+		]
 	].
 
 	self flag: #toImplement.
@@ -183,23 +208,27 @@ SWTranspiler >> putCode: code [
 
 { #category : #'code generation' }
 SWTranspiler >> putCode: code with: anAssociationArray [
-	|leftPad|
-	leftPad := -1.
-	(({ code. ('\', String crlf) -> ''. ('\', String cr) -> ''. ('\', String lf) -> '' }, anAssociationArray) reduce: [ :acc :assoc|
+	|leftPad lTrimmed|
+	leftPad := 0.
+	lTrimmed := code trimLeft: [ :c |
+		c isSeparator ifTrue: [ leftPad := leftPad + 1 ].
+		c isSeparator or: [ c = $\ ]
+	].
+	(({ code }, anAssociationArray) reduce: [ :acc :assoc|
 		acc copyReplaceAll: assoc key with: assoc value asString
-	]) linesDo: [ :aLine ||rTrimmed trimmed|
-		rTrimmed := aLine trimRight.
-		leftPad < 0 ifTrue: [
-			trimmed := rTrimmed trimLeft.
-			leftPad := rTrimmed size - trimmed size.
-		] ifFalse: [ |counter|
-			counter := 0.
-			trimmed := rTrimmed trimLeft: [ :c |
-				counter := counter + 1.
-				c isSeparator and: [ counter <= leftPad ]
-			]
+	]) linesDo: [ :aLine ||rTrimmed preventsNewline trimmed counter|
+		preventsNewline := aLine isEmpty or: [aLine last = $\].
+		rTrimmed := aLine trimRight: [:c | c isSeparator or: [c = $\]].
+		counter := 0.
+		trimmed := rTrimmed trimLeft: [ :c |
+			counter := counter + 1.
+			c isSeparator and: [ counter <= leftPad ]
 		].
-		self putLine: trimmed.
+		preventsNewline ifTrue: [
+			trimmed ifNotEmpty: [self put: trimmed ]
+		] ifFalse: [
+			self putLine: trimmed.
+		]
 	]
 ]
 
@@ -319,6 +348,7 @@ SWTranspiler >> putMessage: receiver call: selector with: arguments [
 
 { #category : #'as yet unclassified' }
 SWTranspiler >> putMethod: aMethod ofClass: aClass [
+	|sel|
 	self
 		put: 'def ';
 		put: (self class transpiledNameOf: aMethod selector);
@@ -329,7 +359,14 @@ SWTranspiler >> putMethod: aMethod ofClass: aClass [
 		self put: ', '
 	].
 	self putLine: ')'.
-	aMethod transpileUsing: self.
+	sel := self transpilerNameFor: aMethod.
+	(aClass respondsTo: sel) ifTrue: [
+		self incIndent.
+		aClass perform: sel with: self.
+		self decIndent.
+	] ifFalse: [
+		aMethod transpileUsing: self.
+	].
 	self putLine: 'end'.
 ]
 
@@ -361,18 +398,6 @@ SWTranspiler >> reset [
 	stream resetToStart.
 	self variables: nil.
 	preventNewline := false.
-]
-
-{ #category : #accessing }
-SWTranspiler >> source [
-
-	^ source
-]
-
-{ #category : #accessing }
-SWTranspiler >> source: anObject [
-
-	source := anObject
 ]
 
 { #category : #accessing }
@@ -418,6 +443,18 @@ SWTranspiler >> transpileProgram [
 	self putMainProgramHeaderOf: self programName.
 	self transpileMethod: #program.
 	self putMainProgramFooterOf: self programName.
+
+]
+
+{ #category : #'as yet unclassified' }
+SWTranspiler >> transpilerNameFor: aMethod [
+	^ (String streamContents: [ :s |
+		s
+			<< self type;
+			<< '_';
+			<< (self class transpiledNameOf: aMethod selector);
+			<< 'Using:'
+	]) asSymbol.
 
 ]
 

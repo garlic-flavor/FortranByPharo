@@ -11,25 +11,26 @@ Class {
 }
 
 { #category : #accessing }
-SWClass >> functionDeclarations [
-	^ #()
+SWClass class >> declarations [
+	^ #(print:)
 ]
 
-{ #category : #initialization }
-SWClass >> initialize [
-	super initialize.
-
+{ #category : #'as yet unclassified' }
+SWClass class >> rb_print_Using: transpiler [
+	transpiler putCode: '\
+		puts msg
+	\'
 ]
 
-{ #category : #running }
-SWClass >> program [
-	^ self subclassResponsibility
+{ #category : #printing }
+SWClass >> print: msg [
+	self stdout << msg; cr; flush
 ]
 
 { #category : #accessing }
 SWClass >> stdout [
 
-	^ stdout
+	^ stdout ifNil: [ stdout := Transcript ]
 ]
 
 { #category : #accessing }
