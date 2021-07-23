@@ -23,6 +23,34 @@ Class {
 	#category : #'SWFortranByPharo-Client-Transpiler'
 }
 
+{ #category : #initialization }
+SWTranspiler class >> resetSelectorName [
+	<script>
+	selectorName := nil.
+]
+
+{ #category : #'as yet unclassified' }
+SWTranspiler class >> selectorName [
+	^ selectorName ifNil: [
+		selectorName := Dictionary new
+			at: '+' put: 'opAdd_';
+			at: '-' put: 'opSub_';
+			at: '*' put: 'opMul_';
+			at: '/' put: 'opDiv_';
+			at: '%' put: 'opRem_';
+			at: '**' put: 'opPow_';
+			yourself
+	]
+]
+
+{ #category : #'as yet unclassified' }
+SWTranspiler class >> selectorNameOf: selector [
+	^ self selectorName at: selector ifAbsent: [|sel|
+		sel := selector asString copyReplaceAll: ':' with: '_'.
+		sel last = $_ ifTrue: [ sel ] ifFalse: [ sel, '_' ]
+	]
+]
+
 { #category : #'code generation - protected' }
 SWTranspiler class >> transpiledNameOf: selector [
 	^ selector asString copyReplaceAll: ':' with: '_'
@@ -74,6 +102,12 @@ SWTranspiler >> decMessageNest [
 { #category : #'code generation - protected' }
 SWTranspiler >> enterBlock [
 	self incIndent.
+
+]
+
+{ #category : #'code generation' }
+SWTranspiler >> getVariable: name [
+	^ self variables at: name ifAbsent: [ nil ]
 
 ]
 
@@ -176,6 +210,15 @@ SWTranspiler >> putArrayFooter [
 { #category : #'code generation' }
 SWTranspiler >> putArrayHeader [
 	self put: '[ '.
+]
+
+{ #category : #'as yet unclassified' }
+SWTranspiler >> putArrayLiteral: anArray [
+	self
+		put: '[ ';
+		putArray: anArray;
+		put: ' ]'.
+	^ anArray
 ]
 
 { #category : #'as yet unclassified' }
@@ -388,6 +431,19 @@ SWTranspiler >> putString: aString [
 		put: '"'.
 ]
 
+{ #category : #'as yet unclassified' }
+SWTranspiler >> putVariable: aVariable named: name [
+	aVariable ifNil: [
+		self preventNewline.
+		^ aVariable
+	].
+	(aVariable class inheritsFrom: SWProjectSource) ifTrue: [ 
+		^ aVariable
+	].
+	self put: name.
+	^ aVariable
+]
+
 { #category : #accessing }
 SWTranspiler >> readStream [
 	^ stream readStream
@@ -401,6 +457,18 @@ SWTranspiler >> reset [
 ]
 
 { #category : #accessing }
+SWTranspiler >> source [
+
+	^ source
+]
+
+{ #category : #accessing }
+SWTranspiler >> source: anObject [
+
+	source := anObject
+]
+
+{ #category : #accessing }
 SWTranspiler >> tabWidth [
 
 	^ tabWidth
@@ -410,6 +478,14 @@ SWTranspiler >> tabWidth [
 SWTranspiler >> tabWidth: anObject [
 
 	tabWidth := anObject
+]
+
+{ #category : #'as yet unclassified' }
+SWTranspiler >> transformSelector: aSelector [
+	^ (String streamContents: [ :s |
+		s << self type; << '_'; << (self class selectorNameOf: aSelector); << 'with:using:'
+	]) asSymbol.
+
 ]
 
 { #category : #'public API' }
