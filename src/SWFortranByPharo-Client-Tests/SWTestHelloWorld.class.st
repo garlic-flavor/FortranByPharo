@@ -3,7 +3,7 @@ I am belong to SWProjectTest
 "
 Class {
 	#name : #SWTestHelloWorld,
-	#superclass : #SWSource,
+	#superclass : #SWClass,
 	#category : #'SWFortranByPharo-Client-Tests'
 }
 
@@ -38,9 +38,4 @@ SWTestHelloWorld >> program5 [
 	|a|
 	a := { 10. 20. 30. 40. 50 }.
 	self print: (a at: 1)
-]
-
-{ #category : #accessing }
-SWTestHelloWorld >> programName [
-	^ 'HelloWorld'
 ]

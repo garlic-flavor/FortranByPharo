@@ -10,10 +10,11 @@ Class {
 		'stream',
 		'indent',
 		'indentShifter',
+		'tabWidth',
 		'isNewline',
-		'variables',
 		'newline',
-		'preventNewline'
+		'preventNewline',
+		'messageNest'
 	],
 	#classVars : [
 		'selectorName'
@@ -21,33 +22,10 @@ Class {
 	#category : #'SWFortranByPharo-Client-Transpiler'
 }
 
-{ #category : #initialization }
-SWTranspiler class >> resetSelectorName [
-	<script>
-	selectorName := nil.
-]
-
-{ #category : #'as yet unclassified' }
-SWTranspiler class >> selectorName [
-	^ selectorName ifNil: [
-		selectorName := Dictionary new
-			at: #+ put: 'opAdd_';
-			at: #- put: 'opSub_';
-			at: #* put: 'opMul_';
-			at: #/ put: 'opDiv_';
-			at: #% put: 'opRem_';
-			at: #** put: 'opPow_';
-			at: #, put: 'opConcat_';
-			yourself
-	]
-]
-
-{ #category : #'as yet unclassified' }
-SWTranspiler class >> selectorNameOf: selector [
-	^ self selectorName at: selector ifAbsent: [|sel|
-		sel := selector asString copyReplaceAll: ':' with: '_'.
-		sel last = $_ ifTrue: [ sel ] ifFalse: [ sel, '_' ]
-	]
+{ #category : #'code generation - protected' }
+SWTranspiler class >> transpiledNameOf: selector [
+	^ selector asString copyReplaceAll: ':' with: '_'
+	
 ]
 
 { #category : #'code generation' }
@@ -71,20 +49,14 @@ SWTranspiler >> decIndent [
 { #category : #'code generation - protected' }
 SWTranspiler >> decMessageNest [
 	|nest|
-	nest := self variables at: '%messageNest%' put: {(self variables at: '%messageNest%' ifAbsentPut: 0) - 1. 0} max.
-	0 < nest ifTrue: [ self put: ')' ].
+	messageNest := {0. messageNest - 1} max.
+	0 < messageNest ifTrue: [ self put: ')' ].
 
 ]
 
 { #category : #'code generation - protected' }
 SWTranspiler >> enterBlock [
 	self incIndent.
-	self variables push.
-]
-
-{ #category : #'code generation' }
-SWTranspiler >> getVariable: name [
-	^ self variables at: name ifAbsent: [ nil ]
 
 ]
 
@@ -95,9 +67,8 @@ SWTranspiler >> incIndent [
 
 { #category : #'code generation - protected' }
 SWTranspiler >> incMessageNest [
-	|nest|
-	nest := self variables at: '%messageNest%' put: (self variables at: '%messageNest%' ifAbsentPut: 0) + 1.
-	1 < nest ifTrue: [ self put: '(' ].
+	messageNest := messageNest + 1.
+	1 < messageNest ifTrue: [ self put: '(' ].
 ]
 
 { #category : #'code generation - protected' }
@@ -115,18 +86,20 @@ SWTranspiler >> indentShifter: anObject [
 { #category : #initialization }
 SWTranspiler >> initialize [
 	super initialize.
-	stream := ReadWriteStream on: String new.
+	stream := String new writeStream.
 	indent := 0.
 	indentShifter := 0.
-	isNewline := true.
-	newline := String cr, String lf.
+	tabWidth := 4.
+	isNewline := false.
+	newline := String crlf.
 	preventNewline := false.
+	messageNest := 0.
 ]
 
 { #category : #'code generation - protected' }
 SWTranspiler >> leaveBlock [
 	self decIndent.
-	self variables pop.
+
 ]
 
 { #category : #'code generation' }
@@ -148,12 +121,8 @@ SWTranspiler >> preventNewline [
 
 { #category : #accessing }
 SWTranspiler >> programName [ 
-	self assert: (self source isNotNil).
-	^ (self source respondsTo: #programName) ifTrue: [
-		self source programName.
-	] ifFalse: [ 
-		self source class asString.
-	]
+	^ self source programName
+
 ]
 
 { #category : #'code generation' }
@@ -187,6 +156,26 @@ SWTranspiler >> putArrayHeader [
 	self put: '[ '.
 ]
 
+{ #category : #'as yet unclassified' }
+SWTranspiler >> putClass: aClass [
+	self put: 'class '.
+	self put: aClass name.
+	(aClass superclass = Object) ifFalse: [
+		self put: ' > '; put: aClass superclass name
+	].
+	self putLine.
+	self incIndent.
+
+	aClass methods do: [ :aMethod |
+		self putMethod: aMethod ofClass: aClass
+	].
+
+	self flag: #toImplement.
+
+	self decIndent.
+	self putLine: 'end'.
+]
+
 { #category : #accessing }
 SWTranspiler >> putCode: code [
 	^ self putCode: code with: {  }
@@ -194,15 +183,23 @@ SWTranspiler >> putCode: code [
 
 { #category : #'code generation' }
 SWTranspiler >> putCode: code with: anAssociationArray [
-	(({ code }, anAssociationArray) reduce: [ :acc :assoc|
-		acc copyReplaceAll: assoc key with: assoc value
-	]) linesDo: [ :aLine ||trimmed|
-		trimmed := aLine trimBoth.
-		(trimmed endsWith: '\') ifTrue: [
-			self put: (trimmed trimRight: [ :c | c = $\ ])
-		] ifFalse: [
-			self putLine: trimmed.
-		]
+	|leftPad|
+	leftPad := -1.
+	(({ code. ('\', String crlf) -> ''. ('\', String cr) -> ''. ('\', String lf) -> '' }, anAssociationArray) reduce: [ :acc :assoc|
+		acc copyReplaceAll: assoc key with: assoc value asString
+	]) linesDo: [ :aLine ||rTrimmed trimmed|
+		rTrimmed := aLine trimRight.
+		leftPad < 0 ifTrue: [
+			trimmed := rTrimmed trimLeft.
+			leftPad := rTrimmed size - trimmed size.
+		] ifFalse: [ |counter|
+			counter := 0.
+			trimmed := rTrimmed trimLeft: [ :c |
+				counter := counter + 1.
+				c isSeparator and: [ counter <= leftPad ]
+			]
+		].
+		self putLine: trimmed.
 	]
 ]
 
@@ -259,7 +256,7 @@ SWTranspiler >> putFunctionDefinitionHeaderOf: aMethodName [
 { #category : #'code generation - protected' }
 SWTranspiler >> putIndent [
 	isNewline ifFalse: [ ^ self ].
-	stream nextPutAll: (' ' repeat: {0. (4 * (indent + indentShifter))} max).
+	stream nextPutAll: (' ' repeat: {0. (self tabWidth * (indent + indentShifter))} max).
 	isNewline := false.
 
 ]
@@ -289,15 +286,18 @@ SWTranspiler >> putMainProgramFooterOf: project [
 
 { #category : #'code generation' }
 SWTranspiler >> putMainProgramHeaderOf: project [
-	indentShifter := -1
+	^ self subclassResponsibility 
 ]
 
 { #category : #'code generation' }
 SWTranspiler >> putMessage: receiver call: selector with: arguments [
-	|var sel|
 	self flag: #toImplement.
 	self incMessageNest.
 	[
+		receiver transpileUsing: self.
+		(selector first isLetter) ifTrue: [ self put: '.' ].
+		self putFunctionCallOf: (self class transpiledNameOf: selector) with: arguments.
+"
 		var := receiver transpileUsing: self.
 		self assert: [var isNotNil].
 		sel := self transformSelector: selector.
@@ -311,9 +311,26 @@ SWTranspiler >> putMessage: receiver call: selector with: arguments [
 					^ func value: arguments value: self.
 				]
 		].
-		self error: 'NO IMPLEMENTATION.'
+"
+		
 	] ensure: [ self decMessageNest ].
 
+]
+
+{ #category : #'as yet unclassified' }
+SWTranspiler >> putMethod: aMethod ofClass: aClass [
+	self
+		put: 'def ';
+		put: (self class transpiledNameOf: aMethod selector);
+		put: '('.
+	aMethod argumentNames do: [ :aName |
+		self put: aName asString
+	] separatedBy: [
+		self put: ', '
+	].
+	self putLine: ')'.
+	aMethod transpileUsing: self.
+	self putLine: 'end'.
 ]
 
 { #category : #'code generation' }
@@ -332,22 +349,6 @@ SWTranspiler >> putString: aString [
 		put: '"';
 		put: aString;
 		put: '"'.
-]
-
-{ #category : #'code generation' }
-SWTranspiler >> putVariable: aVariable named: name [
-	name first isUppercase ifTrue: [ 
-		^ Smalltalk globals at: name
-	].
-	aVariable ifNil: [
-		self preventNewline.
-		^ aVariable
-	].
-	(aVariable class inheritsFrom: SWSource) ifTrue: [ 
-		^ aVariable
-	].
-	self put: name.
-	^ aVariable
 ]
 
 { #category : #accessing }
@@ -374,12 +375,16 @@ SWTranspiler >> source: anObject [
 	source := anObject
 ]
 
-{ #category : #'code generation - protected' }
-SWTranspiler >> transformSelector: aSelector [
-	^ (String streamContents: [ :s |
-		s << self type; << '_'; << (self class selectorNameOf: aSelector); << 'with:using:'
-	]) asSymbol.
+{ #category : #accessing }
+SWTranspiler >> tabWidth [
 
+	^ tabWidth
+]
+
+{ #category : #accessing }
+SWTranspiler >> tabWidth: anObject [
+
+	tabWidth := anObject
 ]
 
 { #category : #'public API' }
@@ -388,74 +393,32 @@ SWTranspiler >> transpile [
 ]
 
 { #category : #'code generation' }
-SWTranspiler >> transpileDeclaredFunction: dict [
-		|symbol name ret argtype|
-		symbol := dict at: #name.
-		name := dict at: #transpiledName.
-		argtype := dict at: #argtype ifAbsent: [ #position ].
-		ret := self transpileFunctionDefinition: symbol.
-
-		argtype = #position ifTrue: [
-			^ [ :args :transpiler |
-				transpiler putFunctionCallOf: name with: args.
-				ret.
-			]
-		].
-		argtype = #named ifTrue: [
-			self error: 'no implementation'
-		].
-		argtype = #dict ifTrue: [ 
-			self error: 'no implementation'
-		]
-
-]
-
-{ #category : #'code generation' }
 SWTranspiler >> transpileDeclaredFunctions [
-	self source functionDeclarations do: [ :each ||dict name|
-		dict := each isArray ifTrue: [
-			Dictionary newFrom: each
-		] ifFalse: [
-			Dictionary new
-				at: #name put: each;
-				yourself
-		].
-		name := dict at: #transpiledName ifAbsentPut: [ self class selectorNameOf: (dict at: #name) ].
-		(dict at: #foreign ifAbsent: [ false ]) ifTrue: [
-			self variables at: name put: (dict at: #return ifAbsent: [nil])
-		] ifFalse: [
-			self variables at: name put: (self transpileDeclaredFunction: dict)
-		]
+	self source functionDeclarations do: [ :each |
+		self transpileFunctionDefinition: each
 	]
 ]
 
 { #category : #'code generation' }
 SWTranspiler >> transpileFunctionDefinition: aMethodName [
-	|res|
 	self putFunctionDefinitionHeaderOf: aMethodName.
-	res := self transpileMethod: aMethodName.
+	self transpileMethod: aMethodName.
 	self putFunctionDefinitionFooterOf: aMethodName.	
-	^ res
 	
 ]
 
 { #category : #'code generation' }
 SWTranspiler >> transpileMethod: aMethod [
-	|res|
-	self variables push.
-	res := (self source class >> aMethod) transpileUsing: self.
-	res := variables at: '%returnValue%' ifAbsent: [ res ].
-	self variables pop.
-	^ res
+	(self source class >> aMethod) transpileUsing: self.
+
 ]
 
 { #category : #'code generation' }
 SWTranspiler >> transpileProgram [
-	|res|
 	self putMainProgramHeaderOf: self programName.
-	res := self transpileMethod: #program.
+	self transpileMethod: #program.
 	self putMainProgramFooterOf: self programName.
-	^ res
+
 ]
 
 { #category : #accessing }
@@ -468,19 +431,4 @@ SWTranspiler >> type [
 SWTranspiler >> type: anObject [
 
 	type := anObject
-]
-
-{ #category : #accessing }
-SWTranspiler >> variables [
-
-	^ variables ifNil: [
-		variables := VariableStack new
-			at: #self put: self source;
-			yourself
-	]
-]
-
-{ #category : #accessing }
-SWTranspiler >> variables: aObject [
-	variables := aObject
 ]

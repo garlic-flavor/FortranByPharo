@@ -3,7 +3,7 @@ This is a WebSocket server.
 "
 Class {
 	#name : #SWServer,
-	#superclass : #SWSource,
+	#superclass : #SWClass,
 	#instVars : [
 		'env'
 	],
@@ -45,7 +45,9 @@ SWServer class >> transpile [
 { #category : #dispatching }
 SWServer >> dispatch: message on: socket [
 	|obj method target|
-	obj := socket parseRequest: message.
+	self declare: #message asKindOf: [''].
+	self declare: #socket asKindOf: [ZnWebSocket new].
+	obj := self parseRequest: message.
 	method := obj at: #method ifAbsent: ''.
 	target := self filePathOf: (obj at: #target ifAbsent: '').
 	method = #GET ifTrue: [
@@ -99,7 +101,7 @@ SWServer >> filePathOf: name [
 
 { #category : #'code generation - protected' }
 SWServer >> functionDeclarations [
-	^ #()
+	^ #(dispatch:on: parseRequest:)
 ]
 
 { #category : #responses }
@@ -146,6 +148,27 @@ SWServer >> make: target by: method with: msg on: socket [
 	].
 	self error: 'no implementation'
 
+]
+
+{ #category : #parsing }
+SWServer >> parseRequest: received [
+	|request dict|
+	request := ZnRequest readFrom: received readStream.
+	dict := Dictionary new
+		at: #method put: request method;
+		at: #target put: request uri;
+		at: #type put: request contentType;
+		at: #original put: request;
+		yourself.
+	request headersDo: [ :key :value | dict at: key put: value ].
+	request contentType = ZnMimeType applicationJson ifTrue: [
+		(STON reader on: request entity contents readStream; next) associationsDo: [ :assoc |
+			dict at: assoc key put: assoc value
+		]
+	] ifFalse: [
+		dict at: #entity put: (request entity ifNil: [ nil ] ifNotNil: [ request entity contents ])
+	].
+	^ dict
 ]
 
 { #category : #responses }
@@ -199,8 +222,14 @@ SWServer >> rb_fileHeaders [
 SWServer >> rb_startOn_with: arguments using: transpiler [
 	|portNumber|
 	portNumber := (arguments at: 1) evaluate.
-	transpiler putCode: 'EM.run{'.
-	transpiler putCode: '}'.
+	transpiler putCode: '\
+		EM.run{
+			EM::WebSocket.run(:host => "0.0.0.0", :port=>%port%) do |ws|
+				ws.onmessage {  |msg|
+					dispatch(msg, ws)
+				}
+			end
+		}' with: { '%port%' -> portNumber }.
 
 ]
 

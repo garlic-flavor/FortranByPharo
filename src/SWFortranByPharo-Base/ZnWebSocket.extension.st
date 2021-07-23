@@ -1,27 +1,6 @@
 Extension { #name : #ZnWebSocket }
 
 { #category : #'*SWFortranByPharo-Base' }
-ZnWebSocket >> parseRequest: received [
-	|request dict|
-	request := ZnRequest readFrom: received readStream.
-	dict := Dictionary new
-		at: #method put: request method;
-		at: #target put: request uri;
-		at: #type put: request contentType;
-		at: #original put: request;
-		yourself.
-	request headersDo: [ :key :value | dict at: key put: value ].
-	request contentType = ZnMimeType applicationJson ifTrue: [
-		(STON reader on: request entity contents readStream; next) associationsDo: [ :assoc |
-			dict at: assoc key put: assoc value
-		]
-	] ifFalse: [
-		dict at: #entity put: (request entity ifNil: [ nil ] ifNotNil: [ request entity contents ])
-	].
-	^ dict
-]
-
-{ #category : #'*SWFortranByPharo-Base' }
 ZnWebSocket >> readResponse [
 	|received response dict|
 	received := self readMessage.
