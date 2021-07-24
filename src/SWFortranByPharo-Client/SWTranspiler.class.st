@@ -10,7 +10,6 @@ Class {
 		'mainClass',
 		'stream',
 		'indent',
-		'indentShifter',
 		'tabWidth',
 		'isNewline',
 		'newline',
@@ -23,34 +22,6 @@ Class {
 	#category : #'SWFortranByPharo-Client-Transpiler'
 }
 
-{ #category : #initialization }
-SWTranspiler class >> resetSelectorName [
-	<script>
-	selectorName := nil.
-]
-
-{ #category : #'as yet unclassified' }
-SWTranspiler class >> selectorName [
-	^ selectorName ifNil: [
-		selectorName := Dictionary new
-			at: '+' put: 'opAdd_';
-			at: '-' put: 'opSub_';
-			at: '*' put: 'opMul_';
-			at: '/' put: 'opDiv_';
-			at: '%' put: 'opRem_';
-			at: '**' put: 'opPow_';
-			yourself
-	]
-]
-
-{ #category : #'as yet unclassified' }
-SWTranspiler class >> selectorNameOf: selector [
-	^ self selectorName at: selector ifAbsent: [|sel|
-		sel := selector asString copyReplaceAll: ':' with: '_'.
-		sel last = $_ ifTrue: [ sel ] ifFalse: [ sel, '_' ]
-	]
-]
-
 { #category : #'code generation - protected' }
 SWTranspiler class >> transpiledNameOf: selector [
 	^ selector asString copyReplaceAll: ':' with: '_'
@@ -60,7 +31,7 @@ SWTranspiler class >> transpiledNameOf: selector [
 { #category : #'code generation' }
 SWTranspiler >> assign: key with: value [
 	self put: key; put: ' = '.
-	^ self variables at: key put: (value transpileUsing: self).
+	value transpileUsing: self.
 
 ]
 
@@ -72,11 +43,7 @@ SWTranspiler >> classes [
 { #category : #accessing }
 SWTranspiler >> classes: anArray [
 	classes := anArray.
-	classes detect: [ :aClass |
-		(aClass compiledMethodAt: #main: ifAbsent: [ nil ]) isNotNil
-	] ifFound: [ :aClass |
-		mainClass := aClass
-	]
+
 ]
 
 { #category : #accessing }
@@ -92,21 +59,8 @@ SWTranspiler >> decIndent [
 
 { #category : #'code generation - protected' }
 SWTranspiler >> decMessageNest [
-	|nest|
-	messageNest := {0. messageNest - 1} max.
-	0 < messageNest ifTrue: [ self put: ')' ].
-
-]
-
-{ #category : #'code generation - protected' }
-SWTranspiler >> enterBlock [
-	self incIndent.
-
-]
-
-{ #category : #'code generation' }
-SWTranspiler >> getVariable: name [
-	^ self variables at: name ifAbsent: [ nil ]
+	messageNest push: { 0. messageNest pop - 1 } max.
+	0 < messageNest top ifTrue: [ self put: ')' ].
 
 ]
 
@@ -117,20 +71,8 @@ SWTranspiler >> incIndent [
 
 { #category : #'code generation - protected' }
 SWTranspiler >> incMessageNest [
-	messageNest := messageNest + 1.
-	1 < messageNest ifTrue: [ self put: '(' ].
-]
-
-{ #category : #'code generation - protected' }
-SWTranspiler >> indentShifter [
-
-	^ indentShifter
-]
-
-{ #category : #'code generation - protected' }
-SWTranspiler >> indentShifter: anObject [
-
-	indentShifter := anObject
+	messageNest push: (messageNest pop + 1).
+	1 < messageNest top ifTrue: [ self put: '(' ].
 ]
 
 { #category : #initialization }
@@ -138,35 +80,35 @@ SWTranspiler >> initialize [
 	super initialize.
 	stream := String new writeStream.
 	indent := 0.
-	indentShifter := 0.
-	tabWidth := 4.
-	isNewline := false.
 	newline := String crlf.
-	preventNewline := false.
-	messageNest := 0.
-]
-
-{ #category : #'code generation - protected' }
-SWTranspiler >> leaveBlock [
-	self decIndent.
+	self reset.
 
 ]
 
 { #category : #accessing }
 SWTranspiler >> mainClass [
-	^ mainClass
+	^ mainClass ifNil: [
+		mainClass := self classes detect: [ :aClass |
+			(aClass compiledMethodAt: #main: ifAbsent: [ nil ]) isNotNil
+		] ifFound: [ :aClass | aClass ] ifNone: [ nil ]
+	]
 ]
 
-{ #category : #'code generation' }
+{ #category : #accessing }
 SWTranspiler >> newline [
 
 	^ newline
 ]
 
-{ #category : #'code generation' }
+{ #category : #accessing }
 SWTranspiler >> newline: anObject [
 
 	newline := anObject
+]
+
+{ #category : #'code generation - protected' }
+SWTranspiler >> popMessageNest [
+	messageNest pop
 ]
 
 { #category : #'code generation - protected' }
@@ -182,6 +124,11 @@ SWTranspiler >> programName [
 		self mainClass name
 	]
 
+]
+
+{ #category : #'code generation - protected' }
+SWTranspiler >> pushMessageNest [
+	messageNest push: 0
 ]
 
 { #category : #'code generation' }
@@ -215,7 +162,7 @@ SWTranspiler >> putArrayHeader [
 	self put: '[ '.
 ]
 
-{ #category : #'as yet unclassified' }
+{ #category : #'code generation' }
 SWTranspiler >> putArrayLiteral: anArray [
 	self
 		put: '[ ';
@@ -224,7 +171,7 @@ SWTranspiler >> putArrayLiteral: anArray [
 	^ anArray
 ]
 
-{ #category : #'as yet unclassified' }
+{ #category : #'code generation' }
 SWTranspiler >> putClassDefinition: aClass [
 	^ self subclassResponsibility 
 ]
@@ -236,10 +183,11 @@ SWTranspiler >> putCode: code [
 
 { #category : #'code generation' }
 SWTranspiler >> putCode: code with: anAssociationArray [
-	|leftPad lTrimmed|
+	"when a line in code ends with $\, the line continues to the next."
+	|leftPad|
 	leftPad := 0.
-	lTrimmed := code trimLeft: [ :c |
-		c isSeparator ifTrue: [ leftPad := leftPad + 1 ].
+	code trimLeft: [ :c |
+		c = Character tab ifTrue: [ leftPad := leftPad + 1 ].
 		c isSeparator or: [ c = $\ ]
 	].
 	(({ code }, anAssociationArray) reduce: [ :acc :assoc|
@@ -260,7 +208,7 @@ SWTranspiler >> putCode: code with: anAssociationArray [
 	]
 ]
 
-{ #category : #'as yet unclassified' }
+{ #category : #'code generation' }
 SWTranspiler >> putComment: aComment [
 	^ self subclassResponsibility 
 ]
@@ -273,20 +221,6 @@ SWTranspiler >> putFileFooterOf: filename [
 SWTranspiler >> putFileHeaderOf: filename [
 	
 	
-]
-
-{ #category : #'code generation' }
-SWTranspiler >> putFileHeaders [
-	|sel|
-	sel := (self type, '_fileHeaders') asSymbol.
-	self classes do: [:aClass |
-		(aClass respondsTo: sel) ifTrue: [
-			(aClass perform: sel) do: [ :header |
-				self putCode: header
-			]
-		]
-	]
-
 ]
 
 { #category : #'code generation' }
@@ -320,7 +254,7 @@ SWTranspiler >> putFunctionDefinitionHeaderOf: aMethodName [
 { #category : #'code generation - protected' }
 SWTranspiler >> putIndent [
 	isNewline ifFalse: [ ^ self ].
-	stream nextPutAll: (' ' repeat: {0. (self tabWidth * (indent + indentShifter))} max).
+	stream nextPutAll: (' ' repeat: {0. (self tabWidth * indent)} max).
 	isNewline := false.
 
 ]
@@ -343,19 +277,9 @@ SWTranspiler >> putLine: code [
 
 ]
 
-{ #category : #'as yet unclassified' }
+{ #category : #'code generation' }
 SWTranspiler >> putMainProgram [
 	^ self subclassResponsibility
-]
-
-{ #category : #'code generation' }
-SWTranspiler >> putMainProgramFooterOf: project [
-	^ self subclassResponsibility 
-]
-
-{ #category : #'code generation' }
-SWTranspiler >> putMainProgramHeaderOf: project [
-	^ self subclassResponsibility 
 ]
 
 { #category : #'code generation' }
@@ -386,7 +310,7 @@ SWTranspiler >> putMessage: receiver call: selector with: arguments [
 
 ]
 
-{ #category : #'as yet unclassified' }
+{ #category : #'code generation' }
 SWTranspiler >> putMethod: selector ofClass: class [
 	^ self subclassResponsibility 
 ]
@@ -402,24 +326,25 @@ SWTranspiler >> putParameters: anArray [
 ]
 
 { #category : #'code generation' }
+SWTranspiler >> putRequirements [
+	|sel|
+	sel := (self type, '_requirements') asSymbol.
+	self classes do: [:aClass |
+		(aClass respondsTo: sel) ifTrue: [
+			(aClass perform: sel) do: [ :header |
+				self putCode: header
+			]
+		]
+	]
+
+]
+
+{ #category : #'code generation' }
 SWTranspiler >> putString: aString [
 	self
 		put: '"';
 		put: aString;
 		put: '"'.
-]
-
-{ #category : #'as yet unclassified' }
-SWTranspiler >> putVariable: aVariable named: name [
-	aVariable ifNil: [
-		self preventNewline.
-		^ aVariable
-	].
-	(aVariable class inheritsFrom: SWProjectSource) ifTrue: [ 
-		^ aVariable
-	].
-	self put: name.
-	^ aVariable
 ]
 
 { #category : #accessing }
@@ -430,14 +355,15 @@ SWTranspiler >> readStream [
 { #category : #initialization }
 SWTranspiler >> reset [
 	stream resetToStart.
-	self variables: nil.
+	isNewline := false.
 	preventNewline := false.
+	messageNest := Stack new push: 0; yourself.
 ]
 
 { #category : #accessing }
 SWTranspiler >> tabWidth [
 
-	^ tabWidth
+	^ tabWidth ifNil: [ tabWidth := 4 ]
 ]
 
 { #category : #accessing }
@@ -446,18 +372,10 @@ SWTranspiler >> tabWidth: anObject [
 	tabWidth := anObject
 ]
 
-{ #category : #'as yet unclassified' }
-SWTranspiler >> transformSelector: aSelector [
-	^ (String streamContents: [ :s |
-		s << self type; << '_'; << (self class selectorNameOf: aSelector); << 'with:using:'
-	]) asSymbol.
-
-]
-
 { #category : #'public API' }
 SWTranspiler >> transpile [
 	self putFileHeaderOf: self programName.
-	self putFileHeaders.
+	self putRequirements.
 	self classes do: [ :aClass |
 		self putClassDefinition: aClass
 	].
@@ -466,36 +384,7 @@ SWTranspiler >> transpile [
 	].
 ]
 
-{ #category : #'code generation' }
-SWTranspiler >> transpileDeclaredFunctions [
-	self source functionDeclarations do: [ :each |
-		self transpileFunctionDefinition: each
-	]
-]
-
-{ #category : #'code generation' }
-SWTranspiler >> transpileFunctionDefinition: aMethodName [
-	self putFunctionDefinitionHeaderOf: aMethodName.
-	self transpileMethod: aMethodName.
-	self putFunctionDefinitionFooterOf: aMethodName.	
-	
-]
-
-{ #category : #'code generation' }
-SWTranspiler >> transpileMethod: aMethod [
-	(self source class >> aMethod) transpileUsing: self.
-
-]
-
-{ #category : #'code generation' }
-SWTranspiler >> transpileProgram [
-	self putMainProgramHeaderOf: self programName.
-	self transpileMethod: #program.
-	self putMainProgramFooterOf: self programName.
-
-]
-
-{ #category : #'as yet unclassified' }
+{ #category : #'code generation - protected' }
 SWTranspiler >> transpilerNameFor: aMethod [
 	^ (String streamContents: [ :s |
 		s

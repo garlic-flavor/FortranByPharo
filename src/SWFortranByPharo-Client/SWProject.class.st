@@ -3,7 +3,6 @@ Class {
 	#superclass : #Object,
 	#instVars : [
 		'client',
-		'type',
 		'sources',
 		'objs',
 		'exeName'
@@ -43,13 +42,6 @@ SWProject >> compileAllAsFortran [
 ]
 
 { #category : #accessing }
-SWProject >> dirName [
-	self type = #f90 ifTrue: [ ^ 'src' ].
-	self type = #rb ifTrue: [ ^ 'script' ].
-	self error: 'NO IMPLEMENTAION.'.
-]
-
-{ #category : #accessing }
 SWProject >> exeName [
 
 	^ exeName ifNil: [
@@ -76,7 +68,9 @@ SWProject >> exeName: anObject [
 
 { #category : #running }
 SWProject >> go [
-	self type = #f90 ifTrue: [
+	|type|
+	type := self sources first type.
+	type = #f90 ifTrue: [
 		^ self
 			putAll;
 			compileAllAsFortran;
@@ -84,7 +78,7 @@ SWProject >> go [
 			run
 	].
 
-	self type = #rb ifTrue: [
+	type = #rb ifTrue: [
 		^ self
 			putAll;
 			run
@@ -98,7 +92,9 @@ SWProject >> goDomestic [
 	^ String streamContents: [ :s |
 		self sources do: [ :aSource ||program|
 			program := aSource mainClass new.
-			program stdout: s.
+			(aSource mainClass inheritsFrom: SWClass) ifTrue: [
+				program stdout: s
+			].
 			program main: {  }
 		]
 	]
@@ -107,7 +103,7 @@ SWProject >> goDomestic [
 { #category : #initialization }
 SWProject >> initialize [
 	super initialize.
-	type := #f90.
+
 ]
 
 { #category : #execution }
@@ -163,7 +159,9 @@ SWProject >> putAll [
 
 { #category : #execution }
 SWProject >> run [
-	self type = #f90 ifTrue: [|res|
+	|type|
+	type := self sources first type.
+	type = #f90 ifTrue: [|res|
 		res := self client post: self exeName with: {
 			'action' -> 'execute'.	
 			'arguments' -> {  }
@@ -172,7 +170,7 @@ SWProject >> run [
 		^ res
 	].
 
-	self type = #rb ifTrue: [|res|
+	type = #rb ifTrue: [|res|
 		res := self client post: 'ruby' with: {
 			'action' -> 'execute'.
 			'arguments' -> (self sources collect: [ :each | each filename ])
@@ -209,16 +207,4 @@ SWProject >> transpilerClass [
 	self type = #f90 ifTrue: [ ^ SWTranspilerOfFortran ].
 	self type = #rb ifTrue: [ ^ SWTranspilerOfRuby ].
 	self error: 'NO IMPLEMENTATION!'.
-]
-
-{ #category : #accessing }
-SWProject >> type [
-
-	^ type
-]
-
-{ #category : #accessing }
-SWProject >> type: anObject [
-
-	type := anObject
 ]

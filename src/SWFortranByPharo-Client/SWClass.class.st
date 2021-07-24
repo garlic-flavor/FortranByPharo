@@ -24,7 +24,7 @@ SWClass class >> rb_print_Using: transpiler [
 
 { #category : #printing }
 SWClass >> print: msg [
-	self stdout << msg; cr; flush
+	self stdout << msg asString; cr; flush
 ]
 
 { #category : #accessing }

@@ -10,10 +10,50 @@ Class {
 	#category : #'SWFortranByPharo-Server-Server'
 }
 
+{ #category : #'code generation - protected' }
+SWServer class >> declarations [
+	^ #(main: startOn: dispatch:on:)
+]
+
 { #category : #testing }
 SWServer class >> isRunning [
 	<sampleInstance>
 	^ ZnServer default isRunning ifTrue: [ 'The server is running' ] ifFalse: [ 'The server is not running' ]
+]
+
+{ #category : #'as yet unclassified' }
+SWServer class >> rb_requirements [
+	^ {
+		'require ''em-websocket'''
+	}
+]
+
+{ #category : #'as yet unclassified' }
+SWServer class >> rb_startOn_Using: transpiler [
+	transpiler putCode: '\
+		EM.run{
+			EM::WebSocket.run(:host => "0.0.0.0", :port=>portNumber) do |ws|
+				ws.onmessage {  |msg|
+					dispatch(msg, ws)
+				}
+			end
+		}' with: {}.
+
+]
+
+{ #category : #'as yet unclassified' }
+SWServer class >> rb_startOn_with: arguments using: transpiler [
+	|portNumber|
+	portNumber := (arguments at: 1) evaluate.
+	transpiler putCode: '\
+		EM.run{
+			EM::WebSocket.run(:host => "0.0.0.0", :port=>%port%) do |ws|
+				ws.onmessage {  |msg|
+					dispatch(msg, ws)
+				}
+			end
+		}' with: { '%port%' -> portNumber }.
+
 ]
 
 { #category : #accessing }
@@ -35,7 +75,7 @@ SWServer class >> transpile [
 	|instance contents|
 	instance := self new.
 	contents := SWTranspilerOfRuby new 
-		source: instance;
+		classes: { self };
 		transpile;
 		contents.
 	contents inspect.
@@ -97,11 +137,6 @@ SWServer >> filePathOf: name [
 	^ result
 ]
 
-{ #category : #'code generation - protected' }
-SWServer >> functionDeclarations [
-	^ #(dispatch:on: parseRequest:)
-]
-
 { #category : #responses }
 SWServer >> get: target with: msg on: socket [
 	target = FileLocator imageDirectory ifTrue: [
@@ -128,6 +163,11 @@ SWServer >> head: target with: msg on: socket [
 SWServer >> initialize [
 	super initialize.
 
+]
+
+{ #category : #grammar }
+SWServer >> main: argv [
+	self startOn: 50000.
 ]
 
 { #category : #executing }
@@ -189,11 +229,6 @@ SWServer >> post: target with: msg on: socket [
 
 ]
 
-{ #category : #grammar }
-SWServer >> program [
-	self startOn: 50000.
-]
-
 { #category : #responses }
 SWServer >> put: target with: msg on: socket [
 	target writeStreamDo: [ :writer |
@@ -206,28 +241,6 @@ SWServer >> put: target with: msg on: socket [
 		writer << (msg at: #entity ifAbsent: '').
 	].
 	^ socket sendResponseCreated: target rel fullName with: {  }
-
-]
-
-{ #category : #'as yet unclassified' }
-SWServer >> rb_fileHeaders [
-	^ {
-		'require ''em-websocket'''
-	}
-]
-
-{ #category : #'as yet unclassified' }
-SWServer >> rb_startOn_with: arguments using: transpiler [
-	|portNumber|
-	portNumber := (arguments at: 1) evaluate.
-	transpiler putCode: '\
-		EM.run{
-			EM::WebSocket.run(:host => "0.0.0.0", :port=>%port%) do |ws|
-				ws.onmessage {  |msg|
-					dispatch(msg, ws)
-				}
-			end
-		}' with: { '%port%' -> portNumber }.
 
 ]
 

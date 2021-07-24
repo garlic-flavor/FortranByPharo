@@ -2,11 +2,10 @@ Extension { #name : #RBSequenceNode }
 
 { #category : #'*SWFortranByPharo-Client' }
 RBSequenceNode >> transpileUsing: transpiler [
-	|res|
+	transpiler incIndent.
 	self children do: [ :one|
-		res := one transpileUsing: transpiler.
+		one transpileUsing: transpiler.
 		transpiler putLine: ''
 	].
-	^ res
-
+	transpiler decIndent.
 ]

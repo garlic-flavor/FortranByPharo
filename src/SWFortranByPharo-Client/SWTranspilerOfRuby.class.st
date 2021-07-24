@@ -28,7 +28,6 @@ SWTranspilerOfRuby >> putClassDefinition: aClass [
 	].
 	self putLine.
 	self incIndent.
-	
 	aClass methods do: [ :aMethod |
 		(aClass declarations anySatisfy: [:each | each = aMethod selector]) ifTrue: [
 			self putMethod: aMethod ofClass: aClass
@@ -60,28 +59,20 @@ SWTranspilerOfRuby >> putFileHeaderOf: filename [
 
 { #category : #'code generation' }
 SWTranspilerOfRuby >> putFunctionCallFooterOf: selector [
-	self put: ')'
+	self popMessageNest.
+	selector asString first isLetter ifTrue: [
+		self put: ')'
+	]
 ]
 
 { #category : #'code generation' }
 SWTranspilerOfRuby >> putFunctionCallHeaderOf: selector [
-	self put: selector; put: '('.
-]
-
-{ #category : #'as yet unclassified' }
-SWTranspilerOfRuby >> putFunctionDefinitionFooterOf: aMethodName [
-	self putLine: 'end'
-]
-
-{ #category : #'as yet unclassified' }
-SWTranspilerOfRuby >> putFunctionDefinitionHeaderOf: aMethodName [
-	self
-		put: 'def ';
-		put: (self class selectorNameOf: aMethodName);
-		put: '(';
-		putParameters: (self source class >>aMethodName) argumentNames;
-		put: ')';
-		putLine.
+	self pushMessageNest.
+	self put: selector.
+	selector asString first isLetter ifTrue: [
+		self put: '('
+	]
+	
 ]
 
 { #category : #tests }
@@ -90,16 +81,6 @@ SWTranspilerOfRuby >> putMainProgram [
 		(%mainClass%.new).main_(ARGV)
 	\' with: { '%mainClass%' -> self mainClass }
 
-]
-
-{ #category : #'code generation' }
-SWTranspilerOfRuby >> putMainProgramFooterOf: project [
-	indentShifter := 0
-]
-
-{ #category : #'code generation' }
-SWTranspilerOfRuby >> putMainProgramHeaderOf: project [
-	indentShifter := -1
 ]
 
 { #category : #'as yet unclassified' }
@@ -125,11 +106,4 @@ SWTranspilerOfRuby >> putMethod: aMethod ofClass: aClass [
 		aMethod transpileUsing: self.
 	].
 	self putLine: 'end'.
-]
-
-{ #category : #'public API' }
-SWTranspilerOfRuby >> transpileProgram [
-	self indentShifter: -1.
-	^ super transpileProgram.
-	
 ]
