@@ -19,6 +19,40 @@ SWTranspilerOfRuby >> putArgumentsOf: selector with: arguments [
 ]
 
 { #category : #'as yet unclassified' }
+SWTranspilerOfRuby >> putClassDefinition: aClass [
+	self putComment: aClass comment.
+	self put: 'class '.
+	self put: aClass name.
+	(aClass superclass = Object) ifFalse: [
+		self put: ' < '; put: aClass superclass name
+	].
+	self putLine.
+	self incIndent.
+	
+	aClass methods do: [ :aMethod |
+		(aClass declarations anySatisfy: [:each | each = aMethod selector]) ifTrue: [
+			self putMethod: aMethod ofClass: aClass
+		]
+	].
+
+	self flag: #toImplement.
+
+	self decIndent.
+	self putLine: 'end'.
+]
+
+{ #category : #'as yet unclassified' }
+SWTranspilerOfRuby >> putComment: comment [
+	comment ifNotNil: [
+		comment linesDo: [ :aLine |
+			self
+				put: '# ';
+				putLine: aLine
+		]
+	]
+]
+
+{ #category : #'as yet unclassified' }
 SWTranspilerOfRuby >> putFileHeaderOf: filename [
 	self putLine: '#!/usr/bin/ruby'.
 
@@ -50,6 +84,14 @@ SWTranspilerOfRuby >> putFunctionDefinitionHeaderOf: aMethodName [
 		putLine.
 ]
 
+{ #category : #tests }
+SWTranspilerOfRuby >> putMainProgram [
+	self putCode: '\
+		(%mainClass%.new).main_(ARGV)
+	\' with: { '%mainClass%' -> self mainClass }
+
+]
+
 { #category : #'code generation' }
 SWTranspilerOfRuby >> putMainProgramFooterOf: project [
 	indentShifter := 0
@@ -60,16 +102,29 @@ SWTranspilerOfRuby >> putMainProgramHeaderOf: project [
 	indentShifter := -1
 ]
 
-{ #category : #tests }
-SWTranspilerOfRuby >> transpile [
-	self classes do: [ :aClass |
-		self putClassDefinition: aClass
+{ #category : #'as yet unclassified' }
+SWTranspilerOfRuby >> putMethod: aMethod ofClass: aClass [
+	|sel|
+	self
+		putComment: aMethod comment;
+		put: 'def ';
+		put: (self class transpiledNameOf: aMethod selector);
+		put: '('.
+	aMethod argumentNames do: [ :aName |
+		self put: aName asString
+	] separatedBy: [
+		self put: ', '
 	].
-	self mainClass ifNotNil: [
-		self putCode: '\
-			(%mainClass%.new).main_(ARGV)
-		\' with: { '%mainClass%' -> self mainClass }
-	]
+	self putLine: ')'.
+	sel := self transpilerNameFor: aMethod.
+	(aClass respondsTo: sel) ifTrue: [
+		self incIndent.
+		aClass perform: sel with: self.
+		self decIndent.
+	] ifFalse: [
+		aMethod transpileUsing: self.
+	].
+	self putLine: 'end'.
 ]
 
 { #category : #'public API' }

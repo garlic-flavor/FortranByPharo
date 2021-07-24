@@ -1,5 +1,5 @@
 "
-I am a base class of the class that implements a project.s
+I implement stdout.
 "
 Class {
 	#name : #SWClass,
@@ -7,7 +7,7 @@ Class {
 	#instVars : [
 		'stdout'
 	],
-	#category : #'SWFortranByPharo-Client-Transpiler'
+	#category : #'SWFortranByPharo-Client-Client'
 }
 
 { #category : #accessing }

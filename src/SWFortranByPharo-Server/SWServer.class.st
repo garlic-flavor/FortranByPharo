@@ -45,8 +45,6 @@ SWServer class >> transpile [
 { #category : #dispatching }
 SWServer >> dispatch: message on: socket [
 	|obj method target|
-	self declare: #message asKindOf: [''].
-	self declare: #socket asKindOf: [ZnWebSocket new].
 	obj := self parseRequest: message.
 	method := obj at: #method ifAbsent: ''.
 	target := self filePathOf: (obj at: #target ifAbsent: '').
@@ -129,7 +127,7 @@ SWServer >> head: target with: msg on: socket [
 { #category : #initialization }
 SWServer >> initialize [
 	super initialize.
-	self description: 'This is a server.'
+
 ]
 
 { #category : #executing }

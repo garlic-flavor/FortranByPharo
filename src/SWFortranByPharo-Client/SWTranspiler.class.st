@@ -57,17 +57,6 @@ SWTranspiler class >> transpiledNameOf: selector [
 	
 ]
 
-{ #category : #'as yet unclassified' }
-SWTranspiler >> addClass: aClass [
-	self classes add: aClass
-]
-
-{ #category : #'as yet unclassified' }
-SWTranspiler >> addMainClass: aClass [
-	self addClass: aClass.
-	mainClass := aClass.
-]
-
 { #category : #'code generation' }
 SWTranspiler >> assign: key with: value [
 	self put: key; put: ' = '.
@@ -78,6 +67,16 @@ SWTranspiler >> assign: key with: value [
 { #category : #accessing }
 SWTranspiler >> classes [
 	^ classes ifNil: [ classes := OrderedCollection new ]
+]
+
+{ #category : #accessing }
+SWTranspiler >> classes: anArray [
+	classes := anArray.
+	classes detect: [ :aClass |
+		(aClass compiledMethodAt: #main: ifAbsent: [ nil ]) isNotNil
+	] ifFound: [ :aClass |
+		mainClass := aClass
+	]
 ]
 
 { #category : #accessing }
@@ -177,7 +176,11 @@ SWTranspiler >> preventNewline [
 
 { #category : #accessing }
 SWTranspiler >> programName [ 
-	^ self source programName
+	^ (self mainClass respondsTo: #programName) ifTrue: [
+		self mainClass programName
+	] ifFalse: [
+		self mainClass name
+	]
 
 ]
 
@@ -223,25 +226,7 @@ SWTranspiler >> putArrayLiteral: anArray [
 
 { #category : #'as yet unclassified' }
 SWTranspiler >> putClassDefinition: aClass [
-	|decls|
-	self put: 'class '.
-	self put: aClass name.
-	(aClass superclass = Object) ifFalse: [
-		self put: ' < '; put: aClass superclass name
-	].
-	self putLine.
-	self incIndent.
-	
-	aClass methods do: [ :aMethod |
-		(aClass declarations anySatisfy: [:each | each = aMethod selector]) ifTrue: [
-			self putMethod: aMethod ofClass: aClass
-		]
-	].
-
-	self flag: #toImplement.
-
-	self decIndent.
-	self putLine: 'end'.
+	^ self subclassResponsibility 
 ]
 
 { #category : #accessing }
@@ -275,6 +260,11 @@ SWTranspiler >> putCode: code with: anAssociationArray [
 	]
 ]
 
+{ #category : #'as yet unclassified' }
+SWTranspiler >> putComment: aComment [
+	^ self subclassResponsibility 
+]
+
 { #category : #'code generation' }
 SWTranspiler >> putFileFooterOf: filename [
 ]
@@ -289,9 +279,11 @@ SWTranspiler >> putFileHeaderOf: filename [
 SWTranspiler >> putFileHeaders [
 	|sel|
 	sel := (self type, '_fileHeaders') asSymbol.
-	(self source respondsTo: sel) ifTrue: [
-		(self source perform: sel) do: [ :header |
-			self putCode: header
+	self classes do: [:aClass |
+		(aClass respondsTo: sel) ifTrue: [
+			(aClass perform: sel) do: [ :header |
+				self putCode: header
+			]
 		]
 	]
 
@@ -351,6 +343,11 @@ SWTranspiler >> putLine: code [
 
 ]
 
+{ #category : #'as yet unclassified' }
+SWTranspiler >> putMainProgram [
+	^ self subclassResponsibility
+]
+
 { #category : #'code generation' }
 SWTranspiler >> putMainProgramFooterOf: project [
 	^ self subclassResponsibility 
@@ -390,27 +387,8 @@ SWTranspiler >> putMessage: receiver call: selector with: arguments [
 ]
 
 { #category : #'as yet unclassified' }
-SWTranspiler >> putMethod: aMethod ofClass: aClass [
-	|sel|
-	self
-		put: 'def ';
-		put: (self class transpiledNameOf: aMethod selector);
-		put: '('.
-	aMethod argumentNames do: [ :aName |
-		self put: aName asString
-	] separatedBy: [
-		self put: ', '
-	].
-	self putLine: ')'.
-	sel := self transpilerNameFor: aMethod.
-	(aClass respondsTo: sel) ifTrue: [
-		self incIndent.
-		aClass perform: sel with: self.
-		self decIndent.
-	] ifFalse: [
-		aMethod transpileUsing: self.
-	].
-	self putLine: 'end'.
+SWTranspiler >> putMethod: selector ofClass: class [
+	^ self subclassResponsibility 
 ]
 
 { #category : #'code generation' }
@@ -457,18 +435,6 @@ SWTranspiler >> reset [
 ]
 
 { #category : #accessing }
-SWTranspiler >> source [
-
-	^ source
-]
-
-{ #category : #accessing }
-SWTranspiler >> source: anObject [
-
-	source := anObject
-]
-
-{ #category : #accessing }
 SWTranspiler >> tabWidth [
 
 	^ tabWidth
@@ -490,7 +456,14 @@ SWTranspiler >> transformSelector: aSelector [
 
 { #category : #'public API' }
 SWTranspiler >> transpile [
-	^ self subclassResponsibility		
+	self putFileHeaderOf: self programName.
+	self putFileHeaders.
+	self classes do: [ :aClass |
+		self putClassDefinition: aClass
+	].
+	self mainClass ifNotNil: [
+		self putMainProgram
+	].
 ]
 
 { #category : #'code generation' }

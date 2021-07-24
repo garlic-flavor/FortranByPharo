@@ -3,7 +3,6 @@ Class {
 	#superclass : #Object,
 	#instVars : [
 		'client',
-		'programs',
 		'type',
 		'sources',
 		'objs',
@@ -97,9 +96,10 @@ SWProject >> go [
 { #category : #running }
 SWProject >> goDomestic [
 	^ String streamContents: [ :s |
-		self programs do: [ :aProgram |
-			aProgram view: s.
-			aProgram program.
+		self sources do: [ :aSource ||program|
+			program := aSource mainClass new.
+			program stdout: s.
+			program main: {  }
 		]
 	]
 ]
@@ -135,21 +135,14 @@ SWProject >> objs: anObject [
 	objs := anObject
 ]
 
-{ #category : #accessing }
-SWProject >> programs [
-
-	^ programs
-]
-
-{ #category : #accessing }
-SWProject >> programs: anObject [
-
-	programs := anObject
-]
-
 { #category : #execution }
 SWProject >> putAll [
-	self sources: (self programs collect: [ :aProgram ||contents hash filename res|
+	self sources do: [ :aSource |
+		aSource putTo: self client
+	]
+
+"
+	self sources: (self classes collect: [ :aProgram ||contents hash filename res|
 		contents := self transpile: aProgram.
 		hash := (SHA256 hashMessage: contents) hex.
 		filename := String streamContents: [ :s |
@@ -165,6 +158,7 @@ SWProject >> putAll [
 			at: #program put: aProgram;
 			yourself.
 	])
+"
 ]
 
 { #category : #execution }
@@ -181,7 +175,7 @@ SWProject >> run [
 	self type = #rb ifTrue: [|res|
 		res := self client post: 'ruby' with: {
 			'action' -> 'execute'.
-			'arguments' -> (self sources collect: [ :each | (each at: #Location) asString ])
+			'arguments' -> (self sources collect: [ :each | each filename ])
 		}.
 		(res at: #success) ifFalse: [ Error signal ].
 		^ res
