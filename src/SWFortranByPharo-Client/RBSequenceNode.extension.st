@@ -4,8 +4,10 @@ Extension { #name : #RBSequenceNode }
 RBSequenceNode >> transpileUsing: transpiler [
 	transpiler incIndent.
 	self children do: [ :one|
-		one transpileUsing: transpiler.
-		transpiler putLine: ''
+		one class = RBVariableNode ifFalse: [
+			one transpileUsing: transpiler.
+			transpiler putLine: ''
+		]
 	].
 	transpiler decIndent.
 ]

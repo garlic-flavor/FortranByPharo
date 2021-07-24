@@ -14,7 +14,8 @@ Class {
 		'isNewline',
 		'newline',
 		'preventNewline',
-		'messageNest'
+		'messageNest',
+		'selectorTranspiler'
 	],
 	#classVars : [
 		'selectorName'
@@ -287,25 +288,13 @@ SWTranspiler >> putMessage: receiver call: selector with: arguments [
 	self flag: #toImplement.
 	self incMessageNest.
 	[
-		receiver transpileUsing: self.
-		(selector first isLetter) ifTrue: [ self put: '.' ].
-		self putFunctionCallOf: (self class transpiledNameOf: selector) with: arguments.
-"
-		var := receiver transpileUsing: self.
-		self assert: [var isNotNil].
-		sel := self transformSelector: selector.
-		(var respondsTo: sel) ifTrue: [
-			^ var perform: sel with: arguments with: self.
-		].
-		var = self source ifTrue: [ |funcname func|
-				funcname := self class selectorNameOf: selector.
-				func := self variables at: funcname ifAbsent: [ nil ].
-				func ifNotNil: [
-					^ func value: arguments value: self.
-				]
-		].
-"
-		
+		self selectorTranspiler at: selector ifPresent: [ :transpiler |
+			transpiler value: receiver value: selector value: arguments
+		] ifAbsent: [
+			receiver transpileUsing: self.
+			(selector first isLetter) ifTrue: [ self put: '.' ].
+			self putFunctionCallOf: (self class transpiledNameOf: selector) with: arguments.
+		]
 	] ensure: [ self decMessageNest ].
 
 ]
@@ -347,6 +336,11 @@ SWTranspiler >> putString: aString [
 		put: '"'.
 ]
 
+{ #category : #'as yet unclassified' }
+SWTranspiler >> putSymbol: aSymbol [
+	^ self subclassResponsibility 
+]
+
 { #category : #accessing }
 SWTranspiler >> readStream [
 	^ stream readStream
@@ -358,6 +352,11 @@ SWTranspiler >> reset [
 	isNewline := false.
 	preventNewline := false.
 	messageNest := Stack new push: 0; yourself.
+]
+
+{ #category : #accessing }
+SWTranspiler >> selectorTranspiler [
+	^ selectorTranspiler ifNil: [ selectorTranspiler := Dictionary new ]
 ]
 
 { #category : #accessing }

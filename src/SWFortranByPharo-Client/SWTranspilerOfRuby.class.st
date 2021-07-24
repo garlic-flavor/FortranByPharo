@@ -11,6 +11,16 @@ Class {
 SWTranspilerOfRuby >> initialize [
 	super initialize.
 	self type: #rb.
+	self selectorTranspiler
+		at: #at:ifAbsent: put: [ :receiver :selector :arguments |
+			self put: '('.
+			receiver transpileUsing: self.
+			self put: '['.
+			(arguments at: 1) transpileUsing: self.
+			self put: '] || '.
+			(arguments at: 2) transpileUsing: self.
+			self put: ')'.
+		]
 ]
 
 { #category : #'code generation' }
@@ -68,9 +78,10 @@ SWTranspilerOfRuby >> putFunctionCallFooterOf: selector [
 { #category : #'code generation' }
 SWTranspilerOfRuby >> putFunctionCallHeaderOf: selector [
 	self pushMessageNest.
-	self put: selector.
 	selector asString first isLetter ifTrue: [
-		self put: '('
+		self put: selector; put: '('
+	] ifFalse: [
+		self put: ' '; put: selector; put: ' '
 	]
 	
 ]
@@ -106,4 +117,11 @@ SWTranspilerOfRuby >> putMethod: aMethod ofClass: aClass [
 		aMethod transpileUsing: self.
 	].
 	self putLine: 'end'.
+]
+
+{ #category : #'as yet unclassified' }
+SWTranspilerOfRuby >> putSymbol: aSymbol [
+	self
+		put: ':';
+		put: aSymbol
 ]
