@@ -14,8 +14,7 @@ Class {
 		'isNewline',
 		'newline',
 		'preventNewline',
-		'messageNest',
-		'selectorTranspiler'
+		'messageNest'
 	],
 	#classVars : [
 		'selectorName'
@@ -25,6 +24,9 @@ Class {
 
 { #category : #'code generation - protected' }
 SWTranspiler class >> transpiledNameOf: selector [
+	selector = '=' ifTrue: [
+		^ 'opEqual_'
+	].
 	^ selector asString copyReplaceAll: ':' with: '_'
 	
 ]
@@ -105,6 +107,14 @@ SWTranspiler >> newline [
 SWTranspiler >> newline: anObject [
 
 	newline := anObject
+]
+
+{ #category : #'as yet unclassified' }
+SWTranspiler >> opEqual_for: receiver with: arguments [
+	self
+		transpile: receiver;
+		put: ' == ';
+		putArgumentsOf: '=' with: arguments
 ]
 
 { #category : #'code generation - protected' }
@@ -287,14 +297,15 @@ SWTranspiler >> putMainProgram [
 SWTranspiler >> putMessage: receiver call: selector with: arguments [
 	self flag: #toImplement.
 	self incMessageNest.
-	[
-		self selectorTranspiler at: selector ifPresent: [ :transpiler |
-			transpiler value: receiver value: selector value: arguments
-		] ifAbsent: [
-			receiver transpileUsing: self.
-			(selector first isLetter) ifTrue: [ self put: '.' ].
-			self putFunctionCallOf: (self class transpiledNameOf: selector) with: arguments.
-		]
+	[ |transpiledName|
+		transpiledName := ((self class transpiledNameOf: selector), 'for:with:') asSymbol.
+		(self respondsTo: transpiledName) ifTrue: [
+			^ self perform: transpiledName with: receiver with: arguments
+		].
+
+		receiver transpileUsing: self.
+		(selector first isLetter) ifTrue: [ self put: '.' ].
+		self putFunctionCallOf: (self class transpiledNameOf: selector) with: arguments.
 	] ensure: [ self decMessageNest ].
 
 ]
@@ -355,11 +366,6 @@ SWTranspiler >> reset [
 ]
 
 { #category : #accessing }
-SWTranspiler >> selectorTranspiler [
-	^ selectorTranspiler ifNil: [ selectorTranspiler := Dictionary new ]
-]
-
-{ #category : #accessing }
 SWTranspiler >> tabWidth [
 
 	^ tabWidth ifNil: [ tabWidth := 4 ]
@@ -383,14 +389,19 @@ SWTranspiler >> transpile [
 	].
 ]
 
+{ #category : #execution }
+SWTranspiler >> transpile: anObject [
+	^ anObject transpileUsing: self
+]
+
 { #category : #'code generation - protected' }
-SWTranspiler >> transpilerNameFor: aMethod [
+SWTranspiler >> transpiledNameOf: aMethod [
 	^ (String streamContents: [ :s |
 		s
 			<< self type;
 			<< '_';
 			<< (self class transpiledNameOf: aMethod selector);
-			<< 'Using:'
+			<< 'using:'
 	]) asSymbol.
 
 ]

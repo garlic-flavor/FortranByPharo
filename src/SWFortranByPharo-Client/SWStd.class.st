@@ -2,7 +2,7 @@
 I implement stdout.
 "
 Class {
-	#name : #SWClass,
+	#name : #SWStd,
 	#superclass : #Object,
 	#instVars : [
 		'stdout'
@@ -11,30 +11,40 @@ Class {
 }
 
 { #category : #accessing }
-SWClass class >> declarations [
+SWStd class >> declarations [
 	^ #(print:)
 ]
 
 { #category : #'as yet unclassified' }
-SWClass class >> rb_print_Using: transpiler [
+SWStd class >> rb_print_using: transpiler [
 	transpiler putCode: '\
 		puts msg
 	\'
 ]
 
 { #category : #printing }
-SWClass >> print: msg [
+SWStd >> print: msg [
 	self stdout << msg asString; cr; flush
 ]
 
 { #category : #accessing }
-SWClass >> stdout [
+SWStd >> stdout [
 
 	^ stdout ifNil: [ stdout := Transcript ]
 ]
 
 { #category : #accessing }
-SWClass >> stdout: anObject [
+SWStd >> stdout: anObject [
 
 	stdout := anObject
+]
+
+{ #category : #'as yet unclassified' }
+SWStd >> switch: needle when: anAssociationArray [
+	^ anAssociationArray detect: [ :acc |
+		(acc key class inheritsFrom: Boolean) ifTrue: [ acc key ]
+			ifFalse: [ acc key = needle ]
+	]
+		ifFound: [ :acc | acc value value ]
+
 ]

@@ -3,7 +3,7 @@ This is a WebSocket server.
 "
 Class {
 	#name : #SWServer,
-	#superclass : #SWClass,
+	#superclass : #SWStd,
 	#instVars : [
 		'env'
 	],
@@ -29,30 +29,15 @@ SWServer class >> rb_requirements [
 ]
 
 { #category : #'as yet unclassified' }
-SWServer class >> rb_startOn_Using: transpiler [
+SWServer class >> rb_startOn_using: transpiler [
 	transpiler putCode: '\
 		EM.run{
 			EM::WebSocket.run(:host => "0.0.0.0", :port=>portNumber) do |ws|
 				ws.onmessage {  |msg|
-					dispatch(msg, ws)
+					self.dispatch(msg, ws)
 				}
 			end
 		}' with: {}.
-
-]
-
-{ #category : #'as yet unclassified' }
-SWServer class >> rb_startOn_with: arguments using: transpiler [
-	|portNumber|
-	portNumber := (arguments at: 1) evaluate.
-	transpiler putCode: '\
-		EM.run{
-			EM::WebSocket.run(:host => "0.0.0.0", :port=>%port%) do |ws|
-				ws.onmessage {  |msg|
-					dispatch(msg, ws)
-				}
-			end
-		}' with: { '%port%' -> portNumber }.
 
 ]
 

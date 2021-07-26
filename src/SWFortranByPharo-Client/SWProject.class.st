@@ -92,7 +92,7 @@ SWProject >> goDomestic [
 	^ String streamContents: [ :s |
 		self sources do: [ :aSource ||program|
 			program := aSource mainClass new.
-			(aSource mainClass inheritsFrom: SWClass) ifTrue: [
+			(aSource mainClass inheritsFrom: SWStd) ifTrue: [
 				program stdout: s
 			].
 			program main: {  }

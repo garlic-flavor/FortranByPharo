@@ -7,20 +7,36 @@ Class {
 	#category : #'SWFortranByPharo-Client-Transpiler'
 }
 
+{ #category : #accessing }
+SWTranspilerOfRuby >> at_ifAbsent_for: receiver with: arguments [
+	self
+		put: '(';
+		transpile: receiver;
+		put: '[';
+		transpile: (arguments at: 1);
+		put: '] || ';
+		transpile: (arguments at: 2);
+		put: ')'
+
+]
+
+{ #category : #'as yet unclassified' }
+SWTranspilerOfRuby >> ifTrue_for: receiver with: arguments [
+	self
+		pushMessageNest;
+		put: 'if(';
+		transpile: receiver;
+		putLine: '){';
+		transpile: (arguments at: 1) body;
+		put: '}'
+
+]
+
 { #category : #initialization }
 SWTranspilerOfRuby >> initialize [
 	super initialize.
 	self type: #rb.
-	self selectorTranspiler
-		at: #at:ifAbsent: put: [ :receiver :selector :arguments |
-			self put: '('.
-			receiver transpileUsing: self.
-			self put: '['.
-			(arguments at: 1) transpileUsing: self.
-			self put: '] || '.
-			(arguments at: 2) transpileUsing: self.
-			self put: ')'.
-		]
+
 ]
 
 { #category : #'code generation' }
@@ -108,7 +124,7 @@ SWTranspilerOfRuby >> putMethod: aMethod ofClass: aClass [
 		self put: ', '
 	].
 	self putLine: ')'.
-	sel := self transpilerNameFor: aMethod.
+	sel := self transpiledNameOf: aMethod.
 	(aClass respondsTo: sel) ifTrue: [
 		self incIndent.
 		aClass perform: sel with: self.
