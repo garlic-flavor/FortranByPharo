@@ -10,9 +10,22 @@ Class {
 	#category : #'SWFortranByPharo-Server-Server'
 }
 
+{ #category : #'as yet unclassified' }
+SWServer class >> _rb_startOn_using: transpiler [
+	transpiler putCode: '\
+		EM.run{
+			EM::WebSocket.run(:host => "0.0.0.0", :port=>portNumber) do |ws|
+				ws.onmessage {  |msg|
+					self.dispatch_on_(msg, ws)
+				}
+			end
+		}' with: {}.
+
+]
+
 { #category : #'code generation - protected' }
 SWServer class >> declarations [
-	^ #(main: startOn: dispatch:on:)
+	^ #(main: startOn: dispatch:on: parseRequest:)
 ]
 
 { #category : #testing }
@@ -26,19 +39,6 @@ SWServer class >> rb_requirements [
 	^ {
 		'require ''em-websocket'''
 	}
-]
-
-{ #category : #'as yet unclassified' }
-SWServer class >> rb_startOn_using: transpiler [
-	transpiler putCode: '\
-		EM.run{
-			EM::WebSocket.run(:host => "0.0.0.0", :port=>portNumber) do |ws|
-				ws.onmessage {  |msg|
-					self.dispatch(msg, ws)
-				}
-			end
-		}' with: {}.
-
 ]
 
 { #category : #accessing }
@@ -189,7 +189,7 @@ SWServer >> parseRequest: received [
 			dict at: assoc key put: assoc value
 		]
 	] ifFalse: [
-		dict at: #entity put: (request entity ifNil: [ nil ] ifNotNil: [ request entity contents ])
+		dict at: #entity put: (request entity ifNotNil: [ request entity contents ])
 	].
 	^ dict
 ]

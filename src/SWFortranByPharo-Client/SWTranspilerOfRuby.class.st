@@ -20,6 +20,30 @@ SWTranspilerOfRuby >> at_ifAbsent_for: receiver with: arguments [
 
 ]
 
+{ #category : #accessing }
+SWTranspilerOfRuby >> at_put_for: receiver with: arguments [
+	self
+		transpile: receiver;
+		pushMessageNest;
+		put: '[';
+		transpile: (arguments at: 1);
+		put: '] = ';
+		transpile: (arguments at: 2);
+		popMessageNest
+]
+
+{ #category : #'as yet unclassified' }
+SWTranspilerOfRuby >> ifNotNil_for: receiver with: arguments [
+	self
+		pushMessageNest;
+		put: '(';
+		transpile: receiver;
+		putLine: ').present? ? (';
+		transpile: (arguments at: 1) body;
+		put: '): nil';
+		popMessageNest
+]
+
 { #category : #'as yet unclassified' }
 SWTranspilerOfRuby >> ifTrue_for: receiver with: arguments [
 	self
@@ -30,6 +54,20 @@ SWTranspilerOfRuby >> ifTrue_for: receiver with: arguments [
 		transpile: (arguments at: 1) body;
 		put: '}'
 
+]
+
+{ #category : #'as yet unclassified' }
+SWTranspilerOfRuby >> ifTrue_ifFalse_for: receiver with: arguments [
+	self
+		pushMessageNest;
+		put: 'if(';
+		transpile: receiver;
+		putLine: '){';
+		transpile: (arguments at: 1) body;
+		putLine: '} else {';
+		transpile: (arguments at: 2) body;
+		put: '}';
+		popMessageNest
 ]
 
 { #category : #initialization }
