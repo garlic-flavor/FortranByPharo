@@ -215,3 +215,16 @@ SWTranspilerOfRuby >> putSymbol: aSymbol [
 		put: ':';
 		put: aSymbol
 ]
+
+{ #category : #'as yet unclassified' }
+SWTranspilerOfRuby >> value_for: receiver with: arguments [
+	self
+		transpile: receiver;
+		put: '.';
+		putFunctionCallOf: 'call' with: arguments
+]
+
+{ #category : #'as yet unclassified' }
+SWTranspilerOfRuby >> yourselffor: receiver with:arguments [
+	self transpile: receiver
+]
