@@ -182,6 +182,11 @@ SWTranspiler >> putArrayLiteral: anArray [
 	^ anArray
 ]
 
+{ #category : #'as yet unclassified' }
+SWTranspiler >> putBlock: aBlock [
+	^ self subclassResponsibility 
+]
+
 { #category : #'code generation' }
 SWTranspiler >> putClassDefinition: aClass [
 	^ self subclassResponsibility 

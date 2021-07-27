@@ -77,9 +77,45 @@ SWTranspilerOfRuby >> initialize [
 
 ]
 
+{ #category : #'as yet unclassified' }
+SWTranspilerOfRuby >> on_do_for: receiver with: arguments [
+	self
+		pushMessageNest;
+		putLine: 'begin';
+		transpile: receiver body;
+		put: 'rescue => ';
+		putLine: ((0 < (arguments at: 2) arguments size) ifTrue: [ (arguments at: 2) argumentNames at: 1 ] ifFalse: ['e']);
+		transpile: (arguments at: 2) body;
+		put: 'end';
+		popMessageNest
+]
+
 { #category : #'code generation' }
 SWTranspilerOfRuby >> putArgumentsOf: selector with: arguments [
 	self putArray: arguments.
+]
+
+{ #category : #'as yet unclassified' }
+SWTranspilerOfRuby >> putBlock: aBlock [
+	self 
+		pushMessageNest;
+		put: '(Proc.new {'.
+	(0 < aBlock arguments size) ifTrue: [
+		self put: '|'.
+		aBlock argumentNames do: [ :each |
+			self put: each asString
+		] separatedBy: [
+			self put: ', '
+		].
+		self put: '|'
+	].
+	self
+		putLine;
+		transpile: aBlock body;
+		put: '})';
+		popMessageNest
+
+
 ]
 
 { #category : #'as yet unclassified' }

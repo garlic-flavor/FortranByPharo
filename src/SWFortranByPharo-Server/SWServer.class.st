@@ -37,7 +37,7 @@ SWServer class >> isRunning [
 { #category : #'as yet unclassified' }
 SWServer class >> rb_requirements [
 	^ {
-		'require ''em-websocket'''
+		'require ''ZnServer.rb'''.
 	}
 ]
 
@@ -60,7 +60,7 @@ SWServer class >> transpile [
 	|instance contents|
 	instance := self new.
 	contents := SWTranspilerOfRuby new 
-		classes: { self };
+		classes: { SWStd. self };
 		transpile;
 		contents.
 	contents inspect.
