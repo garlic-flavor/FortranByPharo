@@ -22,6 +22,11 @@ SWStd class >> rb_print_using: transpiler [
 	\'
 ]
 
+{ #category : #'as yet unclassified' }
+SWStd class >> rb_requirements [
+	^ { 'require ''Pharo.rb''' }
+]
+
 { #category : #printing }
 SWStd >> print: msg [
 	self stdout << msg asString; cr; flush
