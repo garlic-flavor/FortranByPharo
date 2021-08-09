@@ -6,8 +6,7 @@ Class {
 	#superclass : #Object,
 	#instVars : [
 		'type',
-		'classes',
-		'mainClass',
+		'source',
 		'stream',
 		'indent',
 		'tabWidth',
@@ -27,25 +26,17 @@ SWTranspiler class >> transpiledNameOf: selector [
 	selector = '=' ifTrue: [
 		^ 'opEqual_'
 	].
+	selector = ',' ifTrue: [
+		^ 'opCamma_'
+	].
 	^ selector asString copyReplaceAll: ':' with: '_'
 	
 ]
 
 { #category : #'code generation' }
 SWTranspiler >> assign: key with: value [
-	self put: key; put: ' = '.
+	self transpile: key; put: ' = '.
 	value transpileUsing: self.
-
-]
-
-{ #category : #accessing }
-SWTranspiler >> classes [
-	^ classes ifNil: [ classes := OrderedCollection new ]
-]
-
-{ #category : #accessing }
-SWTranspiler >> classes: anArray [
-	classes := anArray.
 
 ]
 
@@ -84,17 +75,11 @@ SWTranspiler >> initialize [
 	stream := String new writeStream.
 	indent := 0.
 	newline := String crlf.
-	self reset.
+	isNewline := false.
+	preventNewline := false.
+	messageNest := Stack new push: 0; yourself.
 
-]
 
-{ #category : #accessing }
-SWTranspiler >> mainClass [
-	^ mainClass ifNil: [
-		mainClass := self classes detect: [ :aClass |
-			(aClass compiledMethodAt: #main: ifAbsent: [ nil ]) isNotNil
-		] ifFound: [ :aClass | aClass ] ifNone: [ nil ]
-	]
 ]
 
 { #category : #accessing }
@@ -125,16 +110,6 @@ SWTranspiler >> popMessageNest [
 { #category : #'code generation - protected' }
 SWTranspiler >> preventNewline [
 	preventNewline := true
-]
-
-{ #category : #accessing }
-SWTranspiler >> programName [ 
-	^ (self mainClass respondsTo: #programName) ifTrue: [
-		self mainClass programName
-	] ifFalse: [
-		self mainClass name
-	]
-
 ]
 
 { #category : #'code generation - protected' }
@@ -240,21 +215,9 @@ SWTranspiler >> putFileHeaderOf: filename [
 ]
 
 { #category : #'code generation' }
-SWTranspiler >> putFunctionCallFooterOf: selector [
-	^ self subclassResponsibility 
-]
-
-{ #category : #'code generation' }
-SWTranspiler >> putFunctionCallHeaderOf: selector [
-	^ self subclassResponsibility 
-]
-
-{ #category : #'code generation' }
 SWTranspiler >> putFunctionCallOf: selector with: arguments [
-	self
-		putFunctionCallHeaderOf: selector;
-		putArgumentsOf: selector with: arguments;
-		putFunctionCallFooterOf: selector
+	^ self subclassResponsibility
+
 ]
 
 { #category : #'code generation' }
@@ -307,7 +270,6 @@ SWTranspiler >> putMessage: receiver call: selector with: arguments [
 		(self respondsTo: transpiledName) ifTrue: [
 			^ self perform: transpiledName with: receiver with: arguments
 		].
-
 		receiver transpileUsing: self.
 		(selector first isLetter) ifTrue: [ self put: '.' ].
 		self putFunctionCallOf: (self class transpiledNameOf: selector) with: arguments.
@@ -318,6 +280,11 @@ SWTranspiler >> putMessage: receiver call: selector with: arguments [
 { #category : #'code generation' }
 SWTranspiler >> putMethod: selector ofClass: class [
 	^ self subclassResponsibility 
+]
+
+{ #category : #'as yet unclassified' }
+SWTranspiler >> putNil [
+	^ self subclassResponsibility
 ]
 
 { #category : #'code generation' }
@@ -334,8 +301,8 @@ SWTranspiler >> putParameters: anArray [
 SWTranspiler >> putRequirements [
 	|sel|
 	sel := (self type, '_requirements') asSymbol.
-	self classes do: [:aClass |
-		(aClass respondsTo: sel) ifTrue: [
+	self source classes do: [:aClass |
+		(aClass class methods anySatisfy: [ :each | each selector = sel ]) ifTrue: [
 			(aClass perform: sel) do: [ :header |
 				self putCode: header
 			]
@@ -357,17 +324,31 @@ SWTranspiler >> putSymbol: aSymbol [
 	^ self subclassResponsibility 
 ]
 
+{ #category : #'as yet unclassified' }
+SWTranspiler >> putTestRunner [
+	^ self subclassResponsibility 
+]
+
+{ #category : #'as yet unclassified' }
+SWTranspiler >> putVariable: aName [
+	self put: aName
+]
+
 { #category : #accessing }
 SWTranspiler >> readStream [
 	^ stream readStream
 ]
 
-{ #category : #initialization }
-SWTranspiler >> reset [
-	stream resetToStart.
-	isNewline := false.
-	preventNewline := false.
-	messageNest := Stack new push: 0; yourself.
+{ #category : #accessing }
+SWTranspiler >> source [
+
+	^ source
+]
+
+{ #category : #accessing }
+SWTranspiler >> source: anObject [
+
+	source := anObject
 ]
 
 { #category : #accessing }
@@ -384,14 +365,18 @@ SWTranspiler >> tabWidth: anObject [
 
 { #category : #'public API' }
 SWTranspiler >> transpile [
-	self putFileHeaderOf: self programName.
+	self putFileHeaderOf: self source moduleName.
 	self putRequirements.
-	self classes do: [ :aClass |
+	self source classes do: [ :aClass |
 		self putClassDefinition: aClass
 	].
-	self mainClass ifNotNil: [
+	self source entryClass ifNotNil: [
 		self putMainProgram
-	].
+	] ifNil: [ 
+		(self source mainClass inheritsFrom: TestCase) ifTrue: [
+			self putTestRunner
+		]
+	]
 ]
 
 { #category : #execution }

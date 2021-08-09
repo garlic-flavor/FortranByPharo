@@ -13,17 +13,18 @@ BaselineOfSWFortranByPharo >> baseline: spec [
 	<baseline>
 	spec for: #pharo
 	do: [ 
+		spec blessing: #baseline.
 		"Dependencies"
 		self setUpDependencies: spec.
 
 		"Packages"
 		spec
 			package: 'SWFortranByPharo-Base';
-			package: 'SWFortranByPharo-Client' with: [ spec requires: #('SQLite3-Core' 'SWFortranByPharo-Base') ];
-			package: 'SWFortranByPharo-Server' with: [ spec requires: #('OSSubprocess' 'SWFortranByPharo-Base' 'SWFortranByPharo-Client') ];
-			package: 'SWFortranByPharo-Base-Test' with: [ spec requires: #('SWFortranByPharo-Base') ];
-			package: 'SWFortranByPharo-Server-Test' with: [ spec requires: #('SWFortranByPharo-Server') ];
-			package: 'SWFortranByPharo-Client-Test' with: [ spec requires: #('SWFortranByPharo-Client') ].
+			package: 'SWFortranByPharo-Client' with: [ spec requires: #('SQLite3' 'ZincHTTPComponents' 'SWFortranByPharo-Base') ];
+			package: 'SWFortranByPharo-Server' with: [ spec requires: #('OSSubprocess' 'ZincHTTPComponents' 'SWFortranByPharo-Base' 'SWFortranByPharo-Client') ];
+			package: 'SWFortranByPharo-Base-Tests' with: [ spec requires: #('SWFortranByPharo-Base') ];
+			package: 'SWFortranByPharo-Server-Tests' with: [ spec requires: #('SWFortranByPharo-Server') ];
+			package: 'SWFortranByPharo-Client-Tests' with: [ spec requires: #('SWFortranByPharo-Client') ].
 		
 		"Groups"
 	]
@@ -39,6 +40,10 @@ BaselineOfSWFortranByPharo >> setUpDependencies: spec [
 	spec 
 		baseline: 'OSSubprocess'
 			with: [spec repository: 'github://pharo-contributions/OSSubprocess:master/repository'];
-		baseline: 'SQLite3-Core'
-			with: [ spec repository: 'https://github.com/pharo-rdbms/Pharo-SQLite3' ].
+		baseline: 'SQLite3'
+			with: [ spec repository: 'github://pharo-rdbms/Pharo-SQLite3/src' ];
+		baseline: 'ZincHTTPComponents'
+ 			with: [ spec repository: 'github://svenvc/zinc/repository' ]
+
+
 ]

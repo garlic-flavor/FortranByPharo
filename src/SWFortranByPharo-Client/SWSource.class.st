@@ -6,11 +6,14 @@ Class {
 	#superclass : #Object,
 	#instVars : [
 		'classes',
+		'mainClass',
+		'entryClass',
 		'type',
 		'transpiler',
 		'contents',
 		'contentsHash',
-		'filename'
+		'filename',
+		'moduleName'
 	],
 	#category : #'SWFortranByPharo-Client-Client'
 }
@@ -18,7 +21,7 @@ Class {
 { #category : #accessing }
 SWSource >> classes [
 
-	^ classes ifNil: [ classes := OrderedCollection new ]
+	^ classes
 ]
 
 { #category : #accessing }
@@ -63,13 +66,29 @@ SWSource >> dirName [
 ]
 
 { #category : #accessing }
+SWSource >> entryClass [
+
+	^ entryClass ifNil: [
+		entryClass := self classes detect: [ :aClass |
+			(aClass compiledMethodAt: #main: ifAbsent: [ nil ]) isNotNil
+		] ifFound: [ :aClass | aClass ] ifNone: [ nil ]
+	]
+]
+
+{ #category : #accessing }
+SWSource >> entryClass: anObject [
+
+	entryClass := anObject
+]
+
+{ #category : #accessing }
 SWSource >> filename [
 
 	^ filename ifNil: [
 		filename := String streamContents: [:s |
 			s
 				<< self dirName; << '/';
-				<< self programName; << '/';
+				<< self moduleName; << '/';
 				<< self contentsHash; << '.'; << self type
 		]
 	]
@@ -83,27 +102,45 @@ SWSource >> filename: anObject [
 
 { #category : #accessing }
 SWSource >> mainClass [
-	^ self transpiler mainClass
+	^ mainClass ifNil: [
+		mainClass := self entryClass ifNil: [ self classes last ]
+	]
 ]
 
 { #category : #accessing }
-SWSource >> programName [
-	^ self transpiler programName
+SWSource >> mainClass: anObject [
+	mainClass := anObject
+]
+
+{ #category : #accessing }
+SWSource >> moduleName [
+	^ moduleName ifNil: [
+		moduleName := (self mainClass respondsTo: #moduleName) ifTrue: [
+			self mainClass moduleName
+		] ifFalse: [
+			self mainClass name
+		]
+	]
+
+]
+
+{ #category : #accessing }
+SWSource >> moduleName: anObject [
+
+	moduleName := anObject
 ]
 
 { #category : #accessing }
 SWSource >> putTo: client [
-	|res|
-	res := client put: self filename contents: self contents.
-	self assert: [ res at: #success ].
-	^ res
+	^ client put: self filename contents: self contents.
+
 ]
 
 { #category : #accessing }
 SWSource >> transpiler [
 
 	^ transpiler ifNil: [
-		transpiler := (self transpilerClass new) classes: self classes yourself
+		transpiler := (self transpilerClass new) source: self; yourself
 	]
 ]
 

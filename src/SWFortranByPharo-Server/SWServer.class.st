@@ -24,8 +24,8 @@ SWServer class >> _rb_startOn_using: transpiler [
 ]
 
 { #category : #'code generation - protected' }
-SWServer class >> declarations [
-	^ #(main: startOn: dispatch:on: parseRequest:)
+SWServer class >> declarationFilter: symbolName [
+	^ #(main: startOn: dispatch:on:) anySatisfy: [ :each | each = symbolName ]
 ]
 
 { #category : #testing }
@@ -60,7 +60,7 @@ SWServer class >> transpile [
 	|instance contents|
 	instance := self new.
 	contents := SWTranspilerOfRuby new 
-		classes: { SWStd. self };
+		classes: { SWStd. SWServerInstruction. SWServerStatus. SWSession. self };
 		transpile;
 		contents.
 	contents inspect.
@@ -68,7 +68,25 @@ SWServer class >> transpile [
 ]
 
 { #category : #dispatching }
-SWServer >> dispatch: message on: socket [
+SWServer >> dispatch: message on: session [
+	session instruction isPut ifTrue: [
+		message ifNotNil: [
+			^ self put: message on: session
+		] ifNil: [
+			^ self
+		]
+	].
+	session instruction isHead ifTrue: [
+		^ self headOn: session
+	].
+
+	session instruction isExecute ifTrue: [
+		^ self exec: session
+	].
+
+	self error: 'no implementation'
+
+"
 	|obj method target|
 	obj := self parseRequest: message.
 	method := obj at: #method ifAbsent: ''.
@@ -76,17 +94,12 @@ SWServer >> dispatch: message on: socket [
 	method = #GET ifTrue: [
 		^ self get: target with: obj on: socket
 	].
-	method = #HEAD ifTrue: [ 
-		^ self head: target with: obj on: socket
-	].
 	method = #PUT ifTrue: [
-		^ self put: target with: obj on: socket
 	].
 	method = #POST ifTrue: [
 		^ self post: target with: obj on: socket
 	].
-	^ socket sendResponseBadRequest: message.
-
+"
 ]
 
 { #category : #accessing }
@@ -102,14 +115,12 @@ SWServer >> env: anObject [
 ]
 
 { #category : #executing }
-SWServer >> exec: target with: msg on: socket [
+SWServer >> exec: session [
 	|result|
 	
-	result := SWShell execute: target fullName arguments: (msg at: #arguments ifAbsent: {}).
-	socket sendResponseOk: {
-		'status' -> 'ok'.
-		'stdout' -> result.
-	}
+	result := SWShell execute: session instruction target fullName arguments: session instruction options.
+	session status ok.
+	session status message: result
 
 ]
 
@@ -118,6 +129,9 @@ SWServer >> filePathOf: name [
 	|relname result|
 	relname := name asString trimLeft: [ :c | c = $/ ].
 	result := relname ifNotEmpty: [ FileLocator imageDirectory / relname ] ifEmpty: [ FileLocator imageDirectory ].
+	(FileLocator imageDirectory contains: result) ifFalse: [
+		result := FileLocator imageDirectory
+	].
 	result parent ensureCreateDirectory.
 	^ result
 ]
@@ -137,10 +151,14 @@ SWServer >> get: target with: msg on: socket [
 ]
 
 { #category : #responses }
-SWServer >> head: target with: msg on: socket [
-	^ socket sendResponseOk: (#(exists accessTime changeTime creationTime) collect: [ :each |
-		(each asString) -> (target perform: each)
-	]).
+SWServer >> headOn: session [
+	session instruction target exists ifTrue: [
+		(#(exists accessTime changeTime creationTime) do: [ :each |
+			session status entity at: each asString put: (session instruction target perform: each)
+		]).
+	] ifFalse: [
+		session status entity at: 'exists' put: false
+	]
 
 ]
 
@@ -215,17 +233,14 @@ SWServer >> post: target with: msg on: socket [
 ]
 
 { #category : #responses }
-SWServer >> put: target with: msg on: socket [
-	target writeStreamDo: [ :writer |
-		(msg at: 'Creation-Mode' ifAbsent: '') = 'new' ifTrue: [
-			writer truncate.
-		].
-		(msg at: 'Creation-Mode' ifAbsent: '') = 'append' ifTrue: [
-			writer setToEnd.
-		].
-		writer << (msg at: #entity ifAbsent: '').
+SWServer >> put: message on: session [
+	session instruction target writeStreamDo: [ :writer |
+		writer
+			position: session status completed;
+			truncate;
+			<< message
 	].
-	^ socket sendResponseCreated: target rel fullName with: {  }
+	session status complete: message size
 
 ]
 
@@ -233,14 +248,31 @@ SWServer >> put: target with: msg on: socket [
 SWServer >> startOn: portNumber [
 	ZnServer startDefaultOn: portNumber.
 	ZnServer default delegate: (ZnWebSocketDelegate handler: [ :webSocket |
-		[
+		[|session|
+			session := SWSession new
+				socket: webSocket;
+				yourself.
 			webSocket runWith: [ :message |
-				[ self dispatch: message on: webSocket ] on: Error do: [:exception |
-					webSocket sendResponseInternalServerError: {
-						#required -> message.
-						#message -> exception description
-					}
-				]
+				[
+					session status isGood ifTrue: [
+						session instruction ifNotNil: [
+							self dispatch: message on: session
+						] ifNil: [
+							session instruction: (SWServerInstruction fromSton: (STON reader on: message readStream)).
+							session instruction target: (self filePathOf: session instruction target).
+							session status: (SWServerStatus new
+								toComplete: session instruction length;
+								yourself).
+							self dispatch: nil on: session.
+						].
+						session status isOk ifTrue: [ 
+							session instruction: nil
+						]
+					]
+				] on: Error do: [:exception |
+					session status failed; message: exception description; request: message
+				].
+				webSocket sendMessage: session status toString
 			]
 		] on: ConnectionClosed do: [
 			Transcript << 'Ignoring connection close, done.'; cr.

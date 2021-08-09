@@ -2,6 +2,10 @@ Extension { #name : #RBVariableNode }
 
 { #category : #'*SWFortranByPharo-Client' }
 RBVariableNode >> transpileUsing: transpiler [
-	^ transpiler put: self name
+	(self variable class = InstanceVariableSlot) ifTrue: [
+		^ transpiler put: '@'; put: self name
+	].
+
+	^ transpiler putVariable: self name
 
 ]

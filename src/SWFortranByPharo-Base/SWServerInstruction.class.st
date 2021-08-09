@@ -3,32 +3,54 @@ I indicate an instruction code for the SWServer
 "
 Class {
 	#name : #SWServerInstruction,
-	#superclass : #Object,
+	#superclass : #SWStd,
 	#instVars : [
 		'code',
 		'target',
+		'length',
 		'options'
 	],
 	#category : #'SWFortranByPharo-Base'
 }
+
+{ #category : #accessing }
+SWServerInstruction class >> classMethodDeclarationFilter: symbolName [
+	^ self declarationFilterBase: symbolName
+]
+
+{ #category : #constants }
+SWServerInstruction class >> executeCode [
+	^ #execute
+]
 
 { #category : #'instance creation' }
 SWServerInstruction class >> fromSton: stonReader [
 	|dict|
 	dict := STON mapClass fromSton: stonReader.
 	^ self new
-		code: (dict at: #code ifAbsent: [ self headCode ]);
+		code: (dict at: #code ifAbsent: [ self headCode ]) asSymbol;
 		target: (dict at: #target ifAbsent: [ '' ]);
+		length: (dict at: #length ifAbsent: [ 0 ]);
 		options: (dict at: #options ifAbsent: [ STON mapClass new ]) copy;
 		yourself
 ]
 
-{ #category : #'as yet unclassified' }
+{ #category : #constants }
 SWServerInstruction class >> headCode [
 	^ #head
 ]
 
-{ #category : #'as yet unclassified' }
+{ #category : #accessing }
+SWServerInstruction class >> instanceVariableDeclarationFilter: symbolName [
+	^ self declarationFilterBase: symbolName
+]
+
+{ #category : #accessing }
+SWServerInstruction class >> methodDeclarationFilter: symbolName [
+	^ self declarationFilterBase: symbolName
+]
+
+{ #category : #constants }
 SWServerInstruction class >> postCode [
 	^ #post
 ]
@@ -39,25 +61,67 @@ SWServerInstruction class >> putCode [
 ]
 
 { #category : #'as yet unclassified' }
+SWServerInstruction class >> rb_requirements [
+	^ #('require ''STON.rb''')
+]
+
+{ #category : #constants }
 SWServerInstruction class >> validCodes [
-	^ { self headCode. self postCode. self putCode }
+	^ { self headCode. self postCode. self putCode. self executeCode }
 ]
 
 { #category : #accessing }
 SWServerInstruction >> code [
 
-	^ code ifNil: [ self head ]
+	^ code
 ]
 
 { #category : #accessing }
 SWServerInstruction >> code: anObject [
 	self assert: (self class validCodes anySatisfy: [:c | c = anObject]).
-	code := anObject
+	^ code := anObject
+]
+
+{ #category : #execution }
+SWServerInstruction >> execute [
+	^ code := self class executeCode
 ]
 
 { #category : #accessing }
 SWServerInstruction >> head [
 	^ code := self class headCode.
+]
+
+{ #category : #testing }
+SWServerInstruction >> isExecute [
+	^ self code = self class executeCode
+]
+
+{ #category : #testing }
+SWServerInstruction >> isHead [
+	^ self code = self class headCode
+]
+
+{ #category : #testing }
+SWServerInstruction >> isPost [
+	^ self code = self class postCode
+]
+
+{ #category : #testing }
+SWServerInstruction >> isPut [
+	^ self code = self class putCode
+]
+
+{ #category : #accessing }
+SWServerInstruction >> length [
+
+	^ length ifNil: [ length := 0 ]
+]
+
+{ #category : #accessing }
+SWServerInstruction >> length: anObject [
+
+	length := anObject
 ]
 
 { #category : #accessing }
@@ -85,8 +149,9 @@ SWServerInstruction >> put [
 { #category : #'ston persistence' }
 SWServerInstruction >> stonOn: aStream [
 	^ STON mapClass new
-		at: 'code' put: self code;
+		at: 'code' put: self code asString;
 		at: 'target' put: self target;
+		at: 'length' put: self length;
 		at: 'options' put: self options;
 		stonOn: aStream
 ]
@@ -101,4 +166,13 @@ SWServerInstruction >> target [
 SWServerInstruction >> target: anObject [
 
 	target := anObject
+]
+
+{ #category : #printing }
+SWServerInstruction >> toString [
+	^ String streamContents: [ :s |
+		STON writer
+			on: s;
+			nextPut: self
+	]
 ]

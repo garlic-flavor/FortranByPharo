@@ -90,6 +90,22 @@ SWClientView >> enableAborting [
 	abort enable
 ]
 
+{ #category : #requesting }
+SWClientView >> exec: target with: options [
+	|res inst|
+	self << target; << '('; << options; << ')'; << ' to '; << self server; cr.
+	inst := SWServerInstruction new
+		execute;
+		target: target;
+		options: options;
+		yourself.
+	res := self socket ensureSendMessage: inst toString.
+	self
+		<< res code; cr;
+		<< (res entity at: #stdout ifAbsent: ''); << res message; cr.
+	^ res.
+]
+
 { #category : #initialization }
 SWClientView >> initialize [
 	super initialize.
@@ -203,20 +219,23 @@ SWClientView >> progress: aNumber [
 
 { #category : #requesting }
 SWClientView >> put: target contents: contents [
-	|res|
+	|req status|
 	self << 'put: '; << target; << '('; << contents size asString; << ') to '; << self server; cr.
-	self socket sendRequestHead: target.
-	res := self socket readResponse.
-	(res at: #exists ifAbsent: false) ifTrue: [
+	req := SWServerInstruction new
+		head;
+		target: target;
+		yourself.
+	status := self socket ensureSendMessage: req toString.
+	(status entity at: #exists ifAbsent: false) ifTrue: [
 		self << target; << ' already existed.'; cr.
-		res at: #Location put: target.
-		^ res
+		^ status
 	].
 
-	self socket sendRequestPut: target with: { 'Creation-Mode' -> 'new' } entity: contents.
-	res := self socket readResponse.
-	self << (res at: #reason ifAbsent: ''); cr.
-	^ res
+	req put; length: contents size.
+	status := self socket
+		ensureSendMessage: req toString;
+		ensureSendMessage: contents.
+	^ status
 
 ]
 

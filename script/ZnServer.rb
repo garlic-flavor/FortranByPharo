@@ -5,21 +5,17 @@ class ZnServer
   @@_message_handler = nil
 
   def self.default()
-    return ZnServer
+    return self
   end
 
   def self.startDefaultOn_(portNumber)
     @@_port_number = portNumber
-    if (@@_message_handler.present?) {
-      self.start()
-    }
+    self.start() if @@_message_handler.present?
   end
 
   def self.delegate_(handler)
     @@_message_handler = handler
-    if (@@_port_number.present?) {
-      self.start()
-    }
+    self.start() if @@_port_number.present?
   end
 
   def self.start()
@@ -52,5 +48,8 @@ class WebSocketAdapter
     @_ws.onmessage {|msg|
       proc.call(msg, self)
     }
+  end
+
+  def sendResponseInternalServerError_(anAssoc)
   end
 end

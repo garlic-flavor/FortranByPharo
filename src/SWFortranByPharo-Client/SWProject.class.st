@@ -46,6 +46,7 @@ SWProject >> exeName [
 
 	^ exeName ifNil: [
 		exeName := String streamContents: [ :s |
+			
 			s << 'exe/';
 				<< (self programs isNotEmpty ifTrue: [|head|
 					head := self programs at: 1.
@@ -170,13 +171,12 @@ SWProject >> run [
 		^ res
 	].
 
-	type = #rb ifTrue: [|res|
-		res := self client post: 'ruby' with: {
-			'action' -> 'execute'.
-			'arguments' -> (self sources collect: [ :each | each filename ])
-		}.
-		(res at: #success) ifFalse: [ Error signal ].
-		^ res
+	type = #rb ifTrue: [
+		^ self client exec: 'ruby' with: {
+			'-I'.
+			'./pharo-local/iceberg/garlic-flavor/FortranByPharo/script'.
+			self sources first filename
+		}
 	].
 
 	self error: 'NO IMPLEMENTATION'

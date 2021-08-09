@@ -4,7 +4,7 @@ Class {
 	#instVars : [
 		'client'
 	],
-	#category : #'SWFortranByPharo-Base-Test'
+	#category : #'SWFortranByPharo-Base-Tests'
 }
 
 { #category : #'as yet unclassified' }

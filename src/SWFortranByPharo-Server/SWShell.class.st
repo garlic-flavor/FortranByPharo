@@ -12,8 +12,7 @@ SWShell class >> execute: command [
 	"I execute 'exe' with 'list', then return its result."
 	^ self executeProcess: (OSSUnixSubprocess new
 			shellCommand: command;
-			redirectStdout;
-			redirectStderr)
+			yourself)
 
 ]
 
@@ -23,8 +22,7 @@ SWShell class >> execute: exe arguments: list [
 	^ self executeProcess: (OSSUnixSubprocess new
 			command: exe;
 			arguments: list;
-			redirectStdout;
-			redirectStderr)
+			yourself)
 
 ]
 
@@ -32,7 +30,10 @@ SWShell class >> execute: exe arguments: list [
 SWShell class >> executeProcess: process [
 	"I execute 'exe' with 'list', then return its result."
 	[
-		process runAndWait.
+		process
+			redirectStdout;
+			redirectStderr;
+			runAndWait.
 		process isSuccess
 				ifTrue: [ ^ process stdoutStream upToEnd ]
 				ifFalse: [ self error: process stderrStream upToEnd ].
