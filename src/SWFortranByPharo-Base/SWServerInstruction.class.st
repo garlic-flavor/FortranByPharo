@@ -78,7 +78,7 @@ SWServerInstruction >> code [
 
 { #category : #accessing }
 SWServerInstruction >> code: anObject [
-	self assert: (self class validCodes anySatisfy: [:c | c = anObject]).
+	self assert: [self class validCodes anySatisfy: [:c | c = anObject]].
 	^ code := anObject
 ]
 

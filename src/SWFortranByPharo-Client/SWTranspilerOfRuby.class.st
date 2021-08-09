@@ -16,11 +16,27 @@ SWTranspilerOfRuby >> and_for: receiver with: arguments [
 		transpile: (arguments at: 1) body.
 ]
 
+{ #category : #'as yet unclassified' }
+SWTranspilerOfRuby >> anySatisfy_for: receiver with: arguments [
+	self
+		transpile: receiver;
+		put: '.find(';
+		transpile: (arguments at: 1);
+		put: ')'
+]
+
 { #category : #converting }
 SWTranspilerOfRuby >> asStringfor: receiver with: arguments [
 	self
 		transpile: receiver;
 		put: '.to_s'
+]
+
+{ #category : #converting }
+SWTranspilerOfRuby >> asSymbolfor: receiver with: arguments [
+	self
+		transpile: receiver;
+		put: '.intern'
 ]
 
 { #category : #accessing }
@@ -31,7 +47,8 @@ SWTranspilerOfRuby >> at_ifAbsent_for: receiver with: arguments [
 		put: '[';
 		transpile: (arguments at: 1);
 		put: '] || ';
-		transpile: (arguments at: 2);
+		preventNewline;
+		transpile: (arguments at: 2) body;
 		put: ')'
 
 ]
@@ -60,6 +77,13 @@ SWTranspilerOfRuby >> copyReplaceAll_with_for: receiver with: arguments [
 		transpile: (arguments at: 2);
 		popMessageNest;
 		decMessageNest
+]
+
+{ #category : #'as yet unclassified' }
+SWTranspilerOfRuby >> copyfor:receiver with: arguments [
+	self
+		transpile: receiver;
+		put: '.clone'
 ]
 
 { #category : #'as yet unclassified' }

@@ -15,6 +15,12 @@ SWServerInstructionTest class >> classes [
 	^ { SWServerInstruction. self}
 ]
 
+{ #category : #navigating }
+SWServerInstructionTest class >> go [
+	<sampleInstance>
+	^ super go
+]
+
 { #category : #tests }
 SWServerInstructionTest class >> transpile [
 	<sampleInstance>
