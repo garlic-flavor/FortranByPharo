@@ -26,6 +26,9 @@ SWTranspiler class >> transpiledNameOf: selector [
 	selector = '=' ifTrue: [
 		^ 'opEqual_'
 	].
+	selector = '~=' ifTrue: [
+		^ 'opNotEqual_'
+	].
 	selector = ',' ifTrue: [
 		^ 'opCamma_'
 	].

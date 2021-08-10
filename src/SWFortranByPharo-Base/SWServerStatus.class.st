@@ -16,8 +16,8 @@ Class {
 }
 
 { #category : #accessing }
-SWServerStatus class >> declarationFilter: symbolName [
-	^ super declarationFilter: symbolName
+SWServerStatus class >> classMethodDeclarationFilter: aSymbol [
+	^ self declarationFilterBase: aSymbol
 ]
 
 { #category : #constants }
@@ -40,6 +40,16 @@ SWServerStatus class >> fromSton: stonReader [
 	
 ]
 
+{ #category : #accessing }
+SWServerStatus class >> instanceVariableDeclarationFilter: symbolName [
+	^ true
+]
+
+{ #category : #accessing }
+SWServerStatus class >> methodDeclarationFilter: symbolName [
+	^ self declarationFilterBase: symbolName
+]
+
 { #category : #constants }
 SWServerStatus class >> okCode [
 	^ #ok
@@ -47,7 +57,7 @@ SWServerStatus class >> okCode [
 
 { #category : #'as yet unclassified' }
 SWServerStatus class >> rb_requirements [
-	^ #()
+	^ #('require ''STON.rb''')
 ]
 
 { #category : #constants }

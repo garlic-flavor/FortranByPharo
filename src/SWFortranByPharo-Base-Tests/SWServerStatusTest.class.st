@@ -10,6 +10,28 @@ Class {
 	#category : #'SWFortranByPharo-Base-Tests'
 }
 
+{ #category : #accessing }
+SWServerStatusTest class >> classes [
+	^ { SWServerStatus. self }
+]
+
+{ #category : #navigating }
+SWServerStatusTest class >> go [
+	<sampleInstance>
+	^ super go
+]
+
+{ #category : #tests }
+SWServerStatusTest class >> transpile [
+	<sampleInstance>
+	^ super transpile
+]
+
+{ #category : #accessing }
+SWServerStatusTest class >> type [
+	^ #rb
+]
+
 { #category : #running }
 SWServerStatusTest >> setUp [
 	super setUp.
@@ -21,9 +43,8 @@ SWServerStatusTest >> setUp [
 SWServerStatusTest >> testStonOn [
 	|status2|
 	status ok;
-		description: 'the requested method is not implemented.';
+		message: 'the requested method is not implemented.';
 		toComplete: 100.
-	status clear.
 	status2 := SWServerStatus fromSton: (STON reader on: (status toString) readStream).
-	status2 inspect
+	self assert: [status2 isGood]
 ]

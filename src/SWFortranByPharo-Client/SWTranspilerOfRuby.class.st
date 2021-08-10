@@ -198,6 +198,14 @@ SWTranspilerOfRuby >> opCamma_for: receiver with: arguments [
 		transpile: (arguments at: 1)
 ]
 
+{ #category : #'as yet unclassified' }
+SWTranspilerOfRuby >> opNotEqual_for: receiver with: arguments [
+	self
+		transpile: receiver;
+		put: ' != ';
+		transpile: (arguments at: 1)
+]
+
 { #category : #'code generation' }
 SWTranspilerOfRuby >> putArgumentsOf: selector with: arguments [
 	(0 < arguments size) ifTrue: [

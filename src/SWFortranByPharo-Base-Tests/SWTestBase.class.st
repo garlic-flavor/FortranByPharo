@@ -39,6 +39,12 @@ SWTestBase class >> methodDeclarationFilter: aSymbol [
 SWTestBase class >> setUp [
 	SWServer start.
 	client := SWClientView new.
+	self setUpForTranspile
+
+]
+
+{ #category : #initialization }
+SWTestBase class >> setUpForTranspile [
 	source := SWSource new
 		type: self type;
 		classes: {SWStd. SWTestBase}, self classes;
@@ -59,8 +65,8 @@ SWTestBase class >> tearDown [
 
 { #category : #tests }
 SWTestBase class >> transpile [
-	self setUp.
-	^ [ source contents ] ensure: [ self tearDown ]
+	self setUpForTranspile.
+	^ source contents
 
 ]
 
