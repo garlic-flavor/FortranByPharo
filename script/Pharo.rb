@@ -2,6 +2,7 @@
 # Adapter classes for Pharo
 
 require 'stringio'
+require 'os'
 
 #
 class Transcript
@@ -87,5 +88,18 @@ class TestCase
       raise "Assertion failed: #{left} != #{right}."
     end
   end
+
+  def assert_(aBlock)
+    if !(aBlock.call)
+      raise "Assertion failed: #{aBlock.to_s} failed."
+    end
+  end
 end
 
+#
+class OSPlatform
+  def self.current
+    return self
+  end
+
+end
