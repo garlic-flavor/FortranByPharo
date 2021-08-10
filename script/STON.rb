@@ -6,7 +6,7 @@ class STONWriter
     @stream = stream
   end
   def nextPut_(anObject)
-    anObject.stonOn_(stream)
+    anObject.stonOn_(@stream)
   end
 end
 
@@ -20,44 +20,57 @@ class STONReader
   end
 end
 
-class STONDict
-  @entity = nil
-  def initialize(dict = nil)
-    if dict.nil?
-      @entity = {}
-    else
-      @entity = dict
-    end
-  end
+class STONDict < Hash
   def [](key)
-    return entity[key]
+    return super(key.to_s)
   end
   def []=(key, value)
-    entity[key] = value
+    super(key.to_s, value)
     return value
   end
   def stonOn_(stream)
-    stream.write(JSON[entity])
+    stream.write(JSON[self])
   end
   def self.fromSton_(reader)
-    ret = JSON[reader.contents]
-
+    ret = self.new
+    (JSON[reader.contents]).each { |k, v|
+      ret[k] = v
+    }
+    return ret
   end
+
 end
 
 class STON
-  def writer()
+  def self.writer()
     return STONWriter.new
   end
-  def reader()
+  def self.reader()
     return STONReader.new
   end
 
-  def mapClass()
+  def self.mapClass()
     return STONDict
   end
 end
 
 if $DEBUG
-  puts 'hello, debugger'
+  require 'stringio'
+
+  str=<<JSON
+{ "hello": "world", "goodbye": "heaven", "c": 3 }
+JSON
+
+  reader = STON.reader
+  reader.on_(StringIO.new(str))
+  ston = STON.mapClass.fromSton_(reader)
+  puts ston
+
+  stream = StringIO.new("")
+  writer = STON.writer
+  writer.on_(stream)
+  writer.nextPut_(ston)
+  stream.rewind
+  puts stream.read
+
 end

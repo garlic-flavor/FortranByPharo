@@ -1,6 +1,8 @@
 
 # Adapter classes for Pharo
 
+require 'stringio'
+
 #
 class Transcript
   def << (msg)
@@ -40,7 +42,8 @@ class Association
 end
 
 #
-class SWString
+class SWString < String
+
   def self.cr()
     return "\r"
   end
@@ -51,13 +54,24 @@ class SWString
     return "\r\n"
   end
 
+  def readStream()
+    return SWStringIO.new(self)
+  end
+
   def self.streamContents_(aBlock)
     s = StringIO.new
     aBlock.call(s)
     s.rewind
-    return s.read
+    return self.new(s.read)
   end
 
+end
+
+class SWStringIO < StringIO
+  def contents()
+    self.rewind
+    return self.read
+  end
 end
 
 #
