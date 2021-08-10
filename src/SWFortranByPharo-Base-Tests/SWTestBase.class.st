@@ -9,33 +9,18 @@ Class {
 	#category : #'SWFortranByPharo-Base-Tests'
 }
 
-{ #category : #accessing }
-SWTestBase class >> classMethodDeclarationFilter: aSymbol [
-	^ false
-]
-
-{ #category : #accessing }
+{ #category : #'code generation' }
 SWTestBase class >> classes [
 	^ self subclassResponsibility 
 ]
 
-{ #category : #navigating }
+{ #category : #'code generation' }
 SWTestBase class >> go [
 	self setUp.
 	^ [ project go ] ensure: [ self tearDown ]
 ]
 
-{ #category : #accessing }
-SWTestBase class >> instanceVariableDeclarationFilter: aSymbol [
-	^ true
-]
-
-{ #category : #accessing }
-SWTestBase class >> methodDeclarationFilter: aSymbol [
-	^ true
-]
-
-{ #category : #initialization }
+{ #category : #'code generation' }
 SWTestBase class >> setUp [
 	SWServer start.
 	client := SWClientView new.
@@ -43,7 +28,7 @@ SWTestBase class >> setUp [
 
 ]
 
-{ #category : #initialization }
+{ #category : #'code generation' }
 SWTestBase class >> setUpForTranspile [
 	source := SWSource new
 		type: self type;
@@ -55,7 +40,7 @@ SWTestBase class >> setUpForTranspile [
 		yourself.
 ]
 
-{ #category : #running }
+{ #category : #'code generation' }
 SWTestBase class >> tearDown [
 	client socket close.
 	SWServer stop.
@@ -63,14 +48,14 @@ SWTestBase class >> tearDown [
 
 ]
 
-{ #category : #tests }
+{ #category : #'code generation' }
 SWTestBase class >> transpile [
 	self setUpForTranspile.
 	^ source contents
 
 ]
 
-{ #category : #accessing }
+{ #category : #'code generation' }
 SWTestBase class >> type [
 	^ self subclassResponsibility 
 ]

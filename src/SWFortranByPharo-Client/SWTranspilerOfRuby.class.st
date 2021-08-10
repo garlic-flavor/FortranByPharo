@@ -249,15 +249,12 @@ SWTranspilerOfRuby >> putClassDefinition: aClass [
 	].
 	self putLine.
 	self incIndent.
-	aClass instanceVariables select: [:var | aClass instanceVariableDeclarationFilter: var name ] thenDo: [ :var |
-		self put: '@'; put: var name; putLine: ' = nil'
-	].
 
-	aClass class methods select: [:aMethod | aClass classMethodDeclarationFilter: aMethod selector] thenDo: [ :aMethod |
+	aClass class methods select: [:aMethod | aMethod protocol ~= #'code generation'] thenDo: [ :aMethod |
 		self putMethod: aMethod ofClass: aClass class
 	].
 
-	aClass methods select: [ :aMethod | aClass methodDeclarationFilter: aMethod selector] thenDo: [ :aMethod |
+	aClass methods select: [ :aMethod | aMethod protocol ~= #'code generation'] thenDo: [ :aMethod |
 		self putMethod: aMethod ofClass: aClass
 	].
 
@@ -380,13 +377,21 @@ SWTranspilerOfRuby >> putTestRunner [
 ]
 
 { #category : #'as yet unclassified' }
-SWTranspilerOfRuby >> putVariable: aName [
-	(#(String) anySatisfy: [ :each| each = aName ]) ifTrue: [
+SWTranspilerOfRuby >> putVariable: aVariableNode [
+	(#(String) anySatisfy: [ :each| each = aVariableNode name ]) ifTrue: [
 		^ self
 			put: 'SW';
-			put: aName
+			put: aVariableNode name
 	].
-	^ super putVariable: aName
+
+	(aVariableNode isInstanceVariable) ifTrue: [
+		^ self put: '@'; put: aVariableNode name
+	].
+
+	(aVariableNode isClassVariable) ifTrue: [
+		^ self put: '@@'; put: aVariableNode name
+	].
+	^ super putVariable: aVariableNode
 ]
 
 { #category : #'as yet unclassified' }

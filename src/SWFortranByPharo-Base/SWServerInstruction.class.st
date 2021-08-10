@@ -13,11 +13,6 @@ Class {
 	#category : #'SWFortranByPharo-Base'
 }
 
-{ #category : #accessing }
-SWServerInstruction class >> classMethodDeclarationFilter: symbolName [
-	^ self declarationFilterBase: symbolName
-]
-
 { #category : #constants }
 SWServerInstruction class >> executeCode [
 	^ #execute
@@ -40,16 +35,6 @@ SWServerInstruction class >> headCode [
 	^ #head
 ]
 
-{ #category : #accessing }
-SWServerInstruction class >> instanceVariableDeclarationFilter: symbolName [
-	^ self declarationFilterBase: symbolName
-]
-
-{ #category : #accessing }
-SWServerInstruction class >> methodDeclarationFilter: symbolName [
-	^ self declarationFilterBase: symbolName
-]
-
 { #category : #constants }
 SWServerInstruction class >> postCode [
 	^ #post
@@ -60,7 +45,7 @@ SWServerInstruction class >> putCode [
 	^ #put
 ]
 
-{ #category : #'as yet unclassified' }
+{ #category : #'code generation' }
 SWServerInstruction class >> rb_requirements [
 	^ #('require ''STON.rb''')
 ]

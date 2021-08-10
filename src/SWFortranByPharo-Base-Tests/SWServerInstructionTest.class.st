@@ -10,24 +10,24 @@ Class {
 	#category : #'SWFortranByPharo-Base-Tests'
 }
 
-{ #category : #accessing }
+{ #category : #'code generation' }
 SWServerInstructionTest class >> classes [
 	^ { SWServerInstruction. self}
 ]
 
-{ #category : #navigating }
+{ #category : #'code generation' }
 SWServerInstructionTest class >> go [
 	<sampleInstance>
 	^ super go
 ]
 
-{ #category : #tests }
+{ #category : #'code generation' }
 SWServerInstructionTest class >> transpile [
 	<sampleInstance>
 	^ super transpile
 ]
 
-{ #category : #accessing }
+{ #category : #'code generation' }
 SWServerInstructionTest class >> type [
 	^ #rb
 ]

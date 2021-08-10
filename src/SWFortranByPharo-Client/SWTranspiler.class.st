@@ -333,8 +333,8 @@ SWTranspiler >> putTestRunner [
 ]
 
 { #category : #'as yet unclassified' }
-SWTranspiler >> putVariable: aName [
-	self put: aName
+SWTranspiler >> putVariable: aVariableNode [
+	self put: aVariableNode name
 ]
 
 { #category : #accessing }

@@ -15,11 +15,6 @@ Class {
 	#category : #'SWFortranByPharo-Base'
 }
 
-{ #category : #accessing }
-SWServerStatus class >> classMethodDeclarationFilter: aSymbol [
-	^ self declarationFilterBase: aSymbol
-]
-
 { #category : #constants }
 SWServerStatus class >> failedCode [
 	^ #failed
@@ -40,22 +35,12 @@ SWServerStatus class >> fromSton: stonReader [
 	
 ]
 
-{ #category : #accessing }
-SWServerStatus class >> instanceVariableDeclarationFilter: symbolName [
-	^ true
-]
-
-{ #category : #accessing }
-SWServerStatus class >> methodDeclarationFilter: symbolName [
-	^ self declarationFilterBase: symbolName
-]
-
 { #category : #constants }
 SWServerStatus class >> okCode [
 	^ #ok
 ]
 
-{ #category : #'as yet unclassified' }
+{ #category : #'code generation' }
 SWServerStatus class >> rb_requirements [
 	^ #('require ''STON.rb''')
 ]
@@ -72,7 +57,7 @@ SWServerStatus >> code [
 
 { #category : #accessing }
 SWServerStatus >> code: aCode [
-	self assert: (self class validCodes anySatisfy: [:c | c = aCode ]).
+	self assert: [self class validCodes anySatisfy: [:c | c = aCode ]].
 	^ code := aCode
 ]
 

@@ -10,48 +10,21 @@ Class {
 	#category : #'SWFortranByPharo-Base'
 }
 
-{ #category : #accessing }
-SWStd class >> classMethodDeclarationFilter: aSymbol [
-	^ false
-]
-
-{ #category : #accessing }
-SWStd class >> declarationFilterBase: symbolName [
-	(#('methodDeclarationFilter:' 'classMethodDeclarationFilter:' 'instanceVariableDeclarationFilter:') anySatisfy: [ :each |
-		each = symbolName
-	]) ifTrue: [ ^ false ].
-	(symbolName beginsWith: 'rb_') ifTrue: [ ^ false ].
-	^ true
-]
-
-{ #category : #accessing }
-SWStd class >> instanceVariableDeclarationFilter: aSymbol [
-	^ true
-]
-
-{ #category : #accessing }
-SWStd class >> methodDeclarationFilter: symbolName [
-	^ (self declarationFilterBase: symbolName) and: [
-		#(error: stdout stdout: assert: print:) anySatisfy: [ :each | each = symbolName ]
-	]
-
-]
-
-{ #category : #'as yet unclassified' }
+{ #category : #'code generation' }
 SWStd class >> rb_error_using: transpiler [
 	transpiler putCode: '\
 		raise msg
 	\'
 ]
 
-{ #category : #'as yet unclassified' }
+{ #category : #'code generation' }
 SWStd class >> rb_print_using: transpiler [
 	transpiler putCode: '\
 		puts msg
 	\'
 ]
 
-{ #category : #'as yet unclassified' }
+{ #category : #'code generation' }
 SWStd class >> rb_requirements [
 	^ { 'require ''Pharo.rb''' }
 ]
@@ -83,14 +56,4 @@ SWStd >> stdout [
 SWStd >> stdout: anObject [
 
 	stdout := anObject
-]
-
-{ #category : #'as yet unclassified' }
-SWStd >> switch: needle when: anAssociationArray [
-	^ anAssociationArray detect: [ :acc |
-		(acc key class inheritsFrom: Boolean) ifTrue: [ acc key ]
-			ifFalse: [ acc key = needle ]
-	]
-		ifFound: [ :acc | acc value value ]
-
 ]
