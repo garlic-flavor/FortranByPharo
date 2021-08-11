@@ -32,7 +32,7 @@ SWTestBase class >> setUp [
 SWTestBase class >> setUpForTranspile [
 	source := SWSource new
 		type: self type;
-		classes: {SWStd. SWTestBase}, self classes;
+		classes: {SWStd. SWTestBase}, self classes, {self};
 		yourself.
 	project := SWProject new
 		sources: { source };

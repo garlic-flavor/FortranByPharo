@@ -56,3 +56,9 @@ SWShell class >> ls: path [
 
 
 ]
+
+{ #category : #'code generation' }
+SWShell class >> rb_execute_using: transpiler [
+	transpiler put: 'exec command'
+
+]

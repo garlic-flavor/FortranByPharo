@@ -12,7 +12,7 @@ Class {
 
 { #category : #'code generation' }
 SWStdTest class >> classes [ 
-	^ { self }
+	^ { }
 ]
 
 { #category : #'code generation' }

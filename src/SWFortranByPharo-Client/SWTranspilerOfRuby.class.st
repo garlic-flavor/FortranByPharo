@@ -147,11 +147,11 @@ SWTranspilerOfRuby >> ifNotNil_ifNil_for: receiver with: arguments [
 SWTranspilerOfRuby >> ifTrue_for: receiver with: arguments [
 	self
 		pushMessageNest;
-		put: 'if(';
+		put: 'if ';
 		transpile: receiver;
-		putLine: '){';
+		putLine;
 		transpile: (arguments at: 1) body;
-		put: '}'
+		put: 'end'
 
 ]
 
@@ -250,8 +250,16 @@ SWTranspilerOfRuby >> putClassDefinition: aClass [
 	self putLine.
 	self incIndent.
 
+	aClass classVariables do: [ :aVal |
+		self put: '@@'; put: aVal name; putLine: ' = nil'
+	].
+
+	aClass instanceVariables do: [ :aVal |
+		self put: '@'; put: aVal name; putLine: ' = nil'
+	].
+
 	aClass class methods select: [:aMethod | aMethod protocol ~= #'code generation'] thenDo: [ :aMethod |
-		self putMethod: aMethod ofClass: aClass class
+		self putMethod: aMethod ofClass: aClass
 	].
 
 	aClass methods select: [ :aMethod | aMethod protocol ~= #'code generation'] thenDo: [ :aMethod |
@@ -338,6 +346,7 @@ SWTranspilerOfRuby >> putMethod: aMethod ofClass: aClass [
 		self incIndent.
 		aClass perform: sel with: self.
 		self decIndent.
+		self putLine.
 	] ifFalse: [
 		aMethod transpileUsing: self.
 	].

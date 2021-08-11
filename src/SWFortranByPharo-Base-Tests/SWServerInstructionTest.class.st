@@ -12,7 +12,7 @@ Class {
 
 { #category : #'code generation' }
 SWServerInstructionTest class >> classes [
-	^ { SWServerInstruction. self}
+	^ { SWServerInstruction }
 ]
 
 { #category : #'code generation' }
