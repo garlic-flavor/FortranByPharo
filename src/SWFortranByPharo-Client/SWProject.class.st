@@ -175,6 +175,8 @@ SWProject >> run [
 		^ self client exec: 'ruby' with: {
 			'-I'.
 			'./pharo-local/iceberg/garlic-flavor/FortranByPharo/script'.
+			'-I'.
+			'./'.
 			self sources first filename
 		}
 	].

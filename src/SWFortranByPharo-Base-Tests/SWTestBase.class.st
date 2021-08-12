@@ -10,30 +10,22 @@ Class {
 }
 
 { #category : #'code generation' }
-SWTestBase class >> classes [
-	^ self subclassResponsibility 
-]
-
-{ #category : #'code generation' }
 SWTestBase class >> go [
 	self setUp.
-	^ [ project go ] ensure: [ self tearDown ]
+	^ [ project run ] ensure: [ self tearDown ]
 ]
 
 { #category : #'code generation' }
 SWTestBase class >> setUp [
+	self setUpForTranspile.
 	SWServer start.
 	client := SWClientView new.
-	self setUpForTranspile
 
 ]
 
 { #category : #'code generation' }
 SWTestBase class >> setUpForTranspile [
-	source := SWSource new
-		type: self type;
-		classes: {SWStd. SWTestBase}, self classes, {self};
-		yourself.
+	source := (SWSourceManager default: self type) sourceOf: self.
 	project := SWProject new
 		sources: { source };
 		client: client;

@@ -302,16 +302,7 @@ SWTranspiler >> putParameters: anArray [
 
 { #category : #'code generation' }
 SWTranspiler >> putRequirements [
-	|sel|
-	sel := (self type, '_requirements') asSymbol.
-	self source classes do: [:aClass |
-		(aClass class methods anySatisfy: [ :each | each selector = sel ]) ifTrue: [
-			(aClass perform: sel) do: [ :header |
-				self putCode: header
-			]
-		]
-	]
-
+	^ self subclassResponsibility 
 ]
 
 { #category : #'code generation' }

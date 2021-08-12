@@ -11,14 +11,18 @@ Class {
 }
 
 { #category : #'code generation' }
-SWStdTest class >> classes [ 
-	^ { }
-]
-
-{ #category : #'code generation' }
 SWStdTest class >> go [
 	<sampleInstance>
 	^ super go
+]
+
+{ #category : #'code generation' }
+SWStdTest class >> rb_requirements [
+	^ {
+		'Pharo.rb'.
+		(SWSourceManager ruby sourceOf: SWTestBase) filename.
+		(SWSourceManager ruby sourceOf: SWStd) filename
+	}
 ]
 
 { #category : #'code generation' }

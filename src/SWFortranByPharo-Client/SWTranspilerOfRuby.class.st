@@ -360,6 +360,20 @@ SWTranspilerOfRuby >> putNil [
 	self put: 'nil'
 ]
 
+{ #category : #'code generation' }
+SWTranspilerOfRuby >> putRequirements [
+	|sel|
+	sel := #'rb_requirements'.
+	self source classes do: [:aClass |
+		(aClass respondsTo: sel) ifTrue: [
+			(aClass perform: sel) do: [ :req |
+				self put: 'require '''; put: req asString; putLine: ''''
+			]
+		]
+	]
+
+]
+
 { #category : #'as yet unclassified' }
 SWTranspilerOfRuby >> putSymbol: aSymbol [
 	self

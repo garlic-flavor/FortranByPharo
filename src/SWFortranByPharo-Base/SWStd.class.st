@@ -26,7 +26,7 @@ SWStd class >> rb_print_using: transpiler [
 
 { #category : #'code generation' }
 SWStd class >> rb_requirements [
-	^ { 'require ''Pharo.rb''' }
+	^ { 'Pharo.rb' }
 ]
 
 { #category : #asserting }
