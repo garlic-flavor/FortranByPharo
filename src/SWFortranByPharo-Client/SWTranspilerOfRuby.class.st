@@ -366,8 +366,17 @@ SWTranspilerOfRuby >> putRequirements [
 	sel := #'rb_requirements'.
 	self source classes do: [:aClass |
 		(aClass respondsTo: sel) ifTrue: [
-			(aClass perform: sel) do: [ :req |
-				self put: 'require '''; put: req asString; putLine: ''''
+			(aClass perform: sel) do: [ :dependence |
+				dependence isString ifTrue: [
+					self put: 'require '''; put: dependence; putLine: ''''
+				] ifFalse: [|dep|
+					dep := SWSource new
+						classes: { dependence };
+						type: self type;
+						putTo: self client;
+						yourself.
+					self put: 'require '''; put: dep filename; putLine: ''''
+				]
 			]
 		]
 	]

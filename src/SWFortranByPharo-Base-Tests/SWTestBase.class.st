@@ -3,7 +3,6 @@ Class {
 	#superclass : #TestCase,
 	#classVars : [
 		'client',
-		'project',
 		'source'
 	],
 	#category : #'SWFortranByPharo-Base-Tests'
@@ -12,38 +11,44 @@ Class {
 { #category : #'code generation' }
 SWTestBase class >> go [
 	self setUp.
-	^ [ project run ] ensure: [ self tearDown ]
+ 	^ [
+		SWProject new
+			sources: { source };
+			client: client;
+			run
+	] ensure: [ self tearDown ]
+
+]
+
+{ #category : #'code generation' }
+SWTestBase class >> rb_requirements [
+	^ { 
+		'Pharo.rb'
+	}
 ]
 
 { #category : #'code generation' }
 SWTestBase class >> setUp [
-	self setUpForTranspile.
 	SWServer start.
-	client := SWClientView new.
-
-]
-
-{ #category : #'code generation' }
-SWTestBase class >> setUpForTranspile [
-	source := (SWSourceManager default: self type) sourceOf: self.
-	project := SWProject new
-		sources: { source };
-		client: client;
+	client := SWClient new.
+	source := SWSource new
+		classes: { self };
+		type: self type;
+		putTo: client;
 		yourself.
 ]
 
 { #category : #'code generation' }
 SWTestBase class >> tearDown [
-	client socket close.
+	client close.
 	SWServer stop.
-		
 
 ]
 
 { #category : #'code generation' }
 SWTestBase class >> transpile [
-	self setUpForTranspile.
-	^ source contents
+	self setUp.
+	^ [ source contents ] ensure: [ self tearDown ]
 
 ]
 

@@ -20,8 +20,8 @@ SWStdTest class >> go [
 SWStdTest class >> rb_requirements [
 	^ {
 		'Pharo.rb'.
-		(SWSourceManager ruby sourceOf: SWTestBase) filename.
-		(SWSourceManager ruby sourceOf: SWStd) filename
+		SWTestBase.
+		SWStd.
 	}
 ]
 

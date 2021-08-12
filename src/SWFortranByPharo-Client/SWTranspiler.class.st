@@ -13,7 +13,8 @@ Class {
 		'isNewline',
 		'newline',
 		'preventNewline',
-		'messageNest'
+		'messageNest',
+		'client'
 	],
 	#classVars : [
 		'selectorName'
@@ -41,6 +42,24 @@ SWTranspiler >> assign: key with: value [
 	self transpile: key; put: ' = '.
 	value transpileUsing: self.
 
+]
+
+{ #category : #accessing }
+SWTranspiler >> client [
+
+	^ client ifNil: [ client := SWClient new ]
+]
+
+{ #category : #accessing }
+SWTranspiler >> client: anObject [
+
+	client := anObject
+]
+
+{ #category : #'initialize-release' }
+SWTranspiler >> close [
+	client ifNotNil: [ client close. ].
+	client := nil
 ]
 
 { #category : #accessing }

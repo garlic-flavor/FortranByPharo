@@ -42,7 +42,10 @@ SWServerStatus class >> okCode [
 
 { #category : #'code generation' }
 SWServerStatus class >> rb_requirements [
-	^ #('require ''STON.rb''')
+	^ {
+		SWStd.
+		'STON.rb'
+	}
 ]
 
 { #category : #constants }

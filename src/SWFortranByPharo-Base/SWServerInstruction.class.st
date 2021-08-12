@@ -47,7 +47,10 @@ SWServerInstruction class >> putCode [
 
 { #category : #'code generation' }
 SWServerInstruction class >> rb_requirements [
-	^ #('require ''STON.rb''')
+	^ {
+		SWStd.
+		'STON.rb'
+	}
 ]
 
 { #category : #constants }

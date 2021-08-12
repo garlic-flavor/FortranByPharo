@@ -11,14 +11,17 @@ Class {
 }
 
 { #category : #'code generation' }
-SWServerInstructionTest class >> classes [
-	^ { SWServerInstruction }
-]
-
-{ #category : #'code generation' }
 SWServerInstructionTest class >> go [
 	<sampleInstance>
 	^ super go
+]
+
+{ #category : #'code generation' }
+SWServerInstructionTest class >> rb_requirements [
+	^ {
+		SWServerInstruction.
+		SWTestBase.
+	}
 ]
 
 { #category : #'code generation' }

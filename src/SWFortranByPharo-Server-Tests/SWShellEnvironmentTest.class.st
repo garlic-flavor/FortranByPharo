@@ -7,15 +7,18 @@ Class {
 	#category : #'SWFortranByPharo-Server-Tests-Shell'
 }
 
-{ #category : #accessing }
-SWShellEnvironmentTest class >> classes [
-	^ { SWShellEnvironment }
-]
-
 { #category : #'code generation' }
 SWShellEnvironmentTest class >> go [
 	<sampleInstance>
 	^ super go
+]
+
+{ #category : #accessing }
+SWShellEnvironmentTest class >> rb_requirements [
+	^ {
+		SWTestBase.
+		SWShellEnvironment
+	}
 ]
 
 { #category : #'code generation' }

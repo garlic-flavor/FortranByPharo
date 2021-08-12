@@ -131,8 +131,21 @@ SWSource >> moduleName: anObject [
 ]
 
 { #category : #accessing }
+SWSource >> put [
+	|client|
+	client := SWClient new.
+	^ [ self putTo: client ] ensure: [ client close ]
+]
+
+{ #category : #accessing }
 SWSource >> putTo: client [
-	^ client put: self filename contents: self contents.
+	|res|
+	res := client head: self filename.
+	^ (res entity at: #exists ifAbsent: [false]) ifTrue: [
+		res
+	] ifFalse: [
+		client put: self filename contents: self contents.
+	]
 
 ]
 
