@@ -36,6 +36,7 @@ SWTestBase class >> setUp [
 		type: self type;
 		putTo: client;
 		yourself.
+
 ]
 
 { #category : #'code generation' }

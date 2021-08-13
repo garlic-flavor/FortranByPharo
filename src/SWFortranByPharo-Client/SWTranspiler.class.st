@@ -214,7 +214,7 @@ SWTranspiler >> putCode: code with: anAssociationArray [
 			c isSeparator and: [ counter <= leftPad ]
 		].
 		preventsNewline ifTrue: [
-			trimmed ifNotEmpty: [self put: trimmed ]
+			trimmed ifNotEmpty: [self put: trimmed ].
 		] ifFalse: [
 			self putLine: trimmed.
 		]

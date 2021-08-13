@@ -65,6 +65,11 @@ SWTranspilerOfRuby >> at_put_for: receiver with: arguments [
 		popMessageNest
 ]
 
+{ #category : #'as yet unclassified' }
+SWTranspilerOfRuby >> beginsWith_for: receiver with: arguments [
+	self putMessage: receiver call: 'start_with?' with: arguments
+]
+
 { #category : #copying }
 SWTranspilerOfRuby >> copyReplaceAll_with_for: receiver with: arguments [
 	self
@@ -84,6 +89,19 @@ SWTranspilerOfRuby >> copyfor:receiver with: arguments [
 	self
 		transpile: receiver;
 		put: '.clone'
+]
+
+{ #category : #'as yet unclassified' }
+SWTranspilerOfRuby >> ensure_for: receiver with: arguments [
+	self
+		pushMessageNest;
+		putLine: 'begin';
+		transpile: receiver body;
+		putLine: 'ensure';
+		transpile: (arguments at: 1) body;
+		put: 'end';
+		popMessageNest
+
 ]
 
 { #category : #'as yet unclassified' }
@@ -121,9 +139,9 @@ SWTranspilerOfRuby >> ifNil_for: receiver with: arguments [
 SWTranspilerOfRuby >> ifNotNil_for: receiver with: arguments [
 	self
 		pushMessageNest;
-		put: '(';
+		put: '(not (';
 		transpile: receiver;
-		putLine: ').present? ? (';
+		putLine: ').nil?) ? (';
 		transpile: (arguments at: 1) body;
 		put: '): nil';
 		popMessageNest

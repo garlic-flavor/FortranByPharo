@@ -7,15 +7,18 @@ Class {
 	#category : #'SWFortranByPharo-Server-Tests-Shell'
 }
 
-{ #category : #accessing }
-SWShellTest class >> classes [
-	^ { SWShell }
-]
-
 { #category : #'code generation' }
 SWShellTest class >> go [
 	<sampleInstance>
 	^ super go
+]
+
+{ #category : #accessing }
+SWShellTest class >> rb_requirements [
+	^ {
+		SWTestBase.
+		SWShell
+	}
 ]
 
 { #category : #'code generation' }
@@ -35,5 +38,5 @@ SWShellTest >> testExecution [
 	"This test assumes that GFortran is on the path."
 	|res|
 	res := SWShell execute: 'gfortran' arguments: #('--version').
-	self assert: (res beginsWith: 'GNU Fortran').
+	self assert: [res beginsWith: 'GNU Fortran'].
 ]
