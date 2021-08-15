@@ -3,14 +3,15 @@
 
 require 'stringio'
 require 'os'
+require 'pathname'
 
 #
 class Transcript
-  def << (msg)
+  def self.<< (msg)
     print msg
   end
   
-  def cr()
+  def self.cr()
     puts ''
   end
 end
@@ -68,10 +69,28 @@ class SWString < String
 
 end
 
+#
 class SWStringIO < StringIO
   def contents()
     self.rewind
     return self.read
+  end
+  def upToEnd()
+    return self.read
+  end
+end
+
+#
+class SWStringIOWrapper
+  def initialize(entity)
+    @entity = entity
+  end
+  def contents()
+    @entity.rewind
+    return @entity.read
+  end
+  def upToEnd()
+    return @entity.read
   end
 end
 
@@ -102,4 +121,51 @@ class OSPlatform
     return self
   end
 
+  def self.isMacOS
+    return OS.mac?
+  end
+
+end
+
+#
+class SWDictionary < Hash
+end
+
+#
+class FileTime < Time
+  def prettyPrint()
+    return self.to_s
+  end
+end
+
+#
+class FileLocator < Pathname
+  def self.imageDirectory()
+    return FileLocator.new(Dir.getwd)
+  end
+
+  def isDirectory()
+    return self.directory?
+  end
+
+  def fullName()
+    return self.to_s
+  end
+
+  def basename()
+    return super.to_s
+  end
+  
+  def creationTime()
+    return FileTime.at(self.ctime.to_i)
+  end
+
+  def relativeTo_(relBase)
+    return FileLocator.new(self.relative_path_from(relBase))
+  end
+end
+
+
+# for Dummy
+class SWGFortranCompilerAdapter
 end
