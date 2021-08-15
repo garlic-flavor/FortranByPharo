@@ -141,7 +141,7 @@ SWServer >> get: target with: msg on: socket [
 	target = FileLocator imageDirectory ifTrue: [
 		^ socket sendResponseOk: {
 			'entity' -> (#('src' 'obj' 'exe') collect: [ :each |
-				SWShell ls: FileLocator imageDirectory / each
+				SWShell lsr: FileLocator imageDirectory / each
 			])
 		}
 	].

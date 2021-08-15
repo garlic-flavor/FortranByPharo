@@ -20,9 +20,9 @@ SWTranspilerOfRuby >> and_for: receiver with: arguments [
 SWTranspilerOfRuby >> anySatisfy_for: receiver with: arguments [
 	self
 		transpile: receiver;
-		put: '.find(';
-		transpile: (arguments at: 1);
-		put: ')'
+		put: '.find';
+		putBlockWithoutProc: (arguments at: 1)
+
 ]
 
 { #category : #converting }
@@ -37,6 +37,16 @@ SWTranspilerOfRuby >> asSymbolfor: receiver with: arguments [
 	self
 		transpile: receiver;
 		put: '.intern'
+]
+
+{ #category : #accessing }
+SWTranspilerOfRuby >> at_for: receiver with: arguments [
+	self
+		transpile: receiver;
+		put: '[';
+		transpile: (arguments at: 1);
+		put: ']'
+
 ]
 
 { #category : #accessing }
@@ -68,6 +78,15 @@ SWTranspilerOfRuby >> at_put_for: receiver with: arguments [
 { #category : #'as yet unclassified' }
 SWTranspilerOfRuby >> beginsWith_for: receiver with: arguments [
 	self putMessage: receiver call: 'start_with?' with: arguments
+]
+
+{ #category : #'as yet unclassified' }
+SWTranspilerOfRuby >> collect_for: receiver with: arguments [
+	self
+		transpile: receiver;
+		put: '.collect';
+		putBlockWithoutProc: (arguments at: 1)
+
 ]
 
 { #category : #copying }
@@ -237,8 +256,16 @@ SWTranspilerOfRuby >> putArgumentsOf: selector with: arguments [
 { #category : #'as yet unclassified' }
 SWTranspilerOfRuby >> putBlock: aBlock [
 	self 
+		put: 'proc';
+		putBlockWithoutProc: aBlock
+
+]
+
+{ #category : #'as yet unclassified' }
+SWTranspilerOfRuby >> putBlockWithoutProc: aBlock [
+	self 
 		pushMessageNest;
-		put: 'proc {'.
+		put: '{'.
 	(0 < aBlock arguments size) ifTrue: [
 		self put: '|'.
 		aBlock argumentNames do: [ :each |
@@ -428,7 +455,7 @@ SWTranspilerOfRuby >> putTestRunner [
 
 { #category : #'as yet unclassified' }
 SWTranspilerOfRuby >> putVariable: aVariableNode [
-	(#(String) anySatisfy: [ :each| each = aVariableNode name ]) ifTrue: [
+	(#(String Dictionary) anySatisfy: [ :each| each = aVariableNode name ]) ifTrue: [
 		^ self
 			put: 'SW';
 			put: aVariableNode name

@@ -49,16 +49,32 @@ SWShell class >> ls: path [
 		at: #path put: (path relativeTo: FileLocator imageDirectory) fullName;
 		at: #creationTime put: path creationTime prettyPrint;
 		at: #children put: (path isDirectory
-			ifTrue: [(path children collect: [ :each | self ls: each ])]
+			ifTrue: [path children collect: [ :each |
+				Dictionary new
+					at: #isDirectory put: each isDirectory;
+					at: #basename put: each basename;
+					at: #path put: (each relativeTo: FileLocator imageDirectory) fullName;
+					at: #creationTime put: each creationTime prettyPrint;
+					at: #children put: nil;
+					yourself
+			]] ifFalse: [ nil ]);
+		yourself.
+
+]
+
+{ #category : #execution }
+SWShell class >> lsr: path [
+	^ Dictionary new
+		at: #isDirectory put: path isDirectory;
+		at: #basename put: path basename;
+		at: #path put: (path relativeTo: FileLocator imageDirectory) fullName;
+		at: #creationTime put: path creationTime prettyPrint;
+		at: #children put: (path isDirectory
+			ifTrue: [(path children collect: [ :each | self lsr: each ])]
 			ifFalse: [ { } ]
 		);
 		yourself.
 
-
-]
-
-{ #category : #'code generation' }
-SWShell class >> rb_ls_using: transpiler [
 
 ]
 

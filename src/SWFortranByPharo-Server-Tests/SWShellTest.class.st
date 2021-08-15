@@ -40,3 +40,13 @@ SWShellTest >> testExecution [
 	res := SWShell execute: 'gfortran' arguments: #('--version').
 	self assert: [res beginsWith: 'GNU Fortran'].
 ]
+
+{ #category : #tests }
+SWShellTest >> testLs [
+	|dict|
+	dict := SWShell ls: FileLocator imageDirectory.
+	self assert: [(dict at: #children) anySatisfy: [ :each |
+		(each at: #basename) = 'pharo-local'
+	]]
+
+]
