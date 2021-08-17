@@ -55,6 +55,12 @@ SWServerTest >> testExecWithOn [
 ]
 
 { #category : #test }
+SWServerTest >> testFilePathOf [
+
+	self assert: (SWServer filePathOf: '/ruby') basename equals: 'ruby'
+]
+
+{ #category : #test }
 SWServerTest >> testGetWithOn [
 	|res|
 	client sendRequestGet: '/'.

@@ -7,6 +7,9 @@ Class {
 	#instVars : [
 		'env'
 	],
+	#classVars : [
+		'default'
+	],
 	#category : #'SWFortranByPharo-Server-Server'
 }
 
@@ -28,6 +31,23 @@ SWServer class >> declarationFilter: symbolName [
 	^ #(main: startOn: dispatch:on:) anySatisfy: [ :each | each = symbolName ]
 ]
 
+{ #category : #accessing }
+SWServer class >> default [
+	^ default
+]
+
+{ #category : #'as yet unclassified' }
+SWServer class >> filePathOf: aName [
+	|path|
+	path := FileLocator imageDirectory / (aName asString trimLeft: [ :c | c = $/ ]).
+	(FileLocator imageDirectory contains: path) ifFalse: [
+		path := FileLocator imageDirectory
+	].
+	path parent ensureCreateDirectory.
+	^ path
+
+]
+
 { #category : #testing }
 SWServer class >> isRunning [
 	<sampleInstance>
@@ -44,7 +64,7 @@ SWServer class >> rb_requirements [
 { #category : #accessing }
 SWServer class >> start [
 	<script>
-	self new
+	default := self new
 		startOn: 50000.
 ]
 
@@ -116,24 +136,12 @@ SWServer >> env: anObject [
 
 { #category : #executing }
 SWServer >> exec: session [
-	|result|
-	
-	result := SWShell execute: session instruction target fullName arguments: session instruction options.
+	|exe result|
+	exe := (session instruction target asPath relativeTo: FileLocator imageDirectory) fullName.
+	result := SWShell execute: exe arguments: session instruction options.
 	session status ok.
 	session status message: result
 
-]
-
-{ #category : #'as yet unclassified' }
-SWServer >> filePathOf: name [
-	|relname result|
-	relname := name asString trimLeft: [ :c | c = $/ ].
-	result := relname ifNotEmpty: [ FileLocator imageDirectory / relname ] ifEmpty: [ FileLocator imageDirectory ].
-	(FileLocator imageDirectory contains: result) ifFalse: [
-		result := FileLocator imageDirectory
-	].
-	result parent ensureCreateDirectory.
-	^ result
 ]
 
 { #category : #responses }
@@ -259,7 +267,7 @@ SWServer >> startOn: portNumber [
 							self dispatch: message on: session
 						] ifNil: [
 							session instruction: (SWServerInstruction fromSton: (STON reader on: message readStream)).
-							session instruction target: (self filePathOf: session instruction target).
+							session instruction target: (self class filePathOf: session instruction target).
 							session status: (SWServerStatus new
 								toComplete: session instruction length;
 								yourself).

@@ -215,6 +215,14 @@ SWTranspilerOfRuby >> initialize [
 ]
 
 { #category : #'as yet unclassified' }
+SWTranspilerOfRuby >> join_for: receiver with: arguments [
+	self
+		pushMessageNest;
+		putMessage: (arguments at: 1) call: 'join' with: { receiver };
+		popMessageNest
+]
+
+{ #category : #'as yet unclassified' }
 SWTranspilerOfRuby >> on_do_for: receiver with: arguments [
 	self
 		pushMessageNest;
