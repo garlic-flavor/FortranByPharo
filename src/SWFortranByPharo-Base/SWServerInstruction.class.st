@@ -31,6 +31,11 @@ SWServerInstruction class >> fromSton: stonReader [
 ]
 
 { #category : #constants }
+SWServerInstruction class >> getCode [
+	^ #get
+]
+
+{ #category : #constants }
 SWServerInstruction class >> headCode [
 	^ #head
 ]
@@ -55,7 +60,7 @@ SWServerInstruction class >> rb_requirements [
 
 { #category : #constants }
 SWServerInstruction class >> validCodes [
-	^ { self headCode. self postCode. self putCode. self executeCode }
+	^ { self headCode. self getCode. self postCode. self putCode. self executeCode }
 ]
 
 { #category : #accessing }
@@ -75,6 +80,11 @@ SWServerInstruction >> execute [
 	^ code := self class executeCode
 ]
 
+{ #category : #resolving }
+SWServerInstruction >> get [
+	^ code := self class getCode
+]
+
 { #category : #accessing }
 SWServerInstruction >> head [
 	^ code := self class headCode.
@@ -83,6 +93,11 @@ SWServerInstruction >> head [
 { #category : #testing }
 SWServerInstruction >> isExecute [
 	^ self code = self class executeCode
+]
+
+{ #category : #testing }
+SWServerInstruction >> isGet [
+	^ self code = self class getCode
 ]
 
 { #category : #testing }

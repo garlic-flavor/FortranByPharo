@@ -24,15 +24,10 @@ Class {
 
 { #category : #'code generation - protected' }
 SWTranspiler class >> transpiledNameOf: selector [
-	selector = '=' ifTrue: [
-		^ 'opEqual_'
-	].
-	selector = '~=' ifTrue: [
-		^ 'opNotEqual_'
-	].
-	selector = ',' ifTrue: [
-		^ 'opCamma_'
-	].
+	selector = '=' ifTrue: [ ^ 'opEqual_' ].
+	selector = '~=' ifTrue: [ ^ 'opNotEqual_' ].
+	selector = ',' ifTrue: [ ^ 'opCamma_' ].
+	selector = '->' ifTrue: [ ^ 'opArrow_' ].
 	^ selector asString copyReplaceAll: ':' with: '_'
 	
 ]
@@ -182,6 +177,14 @@ SWTranspiler >> putArrayLiteral: anArray [
 { #category : #'as yet unclassified' }
 SWTranspiler >> putBlock: aBlock [
 	^ self subclassResponsibility 
+]
+
+{ #category : #'as yet unclassified' }
+SWTranspiler >> putCharacter: c [
+	self
+		put: '"';
+		put: c asString;
+		put: '"'.
 ]
 
 { #category : #'code generation' }

@@ -3,7 +3,7 @@ A SWServerTest is a test class for testing the behavior of SWServer
 "
 Class {
 	#name : #SWServerTest,
-	#superclass : #TestCase,
+	#superclass : #SWTestBase,
 	#instVars : [
 		'client'
 	],
@@ -63,10 +63,11 @@ SWServerTest >> testFilePathOf [
 { #category : #test }
 SWServerTest >> testGetWithOn [
 	|res|
-	client sendRequestGet: '/'.
-	res := client readResponse.
-	self assert: (res at: #code) equals: 200.
-	self assert: (res at: #'Content-Type') equals: 'application/json'.
+	res := client ensureSendMessage: (SWServerInstruction new
+		get;
+		target: '/';
+		toString).
+	res inspect.
 
 ]
 

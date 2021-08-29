@@ -31,6 +31,16 @@ SWClient >> exec: target with: options [
 
 ]
 
+{ #category : #public }
+SWClient >> get: target [
+	|inst|
+	inst := SWServerInstruction new
+		get;
+		target: target;
+		yourself.
+	^ self socket ensureSendMessage: inst toString
+]
+
 { #category : #requesting }
 SWClient >> head: target [
 	|req|

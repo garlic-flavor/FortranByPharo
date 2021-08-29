@@ -13,7 +13,7 @@ Class {
 	#category : #'SWFortranByPharo-Server-Server'
 }
 
-{ #category : #'as yet unclassified' }
+{ #category : #'code generation' }
 SWServer class >> _rb_startOn_using: transpiler [
 	transpiler putCode: '\
 		EM.run{
@@ -26,17 +26,12 @@ SWServer class >> _rb_startOn_using: transpiler [
 
 ]
 
-{ #category : #'code generation - protected' }
-SWServer class >> declarationFilter: symbolName [
-	^ #(main: startOn: dispatch:on:) anySatisfy: [ :each | each = symbolName ]
-]
-
 { #category : #accessing }
 SWServer class >> default [
 	^ default
 ]
 
-{ #category : #'as yet unclassified' }
+{ #category : #converting }
 SWServer class >> filePathOf: aName [
 	|path|
 	path := FileLocator imageDirectory / (aName asString trimLeft: [ :c | c = $/ ]).
@@ -54,10 +49,11 @@ SWServer class >> isRunning [
 	^ ZnServer default isRunning ifTrue: [ 'The server is running' ] ifFalse: [ 'The server is not running' ]
 ]
 
-{ #category : #'as yet unclassified' }
+{ #category : #'code generation' }
 SWServer class >> rb_requirements [
 	^ {
-		'require ''ZnServer.rb'''.
+		SWStd.
+		'ZnServer.rb'.
 	}
 ]
 
@@ -74,7 +70,7 @@ SWServer class >> stop [
 	ZnServer default stop.
 ]
 
-{ #category : #tests }
+{ #category : #'code generation' }
 SWServer class >> transpile [
 	<script>
 	|instance contents|
@@ -89,6 +85,12 @@ SWServer class >> transpile [
 
 { #category : #dispatching }
 SWServer >> dispatch: message on: session [
+	session instruction isHead ifTrue: [
+		^ self headOn: session
+	].
+	session instruction isGet ifTrue: [
+		^ self get: session
+	].
 	session instruction isPut ifTrue: [
 		message ifNotNil: [
 			^ self put: message on: session
@@ -96,10 +98,6 @@ SWServer >> dispatch: message on: session [
 			^ self
 		]
 	].
-	session instruction isHead ifTrue: [
-		^ self headOn: session
-	].
-
 	session instruction isExecute ifTrue: [
 		^ self exec: session
 	].
@@ -137,10 +135,23 @@ SWServer >> env: anObject [
 { #category : #executing }
 SWServer >> exec: session [
 	|exe result|
-	exe := (session instruction target asPath relativeTo: FileLocator imageDirectory) fullName.
+	exe := session instruction target fullName.
 	result := SWShell execute: exe arguments: session instruction options.
 	session status ok.
 	session status message: result
+
+]
+
+{ #category : #responses }
+SWServer >> get: session [
+	session instruction target = FileLocator imageDirectory ifTrue: [
+		#(src obj exe) do: [ :each |
+			session status entity
+				at: each put: (SWShell lsr: FileLocator imageDirectory / each)
+		].
+		^ session status ok.
+	].
+	^ session status failed; message: 'not implemented yet'
 
 ]
 
@@ -184,10 +195,10 @@ SWServer >> main: argv [
 { #category : #executing }
 SWServer >> make: target by: method with: msg on: socket [
 	|type|
-	type := (msg at: #type ifAbsent: '').
+	type := (msg at: #type ifAbsent: ['']).
 	(type beginsWith: 'f') ifTrue: [
 		|sources result|
-		sources := (msg at: #sources ifAbsent: {}) collect: [ :each | self filePathOf: each ].
+		sources := (msg at: #sources ifAbsent: [{}]) collect: [ :each | self class filePathOf: each ].
 		result := self env fortranCompilerAdapterClass perform: method with: sources with: target.
 		socket sendResponseOk: {
 			'status' -> 'succeeded'.
@@ -223,7 +234,7 @@ SWServer >> parseRequest: received [
 { #category : #responses }
 SWServer >> post: target with: msg on: socket [
 	|action|
-	action := msg at: #action ifAbsent: ''.
+	action := msg at: #action ifAbsent: [''].
 	action = #compile ifTrue: [
 		^ self make: target by: #compileFortranFiles:to: with: msg on: socket.
 	].

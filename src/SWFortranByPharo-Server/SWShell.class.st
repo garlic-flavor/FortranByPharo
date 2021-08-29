@@ -11,8 +11,7 @@ Class {
 SWShell class >> execute: command [
 	"I execute 'exe' with 'list', then return its result."
 	^ self executeProcess: (OSSUnixSubprocess new
-			command: 'zsh';
-			arguments: { '-rc'. command };
+			shellCommand: command;
 			yourself)
 
 ]
@@ -21,8 +20,8 @@ SWShell class >> execute: command [
 SWShell class >> execute: exe arguments: list [
 	"I execute 'exe' with 'list', then return its result."
 	^ self executeProcess: (OSSUnixSubprocess new
-			command: 'zsh';
-			arguments: { '-rc'. (' ' join: ({exe},  list)) };
+			command: exe;
+			arguments: list;
 			yourself)
 
 ]

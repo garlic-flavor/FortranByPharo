@@ -12,12 +12,7 @@ Class {
 	#category : #'SWFortranByPharo-Server-Server'
 }
 
-{ #category : #accessing }
-SWSession class >> declarationFilter: aSymbol [
-	^ super declarationFilter: aSymbol
-]
-
-{ #category : #'as yet unclassified' }
+{ #category : #'code generation' }
 SWSession class >> rb_requirements [
 	^ #()
 ]

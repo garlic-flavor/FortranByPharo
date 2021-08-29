@@ -25,7 +25,7 @@ SWServerStatus class >> fromSton: stonReader [
 	|dict|
 	dict := STON mapClass fromSton: stonReader.
 	^ self new
-		code: (dict at: #code ifAbsent: [ self failedCode ]);
+		code: (dict at: #code ifAbsent: [ self failedCode ]) asSymbol;
 		message: (dict at: #message ifAbsent: [ '' ]);
 		entity: (dict at: #entity ifAbsent: [ nil ]);
 		toComplete: (dict at: #toComplete ifAbsent: [ 0 ]);

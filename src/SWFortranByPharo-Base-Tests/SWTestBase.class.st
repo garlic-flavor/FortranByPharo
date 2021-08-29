@@ -3,7 +3,8 @@ Class {
 	#superclass : #TestCase,
 	#classVars : [
 		'client',
-		'source'
+		'source',
+		'usingPharoServer'
 	],
 	#category : #'SWFortranByPharo-Base-Tests'
 }
@@ -29,7 +30,9 @@ SWTestBase class >> rb_requirements [
 
 { #category : #'code generation' }
 SWTestBase class >> setUp [
-	SWServer start.
+	self usingPharoServer ifTrue: [
+		SWServer start.
+	].
 	client := SWClient new.
 	source := SWSource new
 		classes: { self };
@@ -42,7 +45,9 @@ SWTestBase class >> setUp [
 { #category : #'code generation' }
 SWTestBase class >> tearDown [
 	client close.
-	SWServer stop.
+	SWServer isRunning ifTrue: [
+		SWServer stop.
+	]
 
 ]
 
@@ -56,6 +61,21 @@ SWTestBase class >> transpile [
 { #category : #'code generation' }
 SWTestBase class >> type [
 	^ self subclassResponsibility 
+]
+
+{ #category : #'as yet unclassified' }
+SWTestBase class >> useNativeServer [
+	usingPharoServer = false
+]
+
+{ #category : #'as yet unclassified' }
+SWTestBase class >> usePharoServer [
+	usingPharoServer := true
+]
+
+{ #category : #'as yet unclassified' }
+SWTestBase class >> usingPharoServer [
+	^ usingPharoServer ifNil: [ usingPharoServer = false ]
 ]
 
 { #category : #asserting }

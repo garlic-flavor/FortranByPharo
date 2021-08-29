@@ -170,13 +170,13 @@ SWTranspilerOfRuby >> ifNotNil_for: receiver with: arguments [
 SWTranspilerOfRuby >> ifNotNil_ifNil_for: receiver with: arguments [
 	self
 		pushMessageNest;
-		put: 'if(';
+		put: 'if ';
 		transpile: receiver;
-		putLine: '.present?){';
+		putLine: '.present?';
 		transpile: (arguments at: 1) body;
-		putLine: '} else {';
+		putLine: 'else';
 		transpile: (arguments at: 2) body;
-		put: '}';
+		put: 'end';
 		popMessageNest
 ]
 
@@ -233,6 +233,18 @@ SWTranspilerOfRuby >> on_do_for: receiver with: arguments [
 		transpile: (arguments at: 2) body;
 		put: 'end';
 		popMessageNest
+]
+
+{ #category : #'as yet unclassified' }
+SWTranspilerOfRuby >> opArrow_for: receiver with: arguments [
+	self
+		pushMessageNest;
+		put: 'Association.new(';
+		transpile: receiver;
+		put: ', ';
+		transpile: (arguments at: 1);
+		put: ')';
+		popMessageNest.
 ]
 
 { #category : #'as yet unclassified' }
@@ -440,7 +452,7 @@ SWTranspilerOfRuby >> putRequirements [
 SWTranspilerOfRuby >> putSymbol: aSymbol [
 	self
 		put: ':';
-		put: aSymbol
+		put: (self class transpiledNameOf: aSymbol)
 ]
 
 { #category : #'as yet unclassified' }
