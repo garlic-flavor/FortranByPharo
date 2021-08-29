@@ -45,14 +45,16 @@ SWServer class >> filePathOf: aName [
 
 { #category : #testing }
 SWServer class >> isRunning [
-	<sampleInstance>
-	^ ZnServer default isRunning ifTrue: [ 'The server is running' ] ifFalse: [ 'The server is not running' ]
+	^ ZnServer default isRunning
 ]
 
 { #category : #'code generation' }
 SWServer class >> rb_requirements [
 	^ {
 		SWStd.
+		SWSession.
+		SWServerInstruction.
+		SWServerStatus.
 		'ZnServer.rb'.
 	}
 ]
@@ -68,6 +70,12 @@ SWServer class >> start [
 SWServer class >> stop [
 	<script>
 	ZnServer default stop.
+]
+
+{ #category : #testing }
+SWServer class >> testRunning [
+	<sampleInstance>
+	^ ZnServer default isRunning ifTrue: [ 'The server is running' ] ifFalse: [ 'The server is not running' ]
 ]
 
 { #category : #'code generation' }
@@ -145,12 +153,17 @@ SWServer >> exec: session [
 { #category : #responses }
 SWServer >> get: session [
 	session instruction target = FileLocator imageDirectory ifTrue: [
-		#(src obj exe) do: [ :each |
+		#(script src obj exe) do: [ :each |
 			session status entity
 				at: each put: (SWShell lsr: FileLocator imageDirectory / each)
 		].
 		^ session status ok.
 	].
+	(session instruction target isFile) ifTrue: [
+		session status message: session instruction target readStream contents.
+		^ session status ok.
+	].
+
 	^ session status failed; message: 'not implemented yet'
 
 ]
@@ -173,7 +186,7 @@ SWServer >> get: target with: msg on: socket [
 SWServer >> headOn: session [
 	session instruction target exists ifTrue: [
 		(#(exists accessTime changeTime creationTime) do: [ :each |
-			session status entity at: each asString put: (session instruction target perform: each)
+			session status entity at: each asString put: (session instruction target perform: each) asString
 		]).
 	] ifFalse: [
 		session status entity at: 'exists' put: false
@@ -293,8 +306,8 @@ SWServer >> startOn: portNumber [
 				].
 				webSocket sendMessage: session status toString
 			]
-		] on: ConnectionClosed do: [
-			Transcript << 'Ignoring connection close, done.'; cr.
+		] on: ConnectionClosed do: [:err|
+			Transcript << err asString; cr.
 		]
 	]). 
 ]

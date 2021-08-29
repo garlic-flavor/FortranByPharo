@@ -4,9 +4,6 @@ A SWServerTest is a test class for testing the behavior of SWServer
 Class {
 	#name : #SWServerTest,
 	#superclass : #SWTestBase,
-	#instVars : [
-		'client'
-	],
 	#category : #'SWFortranByPharo-Server-Tests-Server'
 }
 

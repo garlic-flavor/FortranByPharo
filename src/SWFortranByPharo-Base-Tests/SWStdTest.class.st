@@ -11,29 +11,13 @@ Class {
 }
 
 { #category : #'code generation' }
-SWStdTest class >> go [
-	<sampleInstance>
-	^ super go
-]
-
-{ #category : #'code generation' }
 SWStdTest class >> rb_requirements [
 	^ {
 		'Pharo.rb'.
 		SWTestBase.
 		SWStd.
+		SWSession.
 	}
-]
-
-{ #category : #'code generation' }
-SWStdTest class >> transpile [
-	<sampleInstance>
-	^ super transpile
-]
-
-{ #category : #'code generation' }
-SWStdTest class >> type [
-	^ #rb
 ]
 
 { #category : #running }
@@ -51,4 +35,20 @@ SWStdTest >> testAssert [
 { #category : #test }
 SWStdTest >> testError [
 	self mustFail: [ std error: 'This is an error!' ]
+]
+
+{ #category : #'code generation - tests' }
+SWStdTest >> testThis [
+	self
+		type: #rb;
+		go.
+
+]
+
+{ #category : #'code generation - tests' }
+SWStdTest >> testThisOnExternalServer [
+	self
+		type: #rb;
+		goOnExternalServer.
+
 ]

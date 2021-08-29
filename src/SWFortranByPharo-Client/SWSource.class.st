@@ -141,7 +141,7 @@ SWSource >> put [
 SWSource >> putTo: client [
 	|res|
 	res := client head: self filename.
-	^ (res entity at: #exists ifAbsent: [false]) ifTrue: [
+	^ ((res entity at: #exists ifAbsent: ['false']) = #true) ifTrue: [
 		res
 	] ifFalse: [
 		client put: self filename contents: self contents.

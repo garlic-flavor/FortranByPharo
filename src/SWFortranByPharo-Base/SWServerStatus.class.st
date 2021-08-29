@@ -182,7 +182,7 @@ SWServerStatus >> toComplete: anObject [
 { #category : #printing }
 SWServerStatus >> toString [
 	^ String streamContents: [ :s |
-		STON writer
+		STON jsonWriter
 			on: s;
 			nextPut: self
 	]

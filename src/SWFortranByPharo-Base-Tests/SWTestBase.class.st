@@ -1,25 +1,15 @@
 Class {
 	#name : #SWTestBase,
 	#superclass : #TestCase,
-	#classVars : [
-		'client',
+	#instVars : [
 		'source',
+		'client',
+		'type',
+		'runAsClient',
 		'usingPharoServer'
 	],
 	#category : #'SWFortranByPharo-Base-Tests'
 }
-
-{ #category : #'code generation' }
-SWTestBase class >> go [
-	self setUp.
- 	^ [
-		SWProject new
-			sources: { source };
-			client: client;
-			run
-	] ensure: [ self tearDown ]
-
-]
 
 { #category : #'code generation' }
 SWTestBase class >> rb_requirements [
@@ -28,54 +18,9 @@ SWTestBase class >> rb_requirements [
 	}
 ]
 
-{ #category : #'code generation' }
-SWTestBase class >> setUp [
-	self usingPharoServer ifTrue: [
-		SWServer start.
-	].
-	client := SWClient new.
-	source := SWSource new
-		classes: { self };
-		type: self type;
-		putTo: client;
-		yourself.
-
-]
-
-{ #category : #'code generation' }
-SWTestBase class >> tearDown [
-	client close.
-	SWServer isRunning ifTrue: [
-		SWServer stop.
-	]
-
-]
-
-{ #category : #'code generation' }
-SWTestBase class >> transpile [
-	self setUp.
-	^ [ source contents ] ensure: [ self tearDown ]
-
-]
-
-{ #category : #'code generation' }
-SWTestBase class >> type [
-	^ self subclassResponsibility 
-]
-
 { #category : #'as yet unclassified' }
-SWTestBase class >> useNativeServer [
-	usingPharoServer = false
-]
+SWTestBase class >> rb_tearDownUsing: transpiler [
 
-{ #category : #'as yet unclassified' }
-SWTestBase class >> usePharoServer [
-	usingPharoServer := true
-]
-
-{ #category : #'as yet unclassified' }
-SWTestBase class >> usingPharoServer [
-	^ usingPharoServer ifNil: [ usingPharoServer = false ]
 ]
 
 { #category : #asserting }
@@ -83,7 +28,45 @@ SWTestBase >> assertLines: left equal: right [
 	self assert: (left copyReplaceAll: String lf with: String cr) equals: right
 ]
 
-{ #category : #'as yet unclassified' }
+{ #category : #'code generation - accessing' }
+SWTestBase >> client [
+
+	^ client ifNil: [
+		self runAsClient ifTrue: [
+			client := SWClient new
+		] ifFalse: [
+			nil
+		]
+	]
+]
+
+{ #category : #'code generation - accessing' }
+SWTestBase >> client: anObject [
+
+	client := anObject
+]
+
+{ #category : #'code generation - running' }
+SWTestBase >> go [
+	self runAsClient: true.
+	self usingPharoServer: true.
+	^ SWProject new
+		sources: { self source };
+		client: self client;
+		run
+]
+
+{ #category : #'code generation - running' }
+SWTestBase >> goOnExternalServer [
+	self runAsClient: true.
+	self usingPharoServer: false.
+	^ SWProject new
+		sources: { self source };
+		client: self client;
+		run
+]
+
+{ #category : #asserting }
 SWTestBase >> mustFail: aBlock [
 	[ 
 		aBlock value
@@ -93,8 +76,80 @@ SWTestBase >> mustFail: aBlock [
 	self error: aBlock asString, ' must fail.'
 ]
 
+{ #category : #'code generation - accessing' }
+SWTestBase >> runAsClient [
+
+	^ runAsClient ifNil: [ runAsClient := false ]
+]
+
+{ #category : #'code generation - accessing' }
+SWTestBase >> runAsClient: anObject [
+
+	runAsClient := anObject
+]
+
 { #category : #running }
 SWTestBase >> setUp [
 	super setUp.
+	
+]
 
+{ #category : #'code generation - accessing' }
+SWTestBase >> source [
+
+	^ source ifNil: [
+		self runAsClient ifTrue: [
+			source := SWSource new
+				classes: { self class };
+				type: self type;
+				putTo: self client;
+				yourself
+		] ifFalse: [
+			nil
+		]
+	]
+]
+
+{ #category : #'code generation - accessing' }
+SWTestBase >> source: anObject [
+
+	source := anObject
+]
+
+{ #category : #running }
+SWTestBase >> tearDown [
+	self client ifNotNil: [
+		self client close
+	].
+	SWServer isRunning ifTrue: [ SWServer stop ].
+	super tearDown
+]
+
+{ #category : #'code generation - accessing' }
+SWTestBase >> type [
+	self assert: type isNotNil.
+	^ type
+]
+
+{ #category : #'code generation - accessing' }
+SWTestBase >> type: anObject [
+
+	type := anObject
+]
+
+{ #category : #'code generation - accessing' }
+SWTestBase >> usingPharoServer [
+
+	^ usingPharoServer ifNil: [ usingPharoServer := false ]
+]
+
+{ #category : #'code generation - accessing' }
+SWTestBase >> usingPharoServer: anObject [
+
+	usingPharoServer := anObject.
+	usingPharoServer ifTrue: [ 
+		SWServer isRunning ifFalse: [ SWServer start ]
+	] ifFalse: [ 
+		SWServer isRunning ifTrue: [ SWServer stop ]
+	]
 ]

@@ -14,7 +14,9 @@ Class {
 
 { #category : #'code generation' }
 SWSession class >> rb_requirements [
-	^ #()
+	^ {
+		SWServerStatus.
+	}
 ]
 
 { #category : #accessing }

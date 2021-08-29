@@ -174,7 +174,7 @@ SWServerInstruction >> target: anObject [
 { #category : #printing }
 SWServerInstruction >> toString [
 	^ String streamContents: [ :s |
-		STON writer
+		STON jsonWriter
 			on: s;
 			nextPut: self
 	]

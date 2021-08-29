@@ -291,7 +291,7 @@ SWTranspiler >> putMessage: receiver call: selector with: arguments [
 	self flag: #toImplement.
 	self incMessageNest.
 	[ |transpiledName|
-		transpiledName := ((self class transpiledNameOf: selector), 'for:with:') asSymbol.
+		transpiledName := ((self class transpiledNameOf: selector), 'For:With:') asSymbol.
 		(self respondsTo: transpiledName) ifTrue: [
 			^ self perform: transpiledName with: receiver with: arguments
 		].
@@ -407,7 +407,7 @@ SWTranspiler >> transpiledNameOf: aMethod [
 			<< self type;
 			<< '_';
 			<< (self class transpiledNameOf: aMethod selector);
-			<< 'using:'
+			<< '_using:'
 	]) asSymbol.
 
 ]
