@@ -42,7 +42,7 @@ class STONDict < Hash
 end
 
 class STON
-  def self.writer()
+  def self.jsonWriter()
     return STONWriter.new
   end
   def self.reader()
@@ -58,7 +58,7 @@ if $DEBUG
   require 'stringio'
 
   str=<<JSON
-{ "hello": "world", "goodbye": "heaven", "c": 3 }
+  {"target":"script/SWTestBase/754bb877139a540199a0edd553d0f4aef5b81e2dff5e432873c0eb03326b9eb9.rb","length":0,"options":{},"code":"head"}
 JSON
 
   reader = STON.reader

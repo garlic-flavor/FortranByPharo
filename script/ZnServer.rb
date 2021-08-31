@@ -1,4 +1,5 @@
 require 'em-websocket'
+require 'Pharo.rb'
 
 class ZnServer
   @@_port_number = nil
@@ -10,12 +11,12 @@ class ZnServer
 
   def self.startDefaultOn_(portNumber)
     @@_port_number = portNumber
-    self.start() if @@_message_handler.present?
+    self.start() if !@@_message_handler.nil?
   end
 
   def self.delegate_(handler)
     @@_message_handler = handler
-    self.start() if @@_port_number.present?
+    self.start() if !@@_port_number.nil?
   end
 
   def self.start()
@@ -32,8 +33,8 @@ end
 
 
 class ZnWebSocketDelegate
-  def self.handler_(proc)
-    return proc
+  def self.handler_(procedure)
+    return procedure
   end
 end
 
@@ -44,12 +45,16 @@ class WebSocketAdapter
     @_ws = ws
   end
 
-  def runWith_(proc)
+  def runWith_(procedure)
     @_ws.onmessage {|msg|
-      proc.call(msg, self)
+      procedure.call(SWString.new(msg), self)
     }
   end
 
-  def sendResponseInternalServerError_(anAssoc)
+  def sendMessage_(msg)
+    @_ws.send msg
+  end
+
+  def sendResponseInternalServerError(anAssoc)
   end
 end

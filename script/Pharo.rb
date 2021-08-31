@@ -5,6 +5,7 @@ require 'stringio'
 require 'os'
 require 'pathname'
 
+#------------------------------------------------------------------------------
 #
 class Transcript
   def self.<< (msg)
@@ -13,36 +14,28 @@ class Transcript
   
   def self.cr()
     puts ''
+    STDOUT.flush
   end
 end
 
+#------------------------------------------------------------------------------
+#
+def output(msg)
+  puts msg
+  STDOUT.flush
+end
+
+#------------------------------------------------------------------------------
 #
 class Association
-  @key = nil
-  @value = nil
+  attr_accessor :key, :value
 
   def initialize(k, v)
-    @key = k
-    @value = v
-  end
-
-  def key()
-    return @key
-  end
-
-  def value()
-    return @value
-  end
-
-  def key(k)
-    @key = k
-  end
-
-  def value(v)
-    @value = v
+    @key, @value = k, v
   end
 end
 
+#------------------------------------------------------------------------------
 #
 class SWString < String
 
@@ -67,8 +60,18 @@ class SWString < String
     return self.new(s.read)
   end
 
+  def trimLeft_(procedure)
+    for i in 0...self.length do
+      if not procedure.call(self[i]) then
+        return self[i, self.length - i]
+      end
+    end
+    return ''
+  end
+
 end
 
+#------------------------------------------------------------------------------
 #
 class SWStringIO < StringIO
   def contents()
@@ -80,6 +83,7 @@ class SWStringIO < StringIO
   end
 end
 
+#------------------------------------------------------------------------------
 #
 class SWStringIOWrapper
   def initialize(entity)
@@ -94,6 +98,7 @@ class SWStringIOWrapper
   end
 end
 
+#------------------------------------------------------------------------------
 #
 class TestCase
   def setUp()
@@ -127,10 +132,12 @@ class OSPlatform
 
 end
 
+#------------------------------------------------------------------------------
 #
 class SWDictionary < Hash
 end
 
+#------------------------------------------------------------------------------
 #
 class FileTime < Time
   def prettyPrint()
@@ -138,6 +145,7 @@ class FileTime < Time
   end
 end
 
+#------------------------------------------------------------------------------
 #
 class FileLocator < Pathname
   def self.imageDirectory()
@@ -146,6 +154,10 @@ class FileLocator < Pathname
 
   def isDirectory()
     return self.directory?
+  end
+
+  def exists()
+    return self.exist?
   end
 
   def fullName()
@@ -160,9 +172,67 @@ class FileLocator < Pathname
     return FileTime.at(self.ctime.to_i)
   end
 
+  def accessTime()
+    return FileTime.at(self.atime.to_i)
+  end
+
+  def changeTime()
+    return FileTime.at(self.mtime.to_i)
+  end
+
   def relativeTo_(relBase)
     return FileLocator.new(self.relative_path_from(relBase))
   end
+
+  def contains_(path)
+    base = self.to_s
+    child = path.to_s
+    return (base.size < child.size and base == child[0, base.size])
+  end
+
+  def parent()
+    return FileLocator.new(super)
+  end
+
+  def ensureCreateDirectory()
+    if (self.exist? and self.directory?) then
+      return
+    end
+    self.mkdir
+  end
+
+  def /(path)
+    return FileLocator.new(super)
+  end
+
+  def writeStreamDo_(procedure)
+    io = SWFile.new(self.to_s)
+    begin
+      procedure.call(io)
+    ensure
+      io.close
+    end
+  end
+
+end
+
+
+#------------------------------------------------------------------------------
+#
+class SWFile < File
+  def initialize(path)
+    super(path, "a")
+  end
+
+  def truncate()
+    super(self.pos)
+  end
+
+  def position_(p)
+    self.pos = p
+  end
+
+
 end
 
 
