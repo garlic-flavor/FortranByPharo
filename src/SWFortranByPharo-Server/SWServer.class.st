@@ -55,6 +55,7 @@ SWServer class >> rb_requirements [
 		SWSession.
 		SWServerInstruction.
 		SWServerStatus.
+		SWShell.
 		'ZnServer.rb'.
 	}
 ]

@@ -124,8 +124,13 @@ SWTranspilerOfRuby >> descriptionFor: receiver With: arguments [
 
 { #category : #'as yet unclassified' }
 SWTranspilerOfRuby >> do_For: receiver With: arguments [
-	self halt.
-	self flag: #ToImplement
+	self
+		pushMessageNest;
+		transpile: receiver;
+		put: '.each';
+		putBlockWithoutProc: (arguments at: 1);
+		popMessageNest.
+
 ]
 
 { #category : #'as yet unclassified' }
@@ -287,6 +292,14 @@ SWTranspilerOfRuby >> opNotEqual_For: receiver With: arguments [
 		transpile: receiver;
 		put: ' != ';
 		transpile: (arguments at: 1)
+]
+
+{ #category : #'as yet unclassified' }
+SWTranspilerOfRuby >> perform_For: receiver With: arguments [
+	self
+		pushMessageNest;
+		putMessage: receiver call: 'send' with: arguments;
+		popMessageNest.
 ]
 
 { #category : #'code generation' }
