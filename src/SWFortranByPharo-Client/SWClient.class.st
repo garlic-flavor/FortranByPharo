@@ -19,6 +19,18 @@ SWClient >> close [
 	socket := nil
 ]
 
+{ #category : #'as yet unclassified' }
+SWClient >> ensureSendMessage: aString [
+	|res status message|
+	res := self socket
+		sendMessage: aString;
+		readMessage.
+	status := SWServerStatus fromSton: (STON reader on: res readStream).
+	message := status message.
+	self assert: [ status isGood ].
+	^ status
+]
+
 { #category : #requesting }
 SWClient >> exec: target with: options [
 	|inst|
@@ -27,7 +39,7 @@ SWClient >> exec: target with: options [
 		target: target;
 		options: options;
 		yourself.
-	^ self socket ensureSendMessage: inst toString.
+	^ self ensureSendMessage: inst toString.
 
 ]
 
@@ -38,7 +50,7 @@ SWClient >> get: target [
 		get;
 		target: target;
 		yourself.
-	^ self socket ensureSendMessage: inst toString
+	^ self ensureSendMessage: inst toString
 ]
 
 { #category : #requesting }
@@ -48,14 +60,7 @@ SWClient >> head: target [
 		head;
 		target: target;
 		yourself.
-	^ self socket ensureSendMessage: req toString.
-
-]
-
-{ #category : #requesting }
-SWClient >> post: target with: anAssociationArray [
-	self socket sendRequestPost: target with: anAssociationArray.
-	^ self socket readResponse.
+	^ self ensureSendMessage: req toString.
 
 ]
 
@@ -67,7 +72,7 @@ SWClient >> put: target contents: contents [
 		target: target;
 		length: contents size;
 		yourself.
-	^ self socket
+	^ self
 		ensureSendMessage: req toString;
 		ensureSendMessage: contents.
 

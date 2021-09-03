@@ -407,7 +407,7 @@ SWTranspiler >> transpiledNameOf: aMethod [
 			<< self type;
 			<< '_';
 			<< (self class transpiledNameOf: aMethod selector);
-			<< '_using:'
+			<< 'Using:'
 	]) asSymbol.
 
 ]

@@ -43,7 +43,7 @@ SWTranspilerTest >> testPutCodeWith [
 
 { #category : #test }
 SWTranspilerTest >> testPutMessageCallWith [
-	self test: #program equals: {'puts("Hello, World!")'}.
+	self test: #program equals: {'puts(''Hello, World!'')'}.
 	rbt reset.
 	self test: #program2 equals: {
 		'a = 1 + 2'.
@@ -53,17 +53,7 @@ SWTranspilerTest >> testPutMessageCallWith [
 	self test: #program3 equals: { 
 		'a = 1 + (2 * 3)'.
 		'puts(a)'
-	}.
-	rbt reset.
-	self test: #program4 equals: { 
-		'a = "Hello, world"'.
-		'puts((a[1 - 1]))'
-	}.
-	rbt reset.
-	self test: #program5 equals: { 
-		'a = [ 10, 20, 30, 40, 50 ]'.
-		'puts((a[1 - 1]))'
-	 }.
+	}
 ]
 
 { #category : #tests }

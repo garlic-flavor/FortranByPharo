@@ -10,16 +10,12 @@ Class {
 { #category : #running }
 SWServerTest >> setUp [
 	super setUp.
-	SWServer start.
-	client := ZnWebSocket to: 'ws://localhost:50000'.
 	"Put here a common initialization logic for tests"
 ]
 
 { #category : #running }
 SWServerTest >> tearDown [
 	super tearDown.
-	client isConnected ifTrue: [ client close ].
-	SWServer stop.
 ]
 
 { #category : #test }
@@ -100,6 +96,15 @@ SWServerTest >> testPostWithOn [
 	self assert: (res at: #code) equals: 200.
 
 
+]
+
+{ #category : #tests }
+SWServerTest >> testPutSelf [
+	(self
+		type: #rb;
+		runAsClient: true;
+		usingPharoServer: true;
+		source) inspect.
 ]
 
 { #category : #test }

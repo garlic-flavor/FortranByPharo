@@ -51,3 +51,10 @@ SWServerStatusTest >> testStonOn [
 	status2 := SWServerStatus fromSton: (STON reader on: (status toString) readStream).
 	self assert: [status2 isGood]
 ]
+
+{ #category : #tests }
+SWServerStatusTest >> testThisOnExternalServer [ 
+	self
+		type: #rb;
+		goOnExternalServer
+]

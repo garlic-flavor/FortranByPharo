@@ -38,6 +38,15 @@ SWStdTest >> testError [
 ]
 
 { #category : #'code generation - tests' }
+SWStdTest >> testPut [
+	(self
+		type: #rb;
+		runAsClient: true;
+		usingPharoServer: true;
+		source) inspect
+]
+
+{ #category : #'code generation - tests' }
 SWStdTest >> testThis [
 	self
 		type: #rb;

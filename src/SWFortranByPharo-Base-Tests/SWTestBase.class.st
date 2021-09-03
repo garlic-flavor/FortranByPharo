@@ -33,6 +33,9 @@ SWTestBase >> client [
 
 	^ client ifNil: [
 		self runAsClient ifTrue: [
+			self usingPharoServer ifTrue: [
+				SWServer isRunning ifFalse: [ SWServer start ]
+			].
 			client := SWClient new
 		] ifFalse: [
 			nil
@@ -147,9 +150,5 @@ SWTestBase >> usingPharoServer [
 SWTestBase >> usingPharoServer: anObject [
 
 	usingPharoServer := anObject.
-	usingPharoServer ifTrue: [ 
-		SWServer isRunning ifFalse: [ SWServer start ]
-	] ifFalse: [ 
-		SWServer isRunning ifTrue: [ SWServer stop ]
-	]
+
 ]

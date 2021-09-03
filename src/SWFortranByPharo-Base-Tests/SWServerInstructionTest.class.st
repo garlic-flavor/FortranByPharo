@@ -51,3 +51,10 @@ SWServerInstructionTest >> testStonOn [
 	parsed := (SWServerInstruction fromSton: (STON reader on: (inst toString) readStream)).
 	self assert: inst code equals: parsed code
 ]
+
+{ #category : #tests }
+SWServerInstructionTest >> testThisOnExternalServer [ 
+	self
+		type: #rb;
+		goOnExternalServer
+]
