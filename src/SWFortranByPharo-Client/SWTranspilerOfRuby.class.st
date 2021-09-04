@@ -477,7 +477,8 @@ SWTranspilerOfRuby >> putRequirements [
 					dep := SWSource new
 						classes: { dependence };
 						type: self type;
-						putTo: self client;
+						client: self client;
+						put;
 						yourself.
 					self put: 'require '''; put: dep filename; putLine: ''''
 				]

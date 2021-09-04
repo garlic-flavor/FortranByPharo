@@ -9,6 +9,7 @@ Class {
 		'mainClass',
 		'entryClass',
 		'type',
+		'client',
 		'transpiler',
 		'contents',
 		'contentsHash',
@@ -28,6 +29,18 @@ SWSource >> classes [
 SWSource >> classes: anObject [
 
 	classes := anObject
+]
+
+{ #category : #accessing }
+SWSource >> client [
+
+	^ client ifNil: [ client := SWClient new ]
+]
+
+{ #category : #accessing }
+SWSource >> client: anObject [
+
+	client := anObject
 ]
 
 { #category : #accessing }
@@ -132,19 +145,12 @@ SWSource >> moduleName: anObject [
 
 { #category : #accessing }
 SWSource >> put [
-	|client|
-	client := SWClient new.
-	^ [ self putTo: client ] ensure: [ client close ]
-]
-
-{ #category : #accessing }
-SWSource >> putTo: client [
 	|res|
-	res := client head: self filename.
+	res := self client head: self filename.
 	^ ((res entity at: #exists ifAbsent: ['false']) = #true) ifTrue: [
 		res
 	] ifFalse: [
-		client put: self filename contents: self contents.
+		self client put: self filename contents: self contents.
 	]
 
 ]
@@ -153,7 +159,10 @@ SWSource >> putTo: client [
 SWSource >> transpiler [
 
 	^ transpiler ifNil: [
-		transpiler := (self transpilerClass new) source: self; yourself
+		transpiler := (self transpilerClass new)
+			source: self;
+			client: self client;
+			yourself
 	]
 ]
 

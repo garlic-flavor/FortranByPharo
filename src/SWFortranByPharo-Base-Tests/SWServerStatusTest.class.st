@@ -11,12 +11,6 @@ Class {
 }
 
 { #category : #'code generation' }
-SWServerStatusTest class >> go [
-	<sampleInstance>
-	^ super go
-]
-
-{ #category : #'code generation' }
 SWServerStatusTest class >> rb_requirements [
 	^ {
 		SWServerStatus.
@@ -24,21 +18,11 @@ SWServerStatusTest class >> rb_requirements [
 	}
 ]
 
-{ #category : #'code generation' }
-SWServerStatusTest class >> transpile [
-	<sampleInstance>
-	^ super transpile
-]
-
-{ #category : #'code generation' }
-SWServerStatusTest class >> type [
-	^ #rb
-]
-
 { #category : #running }
 SWServerStatusTest >> setUp [
 	super setUp.
 	status := SWServerStatus new.
+	self type: #rb.
 	"Put here a common initialization logic for tests"
 ]
 
@@ -55,6 +39,5 @@ SWServerStatusTest >> testStonOn [
 { #category : #tests }
 SWServerStatusTest >> testThisOnExternalServer [ 
 	self
-		type: #rb;
 		goOnExternalServer
 ]

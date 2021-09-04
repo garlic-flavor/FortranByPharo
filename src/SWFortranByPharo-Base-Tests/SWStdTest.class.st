@@ -24,6 +24,7 @@ SWStdTest class >> rb_requirements [
 SWStdTest >> setUp [
 	super setUp.
 	std := SWStd new.
+	self type: #rb.
 ]
 
 { #category : #test }
@@ -49,7 +50,6 @@ SWStdTest >> testPut [
 { #category : #'code generation - tests' }
 SWStdTest >> testThis [
 	self
-		type: #rb;
 		go.
 
 ]
@@ -57,7 +57,6 @@ SWStdTest >> testThis [
 { #category : #'code generation - tests' }
 SWStdTest >> testThisOnExternalServer [
 	self
-		type: #rb;
 		goOnExternalServer.
 
 ]

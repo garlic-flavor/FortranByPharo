@@ -135,27 +135,10 @@ SWProject >> objs: anObject [
 { #category : #execution }
 SWProject >> putAll [
 	self sources do: [ :aSource |
-		aSource putTo: self client
+		aSource
+			client: self client;
+			put.
 	]
-
-"
-	self sources: (self classes collect: [ :aProgram ||contents hash filename res|
-		contents := self transpile: aProgram.
-		hash := (SHA256 hashMessage: contents) hex.
-		filename := String streamContents: [ :s |
-			s << self dirName; << '/';
-				<< aProgram class name; << '/';
-				<< hash; << '.'; << self type
-		].
-		res := client put: filename contents: contents.	
-		self assert: [ res at: #success ].
-		Dictionary new
-			at: #Location put: (res at: #Location);
-			at: #hash put: hash;
-			at: #program put: aProgram;
-			yourself.
-	])
-"
 ]
 
 { #category : #execution }

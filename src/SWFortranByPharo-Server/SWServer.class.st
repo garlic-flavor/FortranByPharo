@@ -280,6 +280,7 @@ SWServer >> put: message on: session [
 { #category : #public }
 SWServer >> startOn: portNumber [
 	ZnServer startDefaultOn: portNumber.
+
 	ZnServer default delegate: (ZnWebSocketDelegate handler: [ :webSocket |
 		[|session|
 			session := SWSession new

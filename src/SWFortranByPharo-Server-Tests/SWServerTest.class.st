@@ -7,6 +7,11 @@ Class {
 	#category : #'SWFortranByPharo-Server-Tests-Server'
 }
 
+{ #category : #'as yet unclassified' }
+SWServerTest class >> rb_requirements [
+	^ { SWServer }
+]
+
 { #category : #running }
 SWServerTest >> setUp [
 	super setUp.

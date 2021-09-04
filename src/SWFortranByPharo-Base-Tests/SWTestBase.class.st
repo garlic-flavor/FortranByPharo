@@ -56,6 +56,7 @@ SWTestBase >> go [
 	^ SWProject new
 		sources: { self source };
 		client: self client;
+		putAll;
 		run
 ]
 
@@ -66,6 +67,7 @@ SWTestBase >> goOnExternalServer [
 	^ SWProject new
 		sources: { self source };
 		client: self client;
+		putAll;
 		run
 ]
 
@@ -105,7 +107,8 @@ SWTestBase >> source [
 			source := SWSource new
 				classes: { self class };
 				type: self type;
-				putTo: self client;
+				client: self client;
+				put;
 				yourself
 		] ifFalse: [
 			nil

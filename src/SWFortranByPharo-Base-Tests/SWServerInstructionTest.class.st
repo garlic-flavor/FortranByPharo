@@ -39,7 +39,7 @@ SWServerInstructionTest class >> type [
 SWServerInstructionTest >> setUp [
 	super setUp.
 	inst := SWServerInstruction new.
-	
+	self type: #rb.
 ]
 
 { #category : #tests }
@@ -55,6 +55,5 @@ SWServerInstructionTest >> testStonOn [
 { #category : #tests }
 SWServerInstructionTest >> testThisOnExternalServer [ 
 	self
-		type: #rb;
 		goOnExternalServer
 ]
