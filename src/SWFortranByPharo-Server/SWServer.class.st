@@ -38,9 +38,11 @@ SWServer class >> filePathOf: aName [
 	(FileLocator imageDirectory contains: path) ifFalse: [
 		path := FileLocator imageDirectory
 	].
+	^ path
+"
 	path parent ensureCreateDirectory.
 	^ path
-
+"
 ]
 
 { #category : #testing }
@@ -58,6 +60,11 @@ SWServer class >> rb_requirements [
 		SWShell.
 		'ZnServer.rb'.
 	}
+]
+
+{ #category : #'as yet unclassified' }
+SWServer class >> relPathOf: path [
+	^ path relativeTo: FileLocator imageDirectory
 ]
 
 { #category : #accessing }
@@ -92,43 +99,6 @@ SWServer class >> transpile [
 
 ]
 
-{ #category : #dispatching }
-SWServer >> dispatch: message on: session [
-	session instruction isHead ifTrue: [
-		^ self headOn: session
-	].
-	session instruction isGet ifTrue: [
-		^ self get: session
-	].
-	session instruction isPut ifTrue: [
-		message ifNotNil: [
-			^ self put: message on: session
-		] ifNil: [
-			^ self
-		]
-	].
-	session instruction isExecute ifTrue: [
-		^ self exec: session
-	].
-
-	self error: 'no implementation'
-
-"
-	|obj method target|
-	obj := self parseRequest: message.
-	method := obj at: #method ifAbsent: ''.
-	target := self filePathOf: (obj at: #target ifAbsent: '').
-	method = #GET ifTrue: [
-		^ self get: target with: obj on: socket
-	].
-	method = #PUT ifTrue: [
-	].
-	method = #POST ifTrue: [
-		^ self post: target with: obj on: socket
-	].
-"
-]
-
 { #category : #accessing }
 SWServer >> env [
 
@@ -144,6 +114,7 @@ SWServer >> env: anObject [
 { #category : #executing }
 SWServer >> exec: session [
 	|exe result|
+	self flag: #ToRemove.
 	exe := session instruction target fullName.
 	result := SWShell execute: exe arguments: session instruction options.
 	session status ok.
@@ -152,7 +123,36 @@ SWServer >> exec: session [
 ]
 
 { #category : #responses }
-SWServer >> get: session [
+SWServer >> get: target [
+	^ target exists ifTrue: [
+		target isDirectory ifTrue: [ |writer|
+			writer := XMLWriter new.
+			writer tag: #html attributes: { 'lang' -> 'ja' } with: [ :w |
+				w
+					tag: #head with: [ :w2 |
+						w2 tag: #title with: target basename
+					];
+					tag: #body with: [ :w2 |
+						target children do: [ :child |
+							child isDirectory ifTrue: [
+								w2 tag: #a attributes: { #href -> ('/manage?target=', (self class relPathOf: child) fullName) } with: child basename;
+									tag: #br
+							] ifFalse: [
+								w2
+									tag: #span with: child basename;
+									tag: #br
+							]
+						]
+					]
+			].
+			ZnResponse ok: (ZnEntity html: writer contents)
+		] ifFalse: [
+			ZnResponse noContent
+		]
+	] ifFalse: [ 
+		ZnResponse notFound: (self class relPathOf: target) fullName asZnUrl
+	]
+"
 	session instruction target = FileLocator imageDirectory ifTrue: [
 		#(script src obj exe) do: [ :each |
 			session status entity
@@ -166,33 +166,21 @@ SWServer >> get: session [
 	].
 
 	^ session status failed; message: 'not implemented yet'
+"
 
 ]
 
-{ #category : #responses }
-SWServer >> get: target with: msg on: socket [
-	target = FileLocator imageDirectory ifTrue: [
-		^ socket sendResponseOk: {
-			'entity' -> (#('src' 'obj' 'exe') collect: [ :each |
-				SWShell lsr: FileLocator imageDirectory / each
-			])
-		}
-	].
-	
-	self flag: #TODO.
-	socket sendResponseNotImplemented: { 'target' -> target rel fullName }.
-]
-
-{ #category : #responses }
-SWServer >> headOn: session [
-	session instruction target exists ifTrue: [
-		(#(exists accessTime changeTime creationTime) do: [ :each |
-			session status entity at: each asString put: (session instruction target perform: each) asString
-		]).
+{ #category : #'accessing structure variables' }
+SWServer >> head: target [
+	^ target exists ifTrue: [
+		(ZnResponse statusLine: ZnStatusLine ok)
+			headers: (ZnHeaders defaultResponseHeaders
+				at: #'Last-Modified' put: target changeTime asString;
+				yourself);
+			yourself
 	] ifFalse: [
-		session status entity at: 'exists' put: false
+		ZnResponse notFound: (self class relPathOf: target) fullName asZnUrl
 	]
-
 ]
 
 { #category : #initialization }
@@ -209,6 +197,7 @@ SWServer >> main: argv [
 { #category : #executing }
 SWServer >> make: target by: method with: msg on: socket [
 	|type|
+	self flag: #ToRemove.
 	type := (msg at: #type ifAbsent: ['']).
 	(type beginsWith: 'f') ifTrue: [
 		|sources result|
@@ -224,63 +213,51 @@ SWServer >> make: target by: method with: msg on: socket [
 
 ]
 
-{ #category : #parsing }
-SWServer >> parseRequest: received [
-	|request dict|
-	request := ZnRequest readFrom: received readStream.
-	dict := Dictionary new
-		at: #method put: request method;
-		at: #target put: request uri;
-		at: #type put: request contentType;
-		at: #original put: request;
-		yourself.
-	request headersDo: [ :key :value | dict at: key put: value ].
-	request contentType = ZnMimeType applicationJson ifTrue: [
-		(STON reader on: request entity contents readStream; next) associationsDo: [ :assoc |
-			dict at: assoc key put: assoc value
-		]
-	] ifFalse: [
-		dict at: #entity put: (request entity ifNotNil: [ request entity contents ])
+{ #category : #'as yet unclassified' }
+SWServer >> manage: request [
+	|target|
+	target := self class filePathOf: (request uri queryAt: #target ifAbsent: [ '' ]).
+	(request method = #HEAD) ifTrue: [ 
+		^ self head: target
 	].
-	^ dict
+	(request method = #GET) ifTrue: [
+		^ self get: target
+	].
+	(request method = #PUT) ifTrue: [
+		^ self put: target contents: request entity contents
+	].
+	^ ZnResponse badRequest: request.
 ]
 
-{ #category : #responses }
-SWServer >> post: target with: msg on: socket [
-	|action|
-	action := msg at: #action ifAbsent: [''].
-	action = #compile ifTrue: [
-		^ self make: target by: #compileFortranFiles:to: with: msg on: socket.
-	].
-	action = #link ifTrue: [
-		^ self make: target by: #linkObjs:to: with: msg on: socket.
-	].
-	action = #execute ifTrue: [
-		^ self exec: target with: msg on: socket.
-	].
-	action = #cat ifTrue: [
-		^ socket sendResponseOk: target contents
-	].
-	socket sendResponseNotImplemented: { 'action' -> action }.
-
-]
-
-{ #category : #responses }
-SWServer >> put: message on: session [
-	session instruction target writeStreamDo: [ :writer |
-		writer
-			position: session status completed;
+{ #category : #requesting }
+SWServer >> put: target contents: contents [
+	|res|
+	target parent ensureCreateDirectory.
+	target writeStreamDo: [ :writer |
+		writer 
+			position: 0;
 			truncate;
-			<< message
+			<< contents.
 	].
-	session status complete: message size
-
+	res := ZnResponse ok: (ZnEntity text: '').
+	res headers at: #'Last-Modified' put: target changeTime asString.
+	^ res
 ]
 
 { #category : #public }
 SWServer >> startOn: portNumber [
 	ZnServer startDefaultOn: portNumber.
-
+	ZnServer default delegate
+		map: 'manage'
+		to: [ :request | self manage: request ];
+		map: 'execute'
+		to: (ZnWebSocketDelegate map: 'execute' to: [:webSocket |
+			[ 
+			] on: ConnectionClosed do: [ :err |
+				Transcript << err asString; cr.
+			]
+		]).
+"
 	ZnServer default delegate: (ZnWebSocketDelegate handler: [ :webSocket |
 		[|session|
 			session := SWSession new
@@ -312,4 +289,5 @@ SWServer >> startOn: portNumber [
 			Transcript << err asString; cr.
 		]
 	]). 
+"
 ]

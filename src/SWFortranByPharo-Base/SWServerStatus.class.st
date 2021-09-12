@@ -10,6 +10,7 @@ Class {
 		'toComplete',
 		'completed',
 		'request',
+		'uri',
 		'entity'
 	],
 	#category : #'SWFortranByPharo-Base'
@@ -31,6 +32,7 @@ SWServerStatus class >> fromSton: stonReader [
 		toComplete: (dict at: #toComplete ifAbsent: [ 0 ]);
 		completed: (dict at: #completed ifAbsent: [ 0 ]);
 		request: (dict at: #request ifAbsent: [ '' ]);
+		url: (dict at: #url ifAbsent: [ '' ]);
 		yourself
 	
 ]
@@ -164,6 +166,7 @@ SWServerStatus >> stonOn: stonWriter [
 		at: 'completed' put: self completed;
 		at: 'entity' put: self entity;
 		at: 'request' put: (self request ifNil: ['']);
+		at: 'url' put: (self url ifNil: ['']);
 		stonOn: stonWriter
 ]
 
@@ -186,4 +189,16 @@ SWServerStatus >> toString [
 			on: s;
 			nextPut: self
 	]
+]
+
+{ #category : #accessing }
+SWServerStatus >> uri [
+
+	^ uri
+]
+
+{ #category : #accessing }
+SWServerStatus >> uri: anObject [
+
+	uri := anObject
 ]
