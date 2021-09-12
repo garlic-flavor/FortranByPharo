@@ -32,7 +32,7 @@ SWServerStatus class >> fromSton: stonReader [
 		toComplete: (dict at: #toComplete ifAbsent: [ 0 ]);
 		completed: (dict at: #completed ifAbsent: [ 0 ]);
 		request: (dict at: #request ifAbsent: [ '' ]);
-		url: (dict at: #url ifAbsent: [ '' ]);
+		uri: (dict at: #uri ifAbsent: [ '' ]);
 		yourself
 	
 ]
@@ -166,7 +166,7 @@ SWServerStatus >> stonOn: stonWriter [
 		at: 'completed' put: self completed;
 		at: 'entity' put: self entity;
 		at: 'request' put: (self request ifNil: ['']);
-		at: 'url' put: (self url ifNil: ['']);
+		at: 'uri' put: (self uri ifNil: ['']);
 		stonOn: stonWriter
 ]
 

@@ -122,6 +122,18 @@ SWServer >> exec: session [
 
 ]
 
+{ #category : #execution }
+SWServer >> execute: webSocket [
+	|target args result|
+	target := (self class filePathOf: (webSocket uri queryAt: #target)) fullName.
+	args := webSocket uri queryAt: #args ifAbsent: [ '' ].
+	args isArray ifFalse: [ args := { args } ].
+	result := SWShell execute: target arguments: args.
+	^ SWServerStatus new
+		ok;
+		message: result.
+]
+
 { #category : #responses }
 SWServer >> get: target [
 	^ target exists ifTrue: [
@@ -249,45 +261,28 @@ SWServer >> startOn: portNumber [
 	ZnServer startDefaultOn: portNumber.
 	ZnServer default delegate
 		map: 'manage'
-		to: [ :request | self manage: request ];
+		to: [ :request |
+			[
+				self manage: request
+			] on: Exception do: [:e |
+				ZnResponse serverErrorWithEntity: (ZnEntity text: e asString)
+			]
+		];
 		map: 'execute'
-		to: (ZnWebSocketDelegate map: 'execute' to: [:webSocket |
-			[ 
+		to: (SWWebSocketDelegate map: 'execute' to: [:webSocket |
+			[
+				[ 
+					webSocket sendMessage: (self execute: webSocket) toString
+				] on: Exception do: [ :exception |
+					webSocket sendMessage: (
+						SWServerStatus new
+							failed;
+							message: exception description;
+							request: webSocket uri asString;
+							yourself) toString
+				]
 			] on: ConnectionClosed do: [ :err |
 				Transcript << err asString; cr.
 			]
 		]).
-"
-	ZnServer default delegate: (ZnWebSocketDelegate handler: [ :webSocket |
-		[|session|
-			session := SWSession new
-				socket: webSocket;
-				yourself.
-			webSocket runWith: [ :message |
-				[
-					session status isGood ifTrue: [
-						session instruction ifNotNil: [
-							self dispatch: message on: session
-						] ifNil: [
-							session instruction: (SWServerInstruction fromSton: (STON reader on: message readStream)).
-							session instruction target: (self class filePathOf: session instruction target).
-							session status: (SWServerStatus new
-								toComplete: session instruction length;
-								yourself).
-							self dispatch: nil on: session.
-						].
-						session status isOk ifTrue: [ 
-							session instruction: nil
-						]
-					]
-				] on: Error do: [:exception |
-					session status failed; message: exception description; request: message
-				].
-				webSocket sendMessage: session status toString
-			]
-		] on: ConnectionClosed do: [:err|
-			Transcript << err asString; cr.
-		]
-	]). 
-"
 ]

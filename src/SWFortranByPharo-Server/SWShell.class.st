@@ -29,13 +29,13 @@ SWShell class >> execute: exe arguments: list [
 { #category : #execution }
 SWShell class >> executeProcess: process [
 	"I execute 'exe' with 'list', then return its result."
-	[
+	^ [
 		process
 			redirectStdout;
 			redirectStderr;
 			runAndWait.
 		process isSuccess
-				ifTrue: [ ^ process stdoutStream upToEnd ]
+				ifTrue: [ process stdoutStream upToEnd ]
 				ifFalse: [ self error: process stderrStream upToEnd ].
 	] ensure: [ process ifNotNil: [ process closeAndCleanStreams ] ]
 
