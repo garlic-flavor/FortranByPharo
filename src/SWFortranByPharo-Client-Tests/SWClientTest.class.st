@@ -5,7 +5,8 @@ Class {
 	#name : #SWClientTest,
 	#superclass : #TestCase,
 	#instVars : [
-		'client'
+		'client',
+		'server'
 	],
 	#category : #'SWFortranByPharo-Client-Tests-Client'
 }
@@ -13,41 +14,34 @@ Class {
 { #category : #running }
 SWClientTest >> setUp [
 	super setUp.
-	ZnServer startDefaultOn: 50000.
-	ZnServer default delegate: (ZnWebSocketDelegate handler: [ :webSocket |
-		[
-			webSocket runWith: [ :message ||inst stat|
-				Transcript << 'reach'; cr.
-				inst := SWServerInstruction fromSton: (STON reader on: message readStream).
-				stat := SWServerStatus new.
-				stat ok.
-				stat toComplete: inst length.
-				stat entity
-					at: 'request' put: inst toString.
-				webSocket sendMessage: stat toString.
-			]
-		] on: ConnectionClosed do: [ :exception |
-			Transcript show: exception asString; cr.
-		]
-	]).
-	client := SWClient new
-		server: 'ws://localhost:50000';
-		yourself
-	"Put here a common initialization logic for tests"
+	server := SWTestServer new start; yourself.
+	client := SWClient new.
+
+
 ]
 
 { #category : #running }
 SWClientTest >> tearDown [
-	ZnServer default isRunning ifTrue: [ ZnServer default stop ].
+	client close.
+	server stop.
 	super tearDown.
+	
 ]
 
 { #category : #tests }
 SWClientTest >> testGet [
-	|res req|
-	res := client get: 'hogehoge.txt'.
-	req := SWServerInstruction fromSton: (STON reader on: (res entity at: 'request') readStream).
-	self assert: req code equals: 'get'.
-	self assert: req target equals: 'hogehoge.txt'.
-	
+	|res|
+	res := client get: 'hogehoge'.
+	self assert: (self toCr: res) equals: 'GET /manage?target=hogehoge HTTP/1.1
+User-Agent: Zinc HTTP Components 1.0 (Pharo/9.0)
+Accept: */*
+Host: localhost:50000
+X-Zinc-Remote-Address: 127.0.0.1
+
+'
+]
+
+{ #category : #'as yet unclassified' }
+SWClientTest >> toCr: string [
+	^ string copyReplaceAll: String crlf with: String cr
 ]

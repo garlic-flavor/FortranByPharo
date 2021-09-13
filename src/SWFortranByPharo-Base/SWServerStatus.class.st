@@ -3,18 +3,22 @@ I indicate the status of a server.
 "
 Class {
 	#name : #SWServerStatus,
-	#superclass : #SWStd,
+	#superclass : #Object,
 	#instVars : [
 		'code',
 		'message',
 		'toComplete',
 		'completed',
-		'request',
 		'uri',
 		'entity'
 	],
 	#category : #'SWFortranByPharo-Base'
 }
+
+{ #category : #accessing }
+SWServerStatus class >> failed [
+	^ self new failed; yourself
+]
 
 { #category : #constants }
 SWServerStatus class >> failedCode [
@@ -31,10 +35,14 @@ SWServerStatus class >> fromSton: stonReader [
 		entity: (dict at: #entity ifAbsent: [ nil ]);
 		toComplete: (dict at: #toComplete ifAbsent: [ 0 ]);
 		completed: (dict at: #completed ifAbsent: [ 0 ]);
-		request: (dict at: #request ifAbsent: [ '' ]);
 		uri: (dict at: #uri ifAbsent: [ '' ]);
 		yourself
 	
+]
+
+{ #category : #actions }
+SWServerStatus class >> ok [
+	^ self new ok; yourself
 ]
 
 { #category : #constants }
@@ -145,18 +153,6 @@ SWServerStatus >> progress [
 
 ]
 
-{ #category : #accessing }
-SWServerStatus >> request [
-
-	^ request
-]
-
-{ #category : #accessing }
-SWServerStatus >> request: anObject [
-
-	request := anObject
-]
-
 { #category : #'ston persistence' }
 SWServerStatus >> stonOn: stonWriter [
 	^ STON mapClass new
@@ -165,7 +161,6 @@ SWServerStatus >> stonOn: stonWriter [
 		at: 'toComplete' put: self toComplete;
 		at: 'completed' put: self completed;
 		at: 'entity' put: self entity;
-		at: 'request' put: (self request ifNil: ['']);
 		at: 'uri' put: (self uri ifNil: ['']);
 		stonOn: stonWriter
 ]

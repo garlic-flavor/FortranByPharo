@@ -129,9 +129,9 @@ SWServer >> execute: webSocket [
 	args := webSocket uri queryAt: #args ifAbsent: [ '' ].
 	args isArray ifFalse: [ args := { args } ].
 	result := SWShell execute: target arguments: args.
-	^ SWServerStatus new
-		ok;
-		message: result.
+	^ SWServerStatus ok
+		message: result;
+		yourself
 ]
 
 { #category : #responses }
@@ -272,13 +272,15 @@ SWServer >> startOn: portNumber [
 		to: (SWWebSocketDelegate map: 'execute' to: [:webSocket |
 			[
 				[ 
-					webSocket sendMessage: (self execute: webSocket) toString
+					webSocket sendMessage: ((self execute: webSocket)
+						uri: webSocket uri asString;
+						yourself) toString
 				] on: Exception do: [ :exception |
 					webSocket sendMessage: (
 						SWServerStatus new
 							failed;
 							message: exception description;
-							request: webSocket uri asString;
+							uri: webSocket uri asString;
 							yourself) toString
 				]
 			] on: ConnectionClosed do: [ :err |

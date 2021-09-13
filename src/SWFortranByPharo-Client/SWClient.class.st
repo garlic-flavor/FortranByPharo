@@ -6,7 +6,8 @@ Class {
 	#superclass : #Object,
 	#instVars : [
 		'socket',
-		'server'
+		'host',
+		'port'
 	],
 	#category : #'SWFortranByPharo-Client-Client'
 }
@@ -19,75 +20,88 @@ SWClient >> close [
 	socket := nil
 ]
 
-{ #category : #'as yet unclassified' }
-SWClient >> ensureSendMessage: aString [
-	|res status message|
-	res := self socket
-		sendMessage: aString;
-		readMessage.
-	status := SWServerStatus fromSton: (STON reader on: res readStream).
-	message := status message.
-	self assert: [ status isGood ].
-	^ status
-]
-
 { #category : #requesting }
 SWClient >> exec: target with: options [
-	|inst|
-	inst := SWServerInstruction new
-		execute;
-		target: target;
-		options: options;
+	|url|
+	url := ZnUrl new
+		scheme: 'ws';
+		host: self host;
+		port: self port;
+		addPathSegment: 'execute';
+		queryAt: #target put: target;
 		yourself.
-	^ self ensureSendMessage: inst toString.
-
+	options do: [ :each | url queryAt: #args add: each ].
+	^ ZnWebSocket to: url
 ]
 
 { #category : #public }
 SWClient >> get: target [
-	|inst|
-	inst := SWServerInstruction new
+	^ (ZnClient new
+		http;
+		host: self host;
+		port: self port;
+		addPathSegment: 'manage';
+		enforceHttpSuccess: true;
+		queryAt: #target put: target;
 		get;
-		target: target;
-		yourself.
-	^ self ensureSendMessage: inst toString
+		entity) contents.
+
 ]
 
 { #category : #requesting }
 SWClient >> head: target [
-	|req|
-	req := SWServerInstruction new
+	|res|
+	res := ZnClient new
+		http;
+		host: self host;
+		port: self port;
+		addPathSegment: 'manage';
+		queryAt: #target put: target;
 		head;
-		target: target;
-		yourself.
-	^ self ensureSendMessage: req toString.
+		response.
+	^ res isError ifTrue: [
+		nil
+	] ifFalse: [
+		res headers at: #'Last-Modified' ifAbsent: [ '' ]
+	]
+]
 
+{ #category : #accessing }
+SWClient >> host [
+
+	^ host ifNil: [ host := 'localhost' ]
+]
+
+{ #category : #accessing }
+SWClient >> host: anObject [
+
+	host := anObject
+]
+
+{ #category : #accessing }
+SWClient >> port [
+
+	^ port ifNil: [ port := 50000 ]
+]
+
+{ #category : #accessing }
+SWClient >> port: anObject [
+
+	port := anObject
 ]
 
 { #category : #requesting }
 SWClient >> put: target contents: contents [
-	|req|
-	req := SWServerInstruction new
+	^ (ZnClient new
+		http;
+		host: self host;
+		port: self port;
+		addPathSegment: 'manage';
+		queryAt: #target put: target;
+		contents: contents;
+		enforceHttpSuccess: true;
 		put;
-		target: target;
-		length: contents size;
-		yourself.
-	^ self
-		ensureSendMessage: req toString;
-		ensureSendMessage: contents.
-
-]
-
-{ #category : #accessing }
-SWClient >> server [
-
-	^ server ifNil: [ server := 'ws://localhost:50000' ]
-]
-
-{ #category : #accessing }
-SWClient >> server: anObject [
-
-	server := anObject
+		response) headers at: #'Last-Modified'
 ]
 
 { #category : #accessing }
