@@ -161,7 +161,6 @@ SWSource >> transpiler [
 	^ transpiler ifNil: [
 		transpiler := (self transpilerClass new)
 			source: self;
-			client: self client;
 			yourself
 	]
 ]
@@ -176,6 +175,7 @@ SWSource >> transpiler: anObject [
 SWSource >> transpilerClass [ 
 	self type = #f90 ifTrue: [ ^ SWTranspilerOfFortran ].
 	self type = #rb ifTrue: [ ^ SWTranspilerOfRuby ].
+	self type = #js ifTrue: [ ^ SWTranspilerOfJs ].
 	self error: 'NO IMPLEMENTATION!'.
 ]
 

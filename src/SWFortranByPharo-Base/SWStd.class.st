@@ -11,6 +11,20 @@ Class {
 }
 
 { #category : #'code generation' }
+SWStd class >> js_error_Using: transpiler [
+	transpiler putCode: '\
+		throw msg;
+	\'
+]
+
+{ #category : #'code generation' }
+SWStd class >> js_print_Using: transpiler [
+	transpiler putCode: '\
+		console.log(msg);
+	\'
+]
+
+{ #category : #'code generation' }
 SWStd class >> rb_error_using: transpiler [
 	transpiler putCode: '\
 		raise msg
@@ -46,13 +60,13 @@ SWStd >> print: msg [
 	self stdout << msg asString; cr; flush
 ]
 
-{ #category : #accessing }
+{ #category : #'code generation - accessing' }
 SWStd >> stdout [
 
 	^ stdout ifNil: [ stdout := Transcript ]
 ]
 
-{ #category : #accessing }
+{ #category : #'code generation - accessing' }
 SWStd >> stdout: anObject [
 
 	stdout := anObject

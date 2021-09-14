@@ -9,12 +9,10 @@ SWTestServer >> start [
 	ZnServer startDefaultOn: 50000.
 	ZnServer default delegate
 		map: 'manage' to: [ :request |
-			request method = #HEAD ifTrue: [
-				(ZnResponse statusLine: ZnStatusLine ok)
-					headers: (ZnHeaders defaultResponseHeaders
-						at: #'Requested-Url' put: request uri;
-						yourself);
-					yourself
+			(request method = #HEAD or: [ request method = #PUT ]) ifTrue: [|res|
+				res := ZnResponse ok: (ZnEntity text: '').
+				res headers at: #'Last-Modified' put: 'last modified time'.
+				res
 			] ifFalse: [
 				[
 					ZnResponse ok: (ZnEntity text: (String streamContents: [:s | request writeOn: s]))

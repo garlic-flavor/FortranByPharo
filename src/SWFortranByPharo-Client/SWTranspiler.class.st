@@ -14,7 +14,7 @@ Class {
 		'newline',
 		'preventNewline',
 		'messageNest',
-		'client'
+		'pool'
 	],
 	#classVars : [
 		'selectorName'
@@ -37,24 +37,6 @@ SWTranspiler >> assign: key with: value [
 	self transpile: key; put: ' = '.
 	value transpileUsing: self.
 
-]
-
-{ #category : #accessing }
-SWTranspiler >> client [
-
-	^ client ifNil: [ client := SWClient new ]
-]
-
-{ #category : #accessing }
-SWTranspiler >> client: anObject [
-
-	client := anObject
-]
-
-{ #category : #'initialize-release' }
-SWTranspiler >> close [
-	client ifNotNil: [ client close. ].
-	client := nil
 ]
 
 { #category : #accessing }
@@ -117,6 +99,18 @@ SWTranspiler >> opEqual_for: receiver with: arguments [
 		transpile: receiver;
 		put: ' == ';
 		putArgumentsOf: '=' with: arguments
+]
+
+{ #category : #accessing }
+SWTranspiler >> pool [
+
+	^ pool ifNil: [ pool := SWSourcesPool default ]
+]
+
+{ #category : #accessing }
+SWTranspiler >> pool: anObject [
+
+	pool := anObject
 ]
 
 { #category : #'code generation - protected' }
@@ -200,28 +194,20 @@ SWTranspiler >> putCode: code [
 { #category : #'code generation' }
 SWTranspiler >> putCode: code with: anAssociationArray [
 	"when a line in code ends with $\, the line continues to the next."
-	|leftPad|
-	leftPad := 0.
-	code trimLeft: [ :c |
-		c = Character tab ifTrue: [ leftPad := leftPad + 1 ].
-		c isSeparator or: [ c = $\ ]
+	|matcher leftPad escaped|
+	matcher := RxMatcher forString: '(\\\r|\s+\\$)'.
+	escaped := matcher copy: code replacingMatchesWith: ''.
+	leftPad := (escaped findFirst: [ :c | c ~= Character tab ])-1.
+	matcher := RxMatcher forString: '\t+'.
+	escaped := matcher copy: escaped translatingMatchesUsing: [ :m |
+		String tab repeat: (m size - leftPad)
 	].
-	(({ code }, anAssociationArray) reduce: [ :acc :assoc|
-		acc copyReplaceAll: assoc key with: assoc value asString
-	]) linesDo: [ :aLine ||rTrimmed preventsNewline trimmed counter|
-		preventsNewline := aLine isEmpty or: [aLine last = $\].
-		rTrimmed := aLine trimRight: [:c | c isSeparator or: [c = $\]].
-		counter := 0.
-		trimmed := rTrimmed trimLeft: [ :c |
-			counter := counter + 1.
-			c isSeparator and: [ counter <= leftPad ]
-		].
-		preventsNewline ifTrue: [
-			trimmed ifNotEmpty: [self put: trimmed ].
-		] ifFalse: [
-			self putLine: trimmed.
-		]
-	]
+	anAssociationArray do: [ :each |
+		escaped := escaped copyReplaceAll: each key with: each value.
+	].
+	self put: escaped.
+
+
 ]
 
 { #category : #'code generation' }
@@ -290,14 +276,15 @@ SWTranspiler >> putMainProgram [
 SWTranspiler >> putMessage: receiver call: selector with: arguments [
 	self flag: #toImplement.
 	self incMessageNest.
-	[ |transpiledName|
-		transpiledName := ((self class transpiledNameOf: selector), 'For:With:') asSymbol.
-		(self respondsTo: transpiledName) ifTrue: [
-			^ self perform: transpiledName with: receiver with: arguments
+	[ |transpiledName uniqueSelector|
+		transpiledName := (self class transpiledNameOf: selector) asSymbol.
+		uniqueSelector := transpiledName, 'For:With:'.
+		(self respondsTo: uniqueSelector) ifTrue: [
+			^ self perform: uniqueSelector with: receiver with: arguments
 		].
 		receiver transpileUsing: self.
-		(selector first isLetter) ifTrue: [ self put: '.' ].
-		self putFunctionCallOf: (self class transpiledNameOf: selector) with: arguments.
+		(transpiledName first isLetter) ifTrue: [ self put: '.' ].
+		self putFunctionCallOf: transpiledName with: arguments.
 	] ensure: [ self decMessageNest ].
 
 ]

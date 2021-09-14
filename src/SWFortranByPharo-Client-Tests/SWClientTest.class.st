@@ -29,6 +29,14 @@ SWClientTest >> tearDown [
 ]
 
 { #category : #tests }
+SWClientTest >> testExecWith [
+	|socket|
+	socket := client exec: 'node' with: { '-v' }.
+	self assert: socket readMessage equals: '/execute?target=node&args=-v'
+	
+]
+
+{ #category : #tests }
 SWClientTest >> testGet [
 	|res|
 	res := client get: 'hogehoge'.
@@ -39,6 +47,21 @@ Host: localhost:50000
 X-Zinc-Remote-Address: 127.0.0.1
 
 '
+]
+
+{ #category : #tests }
+SWClientTest >> testHead [
+	|res|
+	res := client head: 'test.js'.
+	self assert: res equals: 'last modified time'.
+
+]
+
+{ #category : #tests }
+SWClientTest >> testPut [
+	|res|
+	res := client put: 'hoge.txt' contents: 'Hello, World!'.
+	self assert: res equals: 'last modified time'
 ]
 
 { #category : #'as yet unclassified' }
