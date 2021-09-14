@@ -6,12 +6,13 @@ Class {
 	#superclass : #Object,
 	#instVars : [
 		'sources',
-		'client'
+		'client',
+		'type'
 	],
 	#classVars : [
 		'default'
 	],
-	#category : #'SWFortranByPharo-Client'
+	#category : #'SWFortranByPharo-Client-Client'
 }
 
 { #category : #accessing }
@@ -42,9 +43,33 @@ SWSourcesPool >> client: anObject [
 	client := anObject
 ]
 
+{ #category : #'as yet unclassified' }
+SWSourcesPool >> get: aModuleName [
+	^ self sources at: aModuleName ifAbsentPut: [|source transpiler|
+			source := SWSource new
+				type: self type;
+				classes: { Smalltalk globals at: aModuleName };
+				yourself.
+			transpiler := self transpilerClass new
+				pool: self;
+				source: source;
+				yourself.
+			source contents: transpiler transpile contents.
+			(self client head: source filename) ifNil: [
+				self client put: source filename contents: source contents
+			].
+			source
+	]
+]
+
 { #category : #initialization }
 SWSourcesPool >> initialize [
 	super initialize
+]
+
+{ #category : #'instance creation' }
+SWSourcesPool >> newTranspiler [
+	^ (self transpilerClass) new
 ]
 
 { #category : #accessing }
@@ -57,4 +82,24 @@ SWSourcesPool >> sources [
 SWSourcesPool >> sources: anObject [
 
 	sources := anObject
+]
+
+{ #category : #accessing }
+SWSourcesPool >> transpilerClass [ 
+	self type = #f90 ifTrue: [ ^ SWTranspilerOfFortran ].
+	self type = #rb ifTrue: [ ^ SWTranspilerOfRuby ].
+	self type = #mjs ifTrue: [ ^ SWTranspilerOfJs ].
+	self error: 'NO IMPLEMENTATION!'.
+]
+
+{ #category : #accessing }
+SWSourcesPool >> type [
+	
+	^ type ifNil: [ self error: 'I need to be set a type of me.' ]
+]
+
+{ #category : #accessing }
+SWSourcesPool >> type: anObject [
+
+	type := anObject
 ]

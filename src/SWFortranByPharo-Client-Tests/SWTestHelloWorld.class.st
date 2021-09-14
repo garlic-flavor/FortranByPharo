@@ -10,7 +10,7 @@ Class {
 { #category : #'code generation' }
 SWTestHelloWorld class >> js_requirements [
 	^ { 
-		'import { SWStd } from ''./pharo-local/iceberg/garlic-flavor/FortranByPharo/script/Pharo.mjs'';'.
+		SWStd.
 	}
 ]
 

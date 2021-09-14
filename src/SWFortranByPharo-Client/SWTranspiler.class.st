@@ -215,6 +215,11 @@ SWTranspiler >> putComment: aComment [
 	^ self subclassResponsibility 
 ]
 
+{ #category : #'as yet unclassified' }
+SWTranspiler >> putExporter [
+	^ self subclassResponsibility 
+]
+
 { #category : #'code generation' }
 SWTranspiler >> putFileFooterOf: filename [
 ]
@@ -378,6 +383,8 @@ SWTranspiler >> transpile [
 	] ifNil: [ 
 		(self source mainClass inheritsFrom: TestCase) ifTrue: [
 			self putTestRunner
+		] ifFalse: [
+			self putExporter
 		]
 	]
 ]

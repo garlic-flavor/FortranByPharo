@@ -392,6 +392,14 @@ SWTranspilerOfJs >> putComment: comment [
 ]
 
 { #category : #'as yet unclassified' }
+SWTranspilerOfJs >> putExporter [
+	self
+		put: 'export {';
+		put: (', ' join: (self source classes collect: [ :each | each name ]));
+		putLine: '}'.
+]
+
+{ #category : #'as yet unclassified' }
 SWTranspilerOfJs >> putFileHeaderOf: filename [
 
 
@@ -470,8 +478,15 @@ SWTranspilerOfJs >> putRequirements [
 			(aClass perform: sel) do: [ :dependence |
 				dependence isString ifTrue: [
 					self putLine: dependence
-				] ifFalse: [
-					self halt
+				] ifFalse: [|s|
+					s := self pool get: dependence name.
+					self
+						put: 'import {';
+						put: s moduleName;
+						put: '} from ''../../';
+						put: s filename;
+						putLine: ''';'
+						
 				]
 			]
 		]

@@ -9,8 +9,6 @@ Class {
 		'mainClass',
 		'entryClass',
 		'type',
-		'client',
-		'transpiler',
 		'contents',
 		'contentsHash',
 		'filename',
@@ -29,18 +27,6 @@ SWSource >> classes [
 SWSource >> classes: anObject [
 
 	classes := anObject
-]
-
-{ #category : #accessing }
-SWSource >> client [
-
-	^ client ifNil: [ client := SWClient new ]
-]
-
-{ #category : #accessing }
-SWSource >> client: anObject [
-
-	client := anObject
 ]
 
 { #category : #accessing }
@@ -75,6 +61,7 @@ SWSource >> contentsHash: anObject [
 SWSource >> dirName [
 	self type = #f90 ifTrue: [ ^ 'src' ].
 	self type = #rb ifTrue: [ ^ 'script' ].
+	self type = #mjs ifTrue: [ ^ 'script' ].
 	self error: 'NO IMPLEMENTAION.'.
 ]
 
@@ -153,22 +140,6 @@ SWSource >> put [
 		self client put: self filename contents: self contents.
 	]
 
-]
-
-{ #category : #accessing }
-SWSource >> transpiler [
-
-	^ transpiler ifNil: [
-		transpiler := (self transpilerClass new)
-			source: self;
-			yourself
-	]
-]
-
-{ #category : #accessing }
-SWSource >> transpiler: anObject [
-
-	transpiler := anObject
 ]
 
 { #category : #accessing }
