@@ -15,17 +15,6 @@ Class {
 	#category : #'SWFortranByPharo-Client-Client'
 }
 
-{ #category : #accessing }
-SWSourcesPool class >> default [
-	^ default ifNil: [ default := self new ]
-]
-
-{ #category : #initialization }
-SWSourcesPool class >> reset [
-	<script>
-	default := nil
-]
-
 { #category : #adding }
 SWSourcesPool >> add: aSource [
 	self sources at: aSource moduleName put: aSource
@@ -67,9 +56,9 @@ SWSourcesPool >> initialize [
 	super initialize
 ]
 
-{ #category : #'instance creation' }
-SWSourcesPool >> newTranspiler [
-	^ (self transpilerClass) new
+{ #category : #initialization }
+SWSourcesPool >> reset: aModuleName [
+	self sources removeKey: aModuleName ifAbsent: [  ]
 ]
 
 { #category : #accessing }
@@ -95,7 +84,7 @@ SWSourcesPool >> transpilerClass [
 { #category : #accessing }
 SWSourcesPool >> type [
 	
-	^ type ifNil: [ self error: 'I need to be set a type of me.' ]
+	^ type
 ]
 
 { #category : #accessing }

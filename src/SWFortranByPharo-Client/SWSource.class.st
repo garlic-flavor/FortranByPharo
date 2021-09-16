@@ -33,7 +33,7 @@ SWSource >> classes: anObject [
 SWSource >> contents [
 
 	^ contents ifNil: [
-		contents := self transpiler transpile contents.
+		self error: 'I need be set a contents.'
 	]
 ]
 
@@ -128,26 +128,6 @@ SWSource >> moduleName [
 SWSource >> moduleName: anObject [
 
 	moduleName := anObject
-]
-
-{ #category : #accessing }
-SWSource >> put [
-	|res|
-	res := self client head: self filename.
-	^ ((res entity at: #exists ifAbsent: ['false']) = #true) ifTrue: [
-		res
-	] ifFalse: [
-		self client put: self filename contents: self contents.
-	]
-
-]
-
-{ #category : #accessing }
-SWSource >> transpilerClass [ 
-	self type = #f90 ifTrue: [ ^ SWTranspilerOfFortran ].
-	self type = #rb ifTrue: [ ^ SWTranspilerOfRuby ].
-	self type = #js ifTrue: [ ^ SWTranspilerOfJs ].
-	self error: 'NO IMPLEMENTATION!'.
 ]
 
 { #category : #accessing }

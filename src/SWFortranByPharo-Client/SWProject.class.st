@@ -2,10 +2,10 @@ Class {
 	#name : #SWProject,
 	#superclass : #Object,
 	#instVars : [
+		'type',
 		'client',
-		'sources',
-		'objs',
-		'exeName'
+		'pool',
+		'moduleName'
 	],
 	#category : #'SWFortranByPharo-Client-Client'
 }
@@ -13,7 +13,7 @@ Class {
 { #category : #accessing }
 SWProject >> client [
 
-	^ client
+	^ client ifNil: [ client := SWClient new ]
 ]
 
 { #category : #accessing }
@@ -22,83 +22,25 @@ SWProject >> client: anObject [
 	client := anObject
 ]
 
-{ #category : #execution }
-SWProject >> compileAllAsFortran [
-	self objs: (self sources collect: [ :aSource ||objname res|
-		objname := String streamContents: [ :s |
-			s << 'obj/'; << (aSource at: #program) class name; << '/'; << (aSource at: #hash); << '.o'
-		].
-		res := client post: objname with: {
-			'action' -> 'compile'.
-			'type' -> self type.
-			'sources' -> {aSource at: #Location}.
-		}.
-		self assert: [ res at: #success ].
-		(Dictionary newFrom: aSource)
-			at: #source put: (aSource at: #Location);
-			at: #Location put: (res at: #Location);
-			yourself.
-	])
-]
-
-{ #category : #accessing }
-SWProject >> exeName [
-
-	^ exeName ifNil: [
-		exeName := String streamContents: [ :s |
-			
-			s << 'exe/';
-				<< (self programs isNotEmpty ifTrue: [|head|
-					head := self programs at: 1.
-					(head respondsTo: #programName) ifTrue: [
-						head programName
-					] ifFalse: [
-						(self programs at: 1) class name
-					]
-				] ifFalse: [ 'a' ]);
-				<< '.out'
-		]
-	]
-]
-
-{ #category : #accessing }
-SWProject >> exeName: anObject [
-
-	exeName := anObject
-]
-
 { #category : #running }
 SWProject >> go [
-	|type|
-	type := self sources first type.
-	type = #f90 ifTrue: [
-		^ self
-			putAll;
-			compileAllAsFortran;
-			linkAllAsFortran;
-			run
-	].
+	^ self subclassResponsibility.
 
-	type = #rb ifTrue: [
-		^ self
-			putAll;
-			run
-	].
-
-	self error: 'NO IMPLEMENTATION!'
 ]
 
 { #category : #running }
 SWProject >> goDomestic [
-	^ String streamContents: [ :s |
-		self sources do: [ :aSource ||program|
-			program := aSource mainClass new.
-			(aSource mainClass inheritsFrom: SWStd) ifTrue: [
-				program stdout: s
-			].
-			program main: {  }
-		]
-	]
+	^ self goDomestic: {  }
+]
+
+{ #category : #running }
+SWProject >> goDomestic: args [
+	|aClass|
+	aClass := (Smalltalk globals at: self moduleName) ifNil: [
+		(self pool get: self moduleName) mainClass
+	].
+	^ aClass new main: args.
+
 ]
 
 { #category : #initialization }
@@ -107,89 +49,43 @@ SWProject >> initialize [
 
 ]
 
-{ #category : #execution }
-SWProject >> linkAllAsFortran [
-	|res|
-	res := self client post: self exeName with: { 
-		'action' -> 'link'.
-		'type' -> self type.
-		'sources' -> (self objs collect: [:each | (each at: #Location) asString ]).
-	}.
-	self assert: [ res at: #success ].
-	self exeName: (res at: #Location) asString.
+{ #category : #accessing }
+SWProject >> moduleName [
 
+	^ moduleName
 ]
 
 { #category : #accessing }
-SWProject >> objs [
+SWProject >> moduleName: anObject [
 
-	^ objs
+	moduleName := anObject
 ]
 
 { #category : #accessing }
-SWProject >> objs: anObject [
+SWProject >> pool [
 
-	objs := anObject
-]
-
-{ #category : #execution }
-SWProject >> putAll [
-	self sources do: [ :aSource |
-		aSource
+	^ pool ifNil: [
+		pool := SWSourcesPool new
+			type: self type;
 			client: self client;
-			put.
+			yourself
 	]
 ]
 
-{ #category : #execution }
-SWProject >> run [
-	|type|
-	type := self sources first type.
-	type = #f90 ifTrue: [|res|
-		res := self client post: self exeName with: {
-			'action' -> 'execute'.	
-			'arguments' -> {  }
-		}.
-		(res at: #success) ifFalse: [ Error signal ].
-		^ res
-	].
+{ #category : #accessing }
+SWProject >> pool: anObject [
 
-	type = #rb ifTrue: [
-		^ self client exec: 'ruby' with: {
-			'-I'.
-			'./pharo-local/iceberg/garlic-flavor/FortranByPharo/script'.
-			'-I'.
-			'./'.
-			self sources first filename
-		}
-	].
-
-	self error: 'NO IMPLEMENTATION'
+	pool := anObject
 ]
 
 { #category : #accessing }
-SWProject >> sources [
+SWProject >> type [
 
-	^ sources
+	^ type
 ]
 
 { #category : #accessing }
-SWProject >> sources: anObject [
+SWProject >> type: anObject [
 
-	sources := anObject
-]
-
-{ #category : #execution }
-SWProject >> transpile: aSource [
-	^ self transpilerClass new
-		source: aSource;
-		transpile;
-		contents
-]
-
-{ #category : #accessing }
-SWProject >> transpilerClass [
-	self type = #f90 ifTrue: [ ^ SWTranspilerOfFortran ].
-	self type = #rb ifTrue: [ ^ SWTranspilerOfRuby ].
-	self error: 'NO IMPLEMENTATION!'.
+	type := anObject
 ]
