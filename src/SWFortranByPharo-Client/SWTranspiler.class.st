@@ -381,10 +381,9 @@ SWTranspiler >> transpile [
 	self source entryClass ifNotNil: [
 		self putMainProgram
 	] ifNil: [ 
+			self putExporter.
 		(self source mainClass inheritsFrom: TestCase) ifTrue: [
 			self putTestRunner
-		] ifFalse: [
-			self putExporter
 		]
 	]
 ]

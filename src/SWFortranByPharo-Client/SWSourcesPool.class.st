@@ -10,10 +10,25 @@ Class {
 		'type'
 	],
 	#classVars : [
-		'default'
+		'localScriptDirectory'
 	],
 	#category : #'SWFortranByPharo-Client-Client'
 }
+
+{ #category : #'as yet unclassified' }
+SWSourcesPool class >> localScriptDirectory [
+	^ localScriptDirectory ifNil: [
+		localScriptDirectory := ((IceRepository repositories select: [ :each |
+			each name = #FortranByPharo
+		]) first location / 'script') relativeTo: FileLocator imageDirectory
+	]
+]
+
+{ #category : #initialization }
+SWSourcesPool class >> reset [
+	<script>
+	localScriptDirectory := nil
+]
 
 { #category : #adding }
 SWSourcesPool >> add: aSource [
@@ -30,6 +45,11 @@ SWSourcesPool >> client [
 SWSourcesPool >> client: anObject [
 
 	client := anObject
+]
+
+{ #category : #'initialize-release' }
+SWSourcesPool >> close [
+	client ifNotNil: [ client close. ]
 ]
 
 { #category : #'as yet unclassified' }

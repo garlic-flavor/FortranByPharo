@@ -238,7 +238,7 @@ SWTranspilerOfJs >> ifTrue_ifFalse_For: receiver With: arguments [
 SWTranspilerOfJs >> initialize [
 	super initialize.
 	self newline: String lf.
-	self type: #js.
+	self type: #mjs.
 
 ]
 
@@ -318,28 +318,14 @@ SWTranspilerOfJs >> putArgumentsOf: selector with: arguments [
 
 { #category : #'as yet unclassified' }
 SWTranspilerOfJs >> putBlock: aBlock [
-	self 
-		put: 'proc';
-		putBlockWithoutProc: aBlock
-
-]
-
-{ #category : #'as yet unclassified' }
-SWTranspilerOfJs >> putBlockWithoutProc: aBlock [
-	self 
-		pushMessageNest;
-		put: '{'.
-	(0 < aBlock arguments size) ifTrue: [
-		self put: '|'.
-		aBlock argumentNames do: [ :each |
-			self put: each asString
-		] separatedBy: [
-			self put: ', '
-		].
-		self put: '|'
-	].
 	self
-		putLine;
+		pushMessageNest;
+		put: 'function ('.
+	aBlock argumentNames do: [ :each |
+		self put: each asString
+	] separatedBy: [ self put: ', ' ].
+	self
+		putLine: ') {';
 		transpile: aBlock body;
 		put: '}';
 		popMessageNest
@@ -472,22 +458,32 @@ SWTranspilerOfJs >> putNil [
 { #category : #'code generation' }
 SWTranspilerOfJs >> putRequirements [
 	|sel|
-	sel := #'js_requirements'.
+	sel := #'mjs_requirements'.
 	self source classes do: [:aClass |
 		(aClass respondsTo: sel) ifTrue: [
-			(aClass perform: sel) do: [ :dependence |
+			(aClass perform: sel) do: [ :dependence ||s|
 				dependence isString ifTrue: [
-					self putLine: dependence
-				] ifFalse: [|s|
-					s := self pool get: dependence name.
+					^ self putLine: dependence
+				].
+				dependence isArray ifTrue: [
 					self
-						put: 'import {';
-						put: s moduleName;
+						put: 'import {'.
+					(dependence at: 2) do: [ :each |
+						self put: each asString
+					 ] separatedBy: [ self put: ', ' ].
+					self
 						put: '} from ''../../';
-						put: s filename;
-						putLine: ''';'
-						
-				]
+						put: (SWSourcesPool localScriptDirectory / (dependence at: 1)) fullName;
+						putLine: ''';'.
+					^ self
+				].
+				s := self pool get: dependence name.
+				self
+					put: 'import {';
+					put: s moduleName;
+					put: '} from ''../../';
+					put: s filename;
+					putLine: ''';'
 			]
 		]
 	]
@@ -503,10 +499,16 @@ SWTranspilerOfJs >> putSymbol: aSymbol [
 
 { #category : #'as yet unclassified' }
 SWTranspilerOfJs >> putTestRunner [
+	|hasRunner|
+	hasRunner := false.
+	self source mainClass methods do: [ :each |
+		(each protocol beginsWith: 'test') ifTrue: [ hasRunner := true ]
+	].
+	hasRunner ifFalse: [ ^ self ].
 	self
-		put: 'runner = ';
+		put: 'var runner = new ';
 		put: self source mainClass asString;
-		putLine: '.new'.
+		putLine: ';'.
 	(self source mainClass methods select: [ :each |
 		each protocol beginsWith: 'test'
 	]) do: [ :each |

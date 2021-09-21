@@ -8,7 +8,7 @@ Class {
 }
 
 { #category : #'code generation' }
-SWTestHelloWorld class >> js_requirements [
+SWTestHelloWorld class >> mjs_requirements [
 	^ { 
 		SWStd.
 	}

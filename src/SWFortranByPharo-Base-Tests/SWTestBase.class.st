@@ -2,14 +2,29 @@ Class {
 	#name : #SWTestBase,
 	#superclass : #TestCase,
 	#instVars : [
-		'source',
-		'client',
 		'type',
+		'project',
 		'runAsClient',
 		'usingPharoServer'
 	],
 	#category : #'SWFortranByPharo-Base-Tests'
 }
+
+{ #category : #'code generation' }
+SWTestBase class >> mjs_requirements [
+	^ { 
+		{'Pharo.mjs'. {'TestCase'}}
+	}
+]
+
+{ #category : #'code generation' }
+SWTestBase class >> mjs_setUpUsing: transpiler [
+]
+
+{ #category : #'code generation' }
+SWTestBase class >> mjs_tearDownUsing: transpiler [
+
+]
 
 { #category : #'code generation' }
 SWTestBase class >> rb_requirements [
@@ -18,7 +33,7 @@ SWTestBase class >> rb_requirements [
 	}
 ]
 
-{ #category : #'as yet unclassified' }
+{ #category : #'code generation' }
 SWTestBase class >> rb_tearDownUsing: transpiler [
 
 ]
@@ -28,47 +43,22 @@ SWTestBase >> assertLines: left equal: right [
 	self assert: (left copyReplaceAll: String lf with: String cr) equals: right
 ]
 
-{ #category : #'code generation - accessing' }
-SWTestBase >> client [
-
-	^ client ifNil: [
-		self runAsClient ifTrue: [
-			self usingPharoServer ifTrue: [
-				SWServer isRunning ifFalse: [ SWServer start ]
-			].
-			client := SWClient new
-		] ifFalse: [
-			nil
-		]
-	]
-]
-
-{ #category : #'code generation - accessing' }
-SWTestBase >> client: anObject [
-
-	client := anObject
-]
-
 { #category : #'code generation - running' }
 SWTestBase >> go [
-	self runAsClient: true.
-	self usingPharoServer: true.
-	^ SWProject new
-		sources: { self source };
-		client: self client;
-		putAll;
-		run
-]
+	^ self runAsClient ifTrue: [ |res status|
+		self usingPharoServer ifTrue: [ 
+			SWServer start.
+		].
+		res := project go.
+		status := SWServerStatus fromSton: (STON reader on: res readStream; yourself).
+		status isOk ifFalse: [|message|
+			message := status message.
+		].
+		status inspect.
+	] ifFalse: [
+		project goDomestic.
+	]
 
-{ #category : #'code generation - running' }
-SWTestBase >> goOnExternalServer [
-	self runAsClient: true.
-	self usingPharoServer: false.
-	^ SWProject new
-		sources: { self source };
-		client: self client;
-		putAll;
-		run
 ]
 
 { #category : #asserting }
@@ -79,6 +69,17 @@ SWTestBase >> mustFail: aBlock [
 		^ true
 	].
 	self error: aBlock asString, ' must fail.'
+]
+
+{ #category : #'code generation - accessing' }
+SWTestBase >> ready: aModuleName [
+	self type = #mjs ifTrue: [ 
+		project := SWProjectOfJs new
+			moduleName: aModuleName;
+			yourself.
+		^ self
+	].
+	self halt.
 ]
 
 { #category : #'code generation - accessing' }
@@ -96,44 +97,19 @@ SWTestBase >> runAsClient: anObject [
 { #category : #running }
 SWTestBase >> setUp [
 	super setUp.
-	
-]
 
-{ #category : #'code generation - accessing' }
-SWTestBase >> source [
-
-	^ source ifNil: [
-		self runAsClient ifTrue: [
-			source := SWSource new
-				classes: { self class };
-				type: self type;
-				client: self client;
-				put;
-				yourself
-		] ifFalse: [
-			nil
-		]
-	]
-]
-
-{ #category : #'code generation - accessing' }
-SWTestBase >> source: anObject [
-
-	source := anObject
 ]
 
 { #category : #running }
 SWTestBase >> tearDown [
-	self client ifNotNil: [
-		self client close
-	].
+	project ifNotNil: [ project close ].
 	SWServer isRunning ifTrue: [ SWServer stop ].
 	super tearDown
 ]
 
 { #category : #'code generation - accessing' }
 SWTestBase >> type [
-	self assert: type isNotNil.
+
 	^ type
 ]
 

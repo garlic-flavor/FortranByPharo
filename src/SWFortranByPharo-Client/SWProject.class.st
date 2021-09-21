@@ -2,13 +2,25 @@ Class {
 	#name : #SWProject,
 	#superclass : #Object,
 	#instVars : [
-		'type',
 		'client',
 		'pool',
-		'moduleName'
+		'moduleName',
+		'args'
 	],
 	#category : #'SWFortranByPharo-Client-Client'
 }
+
+{ #category : #accessing }
+SWProject >> args [
+
+	^ args ifNil: [ args := {  } ]
+]
+
+{ #category : #accessing }
+SWProject >> args: anObject [
+
+	args := anObject
+]
 
 { #category : #accessing }
 SWProject >> client [
@@ -22,6 +34,12 @@ SWProject >> client: anObject [
 	client := anObject
 ]
 
+{ #category : #'initialize-release' }
+SWProject >> close [
+	client ifNotNil: [ client close. ].
+
+]
+
 { #category : #running }
 SWProject >> go [
 	^ self subclassResponsibility.
@@ -30,16 +48,11 @@ SWProject >> go [
 
 { #category : #running }
 SWProject >> goDomestic [
-	^ self goDomestic: {  }
-]
-
-{ #category : #running }
-SWProject >> goDomestic: args [
 	|aClass|
 	aClass := (Smalltalk globals at: self moduleName) ifNil: [
 		(self pool get: self moduleName) mainClass
 	].
-	^ aClass new main: args.
+	^ aClass new main: self args.
 
 ]
 
@@ -81,11 +94,5 @@ SWProject >> pool: anObject [
 { #category : #accessing }
 SWProject >> type [
 
-	^ type
-]
-
-{ #category : #accessing }
-SWProject >> type: anObject [
-
-	type := anObject
+	^ self subclassResponsibility 
 ]

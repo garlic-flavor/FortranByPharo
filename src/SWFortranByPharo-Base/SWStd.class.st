@@ -11,14 +11,14 @@ Class {
 }
 
 { #category : #'code generation' }
-SWStd class >> js_error_Using: transpiler [
+SWStd class >> mjs_error_Using: transpiler [
 	transpiler putCode: '\
 		throw msg;
 	\'
 ]
 
 { #category : #'code generation' }
-SWStd class >> js_print_Using: transpiler [
+SWStd class >> mjs_print_Using: transpiler [
 	transpiler putCode: '\
 		console.log(msg);
 	\'

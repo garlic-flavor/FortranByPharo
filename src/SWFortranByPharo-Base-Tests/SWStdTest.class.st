@@ -11,20 +11,28 @@ Class {
 }
 
 { #category : #'code generation' }
+SWStdTest class >> mjs_requirements [
+	^ {
+		SWTestBase.
+		SWStd.
+	}
+]
+
+{ #category : #'code generation' }
 SWStdTest class >> rb_requirements [
 	^ {
 		'Pharo.rb'.
 		SWTestBase.
 		SWStd.
-		SWSession.
 	}
 ]
 
 { #category : #running }
 SWStdTest >> setUp [
+	self type: #mjs.
 	super setUp.
 	std := SWStd new.
-	self type: #rb.
+	
 ]
 
 { #category : #test }
@@ -39,17 +47,12 @@ SWStdTest >> testError [
 ]
 
 { #category : #'code generation - tests' }
-SWStdTest >> testPut [
-	(self
-		type: #rb;
-		runAsClient: true;
-		usingPharoServer: true;
-		source) inspect
-]
-
-{ #category : #'code generation - tests' }
 SWStdTest >> testThis [
 	self
+		type: #mjs;
+		ready: self class name;
+		runAsClient: true;
+		usingPharoServer: true;
 		go.
 
 ]

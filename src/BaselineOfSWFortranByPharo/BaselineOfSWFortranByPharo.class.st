@@ -40,8 +40,6 @@ BaselineOfSWFortranByPharo >> setUpDependencies: spec [
 	spec 
 		baseline: 'OSSubprocess'
 			with: [spec repository: 'github://pharo-contributions/OSSubprocess:master/repository'];
-		baseline: 'SQLite3'
-			with: [ spec repository: 'github://pharo-rdbms/Pharo-SQLite3/src' ];
 		baseline: 'ZincHTTPComponents'
  			with: [ spec repository: 'github://svenvc/zinc/repository' ]
 
