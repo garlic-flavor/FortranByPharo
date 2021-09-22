@@ -86,19 +86,6 @@ SWServer class >> testRunning [
 	^ ZnServer default isRunning ifTrue: [ 'The server is running' ] ifFalse: [ 'The server is not running' ]
 ]
 
-{ #category : #'code generation' }
-SWServer class >> transpile [
-	<script>
-	|instance contents|
-	instance := self new.
-	contents := SWTranspilerOfRuby new 
-		classes: { SWStd. SWServerInstruction. SWServerStatus. SWSession. self };
-		transpile;
-		contents.
-	contents inspect.
-
-]
-
 { #category : #accessing }
 SWServer >> env [
 
