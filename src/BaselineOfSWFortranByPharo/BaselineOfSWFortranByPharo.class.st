@@ -42,8 +42,10 @@ BaselineOfSWFortranByPharo >> setUpDependencies: spec [
 			with: [spec repository: 'github://pharo-contributions/OSSubprocess:master/repository'];
 		baseline: 'ZincHTTPComponents'
  			with: [ spec
-					loads: #('Zinc-WebSocket-Core');
-					repository: 'github://svenvc/zinc/repository' ]
+					repository: 'github://svenvc/zinc/repository' ];
 
+		package: 'Zinc-WebSocket-Core' with: [
+			spec
+				repository: 'github://svenvc/zinc' ].
 
 ]
