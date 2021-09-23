@@ -215,11 +215,6 @@ SWTranspiler >> putComment: aComment [
 	^ self subclassResponsibility 
 ]
 
-{ #category : #'as yet unclassified' }
-SWTranspiler >> putExporter [
-	^ self subclassResponsibility 
-]
-
 { #category : #'code generation' }
 SWTranspiler >> putFileFooterOf: filename [
 ]
@@ -381,7 +376,6 @@ SWTranspiler >> transpile [
 	self source entryClass ifNotNil: [
 		self putMainProgram
 	] ifNil: [ 
-			self putExporter.
 		(self source mainClass inheritsFrom: TestCase) ifTrue: [
 			self putTestRunner
 		]
@@ -394,7 +388,7 @@ SWTranspiler >> transpile: anObject [
 ]
 
 { #category : #'code generation - protected' }
-SWTranspiler >> transpiledNameOf: aMethod [
+SWTranspiler >> transpilerNameOf: aMethod [
 	^ (String streamContents: [ :s |
 		s
 			<< self type;

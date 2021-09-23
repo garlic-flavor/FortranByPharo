@@ -18,10 +18,6 @@ SWTestBase class >> mjs_requirements [
 ]
 
 { #category : #'code generation' }
-SWTestBase class >> mjs_setUpUsing: transpiler [
-]
-
-{ #category : #'code generation' }
 SWTestBase class >> mjs_tearDownUsing: transpiler [
 
 ]
@@ -45,16 +41,15 @@ SWTestBase >> assertLines: left equal: right [
 
 { #category : #'code generation - running' }
 SWTestBase >> go [
-	^ self runAsClient ifTrue: [ |res status|
+	^ self runAsClient ifTrue: [ |res status message|
 		self usingPharoServer ifTrue: [ 
 			SWServer start.
 		].
 		res := project go.
 		status := SWServerStatus fromSton: (STON reader on: res readStream; yourself).
-		status isOk ifFalse: [|message|
-			message := status message.
-		].
+		message := status message.
 		status inspect.
+		self assert: status isOk.
 	] ifFalse: [
 		project goDomestic.
 	]
@@ -69,6 +64,11 @@ SWTestBase >> mustFail: aBlock [
 		^ true
 	].
 	self error: aBlock asString, ' must fail.'
+]
+
+{ #category : #'as yet unclassified' }
+SWTestBase >> ready [
+	self ready: self class name
 ]
 
 { #category : #'code generation - accessing' }
@@ -107,13 +107,13 @@ SWTestBase >> tearDown [
 	super tearDown
 ]
 
-{ #category : #'code generation - accessing' }
+{ #category : #asserting }
 SWTestBase >> type [
 
 	^ type
 ]
 
-{ #category : #'code generation - accessing' }
+{ #category : #asserting }
 SWTestBase >> type: anObject [
 
 	type := anObject

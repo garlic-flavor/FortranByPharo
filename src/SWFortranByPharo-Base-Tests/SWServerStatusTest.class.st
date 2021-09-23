@@ -11,6 +11,14 @@ Class {
 }
 
 { #category : #'code generation' }
+SWServerStatusTest class >> mjs_requirements [
+	^ {
+		SWServerStatus.
+		SWTestBase
+	}
+]
+
+{ #category : #'code generation' }
 SWServerStatusTest class >> rb_requirements [
 	^ {
 		SWServerStatus.
@@ -33,10 +41,21 @@ SWServerStatusTest >> testStonOn [
 		message: 'the requested method is not implemented.';
 		toComplete: 100.
 	status2 := SWServerStatus fromSton: (STON reader on: (status toString) readStream).
+	Transcript show: status2 toString.
 	self assert: [status2 isGood]
 ]
 
-{ #category : #tests }
+{ #category : #'code generation - tests' }
+SWServerStatusTest >> testThis [
+	self
+		type: #mjs;
+		runAsClient: true;
+		usingPharoServer: true;
+		ready;
+		go.
+]
+
+{ #category : #'code generation - tests' }
 SWServerStatusTest >> testThisOnExternalServer [ 
 	self
 		goOnExternalServer

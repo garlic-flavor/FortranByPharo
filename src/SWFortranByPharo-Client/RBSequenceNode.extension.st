@@ -6,7 +6,7 @@ RBSequenceNode >> transpileUsing: transpiler [
 	self children do: [ :one|
 		one class = RBVariableNode ifFalse: [
 			one transpileUsing: transpiler.
-			transpiler putLine: ''
+			transpiler putLine: ';'
 		]
 	].
 	transpiler decIndent.

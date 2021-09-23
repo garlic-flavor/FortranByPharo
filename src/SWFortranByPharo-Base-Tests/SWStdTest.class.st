@@ -37,7 +37,7 @@ SWStdTest >> setUp [
 
 { #category : #test }
 SWStdTest >> testAssert [
-	self mustFail: [std assert: false].
+	self mustFail: [std assert: [false]].
 	std assert: [true].
 ]
 
@@ -50,9 +50,9 @@ SWStdTest >> testError [
 SWStdTest >> testThis [
 	self
 		type: #mjs;
-		ready: self class name;
 		runAsClient: true;
 		usingPharoServer: true;
+		ready;
 		go.
 
 ]

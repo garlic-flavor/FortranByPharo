@@ -26,8 +26,9 @@ SWTranspilerOfJs >> and_For: receiver With: arguments [
 SWTranspilerOfJs >> anySatisfy_For: receiver With: arguments [
 	self
 		transpile: receiver;
-		put: '.find';
-		putBlockWithoutProc: (arguments at: 1)
+		put: '.find(';
+		putBlock: (arguments at: 1);
+		put: ')'.
 
 ]
 
@@ -168,16 +169,12 @@ SWTranspilerOfJs >> ifFalse_For: receiver With: arguments [
 SWTranspilerOfJs >> ifNil_For: receiver With: arguments [
 	self
 		pushMessageNest;
-		put: '(if ';
-		transpile: receiver;
-		putLine: '.nil?';
+		put: '(o=>{ if(o === undefined || o === null) { return (';
 		transpile: (arguments at: 1) body;
-		putLine: 'else';
-		incIndent;
+		put: '); } else {';
+		put: 'return o; }})(';
 		transpile: receiver;
-		putLine;
-		decIndent;
-		put: 'end)';
+		put: ')';
 		popMessageNest
 		
 ]
@@ -224,13 +221,13 @@ SWTranspilerOfJs >> ifTrue_For: receiver With: arguments [
 SWTranspilerOfJs >> ifTrue_ifFalse_For: receiver With: arguments [
 	self
 		pushMessageNest;
-		put: '(if ';
-		transpile: receiver;
-		putLine;
+		putLine: '(o=>{ if(o){ return (';
 		transpile: (arguments at: 1) body;
-		putLine: 'else';
+		putLine: ');} else { return (';
 		transpile: (arguments at: 2) body;
-		put: 'end)';
+		put: '); }})(';
+		transpile: receiver;
+		put: ')';
 		popMessageNest
 ]
 
@@ -250,16 +247,26 @@ SWTranspilerOfJs >> join_For: receiver With: arguments [
 		popMessageNest
 ]
 
+{ #category : #'instance creation' }
+SWTranspilerOfJs >> newFor: receiver With: arguments [
+	self
+		put: 'new ';
+		transpile: receiver;
+		putLine: '();'
+
+]
+
 { #category : #'as yet unclassified' }
 SWTranspilerOfJs >> on_do_For: receiver With: arguments [
 	self
 		pushMessageNest;
-		putLine: 'begin';
+		putLine: 'try{';
 		transpile: receiver body;
-		put: 'rescue => ';
-		putLine: ((0 < (arguments at: 2) arguments size) ifTrue: [ (arguments at: 2) argumentNames at: 1 ] ifFalse: ['e']);
+		put: '} catch (';
+		put: ((0 < (arguments at: 2) arguments size) ifTrue: [ (arguments at: 2) argumentNames at: 1 ] ifFalse: ['e']);
+		putLine: '){';
 		transpile: (arguments at: 2) body;
-		put: 'end';
+		put: '}';
 		popMessageNest
 ]
 
@@ -325,7 +332,7 @@ SWTranspilerOfJs >> putBlock: aBlock [
 		self put: each asString
 	] separatedBy: [ self put: ', ' ].
 	self
-		putLine: ') {';
+		put: ') { return ';
 		transpile: aBlock body;
 		put: '}';
 		popMessageNest
@@ -336,7 +343,7 @@ SWTranspilerOfJs >> putBlock: aBlock [
 { #category : #'as yet unclassified' }
 SWTranspilerOfJs >> putClassDefinition: aClass [
 	self putComment: aClass comment.
-	self put: 'class '.
+	self put: 'export class '.
 	self put: aClass name.
 	(aClass superclass = Object) ifFalse: [
 		self put: ' extends '; put: aClass superclass name
@@ -344,26 +351,59 @@ SWTranspilerOfJs >> putClassDefinition: aClass [
 	self putLine: '{'.
 	self incIndent.
 
-	aClass classVariables do: [ :aVal |
-		self put: '@@'; put: aVal name; putLine: ' = nil'
+	self
+		putLine: 'constructor(){';
+		incIndent.
+	(aClass superclass = Object) ifFalse: [ 
+		self putLine: 'super();'.
 	].
-
 	aClass instanceVariables do: [ :aVal |
-		self put: '_'; put: aVal name; putLine: ' = null'
+		self put: 'this._'; put: aVal name; putLine: ' = null;'
 	].
-
-	aClass class methods select: [:aMethod | (aMethod protocol beginsWith: 'code generation') not ] thenDo: [ :aMethod |
-		self putMethod: aMethod ofClass: aClass
-	].
+	self
+		decIndent;
+		putLine: '}'.
 
 	aClass methods select: [ :aMethod | (aMethod protocol beginsWith: 'code generation') not ] thenDo: [ :aMethod |
 		self putMethod: aMethod ofClass: aClass
 	].
 
-	self flag: #toImplement.
-
 	self decIndent.
 	self putLine: '}'.
+	
+	aClass classVariables do: [ :aVal |
+		self put: aClass name; put: '.'; put: aVal name; putLine: ' = nil'
+	].
+
+	aClass class methods select: [:aMethod | (aMethod protocol beginsWith: 'code generation') not ] thenDo: [ :aMethod |
+		self putClassMethod: aMethod ofClass: aClass.
+	].
+
+]
+
+{ #category : #'as yet unclassified' }
+SWTranspilerOfJs >> putClassMethod: aMethod ofClass: aClass [
+	|sel|
+	sel := self class transpiledNameOf: aMethod selector.
+	self
+		putComment: aMethod comment;
+		put: aClass name; put: '.'; put: sel; put: ' = ';
+		put: 'function(';
+		put: (', ' join: (aMethod argumentNames collect: [ :each | each asString ]));
+		putLine: ') {';
+		pushMessageNest.
+	sel := self transpilerNameOf: aMethod.
+	(aClass respondsTo: sel) ifTrue: [
+		self incIndent.
+		aClass perform: sel with: self.
+		self decIndent.
+		self putLine.
+	] ifFalse: [
+		aMethod transpileUsing: self.
+	].
+	self
+		putLine: '};';
+		popMessageNest.
 ]
 
 { #category : #'as yet unclassified' }
@@ -375,14 +415,6 @@ SWTranspilerOfJs >> putComment: comment [
 				putLine: aLine
 		]
 	]
-]
-
-{ #category : #'as yet unclassified' }
-SWTranspilerOfJs >> putExporter [
-	self
-		put: 'export {';
-		put: (', ' join: (self source classes collect: [ :each | each name ]));
-		putLine: '}'.
 ]
 
 { #category : #'as yet unclassified' }
@@ -415,9 +447,6 @@ SWTranspilerOfJs >> putMainProgram [
 { #category : #'as yet unclassified' }
 SWTranspilerOfJs >> putMessage: receiver call: selector with: arguments [
 	(receiver respondsTo: #name) ifTrue: [
-		(receiver name = 'super') ifTrue: [
-			^ self putFunctionCallOf: 'super' with: arguments
-		].
 		(receiver name = 'self') ifTrue: [ 
 			^ super putMessage: (RBVariableNode new name: 'this'; yourself) call: selector with: arguments
 		].
@@ -430,13 +459,12 @@ SWTranspilerOfJs >> putMethod: aMethod ofClass: aClass [
 	|sel|
 	self
 		putComment: aMethod comment;
-		put: ((aMethod methodClass class = Metaclass) ifTrue: ['self.'] ifFalse: [ '' ]);
 		put: (self class transpiledNameOf: aMethod selector);
 		put: '(';
 		put: (', ' join: (aMethod argumentNames collect: [ :each | each asString ]));
 		putLine: ') {';
 		pushMessageNest.
-	sel := self transpiledNameOf: aMethod.
+	sel := self transpilerNameOf: aMethod.
 	(aClass respondsTo: sel) ifTrue: [
 		self incIndent.
 		aClass perform: sel with: self.
@@ -493,8 +521,9 @@ SWTranspilerOfJs >> putRequirements [
 { #category : #'as yet unclassified' }
 SWTranspilerOfJs >> putSymbol: aSymbol [
 	self
-		put: ':';
-		put: (self class transpiledNameOf: aSymbol)
+		put: '''';
+		put: (self class transpiledNameOf: aSymbol);
+		put: ''''
 ]
 
 { #category : #'as yet unclassified' }
@@ -513,10 +542,11 @@ SWTranspilerOfJs >> putTestRunner [
 		each protocol beginsWith: 'test'
 	]) do: [ :each |
 		self
-			putLine: 'runner.setUp';
+			putLine: 'runner.setUp();';
 			put: 'runner.';
-			putLine: each selector asString;
-			putLine: 'runner.tearDown'
+			put: each selector asString;
+			putLine: '();';
+			putLine: 'runner.tearDown();'
 	]
 
 ]
@@ -530,7 +560,7 @@ SWTranspilerOfJs >> putVariable: aVariableNode [
 	].
 
 	(aVariableNode isInstanceVariable) ifTrue: [
-		^ self put: '_'; put: aVariableNode name
+		^ self put: 'this._'; put: aVariableNode name
 	].
 
 	(aVariableNode isClassVariable) ifTrue: [
@@ -549,9 +579,10 @@ SWTranspilerOfJs >> valueFor: receiver With: argunents [
 { #category : #'as yet unclassified' }
 SWTranspilerOfJs >> value_For: receiver With: arguments [
 	self
+		put: '(';
 		transpile: receiver;
-		put: '.';
-		putFunctionCallOf: 'call' with: arguments
+		put: ')';
+		putArgumentsOf: '' with: arguments
 ]
 
 { #category : #'as yet unclassified' }
