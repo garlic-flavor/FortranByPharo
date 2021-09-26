@@ -14,16 +14,14 @@ Class {
 		'newline',
 		'preventNewline',
 		'messageNest',
-		'pool'
-	],
-	#classVars : [
-		'selectorName'
+		'pool',
+		'logger'
 	],
 	#category : #'SWFortranByPharo-Client-Transpiler'
 }
 
 { #category : #'code generation - protected' }
-SWTranspiler class >> transpiledNameOf: selector [
+SWTranspiler class >> transpiledSelectorNameOf: selector [
 	selector = '=' ifTrue: [ ^ 'opEqual_' ].
 	selector = '~=' ifTrue: [ ^ 'opNotEqual_' ].
 	selector = ',' ifTrue: [ ^ 'opCamma_' ].
@@ -34,6 +32,7 @@ SWTranspiler class >> transpiledNameOf: selector [
 
 { #category : #'code generation' }
 SWTranspiler >> assign: key with: value [
+	self logger log: [ key asString, ' = ', value asString ].
 	self transpile: key; put: ' = '.
 	value transpileUsing: self.
 
@@ -82,6 +81,16 @@ SWTranspiler >> initialize [
 ]
 
 { #category : #accessing }
+SWTranspiler >> logger [
+	^ logger ifNil: [ logger := SWLogger new ]
+]
+
+{ #category : #accessing }
+SWTranspiler >> logging: trueOrFalse [
+	self logger enabled: trueOrFalse
+]
+
+{ #category : #accessing }
 SWTranspiler >> newline [
 
 	^ newline
@@ -93,12 +102,14 @@ SWTranspiler >> newline: anObject [
 	newline := anObject
 ]
 
-{ #category : #'as yet unclassified' }
-SWTranspiler >> opEqual_for: receiver with: arguments [
+{ #category : #'code generation' }
+SWTranspiler >> opEqual_For: receiver With: arguments [
+	self logger log: [ receiver asString, ' == ', (arguments at: 1) asString ].
 	self
 		transpile: receiver;
 		put: ' == ';
-		putArgumentsOf: '=' with: arguments
+		transpile: (arguments at: 1).
+
 ]
 
 { #category : #accessing }
@@ -130,6 +141,7 @@ SWTranspiler >> pushMessageNest [
 
 { #category : #'code generation' }
 SWTranspiler >> put: code [
+	self logger log: code.
 	self putIndent.
 	stream nextPutAll: code.
 ]
@@ -141,6 +153,7 @@ SWTranspiler >> putArgumentsOf: selector with: artuments [
 
 { #category : #'code generation' }
 SWTranspiler >> putArray: anArray [
+	self logger log.
 	anArray do: [:each |
 		each transpileUsing: self.
 	] separatedBy: [
@@ -161,6 +174,7 @@ SWTranspiler >> putArrayHeader [
 
 { #category : #'code generation' }
 SWTranspiler >> putArrayLiteral: anArray [
+	self logger log.
 	self
 		put: '[ ';
 		putArray: anArray;
@@ -168,13 +182,15 @@ SWTranspiler >> putArrayLiteral: anArray [
 	^ anArray
 ]
 
-{ #category : #'as yet unclassified' }
+{ #category : #'code generation' }
 SWTranspiler >> putBlock: aBlock [
 	^ self subclassResponsibility 
 ]
 
-{ #category : #'as yet unclassified' }
+{ #category : #'code generation' }
 SWTranspiler >> putCharacter: c [
+	self logger log.
+
 	self
 		put: '"';
 		put: c asString;
@@ -195,6 +211,8 @@ SWTranspiler >> putCode: code [
 SWTranspiler >> putCode: code with: anAssociationArray [
 	"when a line in code ends with $\, the line continues to the next."
 	|matcher leftPad escaped|
+	self logger log.
+
 	matcher := RxMatcher forString: '(\\\r|\s+\\$)'.
 	escaped := matcher copy: code replacingMatchesWith: ''.
 	leftPad := (escaped findFirst: [ :c | c ~= Character tab ])-1.
@@ -275,16 +293,17 @@ SWTranspiler >> putMainProgram [
 { #category : #'code generation' }
 SWTranspiler >> putMessage: receiver call: selector with: arguments [
 	self flag: #toImplement.
+	self logger log: [receiver asString, '>>', selector asString].
 	self incMessageNest.
-	[ |transpiledName uniqueSelector|
-		transpiledName := (self class transpiledNameOf: selector) asSymbol.
-		uniqueSelector := transpiledName, 'For:With:'.
+	[ |selectorName uniqueSelector|
+		selectorName := (self class transpiledSelectorNameOf: selector) asSymbol.
+		uniqueSelector := selectorName, 'For:With:'.
 		(self respondsTo: uniqueSelector) ifTrue: [
 			^ self perform: uniqueSelector with: receiver with: arguments
 		].
 		receiver transpileUsing: self.
-		(transpiledName first isLetter) ifTrue: [ self put: '.' ].
-		self putFunctionCallOf: transpiledName with: arguments.
+		(selectorName first isLetter) ifTrue: [ self put: '.' ].
+		self putFunctionCallOf: selectorName with: arguments.
 	] ensure: [ self decMessageNest ].
 
 ]
@@ -294,13 +313,14 @@ SWTranspiler >> putMethod: selector ofClass: class [
 	^ self subclassResponsibility 
 ]
 
-{ #category : #'as yet unclassified' }
+{ #category : #'code generation' }
 SWTranspiler >> putNil [
 	^ self subclassResponsibility
 ]
 
 { #category : #'code generation' }
 SWTranspiler >> putParameters: anArray [
+	self logger log.
 	anArray do: [:each |
 		self put: each asString
 	] separatedBy: [
@@ -315,25 +335,32 @@ SWTranspiler >> putRequirements [
 ]
 
 { #category : #'code generation' }
+SWTranspiler >> putSequence: aSequence [
+	^ self subclassResponsibility 
+]
+
+{ #category : #'code generation' }
 SWTranspiler >> putString: aString [
+	self logger log.
 	self
 		put: '"';
 		put: aString;
 		put: '"'.
 ]
 
-{ #category : #'as yet unclassified' }
+{ #category : #'code generation' }
 SWTranspiler >> putSymbol: aSymbol [
 	^ self subclassResponsibility 
 ]
 
-{ #category : #'as yet unclassified' }
+{ #category : #'code generation' }
 SWTranspiler >> putTestRunner [
 	^ self subclassResponsibility 
 ]
 
-{ #category : #'as yet unclassified' }
+{ #category : #'code generation' }
 SWTranspiler >> putVariable: aVariableNode [
+	self logger log: aVariableNode name.
 	self put: aVariableNode name
 ]
 
@@ -382,8 +409,9 @@ SWTranspiler >> transpile [
 	]
 ]
 
-{ #category : #execution }
+{ #category : #'code generation' }
 SWTranspiler >> transpile: anObject [
+	self logger log.
 	^ anObject transpileUsing: self
 ]
 
@@ -393,7 +421,7 @@ SWTranspiler >> transpilerNameOf: aMethod [
 		s
 			<< self type;
 			<< '_';
-			<< (self class transpiledNameOf: aMethod selector);
+			<< (self class transpiledSelectorNameOf: aMethod selector);
 			<< 'Using:'
 	]) asSymbol.
 

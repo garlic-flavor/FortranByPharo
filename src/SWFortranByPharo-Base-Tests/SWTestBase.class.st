@@ -48,8 +48,10 @@ SWTestBase >> go [
 		res := project go.
 		status := SWServerStatus fromSton: (STON reader on: res readStream; yourself).
 		message := status message.
-		status inspect.
-		self assert: status isOk.
+		status isOk ifFalse: [
+			status inspect.
+			self error: 'The execution failed.'
+		].
 	] ifFalse: [
 		project goDomestic.
 	]

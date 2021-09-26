@@ -440,12 +440,12 @@ SWTranspilerOfRuby >> putMethod: aMethod ofClass: aClass [
 		putComment: aMethod comment;
 		put: 'def ';
 		put: ((aMethod methodClass class = Metaclass) ifTrue: ['self.'] ifFalse: [ '' ]);
-		put: (self class transpiledNameOf: aMethod selector);
+		put: (self class transpiledSelectorNameOf: aMethod selector);
 		put: '(';
 		put: (', ' join: (aMethod argumentNames collect: [ :each | each asString ]));
 		putLine: ')';
 		pushMessageNest.
-	sel := self transpiledNameOf: aMethod.
+	sel := self transpiledSelectorNameOf: aMethod.
 	(aClass respondsTo: sel) ifTrue: [
 		self incIndent.
 		aClass perform: sel with: self.
@@ -492,7 +492,7 @@ SWTranspilerOfRuby >> putRequirements [
 SWTranspilerOfRuby >> putSymbol: aSymbol [
 	self
 		put: ':';
-		put: (self class transpiledNameOf: aSymbol)
+		put: (self class transpiledSelectorNameOf: aSymbol)
 ]
 
 { #category : #'as yet unclassified' }

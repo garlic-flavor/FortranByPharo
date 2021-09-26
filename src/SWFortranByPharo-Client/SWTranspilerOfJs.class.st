@@ -4,25 +4,28 @@ I am a Pharo to ECMAScript (with node.js) transpiler.
 Class {
 	#name : #SWTranspilerOfJs,
 	#superclass : #SWTranspiler,
+	#instVars : [
+		'thisStack'
+	],
 	#category : #'SWFortranByPharo-Client-Transpiler'
 }
 
 { #category : #'code generation - protected' }
-SWTranspilerOfJs class >> transpiledNameOf: aName [
+SWTranspilerOfJs class >> transpiledSelectorNameOf: aName [
 	aName = '<<' ifTrue: [ ^ 'input_' ].
-	^ super transpiledNameOf: aName
+	^ super transpiledSelectorNameOf: aName
 ]
 
-{ #category : #'as yet unclassified' }
+{ #category : #'code generation' }
 SWTranspilerOfJs >> and_For: receiver With: arguments [
 	self
 		transpile: receiver;
 		put: ' && ';
 		preventNewline;
-		transpile: (arguments at: 1) body.
+		putSequence: (arguments at: 1) body.
 ]
 
-{ #category : #'as yet unclassified' }
+{ #category : #'code generation' }
 SWTranspilerOfJs >> anySatisfy_For: receiver With: arguments [
 	self
 		transpile: receiver;
@@ -32,7 +35,7 @@ SWTranspilerOfJs >> anySatisfy_For: receiver With: arguments [
 
 ]
 
-{ #category : #converting }
+{ #category : #'code generation' }
 SWTranspilerOfJs >> asStringFor: receiver With: arguments [
 	self
 		pushMessageNest;
@@ -42,14 +45,14 @@ SWTranspilerOfJs >> asStringFor: receiver With: arguments [
 		
 ]
 
-{ #category : #converting }
+{ #category : #'code generation' }
 SWTranspilerOfJs >> asSymbolFor: receiver With: arguments [
 	self
 		transpile: receiver;
 		put: '.intern'
 ]
 
-{ #category : #accessing }
+{ #category : #'code generation' }
 SWTranspilerOfJs >> at_For: receiver With: arguments [
 	self
 		transpile: receiver;
@@ -59,22 +62,24 @@ SWTranspilerOfJs >> at_For: receiver With: arguments [
 
 ]
 
-{ #category : #accessing }
+{ #category : #'code generation' }
 SWTranspilerOfJs >> at_ifAbsent_For: receiver With: arguments [
 	self
-		put: '(';
+		putLine: '(function(dict, key){ if(key in dict){';
+		putLine: '    return dict[key];';
+		putLine: '} else {';
+		putSequenceWithReturn: (arguments at: 2) body;
+		put: '})(';
 		transpile: receiver;
-		put: '[';
+		put: ', ';
 		transpile: (arguments at: 1);
-		put: '] || ';
-		preventNewline;
-		transpile: (arguments at: 2) body;
-		put: ')'
+		put: ')'.
 
 ]
 
-{ #category : #accessing }
+{ #category : #'code generation' }
 SWTranspilerOfJs >> at_put_For: receiver With: arguments [
+	self logger log.
 	self
 		transpile: receiver;
 		pushMessageNest;
@@ -85,13 +90,16 @@ SWTranspilerOfJs >> at_put_For: receiver With: arguments [
 		popMessageNest
 ]
 
-{ #category : #'as yet unclassified' }
+{ #category : #'code generation' }
 SWTranspilerOfJs >> beginsWith_For: receiver With: arguments [
+	self logger log.
 	self putMessage: receiver call: 'start_with?' with: arguments
 ]
 
-{ #category : #'as yet unclassified' }
+{ #category : #'code generation' }
 SWTranspilerOfJs >> collect_For: receiver With: arguments [
+	self logger log.
+	self flag: #ToImplement.
 	self
 		transpile: receiver;
 		put: '.collect';
@@ -99,15 +107,17 @@ SWTranspilerOfJs >> collect_For: receiver With: arguments [
 
 ]
 
-{ #category : #'as yet unclassified' }
+{ #category : #'code generation' }
 SWTranspilerOfJs >> copyFor:receiver With: arguments [
+	self logger log.
 	self
 		transpile: receiver;
 		put: '.clone'
 ]
 
-{ #category : #copying }
+{ #category : #'code generation' }
 SWTranspilerOfJs >> copyReplaceAll_with_For: receiver With: arguments [
+	self logger log.
 	self
 		incMessageNest;
 		pushMessageNest;
@@ -120,16 +130,19 @@ SWTranspilerOfJs >> copyReplaceAll_with_For: receiver With: arguments [
 		decMessageNest
 ]
 
-{ #category : #'as yet unclassified' }
+{ #category : #'code generation' }
 SWTranspilerOfJs >> descriptionFor: receiver With: arguments [
+	self logger log.
 	self
 		pushMessageNest;	
 		putMessage: receiver call: 'message' with: arguments;
 		popMessageNest
 ]
 
-{ #category : #'as yet unclassified' }
+{ #category : #'code generation' }
 SWTranspilerOfJs >> do_For: receiver With: arguments [
+	self logger log.
+	self flag: #ToImplement.
 	self
 		pushMessageNest;
 		transpile: receiver;
@@ -139,8 +152,9 @@ SWTranspilerOfJs >> do_For: receiver With: arguments [
 
 ]
 
-{ #category : #'as yet unclassified' }
+{ #category : #'code generation' }
 SWTranspilerOfJs >> ensure_For: receiver With: arguments [
+	self logger log.
 	self
 		pushMessageNest;
 		putLine: 'begin';
@@ -152,26 +166,28 @@ SWTranspilerOfJs >> ensure_For: receiver With: arguments [
 
 ]
 
-{ #category : #'as yet unclassified' }
+{ #category : #'code generation' }
 SWTranspilerOfJs >> ifFalse_For: receiver With: arguments [
+	self logger log.
 	self
 		put: 'if (!';
 		pushMessageNest;
 		transpile: receiver;
 		putLine: '){';
-		transpile: (arguments at: 1) body;
+		putSequence: (arguments at: 1) body;
 		popMessageNest;
 		put: '}'
 
 ]
 
-{ #category : #'as yet unclassified' }
+{ #category : #'code generation' }
 SWTranspilerOfJs >> ifNil_For: receiver With: arguments [
+	self logger log.
 	self
 		pushMessageNest;
-		put: '(o=>{ if(o === undefined || o === null) { return (';
-		transpile: (arguments at: 1) body;
-		put: '); } else {';
+		put: '(function(o){ if(o === undefined || o === null) { ';
+		putSequenceWithReturn: (arguments at: 1) body;
+		put: ' } else {';
 		put: 'return o; }})(';
 		transpile: receiver;
 		put: ')';
@@ -179,8 +195,9 @@ SWTranspilerOfJs >> ifNil_For: receiver With: arguments [
 		
 ]
 
-{ #category : #'as yet unclassified' }
+{ #category : #'code generation' }
 SWTranspilerOfJs >> ifNotNil_For: receiver With: arguments [
+	self logger log.
 	self
 		pushMessageNest;
 		put: '(not (';
@@ -191,8 +208,9 @@ SWTranspilerOfJs >> ifNotNil_For: receiver With: arguments [
 		popMessageNest
 ]
 
-{ #category : #'as yet unclassified' }
+{ #category : #'code generation' }
 SWTranspilerOfJs >> ifNotNil_ifNil_For: receiver With: arguments [
+	self logger log.
 	self
 		pushMessageNest;
 		put: 'if not (';
@@ -205,8 +223,9 @@ SWTranspilerOfJs >> ifNotNil_ifNil_For: receiver With: arguments [
 		popMessageNest
 ]
 
-{ #category : #'as yet unclassified' }
+{ #category : #'code generation' }
 SWTranspilerOfJs >> ifTrue_For: receiver With: arguments [
+	self logger log.
 	self
 		pushMessageNest;
 		put: 'if ';
@@ -217,15 +236,16 @@ SWTranspilerOfJs >> ifTrue_For: receiver With: arguments [
 
 ]
 
-{ #category : #'as yet unclassified' }
+{ #category : #'code generation' }
 SWTranspilerOfJs >> ifTrue_ifFalse_For: receiver With: arguments [
+	self logger log.
 	self
 		pushMessageNest;
-		putLine: '(o=>{ if(o){ return (';
-		transpile: (arguments at: 1) body;
-		putLine: ');} else { return (';
-		transpile: (arguments at: 2) body;
-		put: '); }})(';
+		putLine: '(function(o){ if(o){ ';
+		putSequenceWithReturn: (arguments at: 1) body;
+		putLine: '} else {';
+		putSequenceWithReturn: (arguments at: 2) body;
+		put: '}})(';
 		transpile: receiver;
 		put: ')';
 		popMessageNest
@@ -239,39 +259,43 @@ SWTranspilerOfJs >> initialize [
 
 ]
 
-{ #category : #'as yet unclassified' }
+{ #category : #'code generation' }
 SWTranspilerOfJs >> join_For: receiver With: arguments [
+	self logger log.
 	self
 		pushMessageNest;
 		putMessage: (arguments at: 1) call: 'join' with: { receiver };
 		popMessageNest
 ]
 
-{ #category : #'instance creation' }
+{ #category : #'code generation' }
 SWTranspilerOfJs >> newFor: receiver With: arguments [
+	self logger log.
 	self
 		put: 'new ';
 		transpile: receiver;
-		putLine: '();'
+		put: '()'
 
 ]
 
-{ #category : #'as yet unclassified' }
+{ #category : #'code generation' }
 SWTranspilerOfJs >> on_do_For: receiver With: arguments [
+	self logger log.
 	self
 		pushMessageNest;
 		putLine: 'try{';
-		transpile: receiver body;
+		putSequence: receiver body;
 		put: '} catch (';
 		put: ((0 < (arguments at: 2) arguments size) ifTrue: [ (arguments at: 2) argumentNames at: 1 ] ifFalse: ['e']);
 		putLine: '){';
-		transpile: (arguments at: 2) body;
+		putSequence: (arguments at: 2) body;
 		put: '}';
 		popMessageNest
 ]
 
-{ #category : #'as yet unclassified' }
+{ #category : #'code generation' }
 SWTranspilerOfJs >> opArrow_For: receiver With: arguments [
+	self logger log.
 	self
 		pushMessageNest;
 		put: 'Association.new(';
@@ -282,32 +306,27 @@ SWTranspilerOfJs >> opArrow_For: receiver With: arguments [
 		popMessageNest.
 ]
 
-{ #category : #'as yet unclassified' }
+{ #category : #'code generation' }
 SWTranspilerOfJs >> opCamma_For: receiver With: arguments [
+	self logger log.
 	self
 		transpile: receiver;
 		put: ' + ';
 		transpile: (arguments at: 1)
 ]
 
-{ #category : #'as yet unclassified' }
-SWTranspilerOfJs >> opEqual_For: receiver With: arguments [
-	self
-		transpile: receiver;
-		put: ' == ';
-		transpile: (arguments at: 1)
-]
-
-{ #category : #'as yet unclassified' }
+{ #category : #'code generation' }
 SWTranspilerOfJs >> opNotEqual_For: receiver With: arguments [
+	self logger log.
 	self
 		transpile: receiver;
 		put: ' != ';
 		transpile: (arguments at: 1)
 ]
 
-{ #category : #'as yet unclassified' }
+{ #category : #'code generation' }
 SWTranspilerOfJs >> perform_For: receiver With: arguments [
+	self logger log.
 	self
 		pushMessageNest;
 		putMessage: receiver call: 'send' with: arguments;
@@ -316,6 +335,7 @@ SWTranspilerOfJs >> perform_For: receiver With: arguments [
 
 { #category : #'code generation' }
 SWTranspilerOfJs >> putArgumentsOf: selector with: arguments [
+	self logger log.
 	self
 		put: '(';
 		putArray: arguments;
@@ -323,25 +343,34 @@ SWTranspilerOfJs >> putArgumentsOf: selector with: arguments [
 
 ]
 
-{ #category : #'as yet unclassified' }
+{ #category : #'code generation' }
 SWTranspilerOfJs >> putBlock: aBlock [
+	self logger log.
 	self
 		pushMessageNest;
 		put: 'function ('.
-	aBlock argumentNames do: [ :each |
+	(aBlock argumentNames, #('outer')) do: [ :each |
 		self put: each asString
 	] separatedBy: [ self put: ', ' ].
 	self
-		put: ') { return ';
-		transpile: aBlock body;
+		putLine: ') {';
+		incIndent.
+	aBlock temporaryNames do: [ :aName |
+		self put: 'var '; put: aName; putLine: ' = null;'
+	].
+	self thisStack push: #outer.
+	self
+		decIndent;
+		putSequenceWithReturn: aBlock body;
 		put: '}';
-		popMessageNest
-
+		popMessageNest.
+	self thisStack pop
 
 ]
 
-{ #category : #'as yet unclassified' }
+{ #category : #'code generation' }
 SWTranspilerOfJs >> putClassDefinition: aClass [
+	self logger log.
 	self putComment: aClass comment.
 	self put: 'export class '.
 	self put: aClass name.
@@ -381,10 +410,11 @@ SWTranspilerOfJs >> putClassDefinition: aClass [
 
 ]
 
-{ #category : #'as yet unclassified' }
+{ #category : #'code generation' }
 SWTranspilerOfJs >> putClassMethod: aMethod ofClass: aClass [
 	|sel|
-	sel := self class transpiledNameOf: aMethod selector.
+	self logger log.
+	sel := self class transpiledSelectorNameOf: aMethod selector.
 	self
 		putComment: aMethod comment;
 		put: aClass name; put: '.'; put: sel; put: ' = ';
@@ -399,15 +429,16 @@ SWTranspilerOfJs >> putClassMethod: aMethod ofClass: aClass [
 		self decIndent.
 		self putLine.
 	] ifFalse: [
-		aMethod transpileUsing: self.
+		self putSequence: aMethod sourceNode body.
 	].
 	self
 		putLine: '};';
 		popMessageNest.
 ]
 
-{ #category : #'as yet unclassified' }
+{ #category : #'code generation' }
 SWTranspilerOfJs >> putComment: comment [
+	self logger log.
 	comment ifNotNil: [
 		comment linesDo: [ :aLine |
 			self
@@ -417,7 +448,7 @@ SWTranspilerOfJs >> putComment: comment [
 	]
 ]
 
-{ #category : #'as yet unclassified' }
+{ #category : #'code generation' }
 SWTranspilerOfJs >> putFileHeaderOf: filename [
 
 
@@ -425,6 +456,7 @@ SWTranspilerOfJs >> putFileHeaderOf: filename [
 
 { #category : #'code generation' }
 SWTranspilerOfJs >> putFunctionCallOf: selector with: arguments [
+	self logger log.
 	self
 		pushMessageNest;
 		put: (selector asString first isLetter ifTrue: [
@@ -436,30 +468,33 @@ SWTranspilerOfJs >> putFunctionCallOf: selector with: arguments [
 		popMessageNest
 ]
 
-{ #category : #tests }
+{ #category : #'code generation' }
 SWTranspilerOfJs >> putMainProgram [
+	self logger log.
 	self putCode: '\
 		(new %entryClass%()).main_(process.argv)
 	\' with: { '%entryClass%' -> self source entryClass asString }
 
 ]
 
-{ #category : #'as yet unclassified' }
+{ #category : #'code generation' }
 SWTranspilerOfJs >> putMessage: receiver call: selector with: arguments [
+	self logger log: [receiver asString, '>>', selector asString].
 	(receiver respondsTo: #name) ifTrue: [
 		(receiver name = 'self') ifTrue: [ 
-			^ super putMessage: (RBVariableNode new name: 'this'; yourself) call: selector with: arguments
+			^ super putMessage: (RBVariableNode new name: self thisStack top; yourself) call: selector with: arguments
 		].
 	].
 	^ super putMessage: receiver call: selector with: arguments
 ]
 
-{ #category : #'as yet unclassified' }
+{ #category : #'code generation' }
 SWTranspilerOfJs >> putMethod: aMethod ofClass: aClass [
 	|sel|
+	self logger log.
 	self
 		putComment: aMethod comment;
-		put: (self class transpiledNameOf: aMethod selector);
+		put: (self class transpiledSelectorNameOf: aMethod selector);
 		put: '(';
 		put: (', ' join: (aMethod argumentNames collect: [ :each | each asString ]));
 		putLine: ') {';
@@ -471,21 +506,23 @@ SWTranspilerOfJs >> putMethod: aMethod ofClass: aClass [
 		self decIndent.
 		self putLine.
 	] ifFalse: [
-		aMethod transpileUsing: self.
+		self putSequence: aMethod sourceNode body.
 	].
 	self
 		putLine: '}';
 		popMessageNest.
 ]
 
-{ #category : #'as yet unclassified' }
+{ #category : #'code generation' }
 SWTranspilerOfJs >> putNil [
+	self logger log.
 	self put: 'nil'
 ]
 
 { #category : #'code generation' }
 SWTranspilerOfJs >> putRequirements [
 	|sel|
+	self logger log.
 	sel := #'mjs_requirements'.
 	self source classes do: [:aClass |
 		(aClass respondsTo: sel) ifTrue: [
@@ -518,17 +555,56 @@ SWTranspilerOfJs >> putRequirements [
 
 ]
 
-{ #category : #'as yet unclassified' }
+{ #category : #'code generation' }
+SWTranspilerOfJs >> putSequence: aSequence [
+	self logger log.
+	self incIndent.
+	aSequence children do: [ :child |
+		(child class ~= RBValueNode) ifTrue: [
+			self
+				transpile: child;
+				putLine: ';'.
+		].
+	].
+	self
+		decIndent
+]
+
+{ #category : #'code generation' }
+SWTranspilerOfJs >> putSequenceWithReturn: aSequence [
+	| counter |
+	self logger log.
+	self incIndent.
+	counter := 1.
+	aSequence children size timesRepeat: [|child|
+		child := aSequence children at: counter.
+		(child class ~= RBValueNode) ifTrue: [
+			(child class ~= RBReturnNode and: [ counter = aSequence children size ]) ifTrue: [
+				self put: 'return '.
+			].
+			self
+				transpile: child;
+				putLine: ';'.
+		].
+		counter := counter + 1.
+	].
+	self
+		decIndent
+]
+
+{ #category : #'code generation' }
 SWTranspilerOfJs >> putSymbol: aSymbol [
+	self logger log: aSymbol asString.
 	self
 		put: '''';
-		put: (self class transpiledNameOf: aSymbol);
+		put: (self class transpiledSelectorNameOf: aSymbol);
 		put: ''''
 ]
 
-{ #category : #'as yet unclassified' }
+{ #category : #'code generation' }
 SWTranspilerOfJs >> putTestRunner [
 	|hasRunner|
+	self logger log.
 	hasRunner := false.
 	self source mainClass methods do: [ :each |
 		(each protocol beginsWith: 'test') ifTrue: [ hasRunner := true ]
@@ -551,16 +627,21 @@ SWTranspilerOfJs >> putTestRunner [
 
 ]
 
-{ #category : #'as yet unclassified' }
+{ #category : #'code generation' }
 SWTranspilerOfJs >> putVariable: aVariableNode [
+	self logger log: aVariableNode name.
 	(#(String Dictionary) anySatisfy: [ :each| each = aVariableNode name ]) ifTrue: [
 		^ self
 			put: 'SW';
 			put: aVariableNode name
 	].
+	
+	aVariableNode name = 'self' ifTrue: [
+		^ self put: self thisStack top
+	].
 
 	(aVariableNode isInstanceVariable) ifTrue: [
-		^ self put: 'this._'; put: aVariableNode name
+		^ self put: self thisStack top; put: '._'; put: aVariableNode name
 	].
 
 	(aVariableNode isClassVariable) ifTrue: [
@@ -569,23 +650,38 @@ SWTranspilerOfJs >> putVariable: aVariableNode [
 	^ super putVariable: aVariableNode
 ]
 
-{ #category : #'as yet unclassified' }
+{ #category : #accessing }
+SWTranspilerOfJs >> thisStack [
+
+	^ thisStack ifNil: [ thisStack := Stack new push: 'this'; yourself ]
+]
+
+{ #category : #accessing }
+SWTranspilerOfJs >> thisStack: anObject [
+
+	thisStack := anObject
+]
+
+{ #category : #'code generation' }
 SWTranspilerOfJs >> valueFor: receiver With: argunents [
+	self logger log.
 	self
 		transpile: receiver;
 		put: '()'
 ]
 
-{ #category : #'as yet unclassified' }
+{ #category : #'code generation' }
 SWTranspilerOfJs >> value_For: receiver With: arguments [
+	self logger log.
 	self
 		put: '(';
 		transpile: receiver;
 		put: ')';
-		putArgumentsOf: '' with: arguments
+		putArgumentsOf: '' with: (arguments, { (RBVariableNode new name: self thisStack top; yourself) })
 ]
 
-{ #category : #'as yet unclassified' }
+{ #category : #'code generation' }
 SWTranspilerOfJs >> yourselfFor: receiver With:arguments [
+	self logger log.
 	self transpile: receiver
 ]

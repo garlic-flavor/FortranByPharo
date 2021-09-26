@@ -3,11 +3,9 @@ I hold SWSources and put it to the server.
 "
 Class {
 	#name : #SWSourcesPool,
-	#superclass : #Object,
+	#superclass : #SWSourcesLocalPool,
 	#instVars : [
-		'sources',
-		'client',
-		'type'
+		'client'
 	],
 	#classVars : [
 		'localScriptDirectory'
@@ -30,11 +28,6 @@ SWSourcesPool class >> reset [
 	localScriptDirectory := nil
 ]
 
-{ #category : #adding }
-SWSourcesPool >> add: aSource [
-	self sources at: aSource moduleName put: aSource
-]
-
 { #category : #accessing }
 SWSourcesPool >> client [
 
@@ -54,61 +47,11 @@ SWSourcesPool >> close [
 
 { #category : #'as yet unclassified' }
 SWSourcesPool >> get: aModuleName [
-	^ self sources at: aModuleName ifAbsentPut: [|source transpiler|
-			source := SWSource new
-				type: self type;
-				classes: { Smalltalk globals at: aModuleName };
-				yourself.
-			transpiler := self transpilerClass new
-				pool: self;
-				source: source;
-				yourself.
-			source contents: transpiler transpile contents.
+	^ self sources at: aModuleName ifAbsent: [|source|
+			source := super get: aModuleName.
 			(self client head: source filename) ifNil: [
 				self client put: source filename contents: source contents
 			].
 			source
 	]
-]
-
-{ #category : #initialization }
-SWSourcesPool >> initialize [
-	super initialize
-]
-
-{ #category : #initialization }
-SWSourcesPool >> reset: aModuleName [
-	self sources removeKey: aModuleName ifAbsent: [  ]
-]
-
-{ #category : #accessing }
-SWSourcesPool >> sources [
-
-	^ sources ifNil: [ sources := Dictionary new ]
-]
-
-{ #category : #accessing }
-SWSourcesPool >> sources: anObject [
-
-	sources := anObject
-]
-
-{ #category : #accessing }
-SWSourcesPool >> transpilerClass [ 
-	self type = #f90 ifTrue: [ ^ SWTranspilerOfFortran ].
-	self type = #rb ifTrue: [ ^ SWTranspilerOfRuby ].
-	self type = #mjs ifTrue: [ ^ SWTranspilerOfJs ].
-	self error: 'NO IMPLEMENTATION!'.
-]
-
-{ #category : #accessing }
-SWSourcesPool >> type [
-	
-	^ type
-]
-
-{ #category : #accessing }
-SWSourcesPool >> type: anObject [
-
-	type := anObject
 ]
