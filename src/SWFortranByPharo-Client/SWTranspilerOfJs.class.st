@@ -4,9 +4,6 @@ I am a Pharo to ECMAScript (with node.js) transpiler.
 Class {
 	#name : #SWTranspilerOfJs,
 	#superclass : #SWTranspiler,
-	#instVars : [
-		'thisStack'
-	],
 	#category : #'SWFortranByPharo-Client-Transpiler'
 }
 
@@ -69,7 +66,7 @@ SWTranspilerOfJs >> at_ifAbsent_For: receiver With: arguments [
 		putLine: '    return dict[key];';
 		putLine: '} else {';
 		putSequenceWithReturn: (arguments at: 2) body;
-		put: '})(';
+		put: '}})(';
 		transpile: receiver;
 		put: ', ';
 		transpile: (arguments at: 1);
@@ -94,6 +91,14 @@ SWTranspilerOfJs >> at_put_For: receiver With: arguments [
 SWTranspilerOfJs >> beginsWith_For: receiver With: arguments [
 	self logger log.
 	self putMessage: receiver call: 'start_with?' with: arguments
+]
+
+{ #category : #'as yet unclassified' }
+SWTranspilerOfJs >> classFor: receiver With: arguments [
+	self logger log.
+	self
+		transpile: receiver;
+		put: '.constructor'
 ]
 
 { #category : #'code generation' }
@@ -349,22 +354,17 @@ SWTranspilerOfJs >> putBlock: aBlock [
 	self
 		pushMessageNest;
 		put: 'function ('.
-	(aBlock argumentNames, #('outer')) do: [ :each |
+	aBlock argumentNames do: [ :each |
 		self put: each asString
 	] separatedBy: [ self put: ', ' ].
 	self
 		putLine: ') {';
 		incIndent.
-	aBlock temporaryNames do: [ :aName |
-		self put: 'var '; put: aName; putLine: ' = null;'
-	].
-	self thisStack push: #outer.
 	self
 		decIndent;
 		putSequenceWithReturn: aBlock body;
 		put: '}';
 		popMessageNest.
-	self thisStack pop
 
 ]
 
@@ -421,7 +421,12 @@ SWTranspilerOfJs >> putClassMethod: aMethod ofClass: aClass [
 		put: 'function(';
 		put: (', ' join: (aMethod argumentNames collect: [ :each | each asString ]));
 		putLine: ') {';
-		pushMessageNest.
+		pushMessageNest;
+		incIndent;
+		put: 'var self = ';
+		put: aClass name;
+		putLine: ';';
+		decIndent.
 	sel := self transpilerNameOf: aMethod.
 	(aClass respondsTo: sel) ifTrue: [
 		self incIndent.
@@ -478,17 +483,6 @@ SWTranspilerOfJs >> putMainProgram [
 ]
 
 { #category : #'code generation' }
-SWTranspilerOfJs >> putMessage: receiver call: selector with: arguments [
-	self logger log: [receiver asString, '>>', selector asString].
-	(receiver respondsTo: #name) ifTrue: [
-		(receiver name = 'self') ifTrue: [ 
-			^ super putMessage: (RBVariableNode new name: self thisStack top; yourself) call: selector with: arguments
-		].
-	].
-	^ super putMessage: receiver call: selector with: arguments
-]
-
-{ #category : #'code generation' }
 SWTranspilerOfJs >> putMethod: aMethod ofClass: aClass [
 	|sel|
 	self logger log.
@@ -498,7 +492,10 @@ SWTranspilerOfJs >> putMethod: aMethod ofClass: aClass [
 		put: '(';
 		put: (', ' join: (aMethod argumentNames collect: [ :each | each asString ]));
 		putLine: ') {';
-		pushMessageNest.
+		pushMessageNest;
+		incIndent;
+		putLine: 'var self = this;';
+		decIndent.
 	sel := self transpilerNameOf: aMethod.
 	(aClass respondsTo: sel) ifTrue: [
 		self incIndent.
@@ -560,7 +557,9 @@ SWTranspilerOfJs >> putSequence: aSequence [
 	self logger log.
 	self incIndent.
 	aSequence children do: [ :child |
-		(child class ~= RBValueNode) ifTrue: [
+		(child class = RBVariableNode) ifTrue: [
+			self put: 'var '; put: child name; putLine: ' = null;'
+		] ifFalse: [
 			self
 				transpile: child;
 				putLine: ';'.
@@ -578,7 +577,9 @@ SWTranspilerOfJs >> putSequenceWithReturn: aSequence [
 	counter := 1.
 	aSequence children size timesRepeat: [|child|
 		child := aSequence children at: counter.
-		(child class ~= RBValueNode) ifTrue: [
+		(child class = RBVariableNode) ifTrue: [
+			self put: 'var '; put: child name; putLine: ' = null;'.
+		] ifFalse: [
 			(child class ~= RBReturnNode and: [ counter = aSequence children size ]) ifTrue: [
 				self put: 'return '.
 			].
@@ -635,31 +636,14 @@ SWTranspilerOfJs >> putVariable: aVariableNode [
 			put: 'SW';
 			put: aVariableNode name
 	].
-	
-	aVariableNode name = 'self' ifTrue: [
-		^ self put: self thisStack top
-	].
-
 	(aVariableNode isInstanceVariable) ifTrue: [
-		^ self put: self thisStack top; put: '._'; put: aVariableNode name
+		^ self put: 'self._'; put: aVariableNode name
 	].
 
 	(aVariableNode isClassVariable) ifTrue: [
 		^ self put: '@@'; put: aVariableNode name
 	].
 	^ super putVariable: aVariableNode
-]
-
-{ #category : #accessing }
-SWTranspilerOfJs >> thisStack [
-
-	^ thisStack ifNil: [ thisStack := Stack new push: 'this'; yourself ]
-]
-
-{ #category : #accessing }
-SWTranspilerOfJs >> thisStack: anObject [
-
-	thisStack := anObject
 ]
 
 { #category : #'code generation' }
@@ -677,7 +661,7 @@ SWTranspilerOfJs >> value_For: receiver With: arguments [
 		put: '(';
 		transpile: receiver;
 		put: ')';
-		putArgumentsOf: '' with: (arguments, { (RBVariableNode new name: self thisStack top; yourself) })
+		putArgumentsOf: '' with: arguments
 ]
 
 { #category : #'code generation' }
