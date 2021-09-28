@@ -40,6 +40,14 @@ SWServerStatus class >> fromSton: stonReader [
 	
 ]
 
+{ #category : #'code generation' }
+SWServerStatus class >> mjs_requirements: transpiler [
+	transpiler
+		putImportNative: 'PharoObject' from: 'Pharo.mjs';
+		putImportNative: 'STON' from: 'STON.mjs'
+
+]
+
 { #category : #actions }
 SWServerStatus class >> ok [
 	^ self new ok; yourself

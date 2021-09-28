@@ -3,7 +3,7 @@ This is a WebSocket server.
 "
 Class {
 	#name : #SWServer,
-	#superclass : #SWStd,
+	#superclass : #Object,
 	#instVars : [
 		'env'
 	],

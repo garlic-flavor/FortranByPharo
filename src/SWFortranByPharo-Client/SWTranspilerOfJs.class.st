@@ -46,7 +46,7 @@ SWTranspilerOfJs >> asStringFor: receiver With: arguments [
 SWTranspilerOfJs >> asSymbolFor: receiver With: arguments [
 	self
 		transpile: receiver;
-		put: '.intern'
+		put: '.toString()'
 ]
 
 { #category : #'code generation' }
@@ -374,7 +374,9 @@ SWTranspilerOfJs >> putClassDefinition: aClass [
 	self putComment: aClass comment.
 	self put: 'export class '.
 	self put: aClass name.
-	(aClass superclass = Object) ifFalse: [
+	(aClass superclass = Object) ifTrue: [
+		self put: ' extends PharoObject'
+	] ifFalse: [
 		self put: ' extends '; put: aClass superclass name
 	].
 	self putLine: '{'.
@@ -382,10 +384,8 @@ SWTranspilerOfJs >> putClassDefinition: aClass [
 
 	self
 		putLine: 'constructor(){';
-		incIndent.
-	(aClass superclass = Object) ifFalse: [ 
-		self putLine: 'super();'.
-	].
+		incIndent;
+		putLine: 'super();'.
 	aClass instanceVariables do: [ :aVal |
 		self put: 'this._'; put: aVal name; putLine: ' = null;'
 	].
@@ -474,6 +474,39 @@ SWTranspilerOfJs >> putFunctionCallOf: selector with: arguments [
 ]
 
 { #category : #'code generation' }
+SWTranspilerOfJs >> putImportClass: aClass [
+	|s|
+	self logger log.
+	s := self pool get: aClass name.
+	self
+		put: 'import {';
+		put: s moduleName;
+		put: '} from ''../../';
+		put: s filename;
+		putLine: ''';'.
+
+
+]
+
+{ #category : #'as yet unclassified' }
+SWTranspilerOfJs >> putImportNative: classes from: fileName [
+	self logger log.
+	self put: 'import {'.
+	classes isArray ifTrue: [
+		classes do: [ :each |
+			self put: each
+		] separatedBy: [ self put: ', ' ]
+	] ifFalse: [
+		self put: classes asString
+	].
+	self
+		put: '} from ''../../';
+		put: (SWSourcesPool localScriptDirectory / fileName) fullName;
+		putLine: ''';'.
+
+]
+
+{ #category : #'code generation' }
 SWTranspilerOfJs >> putMainProgram [
 	self logger log.
 	self putCode: '\
@@ -514,42 +547,6 @@ SWTranspilerOfJs >> putMethod: aMethod ofClass: aClass [
 SWTranspilerOfJs >> putNil [
 	self logger log.
 	self put: 'nil'
-]
-
-{ #category : #'code generation' }
-SWTranspilerOfJs >> putRequirements [
-	|sel|
-	self logger log.
-	sel := #'mjs_requirements'.
-	self source classes do: [:aClass |
-		(aClass respondsTo: sel) ifTrue: [
-			(aClass perform: sel) do: [ :dependence ||s|
-				dependence isString ifTrue: [
-					^ self putLine: dependence
-				].
-				dependence isArray ifTrue: [
-					self
-						put: 'import {'.
-					(dependence at: 2) do: [ :each |
-						self put: each asString
-					 ] separatedBy: [ self put: ', ' ].
-					self
-						put: '} from ''../../';
-						put: (SWSourcesPool localScriptDirectory / (dependence at: 1)) fullName;
-						putLine: ''';'.
-					^ self
-				].
-				s := self pool get: dependence name.
-				self
-					put: 'import {';
-					put: s moduleName;
-					put: '} from ''../../';
-					put: s filename;
-					putLine: ''';'
-			]
-		]
-	]
-
 ]
 
 { #category : #'code generation' }
@@ -631,7 +628,7 @@ SWTranspilerOfJs >> putTestRunner [
 { #category : #'code generation' }
 SWTranspilerOfJs >> putVariable: aVariableNode [
 	self logger log: aVariableNode name.
-	(#(String Dictionary) anySatisfy: [ :each| each = aVariableNode name ]) ifTrue: [
+	(#(Dictionary) anySatisfy: [ :each| each = aVariableNode name ]) ifTrue: [
 		^ self
 			put: 'SW';
 			put: aVariableNode name

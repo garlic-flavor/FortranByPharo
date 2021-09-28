@@ -3,7 +3,7 @@ I am belong to SWProjectTest
 "
 Class {
 	#name : #SWTestHelloWorld,
-	#superclass : #SWStd,
+	#superclass : #Object,
 	#category : #'SWFortranByPharo-Client-Tests'
 }
 

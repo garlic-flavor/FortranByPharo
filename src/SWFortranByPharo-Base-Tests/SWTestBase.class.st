@@ -11,10 +11,10 @@ Class {
 }
 
 { #category : #'code generation' }
-SWTestBase class >> mjs_requirements [
-	^ { 
-		{'Pharo.mjs'. {'TestCase'}}
-	}
+SWTestBase class >> mjs_requirements: transpiler [
+	transpiler
+		putImportNative: 'TestCase' from: 'Pharo.mjs'
+
 ]
 
 { #category : #'code generation' }

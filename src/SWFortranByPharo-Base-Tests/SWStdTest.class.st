@@ -11,11 +11,11 @@ Class {
 }
 
 { #category : #'code generation' }
-SWStdTest class >> mjs_requirements [
-	^ {
-		SWTestBase.
-		SWStd.
-	}
+SWStdTest class >> mjs_requirements: transpiler [
+	transpiler
+		putImportClass: SWTestBase;
+		putImportClass: SWStd
+
 ]
 
 { #category : #'code generation' }

@@ -331,7 +331,14 @@ SWTranspiler >> putParameters: anArray [
 
 { #category : #'code generation' }
 SWTranspiler >> putRequirements [
-	^ self subclassResponsibility 
+	|sel|
+	sel := self type, '_requirements:'.
+	self source classes do: [ :aClass |
+		(aClass respondsTo: sel) ifTrue: [
+			aClass perform: sel with: self
+		]
+	]
+
 ]
 
 { #category : #'code generation' }

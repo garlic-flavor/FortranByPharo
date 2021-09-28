@@ -11,11 +11,13 @@ Class {
 }
 
 { #category : #'code generation' }
-SWServerStatusTest class >> mjs_requirements [
-	^ {
-		SWServerStatus.
-		SWTestBase
-	}
+SWServerStatusTest class >> mjs_requirements: transpiler [
+	transpiler
+		putImportNative: 'Transcript' from: 'Pharo.mjs';
+		putImportNative: 'STON' from: 'STON.mjs';
+		putImportClass: SWServerStatus;
+		putImportClass: SWTestBase
+
 ]
 
 { #category : #'code generation' }
