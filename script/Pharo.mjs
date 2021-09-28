@@ -1,11 +1,24 @@
 
-class Transcript {};
+export class Transcript {};
 
-Transcript.write = function(msg) {
+Transcript.show_ = function(msg) {
   console.log(msg);
 };
 
-class TestCase {
+export class PharoObject {
+  assert_(aBlock) {
+    var value = false;
+    if (typeof aBlock == 'function') {
+      value = aBlock();
+    } else {
+      value = aBlock;
+    }
+    if(value === undefined || value === null || value === false)
+        throw `Assertion failed: ${aBlock} failed.`;
+  }
+}
+
+export class TestCase extends PharoObject {
   setUp() {
   }
   tearDown() {
@@ -14,10 +27,22 @@ class TestCase {
     if (left != right)
       throw `Assertion failed: ${left} != ${right}.`;
   }
-  assert_(aBlock) {
-    if(!aBlock())
-      throw `Assertion failed: ${aBlock} failed.`;
+
+  error_(msg) {
+    throw msg;
   }
 }
 
-export {Transcript, TestCase}
+import stream from 'memory-streams';
+
+String.cr = function() { return '\r'; };
+String.lf = function() { return '\n'; };
+String.crlf = function() { return '\r\n'; };
+String.prototype.readStream = function() {
+  return new stream.ReadableStream(this);
+};
+String.streamContents_ = function(aBlock) {
+  var s = new stream.WritableStream();
+  aBlock(s);
+  return s.toString();
+};
