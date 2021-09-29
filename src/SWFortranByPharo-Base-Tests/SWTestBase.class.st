@@ -81,6 +81,7 @@ SWTestBase >> ready: aModuleName [
 			yourself.
 		^ self
 	].
+	self flag: #ToImplement
 	self halt.
 ]
 

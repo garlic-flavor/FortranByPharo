@@ -2,24 +2,20 @@
 A SWStdTest is a test class for testing the behavior of SWStd
 "
 Class {
-	#name : #SWStdTest,
+	#name : #SWTest,
 	#superclass : #SWTestBase,
-	#instVars : [
-		'std'
-	],
 	#category : #'SWFortranByPharo-Base-Tests'
 }
 
 { #category : #'code generation' }
-SWStdTest class >> mjs_requirements: transpiler [
+SWTest class >> mjs_requirements: transpiler [
 	transpiler
-		putImportClass: SWTestBase;
-		putImportClass: SWStd
+		putImportClass: SWTestBase
 
 ]
 
 { #category : #'code generation' }
-SWStdTest class >> rb_requirements [
+SWTest class >> rb_requirements [
 	^ {
 		'Pharo.rb'.
 		SWTestBase.
@@ -28,26 +24,25 @@ SWStdTest class >> rb_requirements [
 ]
 
 { #category : #running }
-SWStdTest >> setUp [
+SWTest >> setUp [
 	self type: #mjs.
 	super setUp.
-	std := SWStd new.
 	
 ]
 
 { #category : #test }
-SWStdTest >> testAssert [
-	self mustFail: [std assert: [false]].
-	std assert: [true].
+SWTest >> testAssert [
+	self mustFail: [self assert: [false]].
+	self assert: [true].
 ]
 
 { #category : #test }
-SWStdTest >> testError [
-	self mustFail: [ std error: 'This is an error!' ]
+SWTest >> testError [
+	self mustFail: [ self error: 'This is an error!' ]
 ]
 
 { #category : #'code generation - tests' }
-SWStdTest >> testThis [
+SWTest >> testThis [
 	self
 		type: #mjs;
 		runAsClient: true;
@@ -58,7 +53,7 @@ SWStdTest >> testThis [
 ]
 
 { #category : #'code generation - tests' }
-SWStdTest >> testThisOnExternalServer [
+SWTest >> testThisOnExternalServer [
 	self
 		goOnExternalServer.
 

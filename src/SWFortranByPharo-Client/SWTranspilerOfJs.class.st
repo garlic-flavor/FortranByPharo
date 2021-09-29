@@ -233,11 +233,11 @@ SWTranspilerOfJs >> ifTrue_For: receiver With: arguments [
 	self logger log.
 	self
 		pushMessageNest;
-		put: 'if ';
+		putLine: '(function(o){ if (o) {';
+		putSequenceWithReturn: (arguments at: 1) body;
+		put: '} else { return self; }})(';
 		transpile: receiver;
-		putLine;
-		transpile: (arguments at: 1) body;
-		put: 'end'
+		put: ')'
 
 ]
 
@@ -401,7 +401,7 @@ SWTranspilerOfJs >> putClassDefinition: aClass [
 	self putLine: '}'.
 	
 	aClass classVariables do: [ :aVal |
-		self put: aClass name; put: '.'; put: aVal name; putLine: ' = nil'
+		self put: aClass name; put: '._'; put: aVal name; putLine: ' = null;'
 	].
 
 	aClass class methods select: [:aMethod | (aMethod protocol beginsWith: 'code generation') not ] thenDo: [ :aMethod |
@@ -638,7 +638,7 @@ SWTranspilerOfJs >> putVariable: aVariableNode [
 	].
 
 	(aVariableNode isClassVariable) ifTrue: [
-		^ self put: '@@'; put: aVariableNode name
+		^ self put: 'self._'; put: aVariableNode name
 	].
 	^ super putVariable: aVariableNode
 ]

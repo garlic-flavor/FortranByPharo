@@ -8,9 +8,11 @@ Class {
 }
 
 { #category : #'code generation' }
-SWShellEnvironmentTest class >> go [
-	<sampleInstance>
-	^ super go
+SWShellEnvironmentTest class >> mjs_requirements: transpiler [
+	transpiler
+		putImportNative: 'OSPlatform' from: 'Pharo.mjs';
+		putImportClass: SWTestBase;
+		putImportClass: SWShellEnvironment
 ]
 
 { #category : #accessing }
@@ -21,20 +23,19 @@ SWShellEnvironmentTest class >> rb_requirements [
 	}
 ]
 
-{ #category : #'code generation' }
-SWShellEnvironmentTest class >> transpile [
-	<sampleInstance>
-	^ super transpile
-]
-
-{ #category : #'code generation' }
-SWShellEnvironmentTest class >> type [
-	^ #rb
-]
-
 { #category : #test }
 SWShellEnvironmentTest >> testExeFileExtension [
 	OSPlatform current isMacOS ifTrue: [
 		self assert: SWShellEnvironment default exeFileExtension equals: #out
 	].
+]
+
+{ #category : #'code generation - running' }
+SWShellEnvironmentTest >> testThis [
+	self
+		type: #mjs;
+		runAsClient: true;
+		usingPharoServer: true;
+		ready;
+		go.
 ]

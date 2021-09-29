@@ -21,13 +21,19 @@ SWShellEnvironment class >> default [
 
 ]
 
+{ #category : #'code generation' }
+SWShellEnvironment class >> mjs_requirements: transpiler [
+	transpiler
+		putImportNative: #(PharoObject OSPlatform SWGFortranCompilerAdapter)  from: 'Pharo.mjs'
+]
+
 { #category : #'instance creation' }
 SWShellEnvironment class >> newDefault [
-	OSPlatform current isMacOS ifTrue: [ 
-		^ self newMacDefault
-	].
-	self error: 'This machine is not supported.'.
-
+	^ OSPlatform current isMacOS ifTrue: [ 
+		self newMacDefault
+	] ifFalse: [
+		self error: 'This machine is not supported.'.
+	]
 ]
 
 { #category : #'instance creation' }
