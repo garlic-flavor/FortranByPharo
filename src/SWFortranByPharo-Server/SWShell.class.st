@@ -79,6 +79,13 @@ SWShell class >> lsr: path [
 ]
 
 { #category : #'code generation' }
+SWShell class >> mjs_requirements: transpiler [
+	transpiler
+		putImportNative: {'PharoObject'. 'Dictionary'. 'FileLocator' } from: 'Pharo.mjs';
+		putImportNative: 'OSSUnixSubprocess' from: 'OSSUnixSubprocess.mjs'
+]
+
+{ #category : #'code generation' }
 SWShell class >> rb_requirements [
 	^ { 'OSSUnixSubprocess.rb' }
 ]

@@ -9,7 +9,7 @@ Class {
 
 { #category : #'code generation - protected' }
 SWTranspilerOfJs class >> transpiledSelectorNameOf: aName [
-	aName = '<<' ifTrue: [ ^ 'input_' ].
+	aName = '<<' ifTrue: [ ^ 'write_' ].
 	^ super transpiledSelectorNameOf: aName
 ]
 
@@ -90,7 +90,7 @@ SWTranspilerOfJs >> at_put_For: receiver With: arguments [
 { #category : #'code generation' }
 SWTranspilerOfJs >> beginsWith_For: receiver With: arguments [
 	self logger log.
-	self putMessage: receiver call: 'start_with?' with: arguments
+	self putMessage: receiver call: 'startsWith' with: arguments
 ]
 
 { #category : #'as yet unclassified' }
@@ -105,10 +105,7 @@ SWTranspilerOfJs >> classFor: receiver With: arguments [
 SWTranspilerOfJs >> collect_For: receiver With: arguments [
 	self logger log.
 	self flag: #ToImplement.
-	self
-		transpile: receiver;
-		put: '.collect';
-		putBlockWithoutProc: (arguments at: 1)
+	self putMessage: receiver call: 'flatMap' with: arguments.
 
 ]
 
@@ -160,14 +157,25 @@ SWTranspilerOfJs >> do_For: receiver With: arguments [
 { #category : #'code generation' }
 SWTranspilerOfJs >> ensure_For: receiver With: arguments [
 	self logger log.
-	self
-		pushMessageNest;
-		putLine: 'begin';
-		transpile: receiver body;
-		putLine: 'ensure';
-		transpile: (arguments at: 1) body;
-		put: 'end';
-		popMessageNest
+	self pushMessageNest.
+	(receiver body allStatements reversed anySatisfy: [ :each | each class = RBReturnNode ]) ifTrue: [
+		self
+			putLine: 'try {';
+			putSequence: receiver body;
+			putLine: '} catch(e) {';
+			putLine: '} finally {';
+			putSequence: (arguments at: 1) body;
+			put: '}'
+	] ifFalse: [
+		self
+			putLine: '(function(){ try {';
+			putSequenceWithReturn: receiver body;
+			putLine: '} catch(e) {';
+			putLine: '} finally {';
+			putSequence: (arguments at: 1) body;
+			put: '}})()'
+	].
+	self popMessageNest.
 
 ]
 
@@ -203,14 +211,24 @@ SWTranspilerOfJs >> ifNil_For: receiver With: arguments [
 { #category : #'code generation' }
 SWTranspilerOfJs >> ifNotNil_For: receiver With: arguments [
 	self logger log.
-	self
-		pushMessageNest;
-		put: '(not (';
-		transpile: receiver;
-		putLine: ').nil?) ? (';
-		transpile: (arguments at: 1) body;
-		put: '): nil';
-		popMessageNest
+	self pushMessageNest.
+	((arguments at: 1) body allStatements reversed anySatisfy: [ :each | each class = RBReturnNode ]) ifTrue: [ 
+		self
+			put: 'if (!(function(o){ return o === undefined || o === null; })(';
+			transpile: receiver;
+			putLine: ')){';
+			putSequence: (arguments at: 1) body;
+			put: '}'
+	] ifFalse: [
+		self
+			putLine: '(function(o) { if(!(o === undefined || o === null)) {';
+			putSequenceWithReturn: (arguments at: 1) body;
+			put: '} else { return null; } })(';
+			transpile: receiver;
+			put: ')'
+	].
+	self popMessageNest
+
 ]
 
 { #category : #'code generation' }
@@ -233,27 +251,39 @@ SWTranspilerOfJs >> ifTrue_For: receiver With: arguments [
 	self logger log.
 	self
 		pushMessageNest;
-		putLine: '(function(o){ if (o) {';
-		putSequenceWithReturn: (arguments at: 1) body;
-		put: '} else { return self; }})(';
+		put: 'if(';
 		transpile: receiver;
-		put: ')'
+		putLine: '){';
+		putSequence: (arguments at: 1) body;
+		put: '}'.
 
 ]
 
 { #category : #'code generation' }
 SWTranspilerOfJs >> ifTrue_ifFalse_For: receiver With: arguments [
 	self logger log.
-	self
-		pushMessageNest;
-		putLine: '(function(o){ if(o){ ';
-		putSequenceWithReturn: (arguments at: 1) body;
-		putLine: '} else {';
-		putSequenceWithReturn: (arguments at: 2) body;
-		put: '}})(';
-		transpile: receiver;
-		put: ')';
-		popMessageNest
+	self pushMessageNest.
+	((arguments at: 1) body allStatements reversed anySatisfy: [ :each | each class = RBReturnNode ]) ifTrue: [
+		self
+			put: 'if(';
+			transpile: receiver;
+			putLine: '){';
+			putSequence: (arguments at: 1) body;
+			putLine: '} else {';
+			putSequence: (arguments at: 2) body;
+			put: '}'
+	] ifFalse: [
+		self
+			put: '(function() { if(';
+			transpile: receiver;
+			putLine: '){';
+			putSequenceWithReturn: (arguments at: 1) body;
+			putLine: '} else {';
+			putSequenceWithReturn: (arguments at: 2) body;
+			put: '}})()'
+	].
+	self popMessageNest.
+
 ]
 
 { #category : #initialization }
@@ -546,7 +576,7 @@ SWTranspilerOfJs >> putMethod: aMethod ofClass: aClass [
 { #category : #'code generation' }
 SWTranspilerOfJs >> putNil [
 	self logger log.
-	self put: 'nil'
+	self put: 'null'
 ]
 
 { #category : #'code generation' }
@@ -628,11 +658,6 @@ SWTranspilerOfJs >> putTestRunner [
 { #category : #'code generation' }
 SWTranspilerOfJs >> putVariable: aVariableNode [
 	self logger log: aVariableNode name.
-	(#(Dictionary) anySatisfy: [ :each| each = aVariableNode name ]) ifTrue: [
-		^ self
-			put: 'SW';
-			put: aVariableNode name
-	].
 	(aVariableNode isInstanceVariable) ifTrue: [
 		^ self put: 'self._'; put: aVariableNode name
 	].
@@ -641,6 +666,11 @@ SWTranspilerOfJs >> putVariable: aVariableNode [
 		^ self put: 'self._'; put: aVariableNode name
 	].
 	^ super putVariable: aVariableNode
+]
+
+{ #category : #'as yet unclassified' }
+SWTranspilerOfJs >> upToEndFor: receiver With: arguments [
+	self putMessage: receiver call: 'read' with: arguments
 ]
 
 { #category : #'code generation' }

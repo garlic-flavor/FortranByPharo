@@ -8,9 +8,11 @@ Class {
 }
 
 { #category : #'code generation' }
-SWShellTest class >> go [
-	<sampleInstance>
-	^ super go
+SWShellTest class >> mjs_requirements: transpiler [
+	transpiler
+		putImportNative: 'FileLocator' from: 'Pharo.mjs';
+		putImportClass: SWTestBase;
+		putImportClass: SWShell
 ]
 
 { #category : #accessing }
@@ -19,18 +21,6 @@ SWShellTest class >> rb_requirements [
 		SWTestBase.
 		SWShell
 	}
-]
-
-{ #category : #'code generation' }
-SWShellTest class >> transpile [
-	<sampleInstance>
-	^ super transpile
-]
-
-{ #category : #accessing }
-SWShellTest class >> type [
-	^ #rb
-	
 ]
 
 { #category : #tests }
@@ -49,4 +39,14 @@ SWShellTest >> testLs [
 		(each at: #basename) = 'pharo-local'
 	]]
 
+]
+
+{ #category : #'code generation - tests' }
+SWShellTest >> testThis [
+	self
+		type: #mjs;
+		runAsClient: true;
+		usingPharoServer: true;
+		ready;
+		go.
 ]
