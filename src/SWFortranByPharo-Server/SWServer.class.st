@@ -54,7 +54,7 @@ SWServer class >> isRunning [
 SWServer class >> mjs_requirements: transpiler [
 	transpiler
 		putImportNative: {'PharoObject'. 'Transcript'. 'FileLocator'} from: 'Pharo.mjs';
-		putImportNative: { 'ZnServer'. 'SWWebSocketDelegate' } from: 'ZnServer.mjs';
+		putImportNative: { 'ZnServer'. 'SWWebSocketDelegate'. 'ZnResponse'. 'ZnEntity'. 'ZnStatusLine'. 'ZnHeaders' } from: 'ZnServer.mjs';
 		putImportClass: SWServerStatus;
 		putImportClass: SWShell
 ]
