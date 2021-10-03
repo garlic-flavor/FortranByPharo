@@ -28,6 +28,12 @@ export class Transcript {};
 Transcript.show_ = function(msg) {
   console.log(msg);
 };
+Transcript.write_ = function(msg) {
+  process.stdout.write(msg);
+};
+Transcript.cr = function(msg) {
+  process.stdout.write('\n');
+};
 
 //-----------------------------------------------------------------------------
 export class OSPlatform {}
@@ -78,6 +84,24 @@ String.streamContents_ = function(aBlock) {
   aBlock(s);
   return s.toString();
 };
+String.prototype.trimLeft_ = function(aBlock) {
+  for(var i = 0; i < this.length; i++) {
+    if (!aBlock(this.charAt(i))) {
+      return this.substring(i);
+    }
+  }
+  return this;
+};
+
+//-----------------------------------------------------------------------------
+Error.prototype.getMessage = function() {
+  return this.message;
+};
+
+Error.prototype._toString = Error.prototype.toString;
+Error.prototype.toString = function() {
+  return this.stack.toString();
+};
 
 //-----------------------------------------------------------------------------
 import fs from 'fs';
@@ -111,7 +135,11 @@ export class FileLocator {
     return new FileLocator(path.relative(this._payload, relBase.fullName()));
   }
   contains_(p) {
-    var abs = path.resolve(this._payload, p.fullName());
+    var fullName = p;
+    if (fullName.constructor.name === 'FileLocator'){
+      fullName = fullName.fullName();
+    }
+    var abs = path.resolve(this._payload, fullName);
     return abs.startsWith(this._payload);
   }
   parent() {
@@ -123,7 +151,7 @@ export class FileLocator {
       fs.mkdirSync(dir, {recursive: true});
     }
   }
-  join(p) {
+  joinPath_(p) {
     return new FileLocator(path.resolve(this._payload, p));
   }
   writeStreamDo_(aBlock) {
