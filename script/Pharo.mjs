@@ -129,7 +129,7 @@ export class FileLocator {
     return fs.statSync(this._payload).atime;
   }
   changeTime() {
-    return fs.statSync(this._payload).mtime;
+    return fs.statSync(this._payload).mtime.toLocaleString();
   }
   relativeTo_(relBase) {
     return new FileLocator(path.relative(this._payload, relBase.fullName()));
