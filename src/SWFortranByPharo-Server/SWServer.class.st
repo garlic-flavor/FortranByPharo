@@ -34,7 +34,7 @@ SWServer class >> default [
 { #category : #converting }
 SWServer class >> filePathOf: aName [
 	|path|
-	path := FileLocator imageDirectory / (aName asString trimLeft: [ :c | c = $/ ]).
+	path := FileLocator imageDirectory joinPath: (aName asString trimLeft: [ :c | c = $/ ]).
 	(FileLocator imageDirectory contains: path) ifFalse: [
 		path := FileLocator imageDirectory
 	].
@@ -48,6 +48,15 @@ SWServer class >> filePathOf: aName [
 { #category : #testing }
 SWServer class >> isRunning [
 	^ ZnServer default isRunning
+]
+
+{ #category : #'code generation' }
+SWServer class >> mjs_requirements: transpiler [
+	transpiler
+		putImportNative: {'PharoObject'. 'Transcript'. 'FileLocator'} from: 'Pharo.mjs';
+		putImportNative: { 'ZnServer'. 'SWWebSocketDelegate' } from: 'ZnServer.mjs';
+		putImportClass: SWServerStatus;
+		putImportClass: SWShell
 ]
 
 { #category : #'code generation' }
@@ -256,7 +265,7 @@ SWServer >> startOn: portNumber [
 			]
 		];
 		map: 'execute'
-		to: (SWWebSocketDelegate map: 'execute' to: [:webSocket |
+		to: (SWWebSocketDelegate handler: [:webSocket |
 			[
 				[ 
 					webSocket sendMessage: ((self execute: webSocket)
@@ -266,7 +275,7 @@ SWServer >> startOn: portNumber [
 					webSocket sendMessage: (
 						SWServerStatus new
 							failed;
-							message: exception description;
+							message: exception asString;
 							uri: webSocket uri asString;
 							yourself) toString
 				]

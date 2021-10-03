@@ -148,8 +148,9 @@ SWTranspilerOfJs >> do_For: receiver With: arguments [
 	self
 		pushMessageNest;
 		transpile: receiver;
-		put: '.each';
-		putBlockWithoutProc: (arguments at: 1);
+		put: '.forEach(';
+		putBlock: (arguments at: 1);
+		put: ')';
 		popMessageNest.
 
 ]
@@ -294,6 +295,16 @@ SWTranspilerOfJs >> initialize [
 
 ]
 
+{ #category : #testing }
+SWTranspilerOfJs >> isArrayFor: receiver With: arguments [
+	self
+		pushMessageNest;
+		put: 'Array.isArray(';
+		transpile: receiver;
+		put: ')';
+		popMessageNest
+]
+
 { #category : #'code generation' }
 SWTranspilerOfJs >> join_For: receiver With: arguments [
 	self logger log.
@@ -316,15 +327,30 @@ SWTranspilerOfJs >> newFor: receiver With: arguments [
 { #category : #'code generation' }
 SWTranspilerOfJs >> on_do_For: receiver With: arguments [
 	self logger log.
+	self pushMessageNest.
+	receiver body hasReturnNode ifTrue: [
+		self
+			putLine: 'try{';
+			putSequence: receiver body;
+			put: '} catch (';
+			put: ((0 < (arguments at: 2) arguments size) ifTrue: [ (arguments at: 2) argumentNames at: 1 ] ifFalse: ['e']);
+			putLine: '){';
+			putSequence: (arguments at: 2) body;
+			put: '}'
+	] ifFalse: [
+		self
+			putLine: '(function(){ try {';
+			putSequenceWithReturn: receiver body;
+			put: '} catch (';
+			put: ((0 < (arguments at: 2) arguments size) ifTrue: [ (arguments at: 2) argumentNames at: 1 ] ifFalse: ['e']);
+			putLine: '){';
+			putSequence: (arguments at: 2) body;
+			put: '}})()'
+	].
+	self popMessageNest.
+
 	self
 		pushMessageNest;
-		putLine: 'try{';
-		putSequence: receiver body;
-		put: '} catch (';
-		put: ((0 < (arguments at: 2) arguments size) ifTrue: [ (arguments at: 2) argumentNames at: 1 ] ifFalse: ['e']);
-		putLine: '){';
-		putSequence: (arguments at: 2) body;
-		put: '}';
 		popMessageNest
 ]
 
