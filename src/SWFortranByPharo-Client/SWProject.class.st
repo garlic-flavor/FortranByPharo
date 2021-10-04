@@ -10,6 +10,15 @@ Class {
 	#category : #'SWFortranByPharo-Client-Client'
 }
 
+{ #category : #'instance creation' }
+SWProject class >> of: type [
+	type = #mjs ifTrue: [ 
+		^ SWProjectOfJs new	
+	].
+	self flag: #ToImplement.
+	self halt.
+]
+
 { #category : #accessing }
 SWProject >> args [
 

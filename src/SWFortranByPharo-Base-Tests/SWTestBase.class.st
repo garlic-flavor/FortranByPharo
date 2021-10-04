@@ -41,10 +41,8 @@ SWTestBase >> assertLines: left equal: right [
 
 { #category : #'code generation - running' }
 SWTestBase >> go [
-	^ self runAsClient ifTrue: [ |res status message|
-		self usingPharoServer ifTrue: [ 
-			SWServer start.
-		].
+	self setUp.
+	self runAsClient ifTrue: [ |res status message|
 		res := project go.
 		status := SWServerStatus fromSton: (STON reader on: res readStream; yourself).
 		message := status message.
@@ -54,7 +52,8 @@ SWTestBase >> go [
 		].
 	] ifFalse: [
 		project goDomestic.
-	]
+	].
+	self tearDown.
 
 ]
 
@@ -75,14 +74,11 @@ SWTestBase >> ready [
 
 { #category : #'code generation - accessing' }
 SWTestBase >> ready: aModuleName [
-	self type = #mjs ifTrue: [ 
-		project := SWProjectOfJs new
+	project :=( SWProject of: self type)
 			moduleName: aModuleName;
 			yourself.
-		^ self
-	].
-	self flag: #ToImplement
-	self halt.
+	^ self
+
 ]
 
 { #category : #'code generation - accessing' }
@@ -100,7 +96,9 @@ SWTestBase >> runAsClient: anObject [
 { #category : #running }
 SWTestBase >> setUp [
 	super setUp.
-
+	(self runAsClient and: [self usingPharoServer]) ifTrue: [ 
+		SWServer start.
+	]
 ]
 
 { #category : #running }
