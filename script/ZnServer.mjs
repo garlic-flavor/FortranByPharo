@@ -34,7 +34,14 @@ export class ZnServer {
     const self = this;
     var s = this.server();
     s.on('request', function(req, res) {
-      self.delegate().request(req, res);
+      if (req.method === 'PUT') {
+        req.on('data', function(chunk) {
+          req.contents = chunk.toString();
+          self.delegate().request(req, res);
+        });
+      } else {
+        self.delegate().request(req, res);
+      }
     });
     s.on('upgrade', function(req, sock, head) {
       self.delegate().upgrade(req, sock, head);
@@ -156,20 +163,24 @@ export class ZnUri {
 
 //-----------------------------------------------------------------------------
 export class ZnRequest {
-  _entity = null;
+  _original = null;
   _uri = null;
   constructor(req) {
-    this._entity = req;
+    const self = this;
+    this._original = req;
   }
 
   uri() {
     if (!this._uri) {
-      this._uri = new ZnUri(this._entity.url);
+      this._uri = new ZnUri(this._original.url);
     }
     return this._uri;
   }
   method() {
-    return this._entity.method;
+    return this._original.method;
+  }
+  entity() {
+    return ZnEntity.text_(this._original.contents);
   }
 }
 
@@ -224,7 +235,9 @@ export class ZnResponse {
     Object.keys(h).forEach(function(key) {
       self._headers[key] = h[key];
     });
-
+  }
+  headers() {
+    return this._headers;
   }
 
   writeOn_(res) {
@@ -233,7 +246,7 @@ export class ZnResponse {
 
     res.writeHead(code, this._headers);
     if (entity) {
-      res.write(entity.data());
+      res.write(entity.contents());
     }
     res.end();
   }
@@ -258,6 +271,13 @@ ZnResponse.statusLine_ = function(statusLine) {
   return r;
 }
 
+ZnResponse.ok_ = function(entity) {
+  const r = new ZnResponse();
+  r.statusLine_(ZnStatusLine.ok());
+  r.entity_(entity);
+  return r;
+};
+
 
 String.prototype.asZnUrl = function() {
   return new ZnUri(this);
@@ -273,7 +293,7 @@ ZnHeaders.defaultResponseHeaders = function() {
 //-----------------------------------------------------------------------------
 export class ZnEntity {
   _type = null;
-  _data = null;
+  _contents = null;
   type() {
     if(!this._type) {
       this._type = 'text/plain';
@@ -281,11 +301,11 @@ export class ZnEntity {
     return this._type;
   }
   type_(t) { this._type = t; }
-  data() { return this._data; }
-  data_(d) { this._data = d; }
+  contents() { return this._contents; }
+  contents_(d) { this._contents = d; }
   length() {
-    if (this.data()) {
-      return this.data().length;
+    if (this.contents()) {
+      return this.contents().length;
     }
     return 0;
   }
@@ -293,7 +313,7 @@ export class ZnEntity {
 ZnEntity.text_ = function(t) {
   const e = new ZnEntity();
   e.type_('text/plain');
-  e.data_(t);
+  e.contents_(t);
   return e;
 };
 

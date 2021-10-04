@@ -146,7 +146,8 @@ export class FileLocator {
     return new FileLocator(path.dirname(this._payload));
   }
   ensureCreateDirectory() {
-    var dir = path.dirname(this._payload);
+    var dir = this.isDirectory ?
+      dir = this._payload : path.dirname(this._payload);
     if (!fs.existsSync(dir)) {
       fs.mkdirSync(dir, {recursive: true});
     }
