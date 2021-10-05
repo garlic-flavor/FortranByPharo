@@ -8,6 +8,9 @@ Class {
 		'sources',
 		'type'
 	],
+	#classVars : [
+		'localDirectory'
+	],
 	#category : #'SWFortranByPharo-Client-Client'
 }
 

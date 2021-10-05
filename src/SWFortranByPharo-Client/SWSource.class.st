@@ -59,10 +59,8 @@ SWSource >> contentsHash: anObject [
 
 { #category : #accessing }
 SWSource >> dirName [
-	self type = #f90 ifTrue: [ ^ 'src' ].
-	self type = #rb ifTrue: [ ^ 'script' ].
-	self type = #mjs ifTrue: [ ^ 'script' ].
-	self error: 'NO IMPLEMENTAION.'.
+	^  'cache'
+
 ]
 
 { #category : #accessing }

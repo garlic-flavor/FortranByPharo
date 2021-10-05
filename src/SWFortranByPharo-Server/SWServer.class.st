@@ -8,7 +8,8 @@ Class {
 		'env'
 	],
 	#classVars : [
-		'default'
+		'default',
+		'localDirectory'
 	],
 	#category : #'SWFortranByPharo-Server-Server'
 }
@@ -34,20 +35,31 @@ SWServer class >> default [
 { #category : #converting }
 SWServer class >> filePathOf: aName [
 	|path|
-	path := FileLocator imageDirectory joinPath: (aName asString trimLeft: [ :c | c = $/ ]).
-	(FileLocator imageDirectory contains: path) ifFalse: [
-		path := FileLocator imageDirectory
+	path := self localDirectory joinPath: (aName asString trimLeft: [ :c | c = $/ ]).
+	(self localDirectory contains: path) ifFalse: [
+		path := self localDirectory
 	].
 	^ path
-"
-	path parent ensureCreateDirectory.
-	^ path
-"
+
 ]
 
 { #category : #testing }
 SWServer class >> isRunning [
 	^ ZnServer default isRunning
+]
+
+{ #category : #origins }
+SWServer class >> localDirectory [
+	^ localDirectory ifNil: [
+		localDirectory := ((IceRepository repositories select: [ :each |
+			each name = #FortranByPharo
+		]) first location)
+	]
+]
+
+{ #category : #'code generation' }
+SWServer class >> mjs_localDirectoryUsing: transpiler [
+	transpiler put: 'return new FileLocator(process.cwd());'
 ]
 
 { #category : #'code generation' }
@@ -73,7 +85,7 @@ SWServer class >> rb_requirements [
 
 { #category : #'as yet unclassified' }
 SWServer class >> relPathOf: path [
-	^ path relativeTo: FileLocator imageDirectory
+	^ path relativeTo: self localDirectory
 ]
 
 { #category : #accessing }

@@ -556,8 +556,8 @@ SWTranspilerOfJs >> putImportNative: classes from: fileName [
 		self put: classes asString
 	].
 	self
-		put: '} from ''../../';
-		put: (SWSourcesPool localScriptDirectory / fileName) fullName;
+		put: '} from ''../../script/';
+		put: fileName;
 		putLine: ''';'.
 
 ]
