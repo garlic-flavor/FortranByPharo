@@ -1,0 +1,35 @@
+#! /usr/bin/env ruby
+
+require 'pathname'
+require 'open3'
+
+$searchpath = ['.', 'cache', 'script' ]
+
+def getPathOf(name)
+  detected = $searchpath.find {|base|
+    (Pathname(base) / name).exist?
+  }
+  if detected.nil?
+    raise "#{name}が見つかりませんでした。"
+  end
+  path = Pathname(detected) / name
+  if path.directory?
+    children = (path.children.sort{|a, b|
+      b.ctime <=> a.ctime
+    })
+    path = children.shift
+    while path.extname == '.swp' do
+      path = children.shift
+    end
+  end
+
+  return path
+
+end
+
+
+if $0 == __FILE__
+  
+  puts getPathOf(ARGV[0])
+end
+
