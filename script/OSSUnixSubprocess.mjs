@@ -40,7 +40,7 @@ export class OSSUnixSubprocess {
     }
   }
   isSuccess() {
-    return this._exitStatus == 0;
+    return this._exitStatus === 0;
   }
   stdoutStream() {
     return this._stdoutStream;
