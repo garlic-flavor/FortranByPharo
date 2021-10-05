@@ -60,5 +60,9 @@ SWServerStatusTest >> testThis [
 { #category : #'code generation - tests' }
 SWServerStatusTest >> testThisOnExternalServer [ 
 	self
-		goOnExternalServer
+		type: #mjs;
+		runAsClient: true;
+		usingPharoServer: false;
+		ready;
+		go.
 ]

@@ -18,11 +18,6 @@ SWTestBase class >> mjs_requirements: transpiler [
 ]
 
 { #category : #'code generation' }
-SWTestBase class >> mjs_tearDownUsing: transpiler [
-
-]
-
-{ #category : #'code generation' }
 SWTestBase class >> rb_requirements [
 	^ { 
 		'Pharo.rb'
@@ -41,7 +36,9 @@ SWTestBase >> assertLines: left equal: right [
 
 { #category : #'code generation - running' }
 SWTestBase >> go [
-	self setUp.
+	(self runAsClient and: [self usingPharoServer]) ifTrue: [ 
+		SWServer start.
+	].
 	self runAsClient ifTrue: [ |res status message|
 		res := project go.
 		status := SWServerStatus fromSton: (STON reader on: res readStream; yourself).
@@ -53,7 +50,8 @@ SWTestBase >> go [
 	] ifFalse: [
 		project goDomestic.
 	].
-	self tearDown.
+	project ifNotNil: [ project close ].
+	SWServer isRunning ifTrue: [ SWServer stop ].
 
 ]
 
@@ -67,7 +65,7 @@ SWTestBase >> mustFail: aBlock [
 	self error: aBlock asString, ' must fail.'
 ]
 
-{ #category : #'as yet unclassified' }
+{ #category : #'code generation - accessing' }
 SWTestBase >> ready [
 	self ready: self class name
 ]
@@ -96,15 +94,11 @@ SWTestBase >> runAsClient: anObject [
 { #category : #running }
 SWTestBase >> setUp [
 	super setUp.
-	(self runAsClient and: [self usingPharoServer]) ifTrue: [ 
-		SWServer start.
-	]
+
 ]
 
 { #category : #running }
 SWTestBase >> tearDown [
-	project ifNotNil: [ project close ].
-	SWServer isRunning ifTrue: [ SWServer stop ].
 	super tearDown
 ]
 

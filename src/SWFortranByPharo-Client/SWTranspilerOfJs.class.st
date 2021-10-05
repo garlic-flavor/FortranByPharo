@@ -19,7 +19,9 @@ SWTranspilerOfJs >> and_For: receiver With: arguments [
 		transpile: receiver;
 		put: ' && ';
 		preventNewline;
-		putSequence: (arguments at: 1) body.
+		put: '(function(){';
+		putSequenceWithReturn: (arguments at: 1) body;
+		put: '})()'
 ]
 
 { #category : #'code generation' }
@@ -163,7 +165,6 @@ SWTranspilerOfJs >> ensure_For: receiver With: arguments [
 		self
 			putLine: 'try {';
 			putSequence: receiver body;
-			putLine: '} catch(e) {';
 			putLine: '} finally {';
 			putSequence: (arguments at: 1) body;
 			put: '}'
@@ -171,7 +172,6 @@ SWTranspilerOfJs >> ensure_For: receiver With: arguments [
 		self
 			putLine: '(function(){ try {';
 			putSequenceWithReturn: receiver body;
-			putLine: '} catch(e) {';
 			putLine: '} finally {';
 			putSequence: (arguments at: 1) body;
 			put: '}})()'
@@ -326,9 +326,11 @@ SWTranspilerOfJs >> newFor: receiver With: arguments [
 
 { #category : #'code generation' }
 SWTranspilerOfJs >> on_do_For: receiver With: arguments [
+	|hasReturn|
 	self logger log.
 	self pushMessageNest.
-	receiver body hasReturnNode ifTrue: [
+	hasReturn := receiver body hasReturnNode or: [ (arguments at: 2) body hasReturnNode ].
+	hasReturn ifTrue: [
 		self
 			putLine: 'try{';
 			putSequence: receiver body;
@@ -344,7 +346,7 @@ SWTranspilerOfJs >> on_do_For: receiver With: arguments [
 			put: '} catch (';
 			put: ((0 < (arguments at: 2) arguments size) ifTrue: [ (arguments at: 2) argumentNames at: 1 ] ifFalse: ['e']);
 			putLine: '){';
-			putSequence: (arguments at: 2) body;
+			putSequenceWithReturn: (arguments at: 2) body;
 			put: '}})()'
 	].
 	self popMessageNest.

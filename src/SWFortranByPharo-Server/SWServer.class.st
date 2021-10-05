@@ -119,21 +119,10 @@ SWServer >> env: anObject [
 	env := anObject
 ]
 
-{ #category : #executing }
-SWServer >> exec: session [
-	|exe result|
-	self flag: #ToRemove.
-	exe := session instruction target fullName.
-	result := SWShell execute: exe arguments: session instruction options.
-	session status ok.
-	session status message: result
-
-]
-
 { #category : #execution }
 SWServer >> execute: webSocket [
 	|target args result|
-	target := (self class filePathOf: (webSocket uri queryAt: #target)) fullName.
+	target := webSocket uri queryAt: #target.
 	args := webSocket uri queryAt: #args ifAbsent: [ '' ].
 	args isArray ifFalse: [ args := { args } ].
 	result := SWShell execute: target arguments: args.
