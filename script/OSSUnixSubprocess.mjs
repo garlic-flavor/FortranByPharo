@@ -50,4 +50,7 @@ export class OSSUnixSubprocess {
   }
   closeAndCleanStreams() {
   }
+
+  workingDirectory_(newDir) {
+  }
 }
