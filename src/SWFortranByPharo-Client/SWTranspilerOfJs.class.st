@@ -601,6 +601,7 @@ SWTranspilerOfJs >> putNil [
 { #category : #'code generation' }
 SWTranspilerOfJs >> putProgram: aClass [
 	self logger log.
+	aClass = SWTestBase ifTrue: [ ^ self ].
 	self
 		putLine;
 		putLine: '(function(self){';

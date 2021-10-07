@@ -9,10 +9,9 @@ Class {
 
 { #category : #running }
 SWProjectOfJs >> go [
-	|aSource socket|
+	|aSource|
 	aSource := self pool get: self moduleName.
-	socket := self client exec: 'node' with: ({ aSource filename }, self args).
-	^ socket readMessage.
+	^ self client exec: 'node' with: ({ aSource filename }, self args).
 
 ]
 

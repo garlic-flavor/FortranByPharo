@@ -4,6 +4,9 @@ This implements shell execution using OSSubprocess.
 Class {
 	#name : #SWShell,
 	#superclass : #Object,
+	#classVars : [
+		'localDirectory'
+	],
 	#category : #'SWFortranByPharo-Server-Shell'
 }
 
@@ -31,6 +34,7 @@ SWShell class >> executeProcess: process [
 	"I execute 'exe' with 'list', then return its result."
 	^ [
 		process
+			workingDirectory: self localDirectory fullName;
 			redirectStdout;
 			redirectStderr;
 			runAndWait.
@@ -39,6 +43,15 @@ SWShell class >> executeProcess: process [
 				ifFalse: [ self error: process stderrStream upToEnd ].
 	] ensure: [ process ifNotNil: [ process closeAndCleanStreams ] ]
 
+]
+
+{ #category : #origins }
+SWShell class >> localDirectory [
+	^ localDirectory ifNil: [
+		localDirectory := ((IceRepository repositories select: [ :each |
+			each name = #FortranByPharo
+		]) first location)
+	]
 ]
 
 { #category : #execution }
@@ -76,6 +89,11 @@ SWShell class >> lsr: path [
 		yourself.
 
 
+]
+
+{ #category : #'code generation' }
+SWShell class >> mjs_localDirectoryUsing: transpiler [
+	transpiler put: 'return new FileLocator(process.cwd());'
 ]
 
 { #category : #'code generation' }

@@ -5,26 +5,17 @@ Class {
 	#name : #SWClient,
 	#superclass : #Object,
 	#instVars : [
-		'socket',
 		'host',
 		'port'
 	],
 	#category : #'SWFortranByPharo-Client-Client'
 }
 
-{ #category : #'initialize-release' }
-SWClient >> close [
-	(socket isNotNil and: [ socket isConnected ]) ifTrue: [
-		socket close
-	].
-	socket := nil
-]
-
 { #category : #requesting }
 SWClient >> exec: target with: options [
 	"I run a shell command on the server.
 	and, return a WebSocket to contacet to the server."
-	|url|
+	|url socket status|
 	url := ZnUrl new
 		scheme: 'ws';
 		host: self host;
@@ -33,7 +24,14 @@ SWClient >> exec: target with: options [
 		queryAt: #target put: target;
 		yourself.
 	options do: [ :each | url queryAt: #args add: each ].
-	^ ZnWebSocket to: url
+	socket := ZnWebSocket to: url.
+	status := SWServerStatus readFrom: socket.
+	status isOk ifFalse: [
+		socket close.
+		status inspect.
+		self error: 'The execution failed.'
+	].
+	^ status
 ]
 
 { #category : #public }

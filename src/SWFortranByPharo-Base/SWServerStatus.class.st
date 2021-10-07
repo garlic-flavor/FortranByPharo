@@ -11,7 +11,8 @@ Class {
 		'toComplete',
 		'completed',
 		'uri',
-		'entity'
+		'entity',
+		'socket'
 	],
 	#category : #'SWFortranByPharo-Base'
 }
@@ -65,6 +66,15 @@ SWServerStatus class >> rb_requirements [
 		SWStd.
 		'STON.rb'
 	}
+]
+
+{ #category : #'instance creation' }
+SWServerStatus class >> readFrom: aSocket [
+	|res ret|
+	res := aSocket readMessage.
+	ret := self fromSton: (STON reader on:  res readStream; yourself).
+	ret socket: aSocket.
+	^ ret
 ]
 
 { #category : #constants }
@@ -160,6 +170,18 @@ SWServerStatus >> progress [
 		self completed / self toComplete
 	] ifFalse: [ 0 ]
 
+]
+
+{ #category : #accessing }
+SWServerStatus >> socket [
+
+	^ socket
+]
+
+{ #category : #accessing }
+SWServerStatus >> socket: anObject [
+
+	socket := anObject
 ]
 
 { #category : #'ston persistence' }

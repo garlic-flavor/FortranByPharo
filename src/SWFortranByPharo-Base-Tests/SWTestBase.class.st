@@ -53,18 +53,12 @@ SWTestBase >> go [
 	(self runAsClient and: [self usingPharoServer]) ifTrue: [ 
 		SWServer start.
 	].
-	self runAsClient ifTrue: [ |res status message|
-		res := project go.
-		status := SWServerStatus fromSton: (STON reader on: res readStream; yourself).
-		message := status message.
-		status isOk ifFalse: [
-			status inspect.
-			self error: 'The execution failed.'
-		].
+	self runAsClient ifTrue: [|status|
+		status := project go.
+		status socket close.
 	] ifFalse: [
 		project goDomestic.
 	].
-	project ifNotNil: [ project close ].
 	SWServer isRunning ifTrue: [ SWServer stop ].
 
 ]

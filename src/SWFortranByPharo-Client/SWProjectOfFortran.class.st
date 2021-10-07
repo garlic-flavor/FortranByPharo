@@ -56,9 +56,16 @@ SWProjectOfFortran >> exeName: anObject [
 
 { #category : #running }
 SWProjectOfFortran >> go [
-	|aSource socket|
+	|aSource sourceFile sourcePath exeFile status|
 	aSource := self pool get: self moduleName.
-	socket := self client exec: 'gfortran' with: ({'-o'. }, self args)
+	sourceFile := aSource filename.
+	sourcePath := Path from: sourceFile.
+	exeFile := (sourcePath withExtension: 'out') fullName.
+	status := self client exec: 'gfortran' with: {'-o'. exeFile . sourceFile}.
+	status socket close.
+	status := self client exec: exeFile with: self args.
+	status socket close.
+	^ status
 ]
 
 { #category : #initialization }

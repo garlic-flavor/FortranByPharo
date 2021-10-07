@@ -52,12 +52,6 @@ SWProject >> client: anObject [
 	client := anObject
 ]
 
-{ #category : #'initialize-release' }
-SWProject >> close [
-	client ifNotNil: [ client close. ].
-
-]
-
 { #category : #running }
 SWProject >> go [
 	^ self subclassResponsibility.
