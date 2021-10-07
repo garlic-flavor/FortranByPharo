@@ -1,3 +1,6 @@
+"
+I implements basic functionarity to run tests with SWServer.
+"
 Class {
 	#name : #SWTestBase,
 	#superclass : #TestCase,
@@ -17,6 +20,15 @@ SWTestBase class >> mjs_requirements: transpiler [
 
 ]
 
+{ #category : #running }
+SWTestBase class >> program [
+	|runner|
+	runner := self new.
+	(self methods select: [ :aMethod | aMethod protocol  beginsWith: 'test']) do: [ :each |
+		each valueWithReceiver: runner arguments: #()
+	]
+]
+
 { #category : #'code generation' }
 SWTestBase class >> rb_requirements [
 	^ { 
@@ -31,11 +43,13 @@ SWTestBase class >> rb_tearDownUsing: transpiler [
 
 { #category : #asserting }
 SWTestBase >> assertLines: left equal: right [
+	"I compare left and right ignoring line delimiter chracters."
 	self assert: (left copyReplaceAll: String lf with: String cr) equals: right
 ]
 
 { #category : #'code generation - running' }
 SWTestBase >> go [
+	"I run tests on the server."
 	(self runAsClient and: [self usingPharoServer]) ifTrue: [ 
 		SWServer start.
 	].
@@ -57,6 +71,7 @@ SWTestBase >> go [
 
 { #category : #asserting }
 SWTestBase >> mustFail: aBlock [
+	"When aBlock ends without any Errors, I throw an Error."
 	[ 
 		aBlock value
 	] on: Exception do: [

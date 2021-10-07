@@ -1,5 +1,5 @@
 "
-This is a WebSocket server.
+I am HTTP and WebSocket server.
 "
 Class {
 	#name : #SWServer,
@@ -69,6 +69,11 @@ SWServer class >> mjs_requirements: transpiler [
 		putImportNative: { 'ZnServer'. 'SWWebSocketDelegate'. 'ZnResponse'. 'ZnEntity'. 'ZnStatusLine'. 'ZnHeaders' } from: 'ZnServer.mjs';
 		putImportClass: SWServerStatus;
 		putImportClass: SWShell
+]
+
+{ #category : #'code generation - deprecated' }
+SWServer class >> program [
+	self new startOn: 50000
 ]
 
 { #category : #'code generation' }
@@ -196,11 +201,6 @@ SWServer >> head: target [
 SWServer >> initialize [
 	super initialize.
 
-]
-
-{ #category : #grammar }
-SWServer >> main: argv [
-	self startOn: 50000.
 ]
 
 { #category : #executing }

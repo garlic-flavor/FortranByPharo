@@ -15,32 +15,37 @@ SWTranspilerOfFortran >> initialize [
 
 { #category : #'code generation' }
 SWTranspilerOfFortran >> putArgumentsOf: selector with: arguments [
+	self logger log.
 	^ self putArray: arguments
 ]
 
 { #category : #'code generation' }
-SWTranspilerOfFortran >> putFunctionCallFooterOf: selector [
-	self put: ')'
+SWTranspilerOfFortran >> putClassDefinition: aClass [
+	self logger log.
+	
 ]
 
-{ #category : #'code generation' }
-SWTranspilerOfFortran >> putFunctionCallHeaderOf: name [
-	self put: name; put: '('.
-
-]
-
-{ #category : #'code generation' }
-SWTranspilerOfFortran >> putMainProgramFooterOf: project [
-	self
-		put: 'end program ';
-		putLine: project.
-]
-
-{ #category : #'code generation' }
-SWTranspilerOfFortran >> putMainProgramHeaderOf: project [
+{ #category : #'public API' }
+SWTranspilerOfFortran >> putProgram: aClass [
+	self logger log.
 	self
 		put: 'program ';
-		putLine: project.
+		putLine: self source moduleName;
+		putSequence: (aClass class methodDictionary at: #program) sourceNode body;
+		put: 'end program ';
+		putLine: self source moduleName
+]
+
+{ #category : #'code generation' }
+SWTranspilerOfFortran >> putSequence: aSequence [
+	self logger log.
+	self incIndent.
+	aSequence children do: [ :child |
+		self
+			transpile: child;
+			putLine
+	].
+	self decIndent
 ]
 
 { #category : #'as yet unclassified' }

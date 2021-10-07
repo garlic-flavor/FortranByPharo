@@ -1,5 +1,5 @@
 "
-I manage codes
+I manage SWSources.
 "
 Class {
 	#name : #SWSourcesLocalPool,

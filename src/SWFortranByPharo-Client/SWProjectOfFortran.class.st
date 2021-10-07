@@ -8,18 +8,6 @@ Class {
 	#category : #'SWFortranByPharo-Client-Client'
 }
 
-{ #category : #accessing }
-SWProjectOfFortran >> client [
-
-	^ client ifNil: [ client := SWClient new ]
-]
-
-{ #category : #accessing }
-SWProjectOfFortran >> client: anObject [
-
-	client := anObject
-]
-
 { #category : #execution }
 SWProjectOfFortran >> compileAllAsFortran [
 	self flag: #ToRewrite.
@@ -68,42 +56,15 @@ SWProjectOfFortran >> exeName: anObject [
 
 { #category : #running }
 SWProjectOfFortran >> go [
-	|type|
-	type := self sources first type.
-	type = #f90 ifTrue: [
-		^ self
-			putAll;
-			compileAllAsFortran;
-			linkAllAsFortran;
-			run
-	].
-
-	type = #rb ifTrue: [
-		^ self
-			putAll;
-			run
-	].
-
-	self error: 'NO IMPLEMENTATION!'
-]
-
-{ #category : #running }
-SWProjectOfFortran >> goDomestic [
-	^ String streamContents: [ :s |
-		self sources do: [ :aSource ||program|
-			program := aSource mainClass new.
-			(aSource mainClass inheritsFrom: SWStd) ifTrue: [
-				program stdout: s
-			].
-			program main: {  }
-		]
-	]
+	|aSource socket|
+	aSource := self pool get: self moduleName.
+	socket := self client exec: 'gfortran' with: ({'-o'. }, self args)
 ]
 
 { #category : #initialization }
 SWProjectOfFortran >> initialize [
 	super initialize.
-
+	self type: #f90.
 ]
 
 { #category : #execution }
@@ -176,19 +137,4 @@ SWProjectOfFortran >> sources [
 SWProjectOfFortran >> sources: anObject [
 
 	sources := anObject
-]
-
-{ #category : #execution }
-SWProjectOfFortran >> transpile: aSource [
-	^ self transpilerClass new
-		source: aSource;
-		transpile;
-		contents
-]
-
-{ #category : #accessing }
-SWProjectOfFortran >> transpilerClass [
-	self type = #f90 ifTrue: [ ^ SWTranspilerOfFortran ].
-	self type = #rb ifTrue: [ ^ SWTranspilerOfRuby ].
-	self error: 'NO IMPLEMENTATION!'.
 ]

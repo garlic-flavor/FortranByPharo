@@ -1,5 +1,5 @@
 "
-I translate pharo code to Ruby.
+I am out of order.
 "
 Class {
 	#name : #SWTranspilerOfRuby,
@@ -499,9 +499,9 @@ SWTranspilerOfRuby >> putSymbol: aSymbol [
 SWTranspilerOfRuby >> putTestRunner [
 	self
 		put: 'runner = ';
-		put: self source mainClass asString;
+		put: self source firstClass asString;
 		putLine: '.new'.
-	(self source mainClass methods select: [ :each |
+	(self source firstClass methods select: [ :each |
 		each protocol beginsWith: 'test'
 	]) do: [ :each |
 		self

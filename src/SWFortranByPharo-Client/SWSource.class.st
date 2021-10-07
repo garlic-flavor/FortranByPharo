@@ -6,8 +6,8 @@ Class {
 	#superclass : #Object,
 	#instVars : [
 		'classes',
-		'mainClass',
-		'entryClass',
+		'firstClass',
+		'programClass',
 		'type',
 		'contents',
 		'contentsHash',
@@ -64,22 +64,6 @@ SWSource >> dirName [
 ]
 
 { #category : #accessing }
-SWSource >> entryClass [
-
-	^ entryClass ifNil: [
-		entryClass := self classes detect: [ :aClass |
-			(aClass compiledMethodAt: #main: ifAbsent: [ nil ]) isNotNil
-		] ifFound: [ :aClass | aClass ] ifNone: [ nil ]
-	]
-]
-
-{ #category : #accessing }
-SWSource >> entryClass: anObject [
-
-	entryClass := anObject
-]
-
-{ #category : #accessing }
 SWSource >> filename [
 
 	^ filename ifNil: [
@@ -99,24 +83,24 @@ SWSource >> filename: anObject [
 ]
 
 { #category : #accessing }
-SWSource >> mainClass [
-	^ mainClass ifNil: [
-		mainClass := self entryClass ifNil: [ self classes last ]
+SWSource >> firstClass [
+	^ firstClass ifNil: [
+		firstClass := self programClass ifNil: [ self classes first ]
 	]
 ]
 
 { #category : #accessing }
-SWSource >> mainClass: anObject [
-	mainClass := anObject
+SWSource >> firstClass: anObject [
+	firstClass := anObject
 ]
 
 { #category : #accessing }
 SWSource >> moduleName [
 	^ moduleName ifNil: [
-		moduleName := (self mainClass respondsTo: #moduleName) ifTrue: [
-			self mainClass moduleName
+		moduleName := (self firstClass respondsTo: #moduleName) ifTrue: [
+			self firstClass moduleName
 		] ifFalse: [
-			self mainClass name
+			self firstClass name
 		]
 	]
 
@@ -126,6 +110,16 @@ SWSource >> moduleName [
 SWSource >> moduleName: anObject [
 
 	moduleName := anObject
+]
+
+{ #category : #accessing }
+SWSource >> programClass [
+
+	^ programClass ifNil: [
+		programClass := self classes detect: [ :aClass |
+			aClass respondsTo: #program
+		] ifFound: [ :aClass | aClass ] ifNone: [ nil ]
+	]
 ]
 
 { #category : #accessing }

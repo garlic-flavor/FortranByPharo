@@ -1,3 +1,8 @@
+"
+I have informations about a Project that can be run on the server.
+SWProject>>#go runs the project on the server.
+SWProject>>#goDomestic runs the project inside this Pharo image.
+"
 Class {
 	#name : #SWProject,
 	#superclass : #Object,
@@ -5,7 +10,8 @@ Class {
 		'client',
 		'pool',
 		'moduleName',
-		'args'
+		'args',
+		'type'
 	],
 	#category : #'SWFortranByPharo-Client-Client'
 }
@@ -14,6 +20,9 @@ Class {
 SWProject class >> of: type [
 	type = #mjs ifTrue: [ 
 		^ SWProjectOfJs new	
+	].
+	type = #f90 ifTrue: [
+		^ SWProjectOfFortran new
 	].
 	self flag: #ToImplement.
 	self halt.
@@ -58,10 +67,11 @@ SWProject >> go [
 { #category : #running }
 SWProject >> goDomestic [
 	|aClass|
-	aClass := (Smalltalk globals at: self moduleName) ifNil: [
-		(self pool get: self moduleName) mainClass
+	aClass := (Smalltalk globals at: self moduleName) ifNil: [ 
+		(self pool get: self moduleName) programClass
 	].
-	^ aClass new main: self args.
+	
+	^ aClass program
 
 ]
 
@@ -103,5 +113,10 @@ SWProject >> pool: anObject [
 { #category : #accessing }
 SWProject >> type [
 
-	^ self subclassResponsibility 
+	^ type
+]
+
+{ #category : #accessing }
+SWProject >> type: aType [
+	type := aType
 ]

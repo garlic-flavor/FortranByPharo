@@ -1,5 +1,8 @@
 "
-log like stack tracing.
+I am a logger class for SWTranspiler and its inherited classes.
+I display logs to Transcript window while a transpiling process.
+My main interface is SWLogger>>#log: method.
+
 "
 Class {
 	#name : #SWLogger,
@@ -8,7 +11,7 @@ Class {
 		'enabled',
 		'selector'
 	],
-	#category : #'SWFortranByPharo-Client'
+	#category : #'SWFortranByPharo-Client-Transpiler'
 }
 
 { #category : #accessing }
@@ -23,7 +26,7 @@ SWLogger >> enabled: anObject [
 	enabled := anObject
 ]
 
-{ #category : #'as yet unclassified' }
+{ #category : #private }
 SWLogger >> getDepthOf: aContext [
 	aContext ifNil: [ ^ 0	].
 	(self selector value: aContext) ifTrue: [ 
@@ -33,17 +36,17 @@ SWLogger >> getDepthOf: aContext [
 	]
 ]
 
-{ #category : #accessing }
+{ #category : #public }
 SWLogger >> log [
 	self log: '' withContext: thisContext sender.
 ]
 
-{ #category : #'instance creation' }
+{ #category : #public }
 SWLogger >> log: msg [
 	self log: msg withContext: thisContext sender
 ]
 
-{ #category : #'instance creation' }
+{ #category : #private }
 SWLogger >> log: msg withContext: aContext [
 	|depth|
 	self enabled ifFalse: [ ^ self ].

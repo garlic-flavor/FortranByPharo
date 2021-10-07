@@ -1,7 +1,10 @@
+"
+I have imformations about a Project that can be run with NodeJs.
+"
 Class {
 	#name : #SWProjectOfJs,
 	#superclass : #SWProject,
-	#category : #'SWFortranByPharo-Client'
+	#category : #'SWFortranByPharo-Client-Client'
 }
 
 { #category : #running }
@@ -13,8 +16,8 @@ SWProjectOfJs >> go [
 
 ]
 
-{ #category : #accessing }
-SWProjectOfJs >> type [
-
-	^ #mjs
+{ #category : #initialization }
+SWProjectOfJs >> initialize [
+	super initialize.
+	self type: #mjs
 ]

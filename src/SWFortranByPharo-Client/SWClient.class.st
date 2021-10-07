@@ -22,6 +22,8 @@ SWClient >> close [
 
 { #category : #requesting }
 SWClient >> exec: target with: options [
+	"I run a shell command on the server.
+	and, return a WebSocket to contacet to the server."
 	|url|
 	url := ZnUrl new
 		scheme: 'ws';
@@ -36,6 +38,7 @@ SWClient >> exec: target with: options [
 
 { #category : #public }
 SWClient >> get: target [
+	"I am a GET of HTTP."
 	^ (ZnClient new
 		http;
 		host: self host;
@@ -50,6 +53,7 @@ SWClient >> get: target [
 
 { #category : #requesting }
 SWClient >> head: target [
+	"I am a HEAD of HTTP."
 	|res|
 	res := ZnClient new
 		http;
@@ -92,6 +96,7 @@ SWClient >> port: anObject [
 
 { #category : #requesting }
 SWClient >> put: target contents: contents [
+	"I am a PUT of HTTP."
 	^ (ZnClient new
 		http;
 		host: self host;
@@ -102,20 +107,4 @@ SWClient >> put: target contents: contents [
 		enforceHttpSuccess: true;
 		put;
 		response) headers at: #'Last-Modified'
-]
-
-{ #category : #accessing }
-SWClient >> socket [
-	(socket isNil or: [ socket isConnected not ]) ifTrue: [
-		socket := ZnWebSocket to: self server
-	].
-	^ socket
-
-
-]
-
-{ #category : #accessing }
-SWClient >> socket: anObject [
-
-	socket := anObject
 ]

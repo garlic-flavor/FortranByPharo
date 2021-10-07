@@ -14,6 +14,11 @@ SWTestHelloWorld class >> mjs_requirements [
 	}
 ]
 
+{ #category : #running }
+SWTestHelloWorld class >> program [
+	SWFStd print: 'Hello, World!'
+]
+
 { #category : #accessing }
 SWTestHelloWorld >> main: args [
 	self print: 'Hello, World!'

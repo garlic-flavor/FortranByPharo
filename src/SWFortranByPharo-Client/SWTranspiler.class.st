@@ -1,5 +1,8 @@
 "
-I transpile SWProject.
+I transpile a SWSource.
+SWTranspiler>>#source: sets the SWSource as a source of transpilation.
+SWTranspiler>>#transpile does transpile.
+SWTranspiler>>#contents returns the result.
 "
 Class {
 	#name : #SWTranspiler,
@@ -54,6 +57,12 @@ SWTranspiler >> decMessageNest [
 	messageNest push: { 0. messageNest pop - 1 } max.
 	0 < messageNest top ifTrue: [ self put: ')' ].
 
+]
+
+{ #category : #'as yet unclassified' }
+SWTranspiler >> getClassInside: aVariable [
+	aVariable class = RBVariableNode ifFalse: [ ^ nil ].
+	^ Smalltalk globals at: aVariable name ifAbsent: [ nil ]
 ]
 
 { #category : #'code generation - protected' }
@@ -115,7 +124,7 @@ SWTranspiler >> opEqual_For: receiver With: arguments [
 { #category : #accessing }
 SWTranspiler >> pool [
 
-	^ pool ifNil: [ pool := SWSourcesPool default ]
+	^ pool ifNil: [ pool := SWSourcesPool new type: self type; yourself ]
 ]
 
 { #category : #accessing }
@@ -198,6 +207,11 @@ SWTranspiler >> putCharacter: c [
 ]
 
 { #category : #'code generation' }
+SWTranspiler >> putClassAccessor [
+	self put: '.'
+]
+
+{ #category : #'code generation' }
 SWTranspiler >> putClassDefinition: aClass [
 	^ self subclassResponsibility 
 ]
@@ -249,16 +263,6 @@ SWTranspiler >> putFunctionCallOf: selector with: arguments [
 
 ]
 
-{ #category : #'code generation' }
-SWTranspiler >> putFunctionDefinitionFooterOf: aMethodName [.
-	^ self subclassResponsibility 
-]
-
-{ #category : #'code generation' }
-SWTranspiler >> putFunctionDefinitionHeaderOf: aMethodName [
-	^ self subclassResponsibility 
-]
-
 { #category : #'code generation - protected' }
 SWTranspiler >> putIndent [
 	isNewline ifFalse: [ ^ self ].
@@ -286,23 +290,32 @@ SWTranspiler >> putLine: code [
 ]
 
 { #category : #'code generation' }
-SWTranspiler >> putMainProgram [
-	^ self subclassResponsibility
-]
-
-{ #category : #'code generation' }
 SWTranspiler >> putMessage: receiver call: selector with: arguments [
 	self flag: #toImplement.
 	self logger log: [receiver asString, '>>', selector asString].
 	self incMessageNest.
-	[ |selectorName uniqueSelector|
+	[ |selectorName uniqueSelector receiverClass|
 		selectorName := (self class transpiledSelectorNameOf: selector) asSymbol.
+		(receiverClass := self getClassInside: receiver) ifNotNil: [
+			uniqueSelector := self type, '_', selectorName, 'With:Using:'.
+			(receiverClass respondsTo: uniqueSelector) ifTrue: [
+				^ receiverClass perform: uniqueSelector with: arguments with: self
+			]
+		].
 		uniqueSelector := selectorName, 'For:With:'.
 		(self respondsTo: uniqueSelector) ifTrue: [
 			^ self perform: uniqueSelector with: receiver with: arguments
 		].
-		receiver transpileUsing: self.
-		(selectorName first isLetter) ifTrue: [ self put: '.' ].
+		(receiverClass respondsTo: #receiverName) ifTrue: [|receiverName|
+			receiverName := receiverClass receiverName.
+			receiverName ifNotEmpty: [
+				self put: receiverName.
+				selectorName first isLetter ifTrue: [ self putClassAccessor ]
+			].
+		] ifFalse: [
+			receiver transpileUsing: self.
+			selectorName first isLetter ifTrue: [ self putClassAccessor ]
+		].
 		self putFunctionCallOf: selectorName with: arguments.
 	] ensure: [ self decMessageNest ].
 
@@ -327,6 +340,11 @@ SWTranspiler >> putParameters: anArray [
 		self put: ', '
 	]
 
+]
+
+{ #category : #'public API' }
+SWTranspiler >> putProgram: aClass [
+	^ self subclassResponsibility 
 ]
 
 { #category : #'code generation' }
@@ -407,13 +425,11 @@ SWTranspiler >> transpile [
 	self source classes do: [ :aClass |
 		self putClassDefinition: aClass
 	].
-	self source entryClass ifNotNil: [
-		self putMainProgram
-	] ifNil: [ 
-		(self source mainClass inheritsFrom: TestCase) ifTrue: [
-			self putTestRunner
-		]
-	]
+
+	self source programClass ifNotNil: [
+		self putProgram: self source programClass
+	].
+
 ]
 
 { #category : #'code generation' }

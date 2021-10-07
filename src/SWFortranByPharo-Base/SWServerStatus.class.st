@@ -1,5 +1,6 @@
 "
-I indicate the status of a server.
+I indicate the status of a WebSocket server.
+I can be convert to/from JSON using STON.
 "
 Class {
 	#name : #SWServerStatus,
@@ -15,7 +16,7 @@ Class {
 	#category : #'SWFortranByPharo-Base'
 }
 
-{ #category : #accessing }
+{ #category : #constants }
 SWServerStatus class >> failed [
 	^ self new failed; yourself
 ]
@@ -48,7 +49,7 @@ SWServerStatus class >> mjs_requirements: transpiler [
 
 ]
 
-{ #category : #actions }
+{ #category : #constants }
 SWServerStatus class >> ok [
 	^ self new ok; yourself
 ]
@@ -111,7 +112,7 @@ SWServerStatus >> entity: anObject [
 	entity := anObject
 ]
 
-{ #category : #accessing }
+{ #category : #constants }
 SWServerStatus >> failed [
 	^ code := self class failedCode
 ]
@@ -148,7 +149,7 @@ SWServerStatus >> message: anObject [
 	message := anObject
 ]
 
-{ #category : #accessing }
+{ #category : #constants }
 SWServerStatus >> ok [
 	^ code := self class okCode
 ]
