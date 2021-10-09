@@ -1,2 +1,23 @@
-#!/bin/bash
-node `./get SWServer`
+#!/usr/bin/env node
+
+const targetFolder = './cache/SWServer/';
+const fs = require('fs');
+const {execSync} = require('child_process');
+
+const list = fs.readdirSync(targetFolder).map(file=>{
+  return {
+    name: file,
+    time: fs.statSync(`${targetFolder}/${file}`).mtime.getTime()
+  };
+}).sort((a, b)=>{
+  return b.time - a.time
+}).map(file => {
+  return file.name;
+});
+
+if (0 < list.length) {
+  console.log(targetFolder + list[0]);
+  import(targetFolder + list[0]);
+} else {
+  console.log('No server at there.');
+}
