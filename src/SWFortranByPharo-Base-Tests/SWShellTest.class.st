@@ -4,7 +4,7 @@ A SWShellTest is a test class for testing the behavior of SWShell
 Class {
 	#name : #SWShellTest,
 	#superclass : #SWTestBase,
-	#category : #'SWFortranByPharo-Server-Tests-Shell'
+	#category : #'SWFortranByPharo-Base-Tests'
 }
 
 { #category : #'code generation' }

@@ -34,9 +34,9 @@ SWServer class >> default [
 { #category : #converting }
 SWServer class >> filePathOf: aName [
 	|path|
-	path := SWShell localDirectory joinPath: (aName asString trimLeft: [ :c | c = $/ ]).
-	(SWShell localDirectory contains: path) ifFalse: [
-		path := SWShell localDirectory
+	path := SWShellEnvironment default localDirectory joinPath: (aName asString trimLeft: [ :c | c = $/ ]).
+	(SWShellEnvironment default localDirectory contains: path) ifFalse: [
+		path := SWShellEnvironment default localDirectory
 	].
 	^ path
 
@@ -53,6 +53,7 @@ SWServer class >> mjs_requirements: transpiler [
 		putImportNative: {'PharoObject'. 'Transcript'. 'FileLocator'} from: 'Pharo.mjs';
 		putImportNative: { 'ZnServer'. 'SWWebSocketDelegate'. 'ZnResponse'. 'ZnEntity'. 'ZnStatusLine'. 'ZnHeaders' } from: 'ZnServer.mjs';
 		putImportClass: SWServerStatus;
+		putImportClass: SWShellEnvironment;
 		putImportClass: SWShell
 ]
 
@@ -75,7 +76,7 @@ SWServer class >> rb_requirements [
 
 { #category : #'as yet unclassified' }
 SWServer class >> relPathOf: path [
-	^ path relativeTo: SWShell localDirectory
+	^ path relativeTo: SWShellEnvironment default localDirectory
 ]
 
 { #category : #accessing }

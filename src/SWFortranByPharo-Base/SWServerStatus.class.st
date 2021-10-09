@@ -14,7 +14,7 @@ Class {
 		'entity',
 		'socket'
 	],
-	#category : #'SWFortranByPharo-Base'
+	#category : #'SWFortranByPharo-Base-Bridge'
 }
 
 { #category : #constants }

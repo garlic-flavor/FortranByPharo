@@ -1,3 +1,6 @@
+"
+I represent a Project of fortran.
+"
 Class {
 	#name : #SWProjectOfFortran,
 	#superclass : #SWProject,
@@ -56,16 +59,20 @@ SWProjectOfFortran >> exeName: anObject [
 
 { #category : #running }
 SWProjectOfFortran >> go [
-	|aSource sourceFile sourcePath exeFile status|
+	|aSource make|
 	aSource := self pool get: self moduleName.
-	sourceFile := aSource filename.
-	sourcePath := Path from: sourceFile.
-	exeFile := (sourcePath withExtension: 'out') fullName.
-	status := self client exec: 'gfortran' with: {'-o'. exeFile . sourceFile}.
-	status socket close.
-	status := self client exec: exeFile with: self args.
-	status socket close.
-	^ status
+	make := SWSource new
+		type: #mak;
+		moduleName: self moduleName;
+		contents: (SWTranspilerOfMake new
+			pool: self pool;
+			source: aSource;
+			transpile;
+			contents);
+		putOn: self client;
+		yourself.
+	^ self client exec: 'make' with: ({'-f',  make filename }, self args).
+
 ]
 
 { #category : #initialization }

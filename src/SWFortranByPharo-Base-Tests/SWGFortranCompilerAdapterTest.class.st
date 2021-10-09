@@ -6,7 +6,7 @@ Class {
 		'fm',
 		'source'
 	],
-	#category : #'SWFortranByPharo-Server-Tests-CompilerAdapter'
+	#category : #'SWFortranByPharo-Base-Tests'
 }
 
 { #category : #running }

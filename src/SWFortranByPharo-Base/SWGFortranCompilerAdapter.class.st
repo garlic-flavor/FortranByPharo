@@ -4,7 +4,7 @@ This implements gfortran handler.
 Class {
 	#name : #SWGFortranCompilerAdapter,
 	#superclass : #Object,
-	#category : #'SWFortranByPharo-Server-CompilerAdapter'
+	#category : #'SWFortranByPharo-Base-CompilerAdapter'
 }
 
 { #category : #compiling }

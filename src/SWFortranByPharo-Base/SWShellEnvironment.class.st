@@ -7,12 +7,13 @@ Class {
 	#instVars : [
 		'exeFileExtension',
 		'objFileExtension',
-		'fortranCompilerAdapterClass'
+		'fortranCompilerAdapterClass',
+		'localDirectory'
 	],
 	#classVars : [
 		'default'
 	],
-	#category : #'SWFortranByPharo-Server-Shell'
+	#category : #'SWFortranByPharo-Base-Shell'
 }
 
 { #category : #accessing }
@@ -22,9 +23,14 @@ SWShellEnvironment class >> default [
 ]
 
 { #category : #'code generation' }
+SWShellEnvironment class >> mjs_localDirectoryUsing: transpiler [
+	transpiler put: 'return new FileLocator(process.cwd());'
+]
+
+{ #category : #'code generation' }
 SWShellEnvironment class >> mjs_requirements: transpiler [
 	transpiler
-		putImportNative: #(PharoObject OSPlatform SWGFortranCompilerAdapter)  from: 'Pharo.mjs'
+		putImportNative: #(PharoObject OSPlatform SWGFortranCompilerAdapter FileLocator)  from: 'Pharo.mjs'
 ]
 
 { #category : #'instance creation' }
@@ -67,6 +73,15 @@ SWShellEnvironment >> fortranCompilerAdapterClass [
 SWShellEnvironment >> fortranCompilerAdapterClass: anObject [
 
 	fortranCompilerAdapterClass := anObject
+]
+
+{ #category : #origins }
+SWShellEnvironment >> localDirectory [
+	^ localDirectory ifNil: [
+		localDirectory := ((IceRepository repositories select: [ :each |
+			each name = #FortranByPharo
+		]) first location)
+	]
 ]
 
 { #category : #accessing }

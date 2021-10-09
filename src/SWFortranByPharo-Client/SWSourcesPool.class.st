@@ -35,11 +35,9 @@ SWSourcesPool >> close [
 
 { #category : #'as yet unclassified' }
 SWSourcesPool >> get: aModuleName [
-	^ self sources at: aModuleName ifAbsent: [|source|
-			source := super get: aModuleName.
-			(self client head: source filename) ifNil: [
-				self client put: source filename contents: source contents
-			].
-			source
+	^ self sources at: aModuleName ifAbsent: [
+		(super get: aModuleName)
+			putOn: self client;
+			yourself
 	]
 ]

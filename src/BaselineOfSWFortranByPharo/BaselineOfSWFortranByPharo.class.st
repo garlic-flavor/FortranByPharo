@@ -19,9 +19,9 @@ BaselineOfSWFortranByPharo >> baseline: spec [
 
 		"Packages"
 		spec
-			package: 'SWFortranByPharo-Base';
+			package: 'SWFortranByPharo-Base' with: [ spec requires: #('OSSubprocess') ];
 			package: 'SWFortranByPharo-Client' with: [ spec requires: #('ZincHTTPComponents' 'Zinc-WebSocket-Core' 'SWFortranByPharo-Base') ];
-			package: 'SWFortranByPharo-Server' with: [ spec requires: #('OSSubprocess' 'ZincHTTPComponents' 'Zinc-WebSocket-Core' 'SWFortranByPharo-Base') ];
+			package: 'SWFortranByPharo-Server' with: [ spec requires: #('ZincHTTPComponents' 'Zinc-WebSocket-Core' 'SWFortranByPharo-Base') ];
 			package: 'SWFortranByPharo-Base-Tests' with: [ spec requires: #('SWFortranByPharo-Base') ];
 			package: 'SWFortranByPharo-Server-Tests' with: [ spec requires: #('SWFortranByPharo-Server') ];
 			package: 'SWFortranByPharo-Client-Tests' with: [ spec requires: #('SWFortranByPharo-Client') ].

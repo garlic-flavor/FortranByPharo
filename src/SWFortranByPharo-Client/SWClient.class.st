@@ -81,6 +81,13 @@ SWClient >> host: anObject [
 ]
 
 { #category : #accessing }
+SWClient >> nextPut: aSource [
+	(self head: aSource filename) ifNil: [ 
+		self put: aSource filename contents: aSource contents
+	]
+]
+
+{ #category : #accessing }
 SWClient >> port [
 
 	^ port ifNil: [ port := 50000 ]
