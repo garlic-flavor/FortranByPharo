@@ -4,7 +4,7 @@ I generate makefile.
 Class {
 	#name : #SWTranspilerOfMake,
 	#superclass : #SWTranspiler,
-	#category : #'SWFortranByPharo-Client'
+	#category : #'SWFortranByPharo-Client-Transpiler'
 }
 
 { #category : #'code generation' }
