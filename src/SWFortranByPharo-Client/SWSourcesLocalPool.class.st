@@ -19,11 +19,6 @@ SWSourcesLocalPool >> add: aSource [
 	self sources at: aSource moduleName put: aSource
 ]
 
-{ #category : #'initialize-release' }
-SWSourcesLocalPool >> close [
-
-]
-
 { #category : #'as yet unclassified' }
 SWSourcesLocalPool >> get: aModuleName [
 	^ self sources at: aModuleName ifAbsentPut: [|source transpiler|

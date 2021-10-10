@@ -28,11 +28,6 @@ SWSourcesPool >> client: anObject [
 	client := anObject
 ]
 
-{ #category : #'initialize-release' }
-SWSourcesPool >> close [
-	client ifNotNil: [ client close. ]
-]
-
 { #category : #'as yet unclassified' }
 SWSourcesPool >> get: aModuleName [
 	^ self sources at: aModuleName ifAbsent: [
