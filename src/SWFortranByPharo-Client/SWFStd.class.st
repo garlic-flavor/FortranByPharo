@@ -21,11 +21,10 @@ SWFStd class >> f90_declare_as_With: arguments Using: transpiler [
 		put: (arguments at: 1) value
 ]
 
-{ #category : #printing }
-SWFStd class >> f90_print_With: arguments Using: transpiler [
-	transpiler
-		put: 'print *, ';
-		transpile: (arguments at: 1).
+{ #category : #'code generation - property' }
+SWFStd class >> f90_print_Using: transpiler [
+	transpiler putLine: 'print *, msg'.
+
 ]
 
 { #category : #printing }
@@ -33,7 +32,10 @@ SWFStd class >> print: msg [
 	Transcript show: msg; cr.
 ]
 
-{ #category : #'as yet unclassified' }
-SWFStd class >> receiverName [
-	^ ''
+{ #category : #'code generation - property' }
+SWFStd class >> returnTypeOf: aSelector with: argumentTypes [
+	aSelector == #print: ifTrue: [
+		^ nil
+	].
+	^ nil
 ]

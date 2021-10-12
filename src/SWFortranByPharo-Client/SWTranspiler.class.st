@@ -59,12 +59,6 @@ SWTranspiler >> decMessageNest [
 
 ]
 
-{ #category : #'as yet unclassified' }
-SWTranspiler >> getClassInside: aVariable [
-	aVariable class = RBVariableNode ifFalse: [ ^ nil ].
-	^ Smalltalk globals at: aVariable name ifAbsent: [ nil ]
-]
-
 { #category : #'code generation - protected' }
 SWTranspiler >> incIndent [
 	indent := indent + 1.
@@ -197,6 +191,32 @@ SWTranspiler >> putBlock: aBlock [
 ]
 
 { #category : #'code generation' }
+SWTranspiler >> putCascade: aRBCascadeNode [
+	|msg block seq tmp|
+	tmp := RBVariableNode new
+		name: 'tmp';
+		yourself.
+	seq := RBSequenceNode new
+		addNodes: (aRBCascadeNode messages collect: [:each |
+			each copy receiver: tmp; yourself
+		]);
+		yourself.
+
+	block := RBBlockNode new
+		arguments: { tmp };
+		body: seq;
+		yourself.
+	msg := RBMessageNode new
+		receiver: block;
+		selector: #value:;
+		arguments: { aRBCascadeNode receiver copy };
+		yourself.
+
+	^ msg transpileUsing: self.
+
+]
+
+{ #category : #'code generation' }
 SWTranspiler >> putCharacter: c [
 	self logger log.
 
@@ -271,6 +291,11 @@ SWTranspiler >> putIndent [
 
 ]
 
+{ #category : #'as yet unclassified' }
+SWTranspiler >> putInteger: anInteger [
+	self put: anInteger asString
+]
+
 { #category : #'code generation' }
 SWTranspiler >> putLine [
 	preventNewline
@@ -294,28 +319,14 @@ SWTranspiler >> putMessage: receiver call: selector with: arguments [
 	self flag: #toImplement.
 	self logger log: [receiver asString, '>>', selector asString].
 	self incMessageNest.
-	[ |selectorName uniqueSelector receiverClass|
+	[ |selectorName uniqueSelector|
 		selectorName := (self class transpiledSelectorNameOf: selector) asSymbol.
-		(receiverClass := self getClassInside: receiver) ifNotNil: [
-			uniqueSelector := self type, '_', selectorName, 'With:Using:'.
-			(receiverClass respondsTo: uniqueSelector) ifTrue: [
-				^ receiverClass perform: uniqueSelector with: arguments with: self
-			]
-		].
 		uniqueSelector := selectorName, 'For:With:'.
 		(self respondsTo: uniqueSelector) ifTrue: [
 			^ self perform: uniqueSelector with: receiver with: arguments
 		].
-		(receiverClass respondsTo: #receiverName) ifTrue: [|receiverName|
-			receiverName := receiverClass receiverName.
-			receiverName ifNotEmpty: [
-				self put: receiverName.
-				selectorName first isLetter ifTrue: [ self putClassAccessor ]
-			].
-		] ifFalse: [
-			receiver transpileUsing: self.
-			selectorName first isLetter ifTrue: [ self putClassAccessor ]
-		].
+		receiver transpileUsing: self.
+		selectorName first isLetter ifTrue: [ self putClassAccessor ].
 		self putFunctionCallOf: selectorName with: arguments.
 	] ensure: [ self decMessageNest ].
 
@@ -357,6 +368,14 @@ SWTranspiler >> putRequirements [
 		]
 	]
 
+]
+
+{ #category : #'as yet unclassified' }
+SWTranspiler >> putReturn: value [
+	self logger log.
+	^ self
+		put: 'return ';
+		transpile: value.
 ]
 
 { #category : #'code generation' }

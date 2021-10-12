@@ -4,8 +4,34 @@ This transpile Pharo to Fortran.
 Class {
 	#name : #SWTranspilerOfFortran,
 	#superclass : #SWTranspiler,
+	#instVars : [
+		'analyzer'
+	],
 	#category : #'SWFortranByPharo-Client-Transpiler'
 }
+
+{ #category : #'code generation - protected' }
+SWTranspilerOfFortran class >> transpiledSelectorNameOf: selector [
+^ (super transpiledSelectorNameOf: selector) collect: [ :c |
+	({ Character space. $>. $#. $:. $/ } anySatisfy: [ :each | each = c ]) ifTrue: [
+		$_
+	] ifFalse: [
+		c
+	]
+ ]
+]
+
+{ #category : #accessing }
+SWTranspilerOfFortran >> analyzer [
+
+	^ analyzer ifNil: [ analyzer := SWAnalyzer new ]
+]
+
+{ #category : #accessing }
+SWTranspilerOfFortran >> analyzer: anObject [
+
+	analyzer := anObject
+]
 
 { #category : #initialization }
 SWTranspilerOfFortran >> initialize [
@@ -21,6 +47,11 @@ SWTranspilerOfFortran >> putArgumentsOf: selector with: arguments [
 		putArray: arguments;
 		put: ')'
 
+]
+
+{ #category : #'code generation' }
+SWTranspilerOfFortran >> putClassAccessor [
+	self put: '_'
 ]
 
 { #category : #'code generation' }
@@ -57,38 +88,65 @@ SWTranspilerOfFortran >> putFunctionCallOf: selector with: arguments [
 
 { #category : #'code generation' }
 SWTranspilerOfFortran >> putMessage: receiver call: selector with: arguments [
-	|receiverClass|
-	((receiverClass := self getClassInside: receiver) isNotNil and: [ receiverClass = self source programClass ]) ifTrue: [|selectorName|
-		selectorName := (self class transpiledSelectorNameOf: selector) asSymbol.
-		^ self
-			pushMessageNest;
-			put: 'call ';
-			putFunctionCallOf: selectorName with: arguments;
-			popMessageNest
-	].
-	^ super putMessage: receiver call: selector with: arguments
+	|receiverClass mangledName argumentTypes methodInfo selectorName|
+	self logger log.
+	self incMessageNest.
+	[ 
+		selectorName := self class transpiledSelectorNameOf: selector.
+		self flag: #ToImplement.
+		receiverClass := receiver transpileUsing: self analyzer.
+		argumentTypes := arguments collect: [ :each | each transpileUsing: self analyzer ].
+		mangledName := self analyzer class mangledNameOf: receiverClass s: selector with: argumentTypes.
+		methodInfo := self analyzer methods at: mangledName.
+		methodInfo hasReturn ifTrue: [
+			self flag: #ToImplement.
+		] ifFalse: [
+			self
+				put: 'call ';
+				put: (self class transpiledSelectorNameOf: mangledName);
+				pushMessageNest;
+				putArgumentsOf: selector with: arguments;
+				popMessageNest
+		].
+	] ensure: [ self decMessageNest ]
+
 ]
 
 { #category : #'public API' }
-SWTranspilerOfFortran >> putProgram: aClass [
+SWTranspilerOfFortran >> putMethod: methodInfo [
+	|uniqueTranspiler|
 	self logger log.
-	self
-		incIndent;
-		putLine: 'implicit none';
-		decIndent;
-		putSequence: (aClass class methodDictionary at: #program) sourceNode body
+	self incIndent.
+	methodInfo variables keysAndValuesDo: [ :val :valType |
+		val ~= #self ifTrue: [ 
+			self
+				put:  valType asString;
+				put: ' ';
+				putLine: val asString
+		]
+	].
+	uniqueTranspiler := self transpilerNameOf: (methodInfo owner class methodDictionary at: methodInfo name).
+	(methodInfo owner respondsTo: uniqueTranspiler) ifTrue: [
+		methodInfo owner perform: uniqueTranspiler with: self.
+	] ifFalse: [
+		(methodInfo owner class methodDictionary at: methodInfo name) sourceNode body statements do: [ :each |
+			self
+				transpile: each;
+				putLine
+		]
+	].
+	self decIndent
+
 ]
 
 { #category : #'code generation' }
 SWTranspilerOfFortran >> putSequence: aSequence [
 	self logger log.
 	self incIndent.
-	aSequence children do: [ :child |
-		(child class = RBVariableNode) ifFalse: [
-			self
-				transpile: child;
-				putLine
-		]
+	aSequence statements do: [ :child |
+		self
+			transpile: child;
+			putLine
 	].
 	self decIndent
 ]
@@ -109,25 +167,50 @@ SWTranspilerOfFortran >> putSubprogram: aMethod ofClass: aClass [
 	self
 		putComment: aMethod comment;
 		put: 'subroutine ';
+		put: aClass name;
+		putClassAccessor;
 		put: sel;
 		put: '(';
 		put: (', ' join: (aMethod argumentNames collect: [:each | each asString]));
 		putLine: ')';
 		putSequence: aMethod sourceNode body;
 		put: 'end subroutine ';
+		put: aClass name;
+		putClassAccessor;
 		putLine: sel.
 ]
 
 { #category : #'as yet unclassified' }
-SWTranspilerOfFortran >> putSubprograms: aClass [
+SWTranspilerOfFortran >> putSubprograms: methods [
 	self logger log.
 	self incIndent.
-	aClass class methods select: [:aMethod |
-		(aMethod protocol beginsWith: 'code generation') not and: [ aMethod selector ~= #program ]
-	] thenDo: [ :aMethod |
-		self putSubprogram: aMethod ofClass: aClass.
+	methods valuesDo: [ :methodInfo ||method methodName methodType|
+		method := methodInfo owner class methodDictionary at: methodInfo name.
+		methodName := self class transpiledSelectorNameOf: methodInfo mangledName.
+		methodType := methodInfo hasReturn ifTrue: [ 
+			'function '.
+		] ifFalse: [
+			 'subroutine '.
+		].
+		self
+			put: methodType;
+			put: methodName;
+			put: '(';
+			putArray: method argumentNames;
+			putLine: ')'.
+		self analyzer variables: methodInfo variables.
+		self putMethod: methodInfo.
+		self
+			put: 'end ';
+			put: methodType;
+			putLine: methodName
 	].
 	self decIndent.
+]
+
+{ #category : #'code generation' }
+SWTranspilerOfFortran >> putSymbol: aSymbol [
+	self put: aSymbol asString.
 ]
 
 { #category : #'public API' }
@@ -139,14 +222,18 @@ SWTranspilerOfFortran >> transpile [
 		self putClassDefinition: aClass
 	].
 
-	(programClass := self source programClass) ifNotNil: [
+	(programClass := self source programClass) ifNotNil: [|methodInfo|
+		methodInfo := self analyzer analyze: programClass s: #program with: #().
 		self
 			putComment: programClass comment;
 			put: 'program ';
 			putLine: self source moduleName;
-			putProgram: programClass;
+			incIndent;
+			putLine: 'implicit none';
+			decIndent;
+			putMethod: methodInfo;
 			putLine: 'contains';
-			putSubprograms: programClass;
+			putSubprograms: analyzer methods;
 			put: 'end program ';
 			putLine: self source moduleName
 	].
