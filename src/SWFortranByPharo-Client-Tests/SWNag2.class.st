@@ -9,12 +9,20 @@ Class {
 
 { #category : #'code generation - deprecated' }
 SWNag2 class >> mysub: i [
-	SWFStd print: i
+	SWFStd print: i.
+
 ]
 
 { #category : #'code generation - deprecated' }
 SWNag2 class >> program [
 	|i|
 	i := 99.
-	self mysub: i
+	self mysub: i.
+
+]
+
+{ #category : #tests }
+SWNag2 class >> test [
+	Transcript show: 'Hello!'; cr.
+	^ (Smalltalk globals at: self name) new
 ]

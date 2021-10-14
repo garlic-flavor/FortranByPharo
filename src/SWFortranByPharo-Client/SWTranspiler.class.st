@@ -18,19 +18,37 @@ Class {
 		'preventNewline',
 		'messageNest',
 		'pool',
-		'logger'
+		'logger',
+		'analyzer'
 	],
 	#category : #'SWFortranByPharo-Client-Transpiler'
 }
 
+{ #category : #'as yet unclassified' }
+SWTranspiler class >> domainSpecificMessageTranspilerOf: aSelector [
+	^ ((self safeSelectorNameOf: aSelector), 'For:With:') asSymbol
+]
+
 { #category : #'code generation - protected' }
-SWTranspiler class >> transpiledSelectorNameOf: selector [
+SWTranspiler class >> safeSelectorNameOf: selector [
 	selector = '=' ifTrue: [ ^ 'opEqual_' ].
 	selector = '~=' ifTrue: [ ^ 'opNotEqual_' ].
 	selector = ',' ifTrue: [ ^ 'opCamma_' ].
 	selector = '->' ifTrue: [ ^ 'opArrow_' ].
-	^ selector asString copyReplaceAll: ':' with: '_'
-	
+	^ selector collect: [:c | (#' >#:/' anySatisfy: [ :each | each = c]) ifTrue: [ $_ ] ifFalse: [ c ] ]
+
+]
+
+{ #category : #accessing }
+SWTranspiler >> analyzer [
+
+	^ analyzer ifNil: [ analyzer := SWAnalyzerDummy new ]
+]
+
+{ #category : #accessing }
+SWTranspiler >> analyzer: anObject [
+
+	analyzer := anObject
 ]
 
 { #category : #'code generation' }
@@ -57,6 +75,25 @@ SWTranspiler >> decMessageNest [
 	messageNest push: { 0. messageNest pop - 1 } max.
 	0 < messageNest top ifTrue: [ self put: ')' ].
 
+]
+
+{ #category : #enumerating }
+SWTranspiler >> hasDomainSpecificTranspilerOf: aSelecter ifTrue: aBlock [
+	|dst|
+	dst := self class domainSpecificMessageTranspilerOf: aSelecter.
+	(self respondsTo: dst) ifTrue: [
+		aBlock value: dst
+	]
+]
+
+{ #category : #enumerating }
+SWTranspiler >> ifUniqueMessageTranspilerExistsOn: receiver of: selector thenDo: aBlock [
+	|receiverClass selectorName|
+	receiverClass := receiver transpileUsing: self analyzer .
+	selectorName := self uniqueMessageTranspilerOf: selector.
+	(receiverClass respondsTo: selectorName) ifTrue: [
+		aBlock value: receiverClass value: selectorName
+	]
 ]
 
 { #category : #'code generation - protected' }
@@ -91,6 +128,18 @@ SWTranspiler >> logger [
 { #category : #accessing }
 SWTranspiler >> logging: trueOrFalse [
 	self logger enabled: trueOrFalse
+]
+
+{ #category : #'code generation - protected' }
+SWTranspiler >> methodBodyGeneratorNameOf: aMethod [
+	^ (String streamContents: [ :s |
+		s
+			<< self type;
+			<< '_';
+			<< (self class safeSelectorNameOf: aMethod selector);
+			<< 'Using:'
+	]) asSymbol.
+
 ]
 
 { #category : #accessing }
@@ -277,12 +326,6 @@ SWTranspiler >> putFileHeaderOf: filename [
 	
 ]
 
-{ #category : #'code generation' }
-SWTranspiler >> putFunctionCallOf: selector with: arguments [
-	^ self subclassResponsibility
-
-]
-
 { #category : #'code generation - protected' }
 SWTranspiler >> putIndent [
 	isNewline ifFalse: [ ^ self ].
@@ -291,7 +334,7 @@ SWTranspiler >> putIndent [
 
 ]
 
-{ #category : #'as yet unclassified' }
+{ #category : #'code generation' }
 SWTranspiler >> putInteger: anInteger [
 	self put: anInteger asString
 ]
@@ -319,27 +362,37 @@ SWTranspiler >> putMessage: receiver call: selector with: arguments [
 	self flag: #toImplement.
 	self logger log: [receiver asString, '>>', selector asString].
 	self incMessageNest.
-	[ |selectorName uniqueSelector|
-		selectorName := (self class transpiledSelectorNameOf: selector) asSymbol.
-		uniqueSelector := selectorName, 'For:With:'.
-		(self respondsTo: uniqueSelector) ifTrue: [
-			^ self perform: uniqueSelector with: receiver with: arguments
+	[
+		self ifUniqueMessageTranspilerExistsOn: receiver of: selector thenDo: [ :receiverClass :selectorName |
+			^ receiverClass perform: selectorName with: arguments with: self
 		].
-		receiver transpileUsing: self.
-		selectorName first isLetter ifTrue: [ self putClassAccessor ].
-		self putFunctionCallOf: selectorName with: arguments.
+		self hasDomainSpecificTranspilerOf: selector ifTrue: [ :dst |
+			^ self perform: dst with: receiver with: arguments
+		].
+		self putOrdinaryMessage: receiver call: selector with: arguments.
 	] ensure: [ self decMessageNest ].
 
 ]
 
 { #category : #'code generation' }
 SWTranspiler >> putMethod: selector ofClass: class [
-	^ self subclassResponsibility 
+	|sAnalyzer|
+	sAnalyzer := self analyzer subAnalyzer.
+	
 ]
 
 { #category : #'code generation' }
 SWTranspiler >> putNil [
 	^ self subclassResponsibility
+]
+
+{ #category : #'code generation' }
+SWTranspiler >> putOrdinaryMessage: receiver call: selector with: arguments [
+	receiver transpileUsing: self.
+	selector first isLetter ifTrue: [ self putClassAccessor ].
+
+	self putFunctionCallOf: selector with: arguments.
+
 ]
 
 { #category : #'code generation' }
@@ -353,7 +406,7 @@ SWTranspiler >> putParameters: anArray [
 
 ]
 
-{ #category : #'public API' }
+{ #category : #'code generation' }
 SWTranspiler >> putProgram: aClass [
 	^ self subclassResponsibility 
 ]
@@ -370,7 +423,7 @@ SWTranspiler >> putRequirements [
 
 ]
 
-{ #category : #'as yet unclassified' }
+{ #category : #'code generation' }
 SWTranspiler >> putReturn: value [
 	self logger log.
 	^ self
@@ -457,18 +510,6 @@ SWTranspiler >> transpile: anObject [
 	^ anObject transpileUsing: self
 ]
 
-{ #category : #'code generation - protected' }
-SWTranspiler >> transpilerNameOf: aMethod [
-	^ (String streamContents: [ :s |
-		s
-			<< self type;
-			<< '_';
-			<< (self class transpiledSelectorNameOf: aMethod selector);
-			<< 'Using:'
-	]) asSymbol.
-
-]
-
 { #category : #accessing }
 SWTranspiler >> type [
 
@@ -479,4 +520,13 @@ SWTranspiler >> type [
 SWTranspiler >> type: anObject [
 
 	type := anObject
+]
+
+{ #category : #'code generation - protected' }
+SWTranspiler >> uniqueMessageTranspilerOf: aSelector [
+	^ (String streamContents: [ :s |
+		s << self type; <<  '_'; << (self class safeSelectorNameOf: aSelector); << 'With:Using:'
+	]) asSymbol
+	
+
 ]

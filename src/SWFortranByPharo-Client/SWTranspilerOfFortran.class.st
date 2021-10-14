@@ -4,34 +4,8 @@ This transpile Pharo to Fortran.
 Class {
 	#name : #SWTranspilerOfFortran,
 	#superclass : #SWTranspiler,
-	#instVars : [
-		'analyzer'
-	],
 	#category : #'SWFortranByPharo-Client-Transpiler'
 }
-
-{ #category : #'code generation - protected' }
-SWTranspilerOfFortran class >> transpiledSelectorNameOf: selector [
-^ (super transpiledSelectorNameOf: selector) collect: [ :c |
-	({ Character space. $>. $#. $:. $/ } anySatisfy: [ :each | each = c ]) ifTrue: [
-		$_
-	] ifFalse: [
-		c
-	]
- ]
-]
-
-{ #category : #accessing }
-SWTranspilerOfFortran >> analyzer [
-
-	^ analyzer ifNil: [ analyzer := SWAnalyzer new ]
-]
-
-{ #category : #accessing }
-SWTranspilerOfFortran >> analyzer: anObject [
-
-	analyzer := anObject
-]
 
 { #category : #initialization }
 SWTranspilerOfFortran >> initialize [
@@ -92,7 +66,7 @@ SWTranspilerOfFortran >> putMessage: receiver call: selector with: arguments [
 	self logger log.
 	self incMessageNest.
 	[ 
-		selectorName := self class transpiledSelectorNameOf: selector.
+		selectorName := self class safeSelectorNameOf: selector.
 		self flag: #ToImplement.
 		receiverClass := receiver transpileUsing: self analyzer.
 		argumentTypes := arguments collect: [ :each | each transpileUsing: self analyzer ].
@@ -103,7 +77,7 @@ SWTranspilerOfFortran >> putMessage: receiver call: selector with: arguments [
 		] ifFalse: [
 			self
 				put: 'call ';
-				put: (self class transpiledSelectorNameOf: mangledName);
+				put: (self class safeSelectorNameOf: mangledName);
 				pushMessageNest;
 				putArgumentsOf: selector with: arguments;
 				popMessageNest
@@ -125,7 +99,7 @@ SWTranspilerOfFortran >> putMethod: methodInfo [
 				putLine: val asString
 		]
 	].
-	uniqueTranspiler := self transpilerNameOf: (methodInfo owner class methodDictionary at: methodInfo name).
+	uniqueTranspiler := self methodBodyGeneratorNameOf: (methodInfo owner class methodDictionary at: methodInfo name).
 	(methodInfo owner respondsTo: uniqueTranspiler) ifTrue: [
 		methodInfo owner perform: uniqueTranspiler with: self.
 	] ifFalse: [
@@ -163,7 +137,7 @@ SWTranspilerOfFortran >> putString: aString [
 SWTranspilerOfFortran >> putSubprogram: aMethod ofClass: aClass [
 	|sel|
 	self logger log.
-	sel := self class transpiledSelectorNameOf: aMethod selector.
+	sel := self class safeSelectorNameOf: aMethod selector.
 	self
 		putComment: aMethod comment;
 		put: 'subroutine ';
@@ -186,7 +160,7 @@ SWTranspilerOfFortran >> putSubprograms: methods [
 	self incIndent.
 	methods valuesDo: [ :methodInfo ||method methodName methodType|
 		method := methodInfo owner class methodDictionary at: methodInfo name.
-		methodName := self class transpiledSelectorNameOf: methodInfo mangledName.
+		methodName := self class safeSelectorNameOf: methodInfo mangledName.
 		methodType := methodInfo hasReturn ifTrue: [ 
 			'function '.
 		] ifFalse: [

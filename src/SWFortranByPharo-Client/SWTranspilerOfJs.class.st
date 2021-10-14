@@ -8,9 +8,9 @@ Class {
 }
 
 { #category : #'code generation - protected' }
-SWTranspilerOfJs class >> transpiledSelectorNameOf: aName [
+SWTranspilerOfJs class >> safeSelectorNameOf: aName [
 	aName = '<<' ifTrue: [ ^ 'write_' ].
-	^ super transpiledSelectorNameOf: aName
+	^ super safeSelectorNameOf: aName
 ]
 
 { #category : #'code generation' }
@@ -472,7 +472,7 @@ SWTranspilerOfJs >> putClassDefinition: aClass [
 SWTranspilerOfJs >> putClassMethod: aMethod ofClass: aClass [
 	|sel|
 	self logger log.
-	sel := self class transpiledSelectorNameOf: aMethod selector.
+	sel := self class safeSelectorNameOf: aMethod selector.
 	self
 		putComment: aMethod comment;
 		put: aClass name; put: '.'; put: sel; put: ' = ';
@@ -485,7 +485,7 @@ SWTranspilerOfJs >> putClassMethod: aMethod ofClass: aClass [
 		put: aClass name;
 		putLine: ';';
 		decIndent.
-	sel := self transpilerNameOf: aMethod.
+	sel := self methodBodyGeneratorNameOf: aMethod.
 	(aClass respondsTo: sel) ifTrue: [
 		self incIndent.
 		aClass perform: sel with: self.
@@ -570,15 +570,15 @@ SWTranspilerOfJs >> putMethod: aMethod ofClass: aClass [
 	self logger log.
 	self
 		putComment: aMethod comment;
-		put: (self class transpiledSelectorNameOf: aMethod selector);
+		put: (self class safeSelectorNameOf: aMethod selector);
 		put: '(';
-		put: (', ' join: (aMethod argumentNames collect: [ :each | each asString ]));
+		putParameters: aMethod argumentNames;
 		putLine: ') {';
 		pushMessageNest;
 		incIndent;
 		putLine: 'var self = this;';
 		decIndent.
-	sel := self transpilerNameOf: aMethod.
+	sel := self methodBodyGeneratorNameOf: aMethod.
 	(aClass respondsTo: sel) ifTrue: [
 		self incIndent.
 		aClass perform: sel with: self.
@@ -675,7 +675,7 @@ SWTranspilerOfJs >> putSymbol: aSymbol [
 	self logger log: aSymbol asString.
 	self
 		put: '''';
-		put: (self class transpiledSelectorNameOf: aSymbol);
+		put: (self class safeSelectorNameOf: aSymbol);
 		put: ''''
 ]
 
