@@ -535,6 +535,7 @@ SWTranspilerOfJs >> putFunctionCallOf: selector with: arguments [
 SWTranspilerOfJs >> putImportClass: aClass [
 	|s|
 	self logger log.
+	super putImportClass: aClass.
 	s := self pool get: aClass name.
 	self
 		put: 'import {';

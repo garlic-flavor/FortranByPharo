@@ -14,7 +14,7 @@ Class {
 		'variables',
 		'const'
 	],
-	#category : #'SWFortranByPharo-Client-Transpiler'
+	#category : #'SWFortranByPharo-Client-Analyzer'
 }
 
 { #category : #accessing }

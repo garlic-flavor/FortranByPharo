@@ -6,9 +6,10 @@ Class {
 	#superclass : #Object,
 	#instVars : [
 		'variables',
-		'methods'
+		'methods',
+		'classes'
 	],
-	#category : #'SWFortranByPharo-Client-Transpiler'
+	#category : #'SWFortranByPharo-Client-Analyzer'
 }
 
 { #category : #'as yet unclassified' }
@@ -42,6 +43,7 @@ SWAnalyzer >> addVariable: aName as: aType [
 { #category : #'public API' }
 SWAnalyzer >> analyze: aClass s: aMethod with: argumentTypes [
 	|method explicitReturnType|
+	self putImportClass: aClass.
 	method := self class search: aClass s: aMethod.
 	explicitReturnType := self
 		addVariable: #self as: aClass;
@@ -73,7 +75,19 @@ SWAnalyzer >> assign: aVariable with: aValue [
 
 { #category : #'as yet unclassified' }
 SWAnalyzer >> classFilter: aClass [
-	^ aClass name beginsWith: 'SW'
+	^ self classes anySatisfy: [ :one | one = aClass ]
+]
+
+{ #category : #accessing }
+SWAnalyzer >> classes [
+
+	^ classes ifNil: [ classes := Set new ]
+]
+
+{ #category : #accessing }
+SWAnalyzer >> classes: anObject [
+
+	classes := anObject
 ]
 
 { #category : #'code generation - protected' }
@@ -120,6 +134,14 @@ SWAnalyzer >> putCascade: aCascadeNode [
 		expType := aNode transpileUsing: self
 	].
 	^ expType
+]
+
+{ #category : #'code generation' }
+SWAnalyzer >> putImportClass: aClass [
+	self classes add: aClass.
+	(aClass class ~= Metaclass) ifTrue: [
+		self classes add: aClass class
+	]
 ]
 
 { #category : #'code generation' }
@@ -179,7 +201,8 @@ SWAnalyzer >> solveTypesOfLocalVariablesOf: method [
 { #category : #'public API' }
 SWAnalyzer >> subAnalyzer [
 	^ self class new
-		methods: self methods
+		methods: self methods;
+		classes: self classes;
 		yourself
 ]
 

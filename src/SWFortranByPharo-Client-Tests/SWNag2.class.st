@@ -7,13 +7,18 @@ Class {
 	#category : #'SWFortranByPharo-Client-Tests-Uncategorized'
 }
 
-{ #category : #'code generation - deprecated' }
+{ #category : #running }
+SWNag2 class >> f90_requirements: transpiler [
+
+]
+
+{ #category : #running }
 SWNag2 class >> mysub: i [
 	SWFStd print: i.
 
 ]
 
-{ #category : #'code generation - deprecated' }
+{ #category : #running }
 SWNag2 class >> program [
 	|i|
 	i := 99.

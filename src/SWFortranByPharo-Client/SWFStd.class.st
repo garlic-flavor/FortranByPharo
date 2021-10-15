@@ -14,28 +14,17 @@ SWFStd class >> declare: aSymbol as: aType [
 
 { #category : #'code generation - property' }
 SWFStd class >> f90_declare_as_With: arguments Using: transpiler [
-	transpiler logger log.
-	transpiler
-		put: (arguments at: 2) value;
-		put: ' ';
-		put: (arguments at: 1) value
+
 ]
 
-{ #category : #'code generation - property' }
-SWFStd class >> f90_print_Using: transpiler [
-	transpiler putLine: 'print *, msg'.
-
+{ #category : #'as yet unclassified' }
+SWFStd class >> f90_print_With: arguments Using: transpiler [
+	transpiler
+		put: 'print *, ';
+		transpile: (arguments at: 1)
 ]
 
 { #category : #printing }
 SWFStd class >> print: msg [
 	Transcript show: msg; cr.
-]
-
-{ #category : #'code generation - property' }
-SWFStd class >> returnTypeOf: aSelector with: argumentTypes [
-	aSelector == #print: ifTrue: [
-		^ nil
-	].
-	^ nil
 ]

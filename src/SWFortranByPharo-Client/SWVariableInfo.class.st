@@ -11,7 +11,7 @@ Class {
 	#classVars : [
 		'temporalVariableName'
 	],
-	#category : #'SWFortranByPharo-Client-Transpiler'
+	#category : #'SWFortranByPharo-Client-Analyzer'
 }
 
 { #category : #generating }

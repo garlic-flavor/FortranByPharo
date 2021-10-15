@@ -86,14 +86,16 @@ SWTranspiler >> hasDomainSpecificTranspilerOf: aSelecter ifTrue: aBlock [
 	]
 ]
 
-{ #category : #enumerating }
+{ #category : #'code generation - protected' }
 SWTranspiler >> ifUniqueMessageTranspilerExistsOn: receiver of: selector thenDo: aBlock [
 	|receiverClass selectorName|
 	receiverClass := receiver transpileUsing: self analyzer .
+	receiverClass class = Metaclass ifFalse: [ ^ self ].
 	selectorName := self uniqueMessageTranspilerOf: selector.
-	(receiverClass respondsTo: selectorName) ifTrue: [
-		aBlock value: receiverClass value: selectorName
+	(receiverClass methodDict includesKey: selectorName) ifTrue: [
+		aBlock value: receiverClass soleInstance value: selectorName
 	]
+
 ]
 
 { #category : #'code generation - protected' }
@@ -324,6 +326,12 @@ SWTranspiler >> putFileFooterOf: filename [
 SWTranspiler >> putFileHeaderOf: filename [
 	
 	
+]
+
+{ #category : #'code generation' }
+SWTranspiler >> putImportClass: aClass [
+	self logger log.
+	self analyzer putImportClass: aClass
 ]
 
 { #category : #'code generation - protected' }

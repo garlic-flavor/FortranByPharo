@@ -7,6 +7,11 @@ Class {
 	#category : #'SWFortranByPharo-Client-Transpiler'
 }
 
+{ #category : #accessing }
+SWTranspilerOfFortran >> analyzer [
+	^ analyzer ifNil: [ analyzer := SWAnalyzer new ]
+]
+
 { #category : #initialization }
 SWTranspilerOfFortran >> initialize [
 	super initialize. 
@@ -60,32 +65,6 @@ SWTranspilerOfFortran >> putFunctionCallOf: selector with: arguments [
 		popMessageNest
 ]
 
-{ #category : #'code generation' }
-SWTranspilerOfFortran >> putMessage: receiver call: selector with: arguments [
-	|receiverClass mangledName argumentTypes methodInfo selectorName|
-	self logger log.
-	self incMessageNest.
-	[ 
-		selectorName := self class safeSelectorNameOf: selector.
-		self flag: #ToImplement.
-		receiverClass := receiver transpileUsing: self analyzer.
-		argumentTypes := arguments collect: [ :each | each transpileUsing: self analyzer ].
-		mangledName := self analyzer class mangledNameOf: receiverClass s: selector with: argumentTypes.
-		methodInfo := self analyzer methods at: mangledName.
-		methodInfo hasReturn ifTrue: [
-			self flag: #ToImplement.
-		] ifFalse: [
-			self
-				put: 'call ';
-				put: (self class safeSelectorNameOf: mangledName);
-				pushMessageNest;
-				putArgumentsOf: selector with: arguments;
-				popMessageNest
-		].
-	] ensure: [ self decMessageNest ]
-
-]
-
 { #category : #'public API' }
 SWTranspilerOfFortran >> putMethod: methodInfo [
 	|uniqueTranspiler|
@@ -94,22 +73,54 @@ SWTranspilerOfFortran >> putMethod: methodInfo [
 	methodInfo variables keysAndValuesDo: [ :val :valType |
 		val ~= #self ifTrue: [ 
 			self
-				put:  valType asString;
+				put:  valType type name;
 				put: ' ';
 				putLine: val asString
 		]
 	].
-	uniqueTranspiler := self methodBodyGeneratorNameOf: (methodInfo owner class methodDictionary at: methodInfo name).
+	uniqueTranspiler := self methodBodyGeneratorNameOf: (methodInfo owner methodDictionary at: methodInfo name).
 	(methodInfo owner respondsTo: uniqueTranspiler) ifTrue: [
 		methodInfo owner perform: uniqueTranspiler with: self.
 	] ifFalse: [
-		(methodInfo owner class methodDictionary at: methodInfo name) sourceNode body statements do: [ :each |
+		(methodInfo owner methodDictionary at: methodInfo name) sourceNode body statements do: [ :each |
 			self
 				transpile: each;
 				putLine
 		]
 	].
 	self decIndent
+
+]
+
+{ #category : #'code generation' }
+SWTranspilerOfFortran >> putOrdinaryMessage: receiver call: selector with: arguments [
+	| receiverClass mangledName argumentTypes methodInfo selectorName |
+	self logger log.
+	selectorName := self class safeSelectorNameOf: selector.
+	receiverClass := receiver transpileUsing: self analyzer.
+	argumentTypes := arguments collect: [ :each | 
+                 each transpileUsing: self analyzer
+	].
+	mangledName := self analyzer class
+               mangledNameOf: receiverClass
+               s: selector
+               with: argumentTypes.
+	methodInfo := self analyzer methods at: mangledName ifAbsent: [
+		SWMethodInfo new
+			mangledName: selector;
+			yourself.
+	].
+	methodInfo hasReturn
+		ifTrue: [
+			self flag: #ToImplement
+		] ifFalse: [ 
+			self
+				put: 'call ';
+				put: (self class safeSelectorNameOf: mangledName);
+				pushMessageNest;
+				putArgumentsOf: selector with: arguments;
+				popMessageNest
+		]
 
 ]
 
@@ -159,7 +170,7 @@ SWTranspilerOfFortran >> putSubprograms: methods [
 	self logger log.
 	self incIndent.
 	methods valuesDo: [ :methodInfo ||method methodName methodType|
-		method := methodInfo owner class methodDictionary at: methodInfo name.
+		method := methodInfo owner >> methodInfo name.
 		methodName := self class safeSelectorNameOf: methodInfo mangledName.
 		methodType := methodInfo hasReturn ifTrue: [ 
 			'function '.
@@ -197,7 +208,7 @@ SWTranspilerOfFortran >> transpile [
 	].
 
 	(programClass := self source programClass) ifNotNil: [|methodInfo|
-		methodInfo := self analyzer analyze: programClass s: #program with: #().
+		methodInfo := self analyzer analyze: programClass class s: #program with: #().
 		self
 			putComment: programClass comment;
 			put: 'program ';
