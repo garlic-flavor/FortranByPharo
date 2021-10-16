@@ -14,6 +14,14 @@ Class {
 	#category : #'SWFortranByPharo-Client-Analyzer'
 }
 
+{ #category : #initialization }
+SWVariableInfo class >> named: aName typed: aType [
+	^ self new
+		name: aName;
+		type: aType;
+		yourself
+]
+
 { #category : #generating }
 SWVariableInfo class >> newTemporalVariableNameIn: aDict [
 	self nextTemporalVariableName.
@@ -60,6 +68,16 @@ SWVariableInfo class >> resetTemporalVariableName [
 ]
 
 { #category : #accessing }
+SWVariableInfo >> const [
+	^ (self properties at: #mutable ifAbsentPut: [ false ]) not
+]
+
+{ #category : #accessing }
+SWVariableInfo >> const: aFlag [
+	^ self properties at: #mutable put: aFlag not
+]
+
+{ #category : #accessing }
 SWVariableInfo >> name [
 	^ self properties at: #name
 ]
@@ -89,4 +107,13 @@ SWVariableInfo >> type [
 { #category : #accessing }
 SWVariableInfo >> type: aClass [
 	self properties at: #type put: aClass
+]
+
+{ #category : #accessing }
+SWVariableInfo >> typeIn: aLanguageType [
+	aLanguageType = #f90 ifTrue: [
+		self type = Integer ifTrue: [
+			^ #integer
+		]
+	]
 ]

@@ -24,7 +24,7 @@ Class {
 	#category : #'SWFortranByPharo-Client-Transpiler'
 }
 
-{ #category : #'as yet unclassified' }
+{ #category : #'code generation - protected' }
 SWTranspiler class >> domainSpecificMessageTranspilerOf: aSelector [
 	^ ((self safeSelectorNameOf: aSelector), 'For:With:') asSymbol
 ]
@@ -35,6 +35,8 @@ SWTranspiler class >> safeSelectorNameOf: selector [
 	selector = '~=' ifTrue: [ ^ 'opNotEqual_' ].
 	selector = ',' ifTrue: [ ^ 'opCamma_' ].
 	selector = '->' ifTrue: [ ^ 'opArrow_' ].
+	selector = '/' ifTrue: [ ^ 'opDiv_' ].
+	selector = '<<' ifTrue: [ ^ 'opWrite_' ].
 	^ selector collect: [:c | (#' >#:/' anySatisfy: [ :each | each = c]) ifTrue: [ $_ ] ifFalse: [ c ] ]
 
 ]
@@ -397,9 +399,16 @@ SWTranspiler >> putNil [
 { #category : #'code generation' }
 SWTranspiler >> putOrdinaryMessage: receiver call: selector with: arguments [
 	receiver transpileUsing: self.
-	selector first isLetter ifTrue: [ self putClassAccessor ].
+	selector first isLetter ifTrue: [
+		self putClassAccessor;
+			put: (self class safeSelectorNameOf: selector);
+			putArgumentsOf: selector with: arguments.
+	] ifFalse: [
+		self
+			put: selector;
+			transpile: (arguments at: 1)
+	]
 
-	self putFunctionCallOf: selector with: arguments.
 
 ]
 
@@ -516,6 +525,15 @@ SWTranspiler >> transpile [
 SWTranspiler >> transpile: anObject [
 	self logger log.
 	^ anObject transpileUsing: self
+]
+
+{ #category : #'public API' }
+SWTranspiler >> transpileAsSub [
+	self putFileHeaderOf: self source moduleName.
+	self putRequirements.
+	self source classes do: [ :aClass |
+		self putClassDefinition: aClass
+	]
 ]
 
 { #category : #accessing }

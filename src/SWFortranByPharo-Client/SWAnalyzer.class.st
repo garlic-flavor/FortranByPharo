@@ -14,7 +14,24 @@ Class {
 
 { #category : #'as yet unclassified' }
 SWAnalyzer class >> mangledNameOf: aClass s: aSelector with: argumentTypes [
-	^ aClass name, '#', aSelector, ('/' join: (argumentTypes collect: [:each | each name]))
+	^ String streamContents: [ :s |
+		aClass class = Metaclass ifTrue: [
+			s << aClass soleInstance name; << 'C'
+		] ifFalse: [
+			s << aClass name; << '_'
+		].
+		s << aSelector.
+		argumentTypes do: [ :aType |
+			s << (self mangledTypeNameOf: aType) asString
+		]
+	]
+
+]
+
+{ #category : #'as yet unclassified' }
+SWAnalyzer class >> mangledTypeNameOf: aType [
+	aType = Integer ifTrue: [ ^ $i ].
+	^ $_
 ]
 
 { #category : #'as yet unclassified' }
@@ -34,15 +51,13 @@ SWAnalyzer >> addArgumentsOf: method with: argumentTypes [
 
 { #category : #'code generation - protected' }
 SWAnalyzer >> addVariable: aName as: aType [
-	self variables at: aName put:  (SWVariableInfo new
-		name: aName;
-		type: aType;
-		yourself)
+	self variables at: aName put:  (SWVariableInfo named: aName typed: aType)
+
 ]
 
 { #category : #'public API' }
 SWAnalyzer >> analyze: aClass s: aMethod with: argumentTypes [
-	|method explicitReturnType|
+	|method explicitReturnType constOfThisMethod|
 	self putImportClass: aClass.
 	method := self class search: aClass s: aMethod.
 	explicitReturnType := self
@@ -51,7 +66,7 @@ SWAnalyzer >> analyze: aClass s: aMethod with: argumentTypes [
 		solveTypesOfLocalVariablesOf: method;
 		gatherDependenciesOf: method;
 		explicitReturnTypeOf: method.
-
+	constOfThisMethod := method variableWriteNodes isEmpty.
 	^ SWMethodInfo new
 		argumentTypes: argumentTypes;
 		mangledName: (self class mangledNameOf: aClass s: aMethod with: argumentTypes);
@@ -59,12 +74,15 @@ SWAnalyzer >> analyze: aClass s: aMethod with: argumentTypes [
 		owner: aClass;
 		explicitReturnType: explicitReturnType;
 		variables: self variables;
+		const: constOfThisMethod;
 		yourself
 ]
 
 { #category : #'code generation' }
 SWAnalyzer >> assign: aVariable with: aValue [
-	^ (self variables at: aVariable name ifAbsentPut: [
+	^ (self variables at: aVariable name ifPresent: [ :vi |
+		vi const: false; yourself
+	] ifAbsentPut: [
 		SWVariableInfo new
 			name: aVariable name;
 			type: (aValue transpileUsing: self);

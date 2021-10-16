@@ -30,6 +30,18 @@ SWMethodInfo >> argumentTypes: anObject [
 ]
 
 { #category : #accessing }
+SWMethodInfo >> const [
+
+	^ const
+]
+
+{ #category : #accessing }
+SWMethodInfo >> const: anObject [
+
+	const := anObject
+]
+
+{ #category : #accessing }
 SWMethodInfo >> explicitReturnType [
 
 	^ explicitReturnType

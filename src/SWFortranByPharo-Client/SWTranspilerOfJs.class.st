@@ -7,12 +7,6 @@ Class {
 	#category : #'SWFortranByPharo-Client-Transpiler'
 }
 
-{ #category : #'code generation - protected' }
-SWTranspilerOfJs class >> safeSelectorNameOf: aName [
-	aName = '<<' ifTrue: [ ^ 'write_' ].
-	^ super safeSelectorNameOf: aName
-]
-
 { #category : #'code generation' }
 SWTranspilerOfJs >> and_For: receiver With: arguments [
 	self
@@ -387,6 +381,16 @@ SWTranspilerOfJs >> opNotEqual_For: receiver With: arguments [
 		transpile: (arguments at: 1)
 ]
 
+{ #category : #'as yet unclassified' }
+SWTranspilerOfJs >> opWrite_For: receiver With: arguments [
+	self
+		pushMessageNest;
+		transpile: receiver;
+		put: '.write_';
+		putArgumentsOf: 'write_' with: arguments;
+		popMessageNest
+]
+
 { #category : #'code generation' }
 SWTranspilerOfJs >> perform_For: receiver With: arguments [
 	self logger log.
@@ -536,7 +540,7 @@ SWTranspilerOfJs >> putImportClass: aClass [
 	|s|
 	self logger log.
 	super putImportClass: aClass.
-	s := self pool get: aClass name.
+	s := self pool getAsSub: aClass name.
 	self
 		put: 'import {';
 		put: s moduleName;

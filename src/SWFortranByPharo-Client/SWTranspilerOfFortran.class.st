@@ -73,7 +73,7 @@ SWTranspilerOfFortran >> putMethod: methodInfo [
 	methodInfo variables keysAndValuesDo: [ :val :valType |
 		val ~= #self ifTrue: [ 
 			self
-				put:  valType type name;
+				put:  (valType typeIn: self type);
 				put: ' ';
 				putLine: val asString
 		]
@@ -101,10 +101,7 @@ SWTranspilerOfFortran >> putOrdinaryMessage: receiver call: selector with: argum
 	argumentTypes := arguments collect: [ :each | 
                  each transpileUsing: self analyzer
 	].
-	mangledName := self analyzer class
-               mangledNameOf: receiverClass
-               s: selector
-               with: argumentTypes.
+	mangledName := self analyzer class mangledNameOf: receiverClass s: selector with: argumentTypes.
 	methodInfo := self analyzer methods at: mangledName ifAbsent: [
 		SWMethodInfo new
 			mangledName: selector;
@@ -121,6 +118,25 @@ SWTranspilerOfFortran >> putOrdinaryMessage: receiver call: selector with: argum
 				putArgumentsOf: selector with: arguments;
 				popMessageNest
 		]
+
+]
+
+{ #category : #'public API' }
+SWTranspilerOfFortran >> putProgram: programClass [
+	|methodInfo|
+	methodInfo := self analyzer analyze: programClass class s: #program with: #().
+	self
+		putComment: programClass comment;
+		put: 'program ';
+		putLine: self source moduleName;
+		incIndent;
+		putLine: 'implicit none';
+		decIndent;
+		putMethod: methodInfo;
+		putLine: 'contains';
+		putSubprograms: analyzer methods;
+		put: 'end program ';
+		putLine: self source moduleName
 
 ]
 
@@ -142,27 +158,6 @@ SWTranspilerOfFortran >> putString: aString [
 		put: '''';
 		put: aString;
 		put: ''''.
-]
-
-{ #category : #'as yet unclassified' }
-SWTranspilerOfFortran >> putSubprogram: aMethod ofClass: aClass [
-	|sel|
-	self logger log.
-	sel := self class safeSelectorNameOf: aMethod selector.
-	self
-		putComment: aMethod comment;
-		put: 'subroutine ';
-		put: aClass name;
-		putClassAccessor;
-		put: sel;
-		put: '(';
-		put: (', ' join: (aMethod argumentNames collect: [:each | each asString]));
-		putLine: ')';
-		putSequence: aMethod sourceNode body;
-		put: 'end subroutine ';
-		put: aClass name;
-		putClassAccessor;
-		putLine: sel.
 ]
 
 { #category : #'as yet unclassified' }
@@ -196,31 +191,4 @@ SWTranspilerOfFortran >> putSubprograms: methods [
 { #category : #'code generation' }
 SWTranspilerOfFortran >> putSymbol: aSymbol [
 	self put: aSymbol asString.
-]
-
-{ #category : #'public API' }
-SWTranspilerOfFortran >> transpile [
-	|programClass|
-	self putFileHeaderOf: self source moduleName.
-	self putRequirements.
-	self source classes do: [ :aClass |
-		self putClassDefinition: aClass
-	].
-
-	(programClass := self source programClass) ifNotNil: [|methodInfo|
-		methodInfo := self analyzer analyze: programClass class s: #program with: #().
-		self
-			putComment: programClass comment;
-			put: 'program ';
-			putLine: self source moduleName;
-			incIndent;
-			putLine: 'implicit none';
-			decIndent;
-			putMethod: methodInfo;
-			putLine: 'contains';
-			putSubprograms: analyzer methods;
-			put: 'end program ';
-			putLine: self source moduleName
-	].
-
 ]

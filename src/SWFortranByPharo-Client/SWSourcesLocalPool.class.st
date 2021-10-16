@@ -21,6 +21,12 @@ SWSourcesLocalPool >> add: aSource [
 
 { #category : #'as yet unclassified' }
 SWSourcesLocalPool >> get: aModuleName [
+	^ self get: aModuleName withTranspilerMethodOf: #transpile.
+
+]
+
+{ #category : #'as yet unclassified' }
+SWSourcesLocalPool >> get: aModuleName withTranspilerMethodOf: aMethod [
 	^ self sources at: aModuleName ifAbsentPut: [|source transpiler|
 			source := SWSource new
 				type: self type;
@@ -29,11 +35,17 @@ SWSourcesLocalPool >> get: aModuleName [
 			transpiler := self transpilerClass new
 				pool: self;
 				source: source;
+				perform: aMethod;
 				yourself.
 			source
-				contents: transpiler transpile contents;
+				contents: transpiler contents;
 				yourself.
 	]
+]
+
+{ #category : #'as yet unclassified' }
+SWSourcesLocalPool >> getAsSub: aModuleName [
+	^ self get: aModuleName withTranspilerMethodOf: #transpileAsSub
 ]
 
 { #category : #initialization }
