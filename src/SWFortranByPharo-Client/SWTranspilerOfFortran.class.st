@@ -7,9 +7,26 @@ Class {
 	#category : #'SWFortranByPharo-Client-Transpiler'
 }
 
+{ #category : #'as yet unclassified' }
+SWTranspilerOfFortran class >> typeNameFor: aClass [
+	aClass = Integer ifTrue: [
+		^ #integer
+	].
+	self halt.
+]
+
 { #category : #accessing }
 SWTranspilerOfFortran >> analyzer [
 	^ analyzer ifNil: [ analyzer := SWAnalyzer new ]
+]
+
+{ #category : #'code generation' }
+SWTranspilerOfFortran >> assign: key with: value [
+	self analyzer variables at: key name ifPresent: [:vi |
+		vi initialValue ifNotNil: [ ^ self ].
+	].
+	super assign: key with: value.
+
 ]
 
 { #category : #initialization }
@@ -51,32 +68,13 @@ SWTranspilerOfFortran >> putComment: comment [
 	]
 ]
 
-{ #category : #'code generation' }
-SWTranspilerOfFortran >> putFunctionCallOf: selector with: arguments [
-	self logger log.
-	self
-		pushMessageNest;
-		put: (selector asString first isLetter ifTrue: [
-			selector
-		] ifFalse: [
-			' ' join: {''. selector. ''}
-		]);
-		putArgumentsOf: selector with: arguments;
-		popMessageNest
-]
-
 { #category : #'public API' }
 SWTranspilerOfFortran >> putMethod: methodInfo [
 	|uniqueTranspiler|
 	self logger log.
 	self incIndent.
-	methodInfo variables keysAndValuesDo: [ :val :valType |
-		val ~= #self ifTrue: [ 
-			self
-				put:  (valType typeIn: self type);
-				put: ' ';
-				putLine: val asString
-		]
+	methodInfo variables values select: [ :val | val name ~= #self ] thenDo: [ :val |
+		self putVariableDeclarationOf: val
 	].
 	uniqueTranspiler := self methodBodyGeneratorNameOf: (methodInfo owner methodDictionary at: methodInfo name).
 	(methodInfo owner respondsTo: uniqueTranspiler) ifTrue: [
@@ -191,4 +189,23 @@ SWTranspilerOfFortran >> putSubprograms: methods [
 { #category : #'code generation' }
 SWTranspilerOfFortran >> putSymbol: aSymbol [
 	self put: aSymbol asString.
+]
+
+{ #category : #'as yet unclassified' }
+SWTranspilerOfFortran >> putVariableDeclarationOf: aVariableInfo [
+	self put:  ( self class typeNameFor: aVariableInfo type).
+	(aVariableInfo const and: [ aVariableInfo initialValue isNotNil ]) ifTrue: [
+		self put: ', parameter'
+	].
+	self
+		put: ' :: ';
+		put: aVariableInfo name.
+	aVariableInfo initialValue ifNotNil: [
+		self
+			put: ' = ';
+			putLine: aVariableInfo initialValue asString
+	] ifNil: [
+		self putLine
+	]
+
 ]

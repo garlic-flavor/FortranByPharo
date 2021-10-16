@@ -468,7 +468,7 @@ SWTranspiler >> putSymbol: aSymbol [
 ]
 
 { #category : #'code generation' }
-SWTranspiler >> putTestRunner [
+SWTranspiler >> putTestRunner: aClass [
 	^ self subclassResponsibility 
 ]
 
@@ -509,14 +509,20 @@ SWTranspiler >> tabWidth: anObject [
 
 { #category : #'public API' }
 SWTranspiler >> transpile [
+	|programClass|
 	self putFileHeaderOf: self source moduleName.
 	self putRequirements.
 	self source classes do: [ :aClass |
 		self putClassDefinition: aClass
 	].
 
-	self source programClass ifNotNil: [
-		self putProgram: self source programClass
+	(programClass := self source programClass) ifNotNil: [
+		(programClass inheritsFrom: SWTestBase) ifTrue: [
+			self putTestRunner: programClass
+		] ifFalse: [
+			self putProgram: programClass
+		]
+
 	].
 
 ]

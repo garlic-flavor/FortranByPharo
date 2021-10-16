@@ -82,10 +82,16 @@ SWAnalyzer >> analyze: aClass s: aMethod with: argumentTypes [
 SWAnalyzer >> assign: aVariable with: aValue [
 	^ (self variables at: aVariable name ifPresent: [ :vi |
 		vi const: false; yourself
-	] ifAbsentPut: [
+	] ifAbsentPut: [|value|
+		value := (aValue class inheritsFrom: RBLiteralNode) ifTrue: [
+			aValue value
+		] ifFalse: [
+			nil
+		].
 		SWVariableInfo new
 			name: aVariable name;
 			type: (aValue transpileUsing: self);
+			initialValue: value;
 			yourself
 	]) type
 

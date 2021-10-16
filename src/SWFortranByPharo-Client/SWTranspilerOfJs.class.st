@@ -381,7 +381,7 @@ SWTranspilerOfJs >> opNotEqual_For: receiver With: arguments [
 		transpile: (arguments at: 1)
 ]
 
-{ #category : #'as yet unclassified' }
+{ #category : #'code generation' }
 SWTranspilerOfJs >> opWrite_For: receiver With: arguments [
 	self
 		pushMessageNest;
@@ -610,27 +610,12 @@ SWTranspilerOfJs >> putProgram: aClass [
 	self
 		putLine;
 		putLine: '(function(self){';
-		pushMessageNest.
-	(aClass inheritsFrom: SWTestBase) ifTrue: [
-		self incIndent.
-		self putLine: 'const runner = new self();'.
-		(aClass methods select: [ :each | each protocol beginsWith: 'test' ]) do: [ :each |
-			self
-				putLine: 'runner.setUp();';
-				put: 'runner.';
-				put: each selector asString;
-				putLine: '();';
-				putLine: 'runner.tearDown();'
-		].
-		self decIndent.
-	] ifFalse: [ 
-		self	putSequence: ((aClass class allMethods select: [ :each | each selector = #program  ]) first) sourceNode body
-	].
-	self
+		pushMessageNest;
+		putSequence: ((aClass class allMethods select: [ :each | each selector = #program  ]) first) sourceNode body;
 		put: '})(';
 		put: aClass name;
-		putLine: ');'.	
-	self popMessageNest.
+		putLine: ');';
+		popMessageNest.
 
 ]
 
@@ -682,6 +667,31 @@ SWTranspilerOfJs >> putSymbol: aSymbol [
 		put: '''';
 		put: (self class safeSelectorNameOf: aSymbol);
 		put: ''''
+]
+
+{ #category : #'code generation' }
+SWTranspilerOfJs >> putTestRunner: aClass [
+	self logger log.
+	self
+		putLine;
+		putLine: '(function(self){';
+		pushMessageNest;
+		incIndent;
+		putLine: 'const runner = new self();'.
+	(aClass methods select: [ :each | each protocol beginsWith: 'test' ]) do: [ :each |
+		self
+			putLine: 'runner.setUp();';
+			put: 'runner.';
+			put: each selector asString;
+			putLine: '();';
+			putLine: 'runner.tearDown();'
+	].
+	self decIndent;
+		put: '})(';
+		put: aClass name;
+		putLine: ');'.	
+	self popMessageNest.
+
 ]
 
 { #category : #'code generation' }

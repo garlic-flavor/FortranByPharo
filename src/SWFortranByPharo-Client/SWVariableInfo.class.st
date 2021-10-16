@@ -6,7 +6,10 @@ Class {
 	#name : #SWVariableInfo,
 	#superclass : #Object,
 	#instVars : [
-		'properties'
+		'name',
+		'type',
+		'properties',
+		'initialValue'
 	],
 	#classVars : [
 		'temporalVariableName'
@@ -69,28 +72,45 @@ SWVariableInfo class >> resetTemporalVariableName [
 
 { #category : #accessing }
 SWVariableInfo >> const [
-	^ (self properties at: #mutable ifAbsentPut: [ false ]) not
+	^ self properties includes: #const
 ]
 
 { #category : #accessing }
 SWVariableInfo >> const: aFlag [
-	^ self properties at: #mutable put: aFlag not
+	aFlag ifTrue: [
+		self properties add: #const
+	] ifFalse: [
+		self properties remove: #const ifAbsent: [ ]
+	]
+
+]
+
+{ #category : #accessing }
+SWVariableInfo >> initialValue [
+
+	^ initialValue
+]
+
+{ #category : #accessing }
+SWVariableInfo >> initialValue: anObject [
+
+	initialValue := anObject
 ]
 
 { #category : #accessing }
 SWVariableInfo >> name [
-	^ self properties at: #name
+	^ name
 ]
 
 { #category : #accessing }
 SWVariableInfo >> name: aName [
-	self properties at: #name put: aName
+	name := aName
 ]
 
 { #category : #accessing }
 SWVariableInfo >> properties [
 
-	^ properties ifNil: [ properties := Dictionary new ]
+	^ properties ifNil: [ properties := Set new add: #const; yourself ]
 ]
 
 { #category : #accessing }
@@ -101,19 +121,10 @@ SWVariableInfo >> properties: anObject [
 
 { #category : #accessing }
 SWVariableInfo >> type [
-	^ self properties at: #type ifAbsentPut: [ Object ]
+	^ type ifNil: [ type := Object ]
 ]
 
 { #category : #accessing }
 SWVariableInfo >> type: aClass [
-	self properties at: #type put: aClass
-]
-
-{ #category : #accessing }
-SWVariableInfo >> typeIn: aLanguageType [
-	aLanguageType = #f90 ifTrue: [
-		self type = Integer ifTrue: [
-			^ #integer
-		]
-	]
+	type := aClass
 ]

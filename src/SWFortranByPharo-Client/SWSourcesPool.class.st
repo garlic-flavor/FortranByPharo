@@ -28,10 +28,10 @@ SWSourcesPool >> client: anObject [
 	client := anObject
 ]
 
-{ #category : #'as yet unclassified' }
-SWSourcesPool >> get: aModuleName [
+{ #category : #accessing }
+SWSourcesPool >> get: aModuleName withTranspilerMethodOf: aMethod [
 	^ self sources at: aModuleName ifAbsent: [
-		(super get: aModuleName)
+		(super get: aModuleName withTranspilerMethodOf: aMethod)
 			putOn: self client;
 			yourself
 	]
