@@ -8,12 +8,17 @@ Class {
 	#category : #'SWFortranByPharo-Client-DomainSpecific'
 }
 
-{ #category : #'code generation - property' }
-SWFStd class >> declare: aSymbol as: aType [
+{ #category : #'as yet unclassified' }
+SWFStd class >> a_declare_With: arguments Using: transpiler [
 ]
 
 { #category : #'code generation - property' }
-SWFStd class >> f90_declare_as_With: arguments Using: transpiler [
+SWFStd class >> declare: properties [
+	^ properties detect: [ :p | p isAssociation  and: [p key = #value ]] ifFound: [ :p | p value ] ifNone: [ nil ]
+]
+
+{ #category : #'code generation - property' }
+SWFStd class >> f90_declare_With: arguments Using: transpiler [
 
 ]
 

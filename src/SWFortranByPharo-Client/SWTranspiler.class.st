@@ -331,6 +331,11 @@ SWTranspiler >> putFileHeaderOf: filename [
 ]
 
 { #category : #'code generation' }
+SWTranspiler >> putFloat: anFloat [
+	self put: anFloat asString
+]
+
+{ #category : #'code generation' }
 SWTranspiler >> putImportClass: aClass [
 	self logger log.
 	self analyzer putImportClass: aClass
@@ -522,8 +527,9 @@ SWTranspiler >> transpile [
 		] ifFalse: [
 			self putProgram: programClass
 		]
-
 	].
+
+	self putFileFooterOf: self source moduleName
 
 ]
 

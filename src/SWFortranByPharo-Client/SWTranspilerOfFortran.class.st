@@ -12,6 +12,9 @@ SWTranspilerOfFortran class >> typeNameFor: aClass [
 	aClass = Integer ifTrue: [
 		^ #integer
 	].
+	aClass = Float ifTrue: [
+		^ #'double precision'
+	].
 	self halt.
 ]
 
@@ -23,7 +26,8 @@ SWTranspilerOfFortran >> analyzer [
 { #category : #'code generation' }
 SWTranspilerOfFortran >> assign: key with: value [
 	self analyzer variables at: key name ifPresent: [:vi |
-		vi initialValue ifNotNil: [ ^ self ].
+		vi initialValue ifNotNil: [ self preventNewline. ^ self ].
+		(value transpileUsing: self analyzer) = SWVariableInfo class ifTrue: [ self preventNewline. ^ self ]
 	].
 	super assign: key with: value.
 
@@ -66,6 +70,24 @@ SWTranspilerOfFortran >> putComment: comment [
 				putLine: aLine
 		]
 	]
+]
+
+{ #category : #'code generation' }
+SWTranspilerOfFortran >> putFileFooterOf: aModuleName [
+	self
+		put: 'end program ';
+		putLine: aModuleName
+]
+
+{ #category : #'code generation' }
+SWTranspilerOfFortran >> putFileHeaderOf: aModuleName [
+	self
+		putComment: self source programClass comment;
+		put: 'program ';
+		putLine: aModuleName;
+		incIndent;
+		putLine: 'implicit none';
+		decIndent.
 ]
 
 { #category : #'public API' }
@@ -124,17 +146,9 @@ SWTranspilerOfFortran >> putProgram: programClass [
 	|methodInfo|
 	methodInfo := self analyzer analyze: programClass class s: #program with: #().
 	self
-		putComment: programClass comment;
-		put: 'program ';
-		putLine: self source moduleName;
-		incIndent;
-		putLine: 'implicit none';
-		decIndent;
 		putMethod: methodInfo;
 		putLine: 'contains';
-		putSubprograms: analyzer methods;
-		put: 'end program ';
-		putLine: self source moduleName
+		putSubprograms: analyzer methods
 
 ]
 

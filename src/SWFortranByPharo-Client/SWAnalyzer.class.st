@@ -31,6 +31,7 @@ SWAnalyzer class >> mangledNameOf: aClass s: aSelector with: argumentTypes [
 { #category : #'as yet unclassified' }
 SWAnalyzer class >> mangledTypeNameOf: aType [
 	aType = Integer ifTrue: [ ^ $i ].
+	aType = Float ifTrue: [ ^ $d ].
 	^ $_
 ]
 
@@ -81,18 +82,29 @@ SWAnalyzer >> analyze: aClass s: aMethod with: argumentTypes [
 { #category : #'code generation' }
 SWAnalyzer >> assign: aVariable with: aValue [
 	^ (self variables at: aVariable name ifPresent: [ :vi |
-		vi const: false; yourself
-	] ifAbsentPut: [|value|
-		value := (aValue class inheritsFrom: RBLiteralNode) ifTrue: [
-			aValue value
+		(vi const and: [vi initialValue isNil]) ifTrue: [
+			vi
+				initialValue: ([ aValue evaluate ] on: Exception do: [ nil ]);
+				yourself
 		] ifFalse: [
-			nil
+			vi
+				const: false;
+				initialValue: nil;
+				yourself
 		].
-		SWVariableInfo new
-			name: aVariable name;
-			type: (aValue transpileUsing: self);
-			initialValue: value;
-			yourself
+	] ifAbsentPut: [|type|
+		type := aValue transpileUsing: self.
+		type = SWVariableInfo  class ifTrue: [
+			aValue evaluate
+				name: aVariable name
+				yourself
+		] ifFalse: [
+			SWVariableInfo new
+				name: aVariable name;
+				type: type;
+				initialValue: ([aValue evaluate] on: Exception  do: [nil]);
+				yourself
+		]
 	]) type
 
 ]
@@ -134,6 +146,16 @@ SWAnalyzer >> gatherDependenciesOf: method [
 
 ]
 
+{ #category : #'as yet unclassified' }
+SWAnalyzer >> getVariable: aVariableName [
+	^ self variables at: aVariableName ifAbsentPut: [
+		SWVariableInfo new
+			name: aVariableName;
+			type: Object;
+			yourself.
+	]
+]
+
 { #category : #accessing }
 SWAnalyzer >> methods [
 
@@ -161,6 +183,12 @@ SWAnalyzer >> putCascade: aCascadeNode [
 ]
 
 { #category : #'code generation' }
+SWAnalyzer >> putFloat: anFloat [
+	^ Float
+	
+]
+
+{ #category : #'code generation' }
 SWAnalyzer >> putImportClass: aClass [
 	self classes add: aClass.
 	(aClass class ~= Metaclass) ifTrue: [
@@ -178,7 +206,7 @@ SWAnalyzer >> putInteger: anInteger [
 SWAnalyzer >> putMessage: aReceiver call: aSelector with: arguments [
 	|receiverClass argumentTypes mangledName methodInfo|
 	receiverClass := aReceiver transpileUsing: self.
-	(self classFilter: receiverClass) ifFalse: [ ^ Object ].
+	(self classFilter: receiverClass) ifFalse: [ ^ receiverClass ].
 
 	argumentTypes := arguments collect: [ :each | each transpileUsing: self ].
 	mangledName := self class mangledNameOf: receiverClass s: aSelector with: argumentTypes.
@@ -202,6 +230,11 @@ SWAnalyzer >> putSequence: aRBSequenceNode [
 		expType := each transpileUsing: self
 	].
 	^ expType
+]
+
+{ #category : #'code generation' }
+SWAnalyzer >> putSymbol: aSymbol [
+	^ Symbol
 ]
 
 { #category : #'code generation' }

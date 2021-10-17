@@ -70,9 +70,14 @@ SWVariableInfo class >> resetTemporalVariableName [
 	temporalVariableName := nil
 ]
 
+{ #category : #adding }
+SWVariableInfo >> addProperty: aProp [
+	self properties add: aProp
+]
+
 { #category : #accessing }
 SWVariableInfo >> const [
-	^ self properties includes: #const
+	^ (self properties includes: #const) or: [ self properties includes: #parameter ]
 ]
 
 { #category : #accessing }
@@ -80,7 +85,8 @@ SWVariableInfo >> const: aFlag [
 	aFlag ifTrue: [
 		self properties add: #const
 	] ifFalse: [
-		self properties remove: #const ifAbsent: [ ]
+		self properties remove: #const ifAbsent: [ ].
+		self properties remove: #parameter ifAbsent: [  ].
 	]
 
 ]

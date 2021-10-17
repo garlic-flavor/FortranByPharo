@@ -20,8 +20,11 @@ SWNag2 class >> mysub: i [
 
 { #category : #running }
 SWNag2 class >> program [
+	<script>
 	|i|
+	i := SWVariableInfo new type: Integer.
 	i := 99.
+	i := 3.14.
 	self mysub: i.
 
 ]
