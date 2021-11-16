@@ -6,10 +6,11 @@ Class {
 	#name : #SWVariableInfo,
 	#superclass : #Object,
 	#instVars : [
+		'stackPos',
 		'name',
 		'type',
 		'properties',
-		'initialValue'
+		'original'
 	],
 	#classVars : [
 		'temporalVariableName'
@@ -23,6 +24,16 @@ SWVariableInfo class >> named: aName typed: aType [
 		name: aName;
 		type: aType;
 		yourself
+]
+
+{ #category : #'instance creation' }
+SWVariableInfo class >> newFrom: anTypeArray [
+	^ anTypeArray collectWithIndex: [ :type :idx |
+		self new
+			type: type;
+			stackPos: idx - 2;
+			yourself.
+	]
 ]
 
 { #category : #generating }
@@ -70,37 +81,28 @@ SWVariableInfo class >> resetTemporalVariableName [
 	temporalVariableName := nil
 ]
 
+{ #category : #'accumulator ops' }
+SWVariableInfo >> << rightObject [
+	rightObject original ifNil: [
+		self
+			type: rightObject type;
+			original: (rightObject stackPos ifNotNil: [rightObject] ifNil: [nil]).
+		self properties addAll: rightObject properties
+	] ifNotNil: [
+		self << rightObject original
+	]
+		
+
+]
+
 { #category : #adding }
 SWVariableInfo >> addProperty: aProp [
 	self properties add: aProp
 ]
 
-{ #category : #accessing }
-SWVariableInfo >> const [
-	^ (self properties includes: #const) or: [ self properties includes: #parameter ]
-]
-
-{ #category : #accessing }
-SWVariableInfo >> const: aFlag [
-	aFlag ifTrue: [
-		self properties add: #const
-	] ifFalse: [
-		self properties remove: #const ifAbsent: [ ].
-		self properties remove: #parameter ifAbsent: [  ].
-	]
-
-]
-
-{ #category : #accessing }
-SWVariableInfo >> initialValue [
-
-	^ initialValue
-]
-
-{ #category : #accessing }
-SWVariableInfo >> initialValue: anObject [
-
-	initialValue := anObject
+{ #category : #testing }
+SWVariableInfo >> hasProperty: aProperty [
+	^ self properties includes: aProperty
 ]
 
 { #category : #accessing }
@@ -114,9 +116,21 @@ SWVariableInfo >> name: aName [
 ]
 
 { #category : #accessing }
+SWVariableInfo >> original [
+
+	^ original
+]
+
+{ #category : #accessing }
+SWVariableInfo >> original: anObject [
+
+	original := anObject
+]
+
+{ #category : #accessing }
 SWVariableInfo >> properties [
 
-	^ properties ifNil: [ properties := Set new add: #const; yourself ]
+	^ properties ifNil: [ properties := Set new ]
 ]
 
 { #category : #accessing }
@@ -126,11 +140,35 @@ SWVariableInfo >> properties: anObject [
 ]
 
 { #category : #accessing }
+SWVariableInfo >> property: propName [
+	^ self properties at: propName ifAbsent: nil
+]
+
+{ #category : #removing }
+SWVariableInfo >> removeProperty: propName [
+	properties remove: propName ifAbsent: [  ].
+]
+
+{ #category : #accessing }
+SWVariableInfo >> stackPos [
+
+	^ stackPos
+]
+
+{ #category : #accessing }
+SWVariableInfo >> stackPos: anObject [
+
+	stackPos := anObject
+]
+
+{ #category : #accessing }
 SWVariableInfo >> type [
+
 	^ type ifNil: [ type := Object ]
 ]
 
 { #category : #accessing }
-SWVariableInfo >> type: aClass [
-	type := aClass
+SWVariableInfo >> type: anObject [
+
+	type := anObject
 ]

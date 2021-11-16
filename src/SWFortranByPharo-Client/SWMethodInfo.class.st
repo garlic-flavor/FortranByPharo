@@ -6,62 +6,48 @@ Class {
 	#name : #SWMethodInfo,
 	#superclass : #Object,
 	#instVars : [
-		'owner',
-		'name',
+		'method',
 		'mangledName',
-		'explicitReturnType',
-		'argumentTypes',
 		'variables',
-		'const'
+		'return'
 	],
 	#category : #'SWFortranByPharo-Client-Analyzer'
 }
 
-{ #category : #accessing }
-SWMethodInfo >> argumentTypes [
-
-	^ argumentTypes ifNil: [ argumentTypes := OrderedCollection new ]
+{ #category : #private }
+SWMethodInfo class >> mangledTypeNameOf: aType [
+	aType = Integer ifTrue: [ ^ #i ].
+	aType = Float ifTrue: [ ^ #d ].
+	^ #_
 ]
 
-{ #category : #accessing }
-SWMethodInfo >> argumentTypes: anObject [
-
-	argumentTypes := anObject
-]
-
-{ #category : #accessing }
-SWMethodInfo >> const [
-
-	^ const
-]
-
-{ #category : #accessing }
-SWMethodInfo >> const: anObject [
-
-	const := anObject
-]
-
-{ #category : #accessing }
-SWMethodInfo >> explicitReturnType [
-
-	^ explicitReturnType
-]
-
-{ #category : #accessing }
-SWMethodInfo >> explicitReturnType: anObject [
-
-	explicitReturnType := anObject
+{ #category : #'instance creation' }
+SWMethodInfo class >> newWith: method [
+	^ self new
+		method: method;
+		yourself
 ]
 
 { #category : #testing }
-SWMethodInfo >> hasReturn [
-	^ self explicitReturnType isNotNil
+SWMethodInfo >> hasExplicitReturn [
+	^ self returnValue value class ~= self  method methodClass
 ]
 
 { #category : #accessing }
 SWMethodInfo >> mangledName [
 
-	^ mangledName
+	^ mangledName ifNil: [ mangledName := String streamContents: [ : s ||owner|
+		owner := self method methodClass.
+		owner class = Metaclass ifTrue: [ 
+			s << owner soleInstance name; << 'C'
+		] ifFalse: [
+			s << owner name; << '_'
+		].
+		s << self method selector; << (self const ifTrue: ['C'] ifFalse: ['_']).
+		self variables from: 1 to: self method numArgs do: [ :var |
+			self class mangledTypeNameOf: var value class
+		]
+	] ]
 ]
 
 { #category : #accessing }
@@ -71,39 +57,45 @@ SWMethodInfo >> mangledName: anObject [
 ]
 
 { #category : #accessing }
+SWMethodInfo >> method [
+
+	^ method
+]
+
+{ #category : #accessing }
+SWMethodInfo >> method: anObject [
+
+	method := anObject
+]
+
+{ #category : #accessing }
 SWMethodInfo >> name [
 
-	^ name
+	^ self method selector asString
 ]
 
 { #category : #accessing }
-SWMethodInfo >> name: anObject [
+SWMethodInfo >> return [
 
-	name := anObject
+	^ return
 ]
 
 { #category : #accessing }
-SWMethodInfo >> owner [
+SWMethodInfo >> return: anObject [
 
-	^ owner
-]
-
-{ #category : #accessing }
-SWMethodInfo >> owner: anObject [
-
-	owner := anObject
-]
-
-{ #category : #accessing }
-SWMethodInfo >> returnType [
-
-	^ self explicitReturnType  ifNil: [ self owner ]
+	return := anObject
 ]
 
 { #category : #accessing }
 SWMethodInfo >> variables [
 
-	^ variables ifNil: [ variables := Dictionary new ]
+	^ variables ifNil: [ variables :=  self method temporaryVariables withIndexCollect: [ :var :idx |
+		SWVariableInfo new
+			name: var name;
+			stackPos: idx;
+			const: true;
+			yourself
+	]]
 ]
 
 { #category : #accessing }

@@ -7,7 +7,7 @@ Class {
 	#category : #'SWFortranByPharo-Client-Transpiler'
 }
 
-{ #category : #'code generation' }
+{ #category : #'code generation - domain specific' }
 SWTranspilerOfJs >> and_For: receiver With: arguments [
 	self
 		transpile: receiver;
@@ -18,7 +18,7 @@ SWTranspilerOfJs >> and_For: receiver With: arguments [
 		put: '})()'
 ]
 
-{ #category : #'code generation' }
+{ #category : #'code generation - domain specific' }
 SWTranspilerOfJs >> anySatisfy_For: receiver With: arguments [
 	self
 		transpile: receiver;
@@ -28,7 +28,7 @@ SWTranspilerOfJs >> anySatisfy_For: receiver With: arguments [
 
 ]
 
-{ #category : #'code generation' }
+{ #category : #'code generation - domain specific' }
 SWTranspilerOfJs >> asStringFor: receiver With: arguments [
 	self
 		pushMessageNest;
@@ -38,14 +38,14 @@ SWTranspilerOfJs >> asStringFor: receiver With: arguments [
 		
 ]
 
-{ #category : #'code generation' }
+{ #category : #'code generation - domain specific' }
 SWTranspilerOfJs >> asSymbolFor: receiver With: arguments [
 	self
 		transpile: receiver;
 		put: '.toString()'
 ]
 
-{ #category : #'code generation' }
+{ #category : #'code generation - domain specific' }
 SWTranspilerOfJs >> at_For: receiver With: arguments [
 	self
 		transpile: receiver;
@@ -55,7 +55,7 @@ SWTranspilerOfJs >> at_For: receiver With: arguments [
 
 ]
 
-{ #category : #'code generation' }
+{ #category : #'code generation - domain specific' }
 SWTranspilerOfJs >> at_ifAbsent_For: receiver With: arguments [
 	self
 		putLine: '(function(dict, key){ if(key in dict){';
@@ -70,7 +70,7 @@ SWTranspilerOfJs >> at_ifAbsent_For: receiver With: arguments [
 
 ]
 
-{ #category : #'code generation' }
+{ #category : #'code generation - domain specific' }
 SWTranspilerOfJs >> at_put_For: receiver With: arguments [
 	self logger log.
 	self
@@ -83,13 +83,13 @@ SWTranspilerOfJs >> at_put_For: receiver With: arguments [
 		popMessageNest
 ]
 
-{ #category : #'code generation' }
+{ #category : #'code generation - domain specific' }
 SWTranspilerOfJs >> beginsWith_For: receiver With: arguments [
 	self logger log.
 	self putMessage: receiver call: 'startsWith' with: arguments
 ]
 
-{ #category : #'code generation' }
+{ #category : #'code generation - domain specific' }
 SWTranspilerOfJs >> classFor: receiver With: arguments [
 	self logger log.
 	self
@@ -97,7 +97,7 @@ SWTranspilerOfJs >> classFor: receiver With: arguments [
 		put: '.constructor'
 ]
 
-{ #category : #'code generation' }
+{ #category : #'code generation - domain specific' }
 SWTranspilerOfJs >> collect_For: receiver With: arguments [
 	self logger log.
 	self flag: #ToImplement.
@@ -105,7 +105,7 @@ SWTranspilerOfJs >> collect_For: receiver With: arguments [
 
 ]
 
-{ #category : #'code generation' }
+{ #category : #'code generation - domain specific' }
 SWTranspilerOfJs >> copyFor:receiver With: arguments [
 	self logger log.
 	self
@@ -113,7 +113,7 @@ SWTranspilerOfJs >> copyFor:receiver With: arguments [
 		put: '.clone'
 ]
 
-{ #category : #'code generation' }
+{ #category : #'code generation - domain specific' }
 SWTranspilerOfJs >> copyReplaceAll_with_For: receiver With: arguments [
 	self logger log.
 	self
@@ -128,7 +128,7 @@ SWTranspilerOfJs >> copyReplaceAll_with_For: receiver With: arguments [
 		decMessageNest
 ]
 
-{ #category : #'code generation' }
+{ #category : #'code generation - domain specific' }
 SWTranspilerOfJs >> descriptionFor: receiver With: arguments [
 	self logger log.
 	self
@@ -137,7 +137,7 @@ SWTranspilerOfJs >> descriptionFor: receiver With: arguments [
 		popMessageNest
 ]
 
-{ #category : #'code generation' }
+{ #category : #'code generation - domain specific' }
 SWTranspilerOfJs >> do_For: receiver With: arguments [
 	self logger log.
 	self flag: #ToImplement.
@@ -151,11 +151,11 @@ SWTranspilerOfJs >> do_For: receiver With: arguments [
 
 ]
 
-{ #category : #'code generation' }
+{ #category : #'code generation - domain specific' }
 SWTranspilerOfJs >> ensure_For: receiver With: arguments [
 	self logger log.
 	self pushMessageNest.
-	(receiver body allStatements reversed anySatisfy: [ :each | each class = RBReturnNode ]) ifTrue: [
+	(receiver body lastIsReturn) ifTrue: [
 		self
 			putLine: 'try {';
 			putSequence: receiver body;
@@ -174,7 +174,7 @@ SWTranspilerOfJs >> ensure_For: receiver With: arguments [
 
 ]
 
-{ #category : #'code generation' }
+{ #category : #'code generation - domain specific' }
 SWTranspilerOfJs >> ifFalse_For: receiver With: arguments [
 	self logger log.
 	self
@@ -188,7 +188,7 @@ SWTranspilerOfJs >> ifFalse_For: receiver With: arguments [
 
 ]
 
-{ #category : #'code generation' }
+{ #category : #'code generation - domain specific' }
 SWTranspilerOfJs >> ifNil_For: receiver With: arguments [
 	self logger log.
 	self
@@ -203,11 +203,11 @@ SWTranspilerOfJs >> ifNil_For: receiver With: arguments [
 		
 ]
 
-{ #category : #'code generation' }
+{ #category : #'code generation - domain specific' }
 SWTranspilerOfJs >> ifNotNil_For: receiver With: arguments [
 	self logger log.
 	self pushMessageNest.
-	((arguments at: 1) body allStatements reversed anySatisfy: [ :each | each class = RBReturnNode ]) ifTrue: [ 
+	(arguments at: 1) body lastIsReturn ifTrue: [ 
 		self
 			put: 'if (!(function(o){ return o === undefined || o === null; })(';
 			transpile: receiver;
@@ -226,7 +226,7 @@ SWTranspilerOfJs >> ifNotNil_For: receiver With: arguments [
 
 ]
 
-{ #category : #'code generation' }
+{ #category : #'code generation - domain specific' }
 SWTranspilerOfJs >> ifNotNil_ifNil_For: receiver With: arguments [
 	self logger log.
 	self
@@ -241,7 +241,7 @@ SWTranspilerOfJs >> ifNotNil_ifNil_For: receiver With: arguments [
 		popMessageNest
 ]
 
-{ #category : #'code generation' }
+{ #category : #'code generation - domain specific' }
 SWTranspilerOfJs >> ifTrue_For: receiver With: arguments [
 	self logger log.
 	self
@@ -254,11 +254,11 @@ SWTranspilerOfJs >> ifTrue_For: receiver With: arguments [
 
 ]
 
-{ #category : #'code generation' }
+{ #category : #'code generation - domain specific' }
 SWTranspilerOfJs >> ifTrue_ifFalse_For: receiver With: arguments [
 	self logger log.
 	self pushMessageNest.
-	((arguments at: 1) body allStatements reversed anySatisfy: [ :each | each class = RBReturnNode ]) ifTrue: [
+	(arguments at: 1) body lastIsReturn ifTrue: [
 		self
 			put: 'if(';
 			transpile: receiver;
@@ -289,7 +289,7 @@ SWTranspilerOfJs >> initialize [
 
 ]
 
-{ #category : #'code generation' }
+{ #category : #'code generation - domain specific' }
 SWTranspilerOfJs >> isArrayFor: receiver With: arguments [
 	self
 		pushMessageNest;
@@ -299,7 +299,7 @@ SWTranspilerOfJs >> isArrayFor: receiver With: arguments [
 		popMessageNest
 ]
 
-{ #category : #'code generation' }
+{ #category : #'code generation - domain specific' }
 SWTranspilerOfJs >> join_For: receiver With: arguments [
 	self logger log.
 	self
@@ -308,7 +308,7 @@ SWTranspilerOfJs >> join_For: receiver With: arguments [
 		popMessageNest
 ]
 
-{ #category : #'code generation' }
+{ #category : #'code generation - domain specific' }
 SWTranspilerOfJs >> newFor: receiver With: arguments [
 	self logger log.
 	self
@@ -318,12 +318,12 @@ SWTranspilerOfJs >> newFor: receiver With: arguments [
 
 ]
 
-{ #category : #'code generation' }
+{ #category : #'code generation - domain specific' }
 SWTranspilerOfJs >> on_do_For: receiver With: arguments [
 	|hasReturn|
 	self logger log.
 	self pushMessageNest.
-	hasReturn := receiver body hasReturnNode or: [ (arguments at: 2) body hasReturnNode ].
+	hasReturn := receiver body lastIsReturn or: [ (arguments at: 2) body lastIsReturn ].
 	hasReturn ifTrue: [
 		self
 			putLine: 'try{';
@@ -350,7 +350,7 @@ SWTranspilerOfJs >> on_do_For: receiver With: arguments [
 		popMessageNest
 ]
 
-{ #category : #'code generation' }
+{ #category : #'code generation - domain specific' }
 SWTranspilerOfJs >> opArrow_For: receiver With: arguments [
 	self logger log.
 	self
@@ -363,7 +363,7 @@ SWTranspilerOfJs >> opArrow_For: receiver With: arguments [
 		popMessageNest.
 ]
 
-{ #category : #'code generation' }
+{ #category : #'code generation - domain specific' }
 SWTranspilerOfJs >> opCamma_For: receiver With: arguments [
 	self logger log.
 	self
@@ -372,7 +372,7 @@ SWTranspilerOfJs >> opCamma_For: receiver With: arguments [
 		transpile: (arguments at: 1)
 ]
 
-{ #category : #'code generation' }
+{ #category : #'code generation - domain specific' }
 SWTranspilerOfJs >> opNotEqual_For: receiver With: arguments [
 	self logger log.
 	self
@@ -381,17 +381,17 @@ SWTranspilerOfJs >> opNotEqual_For: receiver With: arguments [
 		transpile: (arguments at: 1)
 ]
 
-{ #category : #'code generation' }
+{ #category : #'code generation - domain specific' }
 SWTranspilerOfJs >> opWrite_For: receiver With: arguments [
 	self
 		pushMessageNest;
 		transpile: receiver;
 		put: '.write_';
-		putArgumentsOf: 'write_' with: arguments;
+		putArguments: arguments;
 		popMessageNest
 ]
 
-{ #category : #'code generation' }
+{ #category : #'code generation - domain specific' }
 SWTranspilerOfJs >> perform_For: receiver With: arguments [
 	self logger log.
 	self
@@ -401,12 +401,15 @@ SWTranspilerOfJs >> perform_For: receiver With: arguments [
 ]
 
 { #category : #'code generation' }
-SWTranspilerOfJs >> putArgumentsOf: selector with: arguments [
+SWTranspilerOfJs >> putArguments: arguments [
 	self logger log.
-	self
-		put: '(';
-		putArray: arguments;
-		put: ')'
+	self put: '('.
+	arguments do: [ :each |
+		each transpileUsing: self.
+	] separatedBy: [
+		self put: ', '
+	].
+	self put: ')'
 
 ]
 
@@ -519,20 +522,6 @@ SWTranspilerOfJs >> putComment: comment [
 SWTranspilerOfJs >> putFileHeaderOf: filename [
 
 
-]
-
-{ #category : #'code generation' }
-SWTranspilerOfJs >> putFunctionCallOf: selector with: arguments [
-	self logger log.
-	self
-		pushMessageNest;
-		put: (selector asString first isLetter ifTrue: [
-			selector
-		] ifFalse: [
-			' ' join: {''. selector. ''}
-		]);
-		putArgumentsOf: selector with: arguments;
-		popMessageNest
 ]
 
 { #category : #'code generation' }
@@ -707,12 +696,12 @@ SWTranspilerOfJs >> putVariable: aVariableNode [
 	^ super putVariable: aVariableNode
 ]
 
-{ #category : #'code generation' }
+{ #category : #'code generation - domain specific' }
 SWTranspilerOfJs >> upToEndFor: receiver With: arguments [
 	self putMessage: receiver call: 'read' with: arguments
 ]
 
-{ #category : #'code generation' }
+{ #category : #'code generation - domain specific' }
 SWTranspilerOfJs >> valueFor: receiver With: argunents [
 	self logger log.
 	self
@@ -720,17 +709,17 @@ SWTranspilerOfJs >> valueFor: receiver With: argunents [
 		put: '()'
 ]
 
-{ #category : #'code generation' }
+{ #category : #'code generation - domain specific' }
 SWTranspilerOfJs >> value_For: receiver With: arguments [
 	self logger log.
 	self
 		put: '(';
 		transpile: receiver;
 		put: ')';
-		putArgumentsOf: '' with: arguments
+		putArguments: arguments
 ]
 
-{ #category : #'code generation' }
+{ #category : #'code generation - domain specific' }
 SWTranspilerOfJs >> yourselfFor: receiver With:arguments [
 	self logger log.
 	self transpile: receiver

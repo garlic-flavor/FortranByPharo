@@ -15,7 +15,11 @@ SWTranspilerOfFortran class >> typeNameFor: aClass [
 	aClass = Float ifTrue: [
 		^ #'double precision'
 	].
-	self halt.
+	(aClass inheritsFrom: SWType) ifTrue: [
+		^ (String streamContents: [ :s | s << 'type('; << aClass name; << ')' ]) asSymbol
+	].
+	^ #'no_implementation'.
+
 ]
 
 { #category : #accessing }
@@ -39,6 +43,24 @@ SWTranspilerOfFortran >> initialize [
 	self type: #f90.
 ]
 
+{ #category : #'instance creation' }
+SWTranspilerOfFortran >> newWith_For: receiver With: arguments [
+	self
+		transpile: receiver;
+		putArguments: arguments;
+		putLine
+]
+
+{ #category : #'code generation' }
+SWTranspilerOfFortran >> putArguments: arguments [
+	self logger log.
+	self
+		put: '(';
+		putArray: arguments;
+		put: ')'
+
+]
+
 { #category : #'code generation' }
 SWTranspilerOfFortran >> putArgumentsOf: selector with: arguments [
 	self logger log.
@@ -56,7 +78,26 @@ SWTranspilerOfFortran >> putClassAccessor [
 
 { #category : #'code generation' }
 SWTranspilerOfFortran >> putClassDefinition: aClass [
+	|va|
 	self logger log.
+	(aClass inheritsFrom: SWType) ifFalse: [ ^self ].
+
+	self
+		incIndent;
+		putComment: aClass comment;
+		put: 'type ';
+		putLine: aClass name;
+		incIndent.
+	va := (self analyzer subAnalyzer analyze: aClass >> #initialize with: #()) variables.
+	aClass instanceVariables collect: [ :slot | va at: slot name ] thenDo: [ :vi |
+		self putVariableDeclarationOf: vi
+	].
+	
+	self
+		decIndent;
+		put: 'end type ';
+		putLine: aClass name;
+		decIndent
 	
 ]
 
@@ -121,7 +162,7 @@ SWTranspilerOfFortran >> putOrdinaryMessage: receiver call: selector with: argum
 	argumentTypes := arguments collect: [ :each | 
                  each transpileUsing: self analyzer
 	].
-	mangledName := self analyzer class mangledNameOf: receiverClass s: selector with: argumentTypes.
+	mangledName := self analyzer class mangledNameOf: receiverClass >> selector with: argumentTypes.
 	methodInfo := self analyzer methods at: mangledName ifAbsent: [
 		SWMethodInfo new
 			mangledName: selector;
@@ -135,7 +176,7 @@ SWTranspilerOfFortran >> putOrdinaryMessage: receiver call: selector with: argum
 				put: 'call ';
 				put: (self class safeSelectorNameOf: mangledName);
 				pushMessageNest;
-				putArgumentsOf: selector with: arguments;
+				putArguments: arguments;
 				popMessageNest
 		]
 
@@ -144,7 +185,7 @@ SWTranspilerOfFortran >> putOrdinaryMessage: receiver call: selector with: argum
 { #category : #'public API' }
 SWTranspilerOfFortran >> putProgram: programClass [
 	|methodInfo|
-	methodInfo := self analyzer analyze: programClass class s: #program with: #().
+	methodInfo := self analyzer analyze: programClass class >> #program with: #().
 	self
 		putMethod: methodInfo;
 		putLine: 'contains';
