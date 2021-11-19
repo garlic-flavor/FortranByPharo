@@ -10,7 +10,8 @@ Class {
 		'name',
 		'type',
 		'properties',
-		'original'
+		'original',
+		'initializer'
 	],
 	#classVars : [
 		'temporalVariableName'
@@ -101,8 +102,25 @@ SWVariableInfo >> addProperty: aProp [
 ]
 
 { #category : #testing }
+SWVariableInfo >> hasExactType [
+	^ type isNotNil
+]
+
+{ #category : #testing }
 SWVariableInfo >> hasProperty: aProperty [
 	^ self properties includes: aProperty
+]
+
+{ #category : #accessing }
+SWVariableInfo >> initializer [
+
+	^ initializer
+]
+
+{ #category : #accessing }
+SWVariableInfo >> initializer: anObject [
+
+	initializer := anObject
 ]
 
 { #category : #accessing }
@@ -164,7 +182,13 @@ SWVariableInfo >> stackPos: anObject [
 { #category : #accessing }
 SWVariableInfo >> type [
 
-	^ type ifNil: [ type := Object ]
+	^ type ifNil: [
+		self initializer ifNotNil: [
+			type := self initializer value
+		] ifNil: [ 
+			nil
+		]
+	]
 ]
 
 { #category : #accessing }

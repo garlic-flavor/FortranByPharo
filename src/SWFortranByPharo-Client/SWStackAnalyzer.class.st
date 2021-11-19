@@ -16,7 +16,7 @@ Class {
 	#category : #'SWFortranByPharo-Client-Analyzer'
 }
 
-{ #category : #'as yet unclassified' }
+{ #category : #private }
 SWStackAnalyzer class >> binaryOpInfo [
 	^ [ :method :types |
 		SWMethodInfo new
@@ -36,17 +36,16 @@ SWStackAnalyzer class >> decode: aMethod types: types [
 
 { #category : #decoding }
 SWStackAnalyzer class >> decode: aMethod types: types sendStack: ss [
-
 	^ self definedMethods at: aMethod selector ifPresent: [ :dm |
 		dm value: aMethod value: types
-	] ifAbsent: [ 	|builder|
+	] ifAbsent: [	|builder|
 		builder := self new
 			method: aMethod;
 			types: types;
 			sendStack: ss;
 			decode;
 			yourself.
-		^ SWMethodInfo new
+		SWMethodInfo new
 			method: aMethod;
 			variables: builder stack asOrderedCollection;
 			return: builder return;
@@ -100,6 +99,13 @@ SWStackAnalyzer class >> search: selector in: aClass [
 	]
 ]
 
+{ #category : #api }
+SWStackAnalyzer >> decode [
+	self pushToSendStack: self method.
+	super decode.
+	self popSendStack: self method.
+]
+
 { #category : #'instruction decoding' }
 SWStackAnalyzer >> doDup [
 	super doDup.
@@ -116,7 +122,7 @@ SWStackAnalyzer >> doPop [
 { #category : #'instruction decoding' }
 SWStackAnalyzer >> methodReturnReceiver [
 	super methodReturnReceiver.
-	self return ifNil: [
+	self return hasExactType ifFalse: [
 		self return: (self stack at: -1)
 	]
 ]
@@ -124,7 +130,7 @@ SWStackAnalyzer >> methodReturnReceiver [
 { #category : #'instruction decoding' }
 SWStackAnalyzer >> methodReturnTop [
 	super methodReturnTop.
-	self return ifNil: [
+	self return hasExactType ifFalse: [
 		self return: self stack top
 	]
 ]
@@ -140,9 +146,9 @@ SWStackAnalyzer >> popIntoTemporaryVariable: offset [
 ]
 
 { #category : #'private - accessing' }
-SWStackAnalyzer >> popSendStack: selector [
-	selector = self sendStack pop ifFalse: [
-		Exception signal: ('A stacking mismatch was detected: ', selector)
+SWStackAnalyzer >> popSendStack: aMethod [
+	aMethod = self sendStack pop ifFalse: [
+		Exception signal: ('A stacking mismatch was detected: ', aMethod)
 	].
 ]
 
@@ -179,17 +185,20 @@ SWStackAnalyzer >> pushTemporaryVariable:  offset [
 ]
 
 { #category : #'private - accessing' }
-SWStackAnalyzer >> pushToSendStack: selector [
-	(self sendStack anySatisfy: [ :each | each = selector ]) ifTrue: [
-		Exception signal: ('A circular referencing was detected: ', selector)
+SWStackAnalyzer >> pushToSendStack: aMethod [
+	(self sendStack anySatisfy: [ :each | each = aMethod ]) ifTrue: [
+		Exception signal: 'A circular referencing detected: '. aMethod
 	].
-	self sendStack push: selector.
+	self sendStack push: aMethod.
+
 ]
 
 { #category : #accessing }
 SWStackAnalyzer >> return [
 
-	^ return
+	^ return ifNil: [
+		return := SWVariableInfo new
+	]
 ]
 
 { #category : #accessing }
@@ -200,24 +209,20 @@ SWStackAnalyzer >> return: anObject [
 
 { #category : #'instruction decoding' }
 SWStackAnalyzer >> send: selector super: supered numArgs: numberArguments [
-	|args aTypes targetMethod methodInfo|
+	|args aTypes targetMethod|
 	super send: selector super: supered numArgs: numberArguments.
-	self pushToSendStack: selector.
 
 	args := self stack pop: numberArguments + 1.
 	aTypes := args collect: [ :each | each type ].
 	targetMethod := self class search: selector in: (supered ifTrue: [ aTypes first superclass ] ifFalse: [ aTypes first ]).
-	targetMethod ifNil: [ self halt ].
-	methodInfo := self class decode: targetMethod types: aTypes sendStack: self sendStack.
-	args with: (methodInfo variables copyFrom: 1 to: 1 + numberArguments) do: [ :left :right |
-		left properties addAll: right properties
-	].
+	targetMethod ifNil: [ Exception signal: selector, ' not found.' ].
 
-	self stack push: (SWVariableInfo new 
-		type: methodInfo return type;
-		yourself).
-
-	self popSendStack: selector.
+	self stack push: (SWVariableInfo new
+		initializer: [
+			(self class decode: targetMethod types: aTypes sendStack: self sendStack) return type
+		];
+		yourself
+	)
 ]
 
 { #category : #'private - accessing' }
@@ -239,17 +244,21 @@ SWStackAnalyzer >> stack [
 	^ stack ifNil: [|vars|
 		vars := self method temporaryVariables.
 		stack := SWStack new.
+		"Reserve slots."
 		self method numTemps + 1 timesRepeat: [
 			stack push: SWVariableInfo new
 		].
 
+		"Set types of the receiver and arguments."
 		self types doWithIndex: [ :type :idx |
 			(stack at: idx - 2)
 				type: type
 		].
 
+		"Set stack position of the receiver."
 		(stack at: -1) stackPos: -1.
 			
+		"Set stack positions of arguments"
 		self method temporaryVariables doWithIndex: [ :var :idx |
 			(stack at: idx -1)
 				name: var name;
