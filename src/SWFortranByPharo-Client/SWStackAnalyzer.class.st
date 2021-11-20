@@ -8,7 +8,8 @@ Class {
 		'stack',
 		'return',
 		'types',
-		'sendStack'
+		'sendStack',
+		'jumperStack'
 	],
 	#classVars : [
 		'definedMethods'
@@ -18,9 +19,9 @@ Class {
 
 { #category : #private }
 SWStackAnalyzer class >> binaryOpInfo [
-	^ [ :method :types |
+	^ [ :selector :types |
 		SWMethodInfo new
-			method: method;
+			method: (self search: selector in: types first);
 			variables: (SWVariableInfo newFrom: types);
 			return: (SWVariableInfo new
 				type: (types at: 1);
@@ -30,31 +31,25 @@ SWStackAnalyzer class >> binaryOpInfo [
 ]
 
 { #category : #decoding }
-SWStackAnalyzer class >> decode: aMethod types: types [
-	^ self decode: aMethod types: types sendStack: nil
+SWStackAnalyzer class >> decode: selector types: types [
+	^ self decode: selector types: types sendStack: nil
 ]
 
 { #category : #decoding }
-SWStackAnalyzer class >> decode: aMethod types: types sendStack: ss [
-	^ self definedMethods at: aMethod selector ifPresent: [ :dm |
-		dm value: aMethod value: types
-	] ifAbsent: [	|builder|
-		builder := self new
-			method: aMethod;
+SWStackAnalyzer class >> decode: selector types: types sendStack: ss [
+	^ self definedMethods at: selector ifPresent: [ :dm |
+		dm value: selector value: types
+	] ifAbsent: [
+		self new
+			method: (self search: selector in: types first);
 			types: types;
 			sendStack: ss;
-			decode;
-			yourself.
-		SWMethodInfo new
-			method: aMethod;
-			variables: builder stack asOrderedCollection;
-			return: builder return;
-			yourself
+			decode
 	]
 
 ]
 
-{ #category : #'as yet unclassified' }
+{ #category : #acccessing }
 SWStackAnalyzer class >> definedMethods [
 	^ definedMethods
 ]
@@ -64,7 +59,7 @@ SWStackAnalyzer class >> initialize [
 	self installMethods
 ]
 
-{ #category : #'as yet unclassified' }
+{ #category : #initialization }
 SWStackAnalyzer class >> installMethods [
 	definedMethods := Dictionary newFrom: (self class methods select: [ :method |
 		method selector beginsWith: 'install_'
@@ -73,22 +68,40 @@ SWStackAnalyzer class >> installMethods [
 	])
 ]
 
-{ #category : #'as yet unclassified' }
+{ #category : #initialization }
+SWStackAnalyzer class >> install_add [
+	^ #+ -> self binaryOpInfo
+]
+
+{ #category : #initialization }
 SWStackAnalyzer class >> install_eq [
 	^ #= -> self binaryOpInfo
 ]
 
-{ #category : #'as yet unclassified' }
+{ #category : #initialization }
 SWStackAnalyzer class >> install_lt [
 	^ #< -> self binaryOpInfo
 ]
 
-{ #category : #'as yet unclassified' }
-SWStackAnalyzer class >> install_plus [
-	^ #+ -> self binaryOpInfo
+{ #category : #private }
+SWStackAnalyzer class >> install_new [
+	^ #new -> [ :selector :types |
+		SWMethodInfo new
+			method: nil;
+			variables: (SWVariableInfo newFrom: types);
+			return: (SWVariableInfo new
+				type: (types at: 1);
+				yourself);
+			yourself
+	]
 ]
 
-{ #category : #'as yet unclassified' }
+{ #category : #initialization }
+SWStackAnalyzer class >> install_sub [
+	^ #- -> self binaryOpInfo
+]
+
+{ #category : #utils }
 SWStackAnalyzer class >> search: selector in: aClass [
 	^ aClass ifNil: [
 		nil
@@ -99,49 +112,99 @@ SWStackAnalyzer class >> search: selector in: aClass [
 	]
 ]
 
+{ #category : #adding }
+SWStackAnalyzer >> addBytecode: description [
+	super addBytecode: description.
+	(self jumperStack nextPeriodIs: scanner pc) ifTrue: [
+		self mergeStackAbove: self jumperStack pop
+	]
+]
+
 { #category : #api }
 SWStackAnalyzer >> decode [
 	self pushToSendStack: self method.
 	super decode.
 	self popSendStack: self method.
+	^ SWMethodInfo new
+		method: self method;
+		variables: self stack asOrderedCollection;
+		return: self return;
+		yourself
 ]
 
 { #category : #'instruction decoding' }
 SWStackAnalyzer >> doDup [
+	self stack push: self stack top.
 	super doDup.
-	self stack push: self stack top
 
 ]
 
 { #category : #'instruction decoding' }
 SWStackAnalyzer >> doPop [
-	super doPop.
 	self stack pop.
+	super doPop.
+
+]
+
+{ #category : #'instruction decoding' }
+SWStackAnalyzer >> jump: offset [
+	self jumperStack pushAt: scanner pc period: scanner pc + offset stackSize: self stack size.
+	super jump: offset.
+	
+]
+
+{ #category : #'instruction decoding' }
+SWStackAnalyzer >> jump: offset if: condition [
+	self stack pop.
+	self jumperStack pushAt: scanner pc period: scanner pc + offset stackSize: self stack size.
+	super jump: offset if: condition.
+
+]
+
+{ #category : #'private - accessing' }
+SWStackAnalyzer >> jumperStack [
+
+	^ jumperStack ifNil: [ jumperStack := SWJumperStack new ]
+]
+
+{ #category : #'private - accessing' }
+SWStackAnalyzer >> jumperStack: anObject [
+
+	jumperStack := anObject
+]
+
+{ #category : #'private utils' }
+SWStackAnalyzer >> mergeStackAbove: size [
+	[
+		size + 1 < self stack size ifTrue: [ | right |
+			right := self stack pop.
+			self stack top << right.
+		] ifFalse: [ false ]
+	] whileTrue.
 ]
 
 { #category : #'instruction decoding' }
 SWStackAnalyzer >> methodReturnReceiver [
-	super methodReturnReceiver.
-	self return hasExactType ifFalse: [
-		self return: (self stack at: -1)
-	]
+	self return << (self stack at: -1).
+	super methodReturnReceiver
+
 ]
 
 { #category : #'instruction decoding' }
 SWStackAnalyzer >> methodReturnTop [
+	self return << self stack top.
 	super methodReturnTop.
-	self return hasExactType ifFalse: [
-		self return: self stack top
-	]
+
 ]
 
 { #category : #'instruction decoding' }
 SWStackAnalyzer >> popIntoTemporaryVariable: offset [
 	|left right|
-	super popIntoTemporaryVariable: offset.
 	left := self stack at: offset.
 	right := self stack pop.
-	left << right
+	left << right.
+
+	super popIntoTemporaryVariable: offset.
 
 ]
 
@@ -154,34 +217,39 @@ SWStackAnalyzer >> popSendStack: aMethod [
 
 { #category : #'instruction decoding' }
 SWStackAnalyzer >> pushConstant: obj [
-	super pushConstant: obj.
 	self stack push: (SWVariableInfo new
 		type: obj class;
-		yourself)
+		yourself).
+
+	super pushConstant: obj.
 
 ]
 
 { #category : #'instruction decoding' }
 SWStackAnalyzer >> pushLiteralVariable: anAssociation [
-	super pushLiteralVariable: anAssociation.
 	self stack push: (SWVariableInfo new
 		type: (anAssociation key
 			ifNil: [ anAssociation value class ]
-			ifNotNil: [anAssociation key class ]);
-		yourself)
+			ifNotNil: [anAssociation value ]);
+		yourself).
+
+	super pushLiteralVariable: anAssociation.
 
 ]
 
 { #category : #'instruction decoding' }
 SWStackAnalyzer >> pushReceiver [
+	self stack push: (self stack at: -1).
+
 	super pushReceiver.
-	self stack push: (self stack at: -1)
+
 ]
 
 { #category : #'instruction decoding' }
 SWStackAnalyzer >> pushTemporaryVariable:  offset [
+	self stack push: (self stack at: offset).
 	super pushTemporaryVariable: offset.
-	self stack push: (self stack at: offset)
+
 ]
 
 { #category : #'private - accessing' }
@@ -209,20 +277,19 @@ SWStackAnalyzer >> return: anObject [
 
 { #category : #'instruction decoding' }
 SWStackAnalyzer >> send: selector super: supered numArgs: numberArguments [
-	|args aTypes targetMethod|
-	super send: selector super: supered numArgs: numberArguments.
-
+	|args|
 	args := self stack pop: numberArguments + 1.
-	aTypes := args collect: [ :each | each type ].
-	targetMethod := self class search: selector in: (supered ifTrue: [ aTypes first superclass ] ifFalse: [ aTypes first ]).
-	targetMethod ifNil: [ Exception signal: selector, ' not found.' ].
-
 	self stack push: (SWVariableInfo new
-		initializer: [
-			(self class decode: targetMethod types: aTypes sendStack: self sendStack) return type
+		initializer: [|aTypes|
+			aTypes := args collect: [ :each | each type ].
+			supered ifTrue: [ aTypes first: aTypes first superclass ].
+			(self class decode: selector types: aTypes sendStack: self sendStack) return type
 		];
 		yourself
-	)
+	).
+	
+	super send: selector super: supered numArgs: numberArguments.
+
 ]
 
 { #category : #'private - accessing' }

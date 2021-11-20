@@ -85,9 +85,12 @@ SWVariableInfo class >> resetTemporalVariableName [
 { #category : #'accumulator ops' }
 SWVariableInfo >> << rightObject [
 	rightObject original ifNil: [
-		self
-			type: rightObject type;
-			original: (rightObject stackPos ifNotNil: [rightObject] ifNil: [nil]).
+		rightObject stackPos = -1 ifTrue: [
+			self hasAnyType ifFalse: [ self type: rightObject type ]
+		] ifFalse: [
+			self hasExactType ifFalse: [ self type: rightObject type ]
+		].
+		self original: (rightObject stackPos ifNotNil: [rightObject] ifNil: [nil]).
 		self properties addAll: rightObject properties
 	] ifNotNil: [
 		self << rightObject original
@@ -99,6 +102,11 @@ SWVariableInfo >> << rightObject [
 { #category : #adding }
 SWVariableInfo >> addProperty: aProp [
 	self properties add: aProp
+]
+
+{ #category : #testing }
+SWVariableInfo >> hasAnyType [
+	^ type isNotNil or: [ initializer isNotNil ]
 ]
 
 { #category : #testing }
@@ -143,6 +151,22 @@ SWVariableInfo >> original [
 SWVariableInfo >> original: anObject [
 
 	original := anObject
+]
+
+{ #category : #printing }
+SWVariableInfo >> printOn: aStream [
+	aStream
+		nextPut: $[;
+		print: stackPos;
+		nextPut: $];
+		space;
+		print: name;
+		space;
+		nextPut: $<;
+		print: type;
+		nextPut: $>;
+		space;
+		nextPutAll: (initializer ifNotNil: [ ' [lazy]' ] ifNil: [ '-' ] )
 ]
 
 { #category : #accessing }
@@ -194,5 +218,7 @@ SWVariableInfo >> type [
 { #category : #accessing }
 SWVariableInfo >> type: anObject [
 
-	type := anObject
+	anObject ifNotNil: [ self initializer: nil ].
+	type := anObject.
+
 ]
