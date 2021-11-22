@@ -13,7 +13,7 @@ Class {
 
 { #category : #testing }
 SWJumperStack >> nextPeriodIs: pc [
-	^ (0 < self payload size and: [ self payload top key = pc ])
+	^ (0 < self payload size and: [ self payload top = pc ])
 ]
 
 { #category : #accessing }
@@ -45,7 +45,7 @@ SWJumperStack >> pop [
 	|val|
 	val := self payload pop value.
 	self payload ifNotEmpty: [
-		self period: self payload top key
+		self period: self payload top
 	] ifEmpty: [
 		self period: nil
 	].
@@ -53,11 +53,13 @@ SWJumperStack >> pop [
 ]
 
 { #category : #accessing }
-SWJumperStack >> pushAt: pc period: aPeriod stackSize: aSize [
+SWJumperStack >> pushAt: pc period: aPeriod [
 	self period: aPeriod.
-	(0 < self payload size and: [ self payload top key = pc ]) ifTrue: [
-		self payload top key: aPeriod
+	(0 < self payload size and: [ self payload top = pc ]) ifTrue: [
+		(self payload)
+			pop;
+			push: aPeriod
 	] ifFalse: [
-		self payload push: aPeriod -> aSize
+		self payload push: aPeriod 
 	]
 ]

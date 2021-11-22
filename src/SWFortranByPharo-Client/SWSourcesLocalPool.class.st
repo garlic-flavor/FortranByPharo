@@ -45,7 +45,7 @@ SWSourcesLocalPool >> get: aModuleName withTranspilerMethodOf: aMethod [
 
 { #category : #'as yet unclassified' }
 SWSourcesLocalPool >> getAsSub: aModuleName [
-	^ self get: aModuleName withTranspilerMethodOf: #transpileAsSub
+	^ self get: aModuleName withTranspilerMethodOf: #transpileAsModule
 ]
 
 { #category : #initialization }

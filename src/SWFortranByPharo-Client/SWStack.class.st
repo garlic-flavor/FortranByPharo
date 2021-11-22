@@ -20,16 +20,16 @@ SWStack class >> newFrom: anArray [
 	^ s
 ]
 
-{ #category : #converting }
-SWStack >> asOrderedCollection [
-	^ self payload
-]
-
 { #category : #accessing }
 SWStack >> at: index [
 	"index is -1 based.".
 	"index -1 responds to index 1."
-	^ self payload at: (index + 2) ifAbsent: [ nil ].
+	^ self payload at: (index + 1) ifAbsent: [ nil ].
+]
+
+{ #category : #copying }
+SWStack >> copyFrom: start to: end [
+	^ self payload copyFrom: start + 1 to: end + 1
 ]
 
 { #category : #accessing }

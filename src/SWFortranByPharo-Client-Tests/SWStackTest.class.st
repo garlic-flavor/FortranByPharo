@@ -23,11 +23,6 @@ SWStackTest >> setUp [
 ]
 
 { #category : #tests }
-SWStackTest >> testAsOrderedCollection [
-	self assert: stack asOrderedCollection equals: { 1. 2. 3. 4 } asOrderedCollection
-]
-
-{ #category : #tests }
 SWStackTest >> testAt [
 	self assert: (stack at: -1) equals: 1.
 	self assert: (stack at: 0) equals: 2.

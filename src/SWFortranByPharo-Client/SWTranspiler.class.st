@@ -6,7 +6,7 @@ SWTranspiler>>#contents returns the result.
 "
 Class {
 	#name : #SWTranspiler,
-	#superclass : #SWTranspilerBase,
+	#superclass : #SWTranspilerBaseOld,
 	#instVars : [
 		'stream',
 		'indent',
@@ -219,7 +219,7 @@ SWTranspiler >> putClassDefinition: aClass [
 	^ self subclassResponsibility 
 ]
 
-{ #category : #accessing }
+{ #category : #'code generation' }
 SWTranspiler >> putCode: code [
 	^ self putCode: code with: {  }
 ]
@@ -268,6 +268,8 @@ SWTranspiler >> putFloat: anFloat [
 { #category : #'code generation' }
 SWTranspiler >> putImportClass: aClass [
 	self logger log.
+	self halt.
+	self flag: #toImplement.
 	self analyzer putImportClass: aClass
 ]
 
@@ -314,7 +316,8 @@ SWTranspiler >> putMessage: receiver call: selector with: arguments [
 SWTranspiler >> putMethod: selector ofClass: class [
 	|sAnalyzer|
 	sAnalyzer := self analyzer subAnalyzer.
-	
+	self halt.
+	self flag: #toImplement.
 ]
 
 { #category : #'code generation' }
@@ -461,7 +464,7 @@ SWTranspiler >> transpile: anObject [
 ]
 
 { #category : #'public API' }
-SWTranspiler >> transpileAsSub [
+SWTranspiler >> transpileAsModule [
 	self putFileHeaderOf: self source moduleName.
 	self putRequirements.
 	self source classes do: [ :aClass |

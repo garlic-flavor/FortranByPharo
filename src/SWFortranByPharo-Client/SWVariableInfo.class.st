@@ -12,7 +12,8 @@ Class {
 		'properties',
 		'original',
 		'initializer',
-		'assignCounter'
+		'assignCounter',
+		'priority'
 	],
 	#classVars : [
 		'temporalVariableName'
@@ -26,16 +27,6 @@ SWVariableInfo class >> named: aName typed: aType [
 		name: aName;
 		type: aType;
 		yourself
-]
-
-{ #category : #'instance creation' }
-SWVariableInfo class >> newFrom: anTypeArray [
-	^ anTypeArray collectWithIndex: [ :type :idx |
-		self new
-			type: type;
-			stackPos: idx - 2;
-			yourself.
-	]
 ]
 
 { #category : #generating }
@@ -86,10 +77,13 @@ SWVariableInfo class >> resetTemporalVariableName [
 { #category : #'accumulator ops' }
 SWVariableInfo >> << rightObject [
 	rightObject original ifNil: [
-		rightObject stackPos = -1 ifTrue: [
-			self hasAnyType ifFalse: [ self type: rightObject type ]
-		] ifFalse: [
-			self hasExactType ifFalse: [ self type: rightObject type ]
+		rightObject priority <= self priority ifTrue: [
+			rightObject hasExactType ifTrue: [
+				self type: rightObject type
+			] ifFalse: [
+				self initializer: [ rightObject type ]
+			].
+			self priority: rightObject priority
 		].
 		self original: (rightObject stackPos ifNotNil: [rightObject] ifNil: [nil]).
 		self properties addAll: rightObject properties.
@@ -142,7 +136,13 @@ SWVariableInfo >> initializer [
 { #category : #accessing }
 SWVariableInfo >> initializer: anObject [
 
-	initializer := anObject
+	initializer := anObject.
+	self type: nil
+]
+
+{ #category : #testing }
+SWVariableInfo >> isReceiver [
+	^ self stackPos = 0
 ]
 
 { #category : #accessing }
@@ -184,6 +184,34 @@ SWVariableInfo >> printOn: aStream [
 		space;
 		nextPutAll: '<<';
 		print: assignCounter
+]
+
+{ #category : #accessing }
+SWVariableInfo >> priority [
+
+	^ priority ifNil: [
+		priority := (
+			stackPos = 0 ifTrue: [
+				3
+			] ifFalse: [
+				type ifNotNil: [
+					1
+				] ifNil: [
+					initializer ifNotNil: [
+						2
+					] ifNil: [
+						999
+					]
+				]
+			]
+		)
+	]
+]
+
+{ #category : #accessing }
+SWVariableInfo >> priority: anObject [
+
+	priority := anObject
 ]
 
 { #category : #accessing }

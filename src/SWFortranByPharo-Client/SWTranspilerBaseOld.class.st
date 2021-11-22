@@ -2,7 +2,7 @@
 I implements base functionality for transpilers.
 "
 Class {
-	#name : #SWTranspilerBase,
+	#name : #SWTranspilerBaseOld,
 	#superclass : #Object,
 	#instVars : [
 		'type',
@@ -11,13 +11,18 @@ Class {
 	#category : #'SWFortranByPharo-Client-Transpiler'
 }
 
-{ #category : #'code generation - protected' }
-SWTranspilerBase class >> domainSpecificMessageTranspilerOf: aSelector [
+{ #category : #accessing }
+SWTranspilerBaseOld class >> analyzerClass [
+	^ SWMethodInfo
+]
+
+{ #category : #utils }
+SWTranspilerBaseOld class >> domainSpecificMessageTranspilerOf: aSelector [
 	^ ((self safeSelectorNameOf: aSelector), 'For:With:') asSymbol
 ]
 
-{ #category : #'code generation - protected' }
-SWTranspilerBase class >> safeSelectorNameOf: selector [
+{ #category : #utils }
+SWTranspilerBaseOld class >> safeSelectorNameOf: selector [
 	selector = '=' ifTrue: [ ^ 'opEqual_' ].
 	selector = '~=' ifTrue: [ ^ 'opNotEqual_' ].
 	selector = ',' ifTrue: [ ^ 'opCamma_' ].
@@ -28,13 +33,8 @@ SWTranspilerBase class >> safeSelectorNameOf: selector [
 
 ]
 
-{ #category : #accessing }
-SWTranspilerBase >> analyzer [
-	^ self subclassResponsibility 
-]
-
-{ #category : #enumerating }
-SWTranspilerBase >> hasDomainSpecificTranspilerOf: aSelecter ifTrue: aBlock [
+{ #category : #testing }
+SWTranspilerBaseOld >> hasDomainSpecificTranspilerOf: aSelecter ifTrue: aBlock [
 	|dst|
 	dst := self class domainSpecificMessageTranspilerOf: aSelecter.
 	(self respondsTo: dst) ifTrue: [
@@ -42,9 +42,11 @@ SWTranspilerBase >> hasDomainSpecificTranspilerOf: aSelecter ifTrue: aBlock [
 	]
 ]
 
-{ #category : #'code generation - protected' }
-SWTranspilerBase >> ifUniqueMessageTranspilerExistsOn: receiver of: selector thenDo: aBlock [
+{ #category : #testing }
+SWTranspilerBaseOld >> ifUniqueMessageTranspilerExistsOn: receiver of: selector thenDo: aBlock [
 	|receiverClass selectorName|
+	self halt.
+	self flag: #ToImplement.
 	receiverClass := receiver transpileUsing: self analyzer .
 	receiverClass class = Metaclass ifFalse: [ ^ self ].
 	selectorName := self uniqueMessageTranspilerOf: selector.
@@ -55,17 +57,17 @@ SWTranspilerBase >> ifUniqueMessageTranspilerExistsOn: receiver of: selector the
 ]
 
 { #category : #accessing }
-SWTranspilerBase >> logger [
+SWTranspilerBaseOld >> logger [
 	^ logger ifNil: [ logger := SWLogger new ]
 ]
 
 { #category : #accessing }
-SWTranspilerBase >> logging: trueOrFalse [
+SWTranspilerBaseOld >> logging: trueOrFalse [
 	self logger enabled: trueOrFalse
 ]
 
-{ #category : #'code generation - protected' }
-SWTranspilerBase >> methodBodyGeneratorNameOf: aMethod [
+{ #category : #utils }
+SWTranspilerBaseOld >> methodBodyGeneratorNameOf: aMethod [
 	^ (String streamContents: [ :s |
 		s
 			<< self type;
@@ -76,8 +78,8 @@ SWTranspilerBase >> methodBodyGeneratorNameOf: aMethod [
 
 ]
 
-{ #category : #'code generation' }
-SWTranspilerBase >> putMessage: receiver call: selector with: arguments [
+{ #category : #'code generation - protected' }
+SWTranspilerBaseOld >> putMessage: receiver call: selector with: arguments [
 	self logger log: [receiver asString, '>>', selector asString].
 	self ifUniqueMessageTranspilerExistsOn: receiver of: selector thenDo: [ :receiverClass :selectorName |
 		^ receiverClass perform: selectorName with: arguments with: self
@@ -89,25 +91,25 @@ SWTranspilerBase >> putMessage: receiver call: selector with: arguments [
 
 ]
 
-{ #category : #'code generation' }
-SWTranspilerBase >> putOrdinaryMessage: receiver call: selector with: arguments [
+{ #category : #'code generation - protected' }
+SWTranspilerBaseOld >> putOrdinaryMessage: receiver call: selector with: arguments [
 	^ self subclassResponsibility 
 ]
 
-{ #category : #accessing }
-SWTranspilerBase >> type [
+{ #category : #'public - accessing' }
+SWTranspilerBaseOld >> type [
 
 	^ type
 ]
 
-{ #category : #accessing }
-SWTranspilerBase >> type: anObject [
+{ #category : #'public - accessing' }
+SWTranspilerBaseOld >> type: anObject [
 
 	type := anObject
 ]
 
-{ #category : #'code generation - protected' }
-SWTranspilerBase >> uniqueMessageTranspilerOf: aSelector [
+{ #category : #utils }
+SWTranspilerBaseOld >> uniqueMessageTranspilerOf: aSelector [
 	^ (String streamContents: [ :s |
 		s << self type; <<  '_'; << (self class safeSelectorNameOf: aSelector); << 'With:Using:'
 	]) asSymbol

@@ -3,11 +3,8 @@ I analyze bytecodes of a method. See also, SymbolicBytecodeBuilder.
 "
 Class {
 	#name : #SWStackAnalyzer,
-	#superclass : #SymbolicBytecodeBuilder,
+	#superclass : #SWMethodInfo,
 	#instVars : [
-		'stack',
-		'return',
-		'types',
 		'sendStack',
 		'jumperStack'
 	],
@@ -22,7 +19,7 @@ SWStackAnalyzer class >> binaryOpInfo [
 	^ [ :selector :types |
 		SWMethodInfo new
 			method: (self search: selector in: types first);
-			variables: (SWVariableInfo newFrom: types);
+			types: types;
 			return: (SWVariableInfo new
 				type: (types at: 1);
 				yourself);
@@ -44,7 +41,8 @@ SWStackAnalyzer class >> decode: selector types: types sendStack: ss [
 			method: (self search: selector in: types first);
 			types: types;
 			sendStack: ss;
-			decode
+			decoded;
+			yourself
 	]
 
 ]
@@ -87,8 +85,6 @@ SWStackAnalyzer class >> install_lt [
 SWStackAnalyzer class >> install_new [
 	^ #new -> [ :selector :types |
 		SWMethodInfo new
-			method: nil;
-			variables: (SWVariableInfo newFrom: types);
 			return: (SWVariableInfo new
 				type: (types at: 1);
 				yourself);
@@ -101,23 +97,13 @@ SWStackAnalyzer class >> install_sub [
 	^ #- -> self binaryOpInfo
 ]
 
-{ #category : #utils }
-SWStackAnalyzer class >> search: selector in: aClass [
-	^ aClass ifNil: [
-		nil
-	] ifNotNil: [
-		aClass methodDict at: selector ifAbsent: [
-			self search: selector in: aClass superclass
-		]
-	]
-]
-
-{ #category : #adding }
+{ #category : #private }
 SWStackAnalyzer >> addBytecode: description [
 	super addBytecode: description.
-	(self jumperStack nextPeriodIs: scanner pc) ifTrue: [
-		self mergeStackAbove: self jumperStack pop
-	]
+	(self jumperStack nextPeriodIs: scanner pc) ifFalse: [ ^ self  ].
+	self jumperStack pop.
+	self mergeStackTopAndSecond .
+
 ]
 
 { #category : #'instruction decoding' }
@@ -135,15 +121,12 @@ SWStackAnalyzer >> blockReturnTop [
 ]
 
 { #category : #api }
-SWStackAnalyzer >> decode [
+SWStackAnalyzer >> decoded [
+	self return hasAnyType ifTrue: [ ^ self ].
 	self pushToSendStack: self method.
-	super decode.
+	self decode.
 	self popSendStack: self method.
-	^ SWMethodInfo new
-		method: self method;
-		variables: self stack asOrderedCollection;
-		return: self return;
-		yourself
+
 ]
 
 { #category : #'instruction decoding' }
@@ -170,15 +153,14 @@ SWStackAnalyzer >> doPop [
 
 { #category : #'instruction decoding' }
 SWStackAnalyzer >> jump: offset [
-	self jumperStack pushAt: scanner pc period: scanner pc + offset stackSize: self stack size.
+	self jumperStack pushAt: scanner pc period: scanner pc + offset.
 	super jump: offset.
 	
 ]
 
 { #category : #'instruction decoding' }
 SWStackAnalyzer >> jump: offset if: condition [
-	self stack pop.
-	self jumperStack pushAt: scanner pc period: scanner pc + offset stackSize: self stack size.
+	self jumperStack pushAt: scanner pc period: scanner pc + offset.
 	super jump: offset if: condition.
 
 ]
@@ -195,14 +177,15 @@ SWStackAnalyzer >> jumperStack: anObject [
 	jumperStack := anObject
 ]
 
-{ #category : #'private utils' }
-SWStackAnalyzer >> mergeStackAbove: size [
-	[
-		size + 1 < self stack size ifTrue: [ | right |
-			right := self stack pop.
-			self stack top << right.
-		] ifFalse: [ false ]
-	] whileTrue.
+{ #category : #private }
+SWStackAnalyzer >> mergeStackTopAndSecond [
+	|result|
+	result := SWVariableInfo new.
+	result << self stack pop.
+	result << self stack pop.
+
+	self stack push: result
+
 ]
 
 { #category : #'instruction decoding' }
@@ -213,7 +196,7 @@ SWStackAnalyzer >> methodReturnConstant: value [
 
 { #category : #'instruction decoding' }
 SWStackAnalyzer >> methodReturnReceiver [
-	self return << (self stack at: -1).
+	self return << (self stack at: 0).
 	super methodReturnReceiver
 
 ]
@@ -252,7 +235,7 @@ SWStackAnalyzer >> popIntoRemoteTemp: remoteTempIndex inVectorAt: tempVectorInde
 { #category : #'instruction decoding' }
 SWStackAnalyzer >> popIntoTemporaryVariable: offset [
 	|left right|
-	left := self stack at: offset.
+	left := self stack at: offset + 1.
 	right := self stack pop.
 	left << right.
 
@@ -343,7 +326,7 @@ SWStackAnalyzer >> pushNewArrayOfSize: numElements [
 
 { #category : #'instruction decoding' }
 SWStackAnalyzer >> pushReceiver [
-	self stack push: (self stack at: -1).
+	self stack push: (self stack at: 0).
 
 	super pushReceiver.
 
@@ -351,7 +334,13 @@ SWStackAnalyzer >> pushReceiver [
 
 { #category : #'instruction decoding' }
 SWStackAnalyzer >> pushReceiverVariable: offset [
-	self halt.
+	self stack push: (SWVariableInfo new
+		initializer: [
+			(self classInfo getVariableInfoAt: offset) type
+		];
+		priority: 10;
+		yourself
+	).
 	super pushReceiverVariable: offset
 ]
 
@@ -364,7 +353,7 @@ SWStackAnalyzer >> pushRemoteTemp: remoteTempIndex inVectorAt: tempVectorIndex [
 
 { #category : #'instruction decoding' }
 SWStackAnalyzer >> pushTemporaryVariable:  offset [
-	self stack push: (self stack at: offset).
+	self stack push: (self stack at: offset + 1).
 	super pushTemporaryVariable: offset.
 
 ]
@@ -376,20 +365,6 @@ SWStackAnalyzer >> pushToSendStack: aMethod [
 	].
 	self sendStack push: aMethod.
 
-]
-
-{ #category : #accessing }
-SWStackAnalyzer >> return [
-
-	^ return ifNil: [
-		return := SWVariableInfo new
-	]
-]
-
-{ #category : #accessing }
-SWStackAnalyzer >> return: anObject [
-
-	return := anObject
 ]
 
 { #category : #'instruction decoding' }
@@ -421,58 +396,12 @@ SWStackAnalyzer >> sendStack: anObject [
 	sendStack := anObject
 ]
 
-{ #category : #accessing }
-SWStackAnalyzer >> stack [
-	"stack holds indices of  referred temporary values or nil."
-	"At index -1 on the stack indicates the VariableInfor for receiver"
-	^ stack ifNil: [|vars|
-		vars := self method temporaryVariables.
-		stack := SWStack new.
-		"Reserve slots."
-		self method numTemps + 1 timesRepeat: [
-			stack push: SWVariableInfo new
-		].
-
-		"Set types of the receiver and arguments."
-		self types doWithIndex: [ :type :idx |
-			(stack at: idx - 2)
-				type: type
-		].
-
-		"Set stack position of the receiver."
-		(stack at: -1) stackPos: -1.
-			
-		"Set stack positions of arguments"
-		self method temporaryVariables doWithIndex: [ :var :idx |
-			(stack at: idx -1)
-				name: var name;
-				stackPos: idx - 1
-		].
-
-		stack
-	]
-]
-
-{ #category : #accessing }
-SWStackAnalyzer >> stack: anObject [
-
-	stack := anObject
-]
-
 { #category : #'instruction decoding' }
 SWStackAnalyzer >> storeIntoLiteralVariable: anAssociation [
 
 	self halt.
 	
 	super storeIntoLiteralVariable: anAssociation
-]
-
-{ #category : #'instruction decoding' }
-SWStackAnalyzer >> storeIntoReceiverVariable: offset [
-
-	self halt.
-	
-	super storeIntoReceiverVariable: offset
 ]
 
 { #category : #'instruction decoding' }
@@ -484,7 +413,7 @@ SWStackAnalyzer >> storeIntoRemoteTemp: remoteTempIndex inVectorAt: tempVectorIn
 { #category : #'instruction decoding' }
 SWStackAnalyzer >> storeIntoTemporaryVariable: offset [
 	|left right|
-	left := self stack at: offset.
+	left := self stack at: offset + 1.
 	right := self stack top.
 	left << right.
 
@@ -495,16 +424,4 @@ SWStackAnalyzer >> storeIntoTemporaryVariable: offset [
 SWStackAnalyzer >> trap [
 	self halt.
 	super trap
-]
-
-{ #category : #accessing }
-SWStackAnalyzer >> types [
-
-	^ types
-]
-
-{ #category : #accessing }
-SWStackAnalyzer >> types: anObject [
-
-	types := anObject
 ]

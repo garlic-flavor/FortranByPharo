@@ -4,15 +4,23 @@ I have informations about Pharo's method.
 "
 Class {
 	#name : #SWMethodInfo,
-	#superclass : #Object,
+	#superclass : #SymbolicBytecodeBuilder,
 	#instVars : [
-		'method',
 		'mangledName',
-		'variables',
-		'return'
+		'stack',
+		'return',
+		'classInfo'
 	],
 	#category : #'SWFortranByPharo-Client-Analyzer'
 }
+
+{ #category : #decoding }
+SWMethodInfo class >> decode: selector types: types [
+	^ self new
+		method: (self search: selector in: types first);
+		types: types;
+		yourself
+]
 
 { #category : #private }
 SWMethodInfo class >> mangledTypeNameOf: aType [
@@ -28,14 +36,38 @@ SWMethodInfo class >> newWith: method [
 		yourself
 ]
 
+{ #category : #utils }
+SWMethodInfo class >> search: selector in: aClass [
+	^ aClass ifNil: [
+		nil
+	] ifNotNil: [
+		aClass methodDict at: selector ifAbsent: [
+			self search: selector in: aClass superclass
+		]
+	]
+]
+
+{ #category : #accessing }
+SWMethodInfo >> classInfo [
+
+	^ classInfo
+]
+
+{ #category : #accessing }
+SWMethodInfo >> classInfo: anObject [
+
+	classInfo := anObject
+]
+
 { #category : #testing }
 SWMethodInfo >> hasExplicitReturn [
-	^ self returnValue value class ~= self  method methodClass
+	^ self  return stackPos ~= -1
 ]
 
 { #category : #accessing }
 SWMethodInfo >> mangledName [
-
+	self halt.
+	self flag: #toImplement.
 	^ mangledName ifNil: [ mangledName := String streamContents: [ : s ||owner|
 		owner := self method methodClass.
 		owner class = Metaclass ifTrue: [ 
@@ -57,18 +89,6 @@ SWMethodInfo >> mangledName: anObject [
 ]
 
 { #category : #accessing }
-SWMethodInfo >> method [
-
-	^ method
-]
-
-{ #category : #accessing }
-SWMethodInfo >> method: anObject [
-
-	method := anObject
-]
-
-{ #category : #accessing }
 SWMethodInfo >> name [
 
 	^ self method selector asString
@@ -77,7 +97,9 @@ SWMethodInfo >> name [
 { #category : #accessing }
 SWMethodInfo >> return [
 
-	^ return
+	^ return ifNil: [
+		return := SWVariableInfo new
+	]
 ]
 
 { #category : #accessing }
@@ -87,19 +109,43 @@ SWMethodInfo >> return: anObject [
 ]
 
 { #category : #accessing }
-SWMethodInfo >> variables [
+SWMethodInfo >> stack [
 
-	^ variables ifNil: [ variables :=  self method temporaryVariables withIndexCollect: [ :var :idx |
-		SWVariableInfo new
-			name: var name;
-			stackPos: idx;
-			const: true;
-			yourself
-	]]
+	^ stack ifNil: [
+		stack := SWStack new.
+		self method numTemps + 1 timesRepeat: [
+			stack push: SWVariableInfo new
+		].
+		(stack at: 0) stackPos: 0.
+		self method temporaryVariables doWithIndex: [ :var :idx |
+			(stack at: idx)
+				name: var name;
+				stackPos: idx
+		].
+		stack
+	]
 ]
 
 { #category : #accessing }
-SWMethodInfo >> variables: anObject [
+SWMethodInfo >> stack: anObject [
 
-	variables := anObject
+	stack := anObject
+]
+
+{ #category : #accessing }
+SWMethodInfo >> types: anObject [
+
+	anObject doWithIndex: [ :type :idx |
+		(self stack at: idx - 1)
+			type: type
+	]
+]
+
+{ #category : #accessing }
+SWMethodInfo >> variableInfoOf: aName [
+	^ (self stack copyFrom: 1 to: self method numTemps) detect: [ :vi |
+		vi name = aName
+	] ifNone: [
+		self classInfo variableInfoOf: aName
+	]
 ]

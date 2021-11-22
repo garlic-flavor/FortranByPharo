@@ -4,6 +4,9 @@ I came from: https://www.nag-j.co.jp/fortran/FI_3.html
 Class {
 	#name : #SWNag2,
 	#superclass : #Object,
+	#instVars : [
+		'hoge'
+	],
 	#category : #'SWFortranByPharo-Client-Tests-Uncategorized'
 }
 
@@ -33,4 +36,9 @@ SWNag2 class >> program [
 SWNag2 class >> test [
 	Transcript show: 'Hello!'; cr.
 	^ (Smalltalk globals at: self name) new
+]
+
+{ #category : #tests }
+SWNag2 >> test2 [
+	^ hoge ifNil: [ hoge := OrderedCollection  new ]
 ]
