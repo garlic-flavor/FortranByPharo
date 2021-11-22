@@ -11,7 +11,8 @@ Class {
 		'type',
 		'properties',
 		'original',
-		'initializer'
+		'initializer',
+		'assignCounter'
 	],
 	#classVars : [
 		'temporalVariableName'
@@ -91,7 +92,8 @@ SWVariableInfo >> << rightObject [
 			self hasExactType ifFalse: [ self type: rightObject type ]
 		].
 		self original: (rightObject stackPos ifNotNil: [rightObject] ifNil: [nil]).
-		self properties addAll: rightObject properties
+		self properties addAll: rightObject properties.
+		self assignCounter: self assignCounter + 1
 	] ifNotNil: [
 		self << rightObject original
 	]
@@ -102,6 +104,18 @@ SWVariableInfo >> << rightObject [
 { #category : #adding }
 SWVariableInfo >> addProperty: aProp [
 	self properties add: aProp
+]
+
+{ #category : #accessing }
+SWVariableInfo >> assignCounter [
+
+	^ assignCounter ifNil: [ assignCounter := 0 ]
+]
+
+{ #category : #accessing }
+SWVariableInfo >> assignCounter: anObject [
+
+	assignCounter := anObject
 ]
 
 { #category : #testing }
@@ -166,7 +180,10 @@ SWVariableInfo >> printOn: aStream [
 		print: type;
 		nextPut: $>;
 		space;
-		nextPutAll: (initializer ifNotNil: [ ' [lazy]' ] ifNil: [ '-' ] )
+		nextPutAll: (initializer ifNotNil: [ ' [lazy]' ] ifNil: [ '-' ] );
+		space;
+		nextPutAll: '<<';
+		print: assignCounter
 ]
 
 { #category : #accessing }

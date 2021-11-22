@@ -120,6 +120,20 @@ SWStackAnalyzer >> addBytecode: description [
 	]
 ]
 
+{ #category : #'instruction decoding' }
+SWStackAnalyzer >> blockReturnConstant: cst [
+	self halt.
+	
+	super blockReturnConstant: cst
+]
+
+{ #category : #'instruction decoding' }
+SWStackAnalyzer >> blockReturnTop [
+	self halt.
+	
+	super blockReturnTop
+]
+
 { #category : #api }
 SWStackAnalyzer >> decode [
 	self pushToSendStack: self method.
@@ -130,6 +144,14 @@ SWStackAnalyzer >> decode [
 		variables: self stack asOrderedCollection;
 		return: self return;
 		yourself
+]
+
+{ #category : #'instruction decoding' }
+SWStackAnalyzer >> directedSuperSend: selector numArgs: numberArguments [
+
+	self halt.
+	
+	super directedSuperSend: selector numArgs: numberArguments 
 ]
 
 { #category : #'instruction decoding' }
@@ -184,6 +206,12 @@ SWStackAnalyzer >> mergeStackAbove: size [
 ]
 
 { #category : #'instruction decoding' }
+SWStackAnalyzer >> methodReturnConstant: value [
+	self halt.
+	super methodReturnConstant: value
+]
+
+{ #category : #'instruction decoding' }
 SWStackAnalyzer >> methodReturnReceiver [
 	self return << (self stack at: -1).
 	super methodReturnReceiver
@@ -195,6 +223,30 @@ SWStackAnalyzer >> methodReturnTop [
 	self return << self stack top.
 	super methodReturnTop.
 
+]
+
+{ #category : #'instruction decoding' }
+SWStackAnalyzer >> popIntoLiteralVariable: anAssociation [
+
+	self halt.
+	
+	super popIntoLiteralVariable: anAssociation 
+]
+
+{ #category : #'instruction decoding' }
+SWStackAnalyzer >> popIntoReceiverVariable: offset [
+
+	self halt.
+	
+	super popIntoReceiverVariable: offset
+]
+
+{ #category : #'instruction decoding' }
+SWStackAnalyzer >> popIntoRemoteTemp: remoteTempIndex inVectorAt: tempVectorIndex [
+
+	self halt.
+	
+	super popIntoRemoteTemp: remoteTempIndex  inVectorAt: tempVectorIndex 
 ]
 
 { #category : #'instruction decoding' }
@@ -216,6 +268,42 @@ SWStackAnalyzer >> popSendStack: aMethod [
 ]
 
 { #category : #'instruction decoding' }
+SWStackAnalyzer >> pushActiveContext [ 
+	self halt.
+	super pushActiveContext
+]
+
+{ #category : #'instruction decoding' }
+SWStackAnalyzer >> pushActiveProcess [ 
+	self halt.
+	super pushActiveProcess 
+]
+
+{ #category : #'instruction decoding' }
+SWStackAnalyzer >> pushClosureCopyNumCopiedValues: numCopied numArgs: numArgs blockSize: blockSize [
+
+	self halt.
+	
+	super pushClosureCopyNumCopiedValues: numCopied numArgs: numArgs blockSize: blockSize 
+]
+
+{ #category : #'instruction decoding' }
+SWStackAnalyzer >> pushClosureTemps: numTemps [
+
+	self halt.
+	
+	super pushClosureTemps: numTemps
+]
+
+{ #category : #'instruction decoding' }
+SWStackAnalyzer >> pushConsArrayWithElements: numElements [
+
+	self halt.
+	
+	super pushConsArrayWithElements: numElements
+]
+
+{ #category : #'instruction decoding' }
 SWStackAnalyzer >> pushConstant: obj [
 	self stack push: (SWVariableInfo new
 		type: obj class;
@@ -223,6 +311,14 @@ SWStackAnalyzer >> pushConstant: obj [
 
 	super pushConstant: obj.
 
+]
+
+{ #category : #'instruction decoding' }
+SWStackAnalyzer >> pushFullClosure: lit numCopies: numCopied receiverOnStack: rcvr ignoreOuterContext: ignore [
+
+	self halt.
+	
+	super pushFullClosure: lit numCopied: numCopied  receiverOnStack: rcvr ignoreOuterContext: ignore 
 ]
 
 { #category : #'instruction decoding' }
@@ -238,11 +334,32 @@ SWStackAnalyzer >> pushLiteralVariable: anAssociation [
 ]
 
 { #category : #'instruction decoding' }
+SWStackAnalyzer >> pushNewArrayOfSize: numElements [
+
+	self halt.
+	
+	super pushNewArrayOfSize: numElements 
+]
+
+{ #category : #'instruction decoding' }
 SWStackAnalyzer >> pushReceiver [
 	self stack push: (self stack at: -1).
 
 	super pushReceiver.
 
+]
+
+{ #category : #'instruction decoding' }
+SWStackAnalyzer >> pushReceiverVariable: offset [
+	self halt.
+	super pushReceiverVariable: offset
+]
+
+{ #category : #'instruction decoding' }
+SWStackAnalyzer >> pushRemoteTemp: remoteTempIndex inVectorAt: tempVectorIndex [
+
+	self halt.
+	super pushRemoteTemp: remoteTempIndex  inVectorAt: tempVectorIndex 
 ]
 
 { #category : #'instruction decoding' }
@@ -340,6 +457,44 @@ SWStackAnalyzer >> stack [
 SWStackAnalyzer >> stack: anObject [
 
 	stack := anObject
+]
+
+{ #category : #'instruction decoding' }
+SWStackAnalyzer >> storeIntoLiteralVariable: anAssociation [
+
+	self halt.
+	
+	super storeIntoLiteralVariable: anAssociation
+]
+
+{ #category : #'instruction decoding' }
+SWStackAnalyzer >> storeIntoReceiverVariable: offset [
+
+	self halt.
+	
+	super storeIntoReceiverVariable: offset
+]
+
+{ #category : #'instruction decoding' }
+SWStackAnalyzer >> storeIntoRemoteTemp: remoteTempIndex inVectorAt: tempVectorIndex [
+	self halt.
+	super storeIntoRemoteTemp: remoteTempIndex  inVectorAt: tempVectorIndex 
+]
+
+{ #category : #'instruction decoding' }
+SWStackAnalyzer >> storeIntoTemporaryVariable: offset [
+	|left right|
+	left := self stack at: offset.
+	right := self stack top.
+	left << right.
+
+	super storeIntoTemporaryVariable: offset
+]
+
+{ #category : #'instruction decoding' }
+SWStackAnalyzer >> trap [
+	self halt.
+	super trap
 ]
 
 { #category : #accessing }
