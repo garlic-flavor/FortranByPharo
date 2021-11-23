@@ -22,9 +22,16 @@ SWStack class >> newFrom: anArray [
 
 { #category : #accessing }
 SWStack >> at: index [
-	"index is -1 based.".
-	"index -1 responds to index 1."
+	"index is 1 based.".
+	"index 0 responds special to receiver."
 	^ self payload at: (index + 1) ifAbsent: [ nil ].
+]
+
+{ #category : #accessing }
+SWStack >> atOffset: offset [
+	"offset is  0 based.".
+	"offset 0 responds to the first argument."
+	^ self payload at: (offset + 2) ifAbsent: [ nil ].
 ]
 
 { #category : #copying }

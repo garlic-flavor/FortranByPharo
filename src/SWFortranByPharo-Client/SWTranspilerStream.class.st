@@ -57,6 +57,11 @@ SWTranspilerStream >> isNewline: anObject [
 ]
 
 { #category : #api }
+SWTranspilerStream >> log [
+	self logger log: '' withContext: thisContext sender
+]
+
+{ #category : #api }
 SWTranspilerStream >> log: msg [
 	self logger log: msg withContext: thisContext sender
 ]
@@ -112,6 +117,11 @@ SWTranspilerStream >> put: code [
 	self logger log: code.
 	self putIndent.
 	payload nextPutAll: code.
+]
+
+{ #category : #api }
+SWTranspilerStream >> putComment: comment [
+	self subclassResponsibility
 ]
 
 { #category : #private }

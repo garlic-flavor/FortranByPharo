@@ -188,19 +188,19 @@ SWVariableInfo >> printOn: aStream [
 
 { #category : #accessing }
 SWVariableInfo >> priority [
-
+	"priority 1 is most significant."
 	^ priority ifNil: [
 		priority := (
 			stackPos = 0 ifTrue: [
-				3
+				3 "receiver's priority"
 			] ifFalse: [
 				type ifNotNil: [
-					1
+					1 "highest priority"
 				] ifNil: [
 					initializer ifNotNil: [
-						2
+						2 "scond priority"
 					] ifNil: [
-						999
+						999 "default priority"
 					]
 				]
 			]

@@ -235,7 +235,7 @@ SWStackAnalyzer >> popIntoRemoteTemp: remoteTempIndex inVectorAt: tempVectorInde
 { #category : #'instruction decoding' }
 SWStackAnalyzer >> popIntoTemporaryVariable: offset [
 	|left right|
-	left := self stack at: offset + 1.
+	left := self stack atOffset: offset.
 	right := self stack pop.
 	left << right.
 
@@ -353,7 +353,7 @@ SWStackAnalyzer >> pushRemoteTemp: remoteTempIndex inVectorAt: tempVectorIndex [
 
 { #category : #'instruction decoding' }
 SWStackAnalyzer >> pushTemporaryVariable:  offset [
-	self stack push: (self stack at: offset + 1).
+	self stack push: (self stack atOffset: offset).
 	super pushTemporaryVariable: offset.
 
 ]
@@ -413,7 +413,7 @@ SWStackAnalyzer >> storeIntoRemoteTemp: remoteTempIndex inVectorAt: tempVectorIn
 { #category : #'instruction decoding' }
 SWStackAnalyzer >> storeIntoTemporaryVariable: offset [
 	|left right|
-	left := self stack at: offset + 1.
+	left := self stack atOffset: offset.
 	right := self stack top.
 	left << right.
 

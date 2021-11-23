@@ -31,7 +31,8 @@ SWMethodBodyTranspiler >> stream: anObject [
 { #category : #'public API' }
 SWMethodBodyTranspiler >> transpile [
 	self decoded.
-	self flag: #toImplement.
+	self stream log.
+	self method sourceNode body statements do: [ :each | each transpileUsing: self ].
 	^ self stream contents
 ]
 
