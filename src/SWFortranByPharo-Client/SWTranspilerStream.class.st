@@ -32,28 +32,13 @@ SWTranspilerStream >> incIndent [
 	indent := indent + 1.
 ]
 
-{ #category : #'private - accessing' }
-SWTranspilerStream >> indent [
-
-	^ indent ifNil: [ indent := 0 ]
-]
-
-{ #category : #'private - accessing' }
-SWTranspilerStream >> indent: anObject [
-
-	indent := anObject
-]
-
-{ #category : #'private - accessing' }
-SWTranspilerStream >> isNewline [
-
-	^ isNewline ifNil: [ isNewline := false ]
-]
-
-{ #category : #'private - accessing' }
-SWTranspilerStream >> isNewline: anObject [
-
-	isNewline := anObject
+{ #category : #initialization }
+SWTranspilerStream >> initialize [
+	super initialize.
+	payload := String new writeStream.
+	indent := 0.
+	isNewline := false.
+	preventNewline := false.
 ]
 
 { #category : #api }
@@ -95,18 +80,6 @@ SWTranspilerStream >> newline: anObject [
 	newline := anObject
 ]
 
-{ #category : #'private - accessing' }
-SWTranspilerStream >> payload [
-
-	^ payload ifNil: [ payload := String new writeStream ]
-]
-
-{ #category : #'private - accessing' }
-SWTranspilerStream >> payload: anObject [
-
-	payload := anObject
-]
-
 { #category : #api }
 SWTranspilerStream >> preventNewline [
 	preventNewline := true
@@ -119,16 +92,29 @@ SWTranspilerStream >> put: code [
 	payload nextPutAll: code.
 ]
 
-{ #category : #api }
-SWTranspilerStream >> putComment: comment [
-	self subclassResponsibility
-]
-
 { #category : #private }
 SWTranspilerStream >> putIndent [
 	isNewline ifFalse: [ ^ self ].
 	payload nextPutAll: (' ' repeat: {0. (self tabWidth * indent)} max).
 	isNewline := false.
+
+]
+
+{ #category : #api }
+SWTranspilerStream >> putLine [
+	preventNewline
+		ifTrue: [ preventNewline := false ]
+		ifFalse: [
+			payload << newline.
+			isNewline := true.
+		].
+
+]
+
+{ #category : #api }
+SWTranspilerStream >> putLine: code [
+	self put: code.
+	self putLine.
 
 ]
 

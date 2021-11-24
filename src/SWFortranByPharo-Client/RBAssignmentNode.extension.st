@@ -2,5 +2,5 @@ Extension { #name : #RBAssignmentNode }
 
 { #category : #'*SWFortranByPharo-Client' }
 RBAssignmentNode >> transpileUsing: transpiler [
-	^ transpiler assign: self variable with: self value
+	^ transpiler putAssignTo: self variable with: self value
 ]
