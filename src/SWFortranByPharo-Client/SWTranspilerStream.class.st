@@ -68,13 +68,13 @@ SWTranspilerStream >> logging: trueOrFalse [
 	self logger enabled: trueOrFalse
 ]
 
-{ #category : #'private - accessing' }
+{ #category : #accessing }
 SWTranspilerStream >> newline [
 
 	^ newline ifNil: [ newline := String crlf ]
 ]
 
-{ #category : #'private - accessing' }
+{ #category : #accessing }
 SWTranspilerStream >> newline: anObject [
 
 	newline := anObject

@@ -9,6 +9,7 @@ Class {
 		'mangledName',
 		'stack',
 		'return',
+		'sourceHash',
 		'classInfo'
 	],
 	#category : #'SWFortranByPharo-Client-Analyzer'
@@ -109,6 +110,11 @@ SWMethodInfo >> return: anObject [
 ]
 
 { #category : #accessing }
+SWMethodInfo >> sourceHash [
+	^ sourceHash ifNil: [ sourceHash := SHA256 hashMessage: self method sourceCode ]
+]
+
+{ #category : #accessing }
 SWMethodInfo >> stack [
 
 	^ stack ifNil: [
@@ -116,7 +122,9 @@ SWMethodInfo >> stack [
 		self method numTemps + 1 timesRepeat: [
 			stack push: SWVariableInfo new
 		].
-		(stack at: 0) stackPos: 0.
+		(stack at: 0)
+			name: 'self';
+			stackPos: 0.
 		self method temporaryVariables doWithIndex: [ :var :idx |
 			(stack at: idx)
 				name: var name;
@@ -143,7 +151,7 @@ SWMethodInfo >> types: anObject [
 
 { #category : #accessing }
 SWMethodInfo >> variableInfoOf: aName [
-	^ (self stack copyFrom: 1 to: self method numTemps) detect: [ :vi |
+	^ self stack detect: [ :vi |
 		vi name = aName
 	] ifNone: [
 		self classInfo variableInfoOf: aName

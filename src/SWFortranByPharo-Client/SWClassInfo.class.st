@@ -6,7 +6,8 @@ Class {
 	#superclass : #Object,
 	#instVars : [
 		'targetClass',
-		'members'
+		'members',
+		'sourceHash'
 	],
 	#category : #'SWFortranByPharo-Client-Analyzer'
 }
@@ -21,11 +22,16 @@ SWClassInfo >> getVariableInfoAt: offset [
 	^ self getVariableInfoOf: (self targetClass slots at: offset + 1) name
 ]
 
-{ #category : #'as yet unclassified' }
+{ #category : #accessing }
 SWClassInfo >> getVariableInfoOf: aName [
-	^ self members at: aName ifAbsentPut: [
-		(self class analyzerClass decode: aName asSymbol types: { self targetClass }) return
+	^ ((self targetClass slots collect: [ :each | each name ]) anySatisfy: [ :each | each = aName ]) ifTrue: [
+		self members at: aName ifAbsentPut: [
+			(self class analyzerClass decode: aName asSymbol types: { self targetClass }) return
+		]
+	] ifFalse: [
+		nil
 	]
+
 ]
 
 { #category : #accessing }
@@ -38,6 +44,15 @@ SWClassInfo >> members [
 SWClassInfo >> members: anObject [
 
 	members := anObject
+]
+
+{ #category : #accessing }
+SWClassInfo >> sourceHash [
+	^ sourceHash ifNil: [
+		sourceHash := SHA256 hashMessage: ((self targetClass methods collect: [
+			:each | SHA256 hashMessage: each sourceCode
+		]) flatCollect: [ :each | each ])
+	]
 ]
 
 { #category : #accessing }

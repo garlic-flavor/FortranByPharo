@@ -39,6 +39,11 @@ SWStack >> copyFrom: start to: end [
 	^ self payload copyFrom: start + 1 to: end + 1
 ]
 
+{ #category : #enumerating }
+SWStack >> detect: needle ifNone: noneBlock [
+	^ self payload detect: needle ifNone: noneBlock
+]
+
 { #category : #accessing }
 SWStack >> payload [
 

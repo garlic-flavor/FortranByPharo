@@ -159,16 +159,6 @@ SWTranspiler >> putArray: anArray [
 ]
 
 { #category : #'code generation' }
-SWTranspiler >> putArrayLiteral: anArray [
-	self logger log.
-	self
-		put: '[ ';
-		putArray: anArray;
-		put: ' ]'.
-	^ anArray
-]
-
-{ #category : #'code generation' }
 SWTranspiler >> putBlock: aBlock [
 	^ self subclassResponsibility 
 ]

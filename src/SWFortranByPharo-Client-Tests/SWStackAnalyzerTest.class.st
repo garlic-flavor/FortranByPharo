@@ -40,6 +40,11 @@ SWStackAnalyzerTest >> program_05 [
 	^ v9 := SWVariableInfo new const: true; yourself.
 ]
 
+{ #category : #'as yet unclassified' }
+SWStackAnalyzerTest >> program_temp [
+	Transcript show: 'hello'
+]
+
 { #category : #'private - utility' }
 SWStackAnalyzerTest >> returnTypeOf: aSelector withArgumentTypes: argTypes equals: rType [
 	self assert: (SWStackAnalyzer decode: aSelector types: {self class}, argTypes) return type equals: rType
