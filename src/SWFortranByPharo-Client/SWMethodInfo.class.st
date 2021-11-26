@@ -10,7 +10,8 @@ Class {
 		'stack',
 		'return',
 		'sourceHash',
-		'classInfo'
+		'classInfo',
+		'numTemps'
 	],
 	#category : #'SWFortranByPharo-Client-Analyzer'
 }
@@ -46,6 +47,13 @@ SWMethodInfo class >> search: selector in: aClass [
 			self search: selector in: aClass superclass
 		]
 	]
+]
+
+{ #category : #adding }
+SWMethodInfo >> addLocalVariable: aVariableInfo [
+	self stack push: aVariableInfo afterIndex: self numTemps.
+	self numTemps: self numTemps + 1.
+	aVariableInfo stackPos: self numTemps.
 ]
 
 { #category : #accessing }
@@ -93,6 +101,18 @@ SWMethodInfo >> mangledName: anObject [
 SWMethodInfo >> name [
 
 	^ self method selector asString
+]
+
+{ #category : #accessing }
+SWMethodInfo >> numTemps [
+
+	^ numTemps ifNil: [ numTemps := self method numTemps ]
+]
+
+{ #category : #accessing }
+SWMethodInfo >> numTemps: anObject [
+
+	numTemps := anObject
 ]
 
 { #category : #accessing }
@@ -156,4 +176,9 @@ SWMethodInfo >> variableInfoOf: aName [
 	] ifNone: [
 		self classInfo variableInfoOf: aName
 	]
+]
+
+{ #category : #enumerating }
+SWMethodInfo >> withTempsDo: aBlock [
+	(self stack copyFrom: 1 to: self numTemps) do: aBlock
 ]

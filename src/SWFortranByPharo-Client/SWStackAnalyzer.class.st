@@ -6,7 +6,8 @@ Class {
 	#superclass : #SWMethodInfo,
 	#instVars : [
 		'sendStack',
-		'jumperStack'
+		'jumperStack',
+		'tempStore'
 	],
 	#classVars : [
 		'definedMethods'
@@ -139,7 +140,12 @@ SWStackAnalyzer >> directedSuperSend: selector numArgs: numberArguments [
 
 { #category : #'instruction decoding' }
 SWStackAnalyzer >> doDup [
-	self stack push: self stack top.
+	|top|
+	top := self stack top.
+	self stack push: top.
+	(self tempStore push: top) ifTrue: [
+		self addLocalVariable: top
+	].
 	super doDup.
 
 ]
@@ -418,6 +424,22 @@ SWStackAnalyzer >> storeIntoTemporaryVariable: offset [
 	left << right.
 
 	super storeIntoTemporaryVariable: offset
+]
+
+{ #category : #accessing }
+SWStackAnalyzer >> tempStore [
+
+	^ tempStore ifNil: [
+		tempStore := SWTempStore new
+			method: self method;
+			yourself
+	]
+]
+
+{ #category : #accessing }
+SWStackAnalyzer >> tempStore: anObject [
+
+	tempStore := anObject
 ]
 
 { #category : #'instruction decoding' }

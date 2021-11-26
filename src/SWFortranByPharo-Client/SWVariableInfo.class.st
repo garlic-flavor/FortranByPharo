@@ -15,9 +15,6 @@ Class {
 		'assignCounter',
 		'priority'
 	],
-	#classVars : [
-		'temporalVariableName'
-	],
 	#category : #'SWFortranByPharo-Client-Analyzer'
 }
 
@@ -29,49 +26,19 @@ SWVariableInfo class >> named: aName typed: aType [
 		yourself
 ]
 
-{ #category : #generating }
-SWVariableInfo class >> newTemporalVariableNameIn: aDict [
-	self nextTemporalVariableName.
-	^ (aDict includesKey: temporalVariableName) ifTrue: [
-		self newTemporalVariableNameIn: aDict
-	] ifFalse: [
-		temporalVariableName
-	]
-]
-
-{ #category : #generating }
-SWVariableInfo class >> nextTemporalVariableName [
-	^ temporalVariableName := self nextTemporalVariableNameOf: temporalVariableName 
-]
-
-{ #category : #generating }
+{ #category : #'as yet unclassified' }
 SWVariableInfo class >> nextTemporalVariableNameOf: prevName [
-	^ prevName ifNil: [
+	^ prevName isEmptyOrNil ifTrue: [
 		'a'
-	] ifNotNil: [|carryOver next|
-		carryOver := 1.
-		next := prevName collect: [ :each ||n|
-			n := Character value: each charCode + carryOver.
-			(n between: $a and: $z) ifTrue: [ 
-				carryOver := 0.
-				n
-			] ifFalse: [
-				carryOver := 1.
-				$a
-			].
-		].
-		0 = carryOver ifTrue: [
-			next
-		] ifFalse: [ 
-			next, 'a'
+	] ifFalse: [|counter|
+		counter := prevName last.
+		counter := Character value: counter charCode + 1.
+		(counter between: $a and: $z) ifTrue: [
+			(prevName copyFrom: 1 to: prevName size - 1), counter asString
+		] ifFalse: [
+			(self nextTemporalVariableNameOf: (prevName copyFrom: 1 to: prevName size - 1)), 'a'
 		]
-	]
-]
-
-{ #category : #initialization }
-SWVariableInfo class >> resetTemporalVariableName [
-	<script>
-	temporalVariableName := nil
+	].
 ]
 
 { #category : #'accumulator ops' }

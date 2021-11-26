@@ -20,6 +20,11 @@ SWStack class >> newFrom: anArray [
 	^ s
 ]
 
+{ #category : #converting }
+SWStack >> asArray [
+	^ self payload asArray
+]
+
 { #category : #accessing }
 SWStack >> at: index [
 	"index is 1 based.".
@@ -74,6 +79,11 @@ SWStack >> pop: itemsCount [
 { #category : #adding }
 SWStack >> push: anObject [
 	^ self payload addLast: anObject.
+]
+
+{ #category : #'as yet unclassified' }
+SWStack >> push: anObject afterIndex: idx [
+	^ self payload add: anObject afterIndex: (idx + 1)
 ]
 
 { #category : #accessing }

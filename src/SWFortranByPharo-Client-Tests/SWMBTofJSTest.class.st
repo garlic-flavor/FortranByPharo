@@ -9,7 +9,7 @@ Class {
 
 { #category : #'tests - source' }
 SWMBTofJSTest >> program_01 [
-	Transcript show: 'Hello, world!'; cr
+	Transcript show: 'Hello, world!'; cr; cr
 ]
 
 { #category : #tests }

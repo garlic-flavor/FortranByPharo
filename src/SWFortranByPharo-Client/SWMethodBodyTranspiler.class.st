@@ -68,6 +68,11 @@ SWMethodBodyTranspiler >> classClassOf: receiver [
 	self halt.
 ]
 
+{ #category : #'code generation' }
+SWMethodBodyTranspiler >> cr [
+	self stream putLine
+]
+
 { #category : #'private - code generation' }
 SWMethodBodyTranspiler >> decMessageNest [
 	messageNest push: { 0. messageNest pop - 1 } max.
@@ -171,27 +176,19 @@ SWMethodBodyTranspiler >> putAssignTo: key with: value [
 
 { #category : #'code generation' }
 SWMethodBodyTranspiler >> putCascade: aRBCascadeNode [
-	|msg block seq tmp|
+	|seq tmp|
 	tmp := RBVariableNode new
-		name: 'tmp';
+		name: self tempStore pop name;
 		yourself.
 	seq := RBSequenceNode new
+		addNode: (RBAssignmentNode variable: tmp value: aRBCascadeNode leftmostChainReceiver );
 		addNodes: (aRBCascadeNode messages collect: [:each |
-			each copy receiver: tmp; yourself
+			each copy
+				receiver: tmp;
+				yourself
 		]);
 		yourself.
-
-	block := RBBlockNode new
-		arguments: { tmp };
-		body: seq;
-		yourself.
-	msg := RBMessageNode new
-		receiver: block;
-		selector: #value:;
-		arguments: { aRBCascadeNode receiver copy };
-		yourself.
-
-	msg transpileUsing: self.
+	self putSequence: seq.
 
 ]
 
@@ -288,6 +285,13 @@ SWMethodBodyTranspiler >> putReturn: value [
 ]
 
 { #category : #'code generation' }
+SWMethodBodyTranspiler >> putSequence: aSequence [
+	aSequence statements do: [ :each |
+		self putStatement: each
+	]
+]
+
+{ #category : #'code generation' }
 SWMethodBodyTranspiler >> putStatement: aStatement [
 	^ self subclassResponsibility 
 ]
@@ -305,6 +309,11 @@ SWMethodBodyTranspiler >> putString: aString [
 SWMethodBodyTranspiler >> putVariable: aVariableNode [
 	self stream log: aVariableNode name.
 	self put: aVariableNode name
+]
+
+{ #category : #'code generation' }
+SWMethodBodyTranspiler >> putVariableDeclarationOf: aVariableInfo [
+	^ self subclassResponsibility 
 ]
 
 { #category : #'private - code generation' }
@@ -336,7 +345,8 @@ SWMethodBodyTranspiler >> stream: anObject [
 SWMethodBodyTranspiler >> transpile [
 	self decoded.
 	self stream log.
-	self method sourceNode body statements do: [ :each | each transpileUsing: self ].
+	self withTempsDo: [ :each | self putVariableDeclarationOf: each ].
+	self putSequence: self method sourceNode body.
 	^ self stream contents
 ]
 

@@ -105,7 +105,7 @@ SWTranspilerStream >> putLine [
 	preventNewline
 		ifTrue: [ preventNewline := false ]
 		ifFalse: [
-			payload << newline.
+			payload << self newline.
 			isNewline := true.
 		].
 
@@ -121,7 +121,7 @@ SWTranspilerStream >> putLine: code [
 { #category : #accessing }
 SWTranspilerStream >> tabWidth [
 
-	^ tabWidth
+	^ tabWidth ifNil: [ tabWidth := 4 ]
 ]
 
 { #category : #accessing }

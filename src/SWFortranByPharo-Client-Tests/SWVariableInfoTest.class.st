@@ -17,4 +17,5 @@ SWVariableInfoTest >> testNextTemporalVariableNameOf [
 		self deny: (dict includes: name).
 		dict add: name
 	].
+
 ]

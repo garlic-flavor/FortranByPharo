@@ -24,25 +24,30 @@ SWStackTest >> setUp [
 
 { #category : #tests }
 SWStackTest >> testAt [
-	self assert: (stack at: -1) equals: 1.
-	self assert: (stack at: 0) equals: 2.
-	self assert: (stack at: 2) equals: 4.
-	self assert: (stack at: 3) equals: nil.
-	self assert: (stack at: -2) equals: nil.
+	self assert: (stack at: 0) equals: 1.
+	self assert: (stack at: 1) equals: 2.
+	self assert: (stack at: 3) equals: 4.
+	self assert: (stack at: 4) equals: nil.
+	self assert: (stack at: -1) equals: nil.
 ]
 
 { #category : #tests }
 SWStackTest >> testPop [
 	stack pop.
-	self assert: stack asOrderedCollection equals: { 1. 2. 3 } asOrderedCollection.
-	self assert: (stack pop: 2) equals: { 2. 3 } asOrderedCollection.
+	self assert: stack asArray equals: { 1. 2. 3 } asArray.
+	self assert: (stack pop: 2) asArray equals: { 2. 3 }.
 	
 ]
 
 { #category : #tests }
 SWStackTest >> testPush [
 	stack push: 5.
-	self assert: stack asOrderedCollection equals: { 1. 2. 3. 4. 5 } asOrderedCollection 
+	self assert: stack asArray equals: { 1. 2. 3. 4. 5 }
+]
+
+{ #category : #tests }
+SWStackTest >> testPushAfterIndex [
+	self assert: (stack push: 99 afterIndex: 2; asArray) equals: { 1. 2. 3. 99. 4 }
 ]
 
 { #category : #tests }
