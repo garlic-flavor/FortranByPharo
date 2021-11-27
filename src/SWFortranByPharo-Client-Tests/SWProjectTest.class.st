@@ -16,7 +16,7 @@ SWProjectTest >> setUp [
 	super setUp.
 	SWServer start.
 	client := SWClientView new.
-	project := SWProject new
+	project := SWProjectOld new
 		programs: { SWTestHelloWorld new  };
 		client: client;
 		yourself.

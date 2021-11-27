@@ -3,7 +3,7 @@ I represent a Project of fortran.
 "
 Class {
 	#name : #SWProjectOfFortran,
-	#superclass : #SWProject,
+	#superclass : #SWProjectOld,
 	#instVars : [
 		'objs',
 		'exeName'
@@ -61,7 +61,7 @@ SWProjectOfFortran >> exeName: anObject [
 SWProjectOfFortran >> go [
 	|aSource make|
 	aSource := self pool get: self moduleName.
-	make := SWSource new
+	make := SWSourceOld new
 		type: #mak;
 		moduleName: self moduleName;
 		contents: (SWTranspilerOfMake new

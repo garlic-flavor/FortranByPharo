@@ -3,7 +3,7 @@ I have imformations about a Project that can be run with NodeJs.
 "
 Class {
 	#name : #SWProjectOfJs,
-	#superclass : #SWProject,
+	#superclass : #SWProjectOld,
 	#category : #'SWFortranByPharo-Client-Client'
 }
 

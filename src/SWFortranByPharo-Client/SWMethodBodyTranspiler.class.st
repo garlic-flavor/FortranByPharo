@@ -7,7 +7,8 @@ Class {
 	#instVars : [
 		'stream',
 		'type',
-		'messageNest'
+		'messageNest',
+		'dependencies'
 	],
 	#category : #'SWFortranByPharo-Client-Transpiler'
 }
@@ -15,19 +16,6 @@ Class {
 { #category : #utils }
 SWMethodBodyTranspiler class >> messageTranspilerMethodNameFor: aSelector [
 	^ ((self safeSelectorNameOf: aSelector), 'For:With:') asSymbol
-]
-
-{ #category : #utils }
-SWMethodBodyTranspiler class >> safeSelectorNameOf: selector [
-	selector = '=' ifTrue: [ ^ 'opEqual_' ].
-	selector = '~=' ifTrue: [ ^ 'opNotEqual_' ].
-	selector = ',' ifTrue: [ ^ 'opCamma_' ].
-	selector = '->' ifTrue: [ ^ 'opArrow_' ].
-	selector = '/' ifTrue: [ ^ 'opDiv_' ].
-	selector = '<<' ifTrue: [ ^ 'opWrite_' ].
-	selector = '+' ifTrue: [ ^ 'opPlus_' ].
-	^ selector collect: [:c | (#' >#:/' anySatisfy: [ :each | each = c]) ifTrue: [ $_ ] ifFalse: [ c ] ]
-
 ]
 
 { #category : #utils }
@@ -78,6 +66,18 @@ SWMethodBodyTranspiler >> decMessageNest [
 	messageNest push: { 0. messageNest pop - 1 } max.
 	0 < messageNest top ifTrue: [ self put: ')' ].
 
+]
+
+{ #category : #accessing }
+SWMethodBodyTranspiler >> dependencies [
+
+	^ dependencies ifNil: [ dependencies := Set new ]
+]
+
+{ #category : #accessing }
+SWMethodBodyTranspiler >> dependencies: anObject [
+
+	dependencies := anObject
 ]
 
 { #category : #'private - testing' }
@@ -293,6 +293,16 @@ SWMethodBodyTranspiler >> putSequence: aSequence [
 
 { #category : #'code generation' }
 SWMethodBodyTranspiler >> putStatement: aStatement [
+	self << aStatement.
+	aStatement class = RBCascadeNode ifTrue: [ ^ self ].
+	self
+		putStatementDelimiter;
+		cr
+
+]
+
+{ #category : #'code generation' }
+SWMethodBodyTranspiler >> putStatementDelimiter [
 	^ self subclassResponsibility 
 ]
 
@@ -345,7 +355,7 @@ SWMethodBodyTranspiler >> stream: anObject [
 SWMethodBodyTranspiler >> transpile [
 	self decoded.
 	self stream log.
-	self withTempsDo: [ :each | self putVariableDeclarationOf: each ].
+	self locals do: [ :each | self putVariableDeclarationOf: each ].
 	self putSequence: self method sourceNode body.
 	^ self stream contents
 ]

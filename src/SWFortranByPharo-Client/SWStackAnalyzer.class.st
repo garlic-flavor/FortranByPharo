@@ -35,16 +35,10 @@ SWStackAnalyzer class >> decode: selector types: types [
 
 { #category : #decoding }
 SWStackAnalyzer class >> decode: selector types: types sendStack: ss [
-	^ self definedMethods at: selector ifPresent: [ :dm |
-		dm value: selector value: types
-	] ifAbsent: [
-		self new
-			method: (self search: selector in: types first);
-			types: types;
-			sendStack: ss;
-			decoded;
-			yourself
-	]
+	^ (self new: selector types: types)
+		sendStack: ss;
+		decoded;
+		yourself
 
 ]
 
@@ -96,6 +90,16 @@ SWStackAnalyzer class >> install_new [
 { #category : #initialization }
 SWStackAnalyzer class >> install_sub [
 	^ #- -> self binaryOpInfo
+]
+
+{ #category : #'instance creation' }
+SWStackAnalyzer class >> new: selector types: types [
+	^ self definedMethods at: selector ifPresent: [ :dm |
+		dm value: selector value: types
+	] ifAbsent: [
+		super new: selector types: types
+	]
+
 ]
 
 { #category : #private }

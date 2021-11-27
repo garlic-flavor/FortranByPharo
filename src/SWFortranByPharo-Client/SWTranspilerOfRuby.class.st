@@ -474,7 +474,7 @@ SWTranspilerOfRuby >> putRequirements [
 				dependence isString ifTrue: [
 					self put: 'require '''; put: dependence; putLine: ''''
 				] ifFalse: [|dep|
-					dep := SWSource new
+					dep := SWSourceOld new
 						classes: { dependence };
 						type: self type;
 						client: self client;

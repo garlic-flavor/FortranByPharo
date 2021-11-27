@@ -18,6 +18,11 @@ Class {
 	#category : #'SWFortranByPharo-Client-Analyzer'
 }
 
+{ #category : #private }
+SWVariableInfo class >> mangledTypeNameOf: aType [
+	^ aType name select: [ :c | c isUppercase ] thenCollect: [ :c | c asLowercase ].
+]
+
 { #category : #initialization }
 SWVariableInfo class >> named: aName typed: aType [
 	^ self new
@@ -110,6 +115,11 @@ SWVariableInfo >> initializer: anObject [
 { #category : #testing }
 SWVariableInfo >> isReceiver [
 	^ self stackPos = 0
+]
+
+{ #category : #accessing }
+SWVariableInfo >> mangledTypeName [
+	^ self class mangledTypeNameOf: self type
 ]
 
 { #category : #accessing }

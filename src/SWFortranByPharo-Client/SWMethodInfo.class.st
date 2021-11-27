@@ -31,11 +31,33 @@ SWMethodInfo class >> mangledTypeNameOf: aType [
 	^ #_
 ]
 
+{ #category : #decoding }
+SWMethodInfo class >> new: selector types: types [
+	^ self new
+		method: (self search: selector in: types first);
+		types: types;
+		yourself
+
+]
+
 { #category : #'instance creation' }
 SWMethodInfo class >> newWith: method [
 	^ self new
 		method: method;
 		yourself
+]
+
+{ #category : #utils }
+SWMethodInfo class >> safeSelectorNameOf: selector [
+	selector = '=' ifTrue: [ ^ 'opEqual_' ].
+	selector = '~=' ifTrue: [ ^ 'opNotEqual_' ].
+	selector = ',' ifTrue: [ ^ 'opCamma_' ].
+	selector = '->' ifTrue: [ ^ 'opArrow_' ].
+	selector = '/' ifTrue: [ ^ 'opDiv_' ].
+	selector = '<<' ifTrue: [ ^ 'opWrite_' ].
+	selector = '+' ifTrue: [ ^ 'opPlus_' ].
+	^ selector collect: [:c | (#' >#:/' anySatisfy: [ :each | each = c]) ifTrue: [ $_ ] ifFalse: [ c ] ]
+
 ]
 
 { #category : #utils }
@@ -49,11 +71,28 @@ SWMethodInfo class >> search: selector in: aClass [
 	]
 ]
 
+{ #category : #comparing }
+SWMethodInfo >> = right [
+	self method = right method ifFalse: [ ^ false ].
+	self arguments with: right arguments do: [ :l :r | l type = r type ifFalse: [ ^ false ] ].
+	^ true
+]
+
 { #category : #adding }
 SWMethodInfo >> addLocalVariable: aVariableInfo [
 	self stack push: aVariableInfo afterIndex: self numTemps.
 	self numTemps: self numTemps + 1.
 	aVariableInfo stackPos: self numTemps.
+]
+
+{ #category : #accessing }
+SWMethodInfo >> allTemps [
+	^ self stack copyFrom: 1 to: self numTemps
+]
+
+{ #category : #accessing }
+SWMethodInfo >> arguments [
+	^ self stack copyFrom: 1 to: self method numArgs
 ]
 
 { #category : #accessing }
@@ -73,10 +112,22 @@ SWMethodInfo >> hasExplicitReturn [
 	^ self  return stackPos ~= -1
 ]
 
+{ #category : #comparing }
+SWMethodInfo >> hash [
+	^ OrderedCollection new
+		add: self method hash;
+		addAll: (self arguments collect: [ :each | each type hash ]);
+		hash
+
+]
+
+{ #category : #accessing }
+SWMethodInfo >> locals [
+	^ self stack copyFrom: self method numArgs + 1 to: self numTemps
+]
+
 { #category : #accessing }
 SWMethodInfo >> mangledName [
-	self halt.
-	self flag: #toImplement.
 	^ mangledName ifNil: [ mangledName := String streamContents: [ : s ||owner|
 		owner := self method methodClass.
 		owner class = Metaclass ifTrue: [ 
@@ -84,10 +135,14 @@ SWMethodInfo >> mangledName [
 		] ifFalse: [
 			s << owner name; << '_'
 		].
-		s << self method selector; << (self const ifTrue: ['C'] ifFalse: ['_']).
-		self variables from: 1 to: self method numArgs do: [ :var |
-			self class mangledTypeNameOf: var value class
-		]
+"
+		(self const ifTrue: ['C'] ifFalse: ['_']).
+"
+		s
+			<< (self class safeSelectorNameOf: self method selector);
+			<< (self arguments collect: [ :v |
+				v mangledTypeName
+			])
 	] ]
 ]
 
@@ -176,9 +231,4 @@ SWMethodInfo >> variableInfoOf: aName [
 	] ifNone: [
 		self classInfo variableInfoOf: aName
 	]
-]
-
-{ #category : #enumerating }
-SWMethodInfo >> withTempsDo: aBlock [
-	(self stack copyFrom: 1 to: self numTemps) do: aBlock
 ]

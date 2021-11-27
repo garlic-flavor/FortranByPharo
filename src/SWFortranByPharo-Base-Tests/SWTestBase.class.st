@@ -81,7 +81,7 @@ SWTestBase >> ready [
 
 { #category : #'code generation - accessing' }
 SWTestBase >> ready: aModuleName [
-	project :=( SWProject of: self type)
+	project :=( SWProjectOld of: self type)
 			moduleName: aModuleName;
 			yourself.
 	^ self

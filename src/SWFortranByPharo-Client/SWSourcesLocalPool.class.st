@@ -28,7 +28,7 @@ SWSourcesLocalPool >> get: aModuleName [
 { #category : #'as yet unclassified' }
 SWSourcesLocalPool >> get: aModuleName withTranspilerMethodOf: aMethod [
 	^ self sources at: aModuleName ifAbsentPut: [|source transpiler|
-			source := SWSource new
+			source := SWSourceOld new
 				type: self type;
 				classes: { Smalltalk globals at: aModuleName };
 				yourself.

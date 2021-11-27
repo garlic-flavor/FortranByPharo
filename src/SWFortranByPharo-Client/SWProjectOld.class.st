@@ -4,7 +4,7 @@ SWProject>>#go runs the project on the server.
 SWProject>>#goDomestic runs the project inside this Pharo image.
 "
 Class {
-	#name : #SWProject,
+	#name : #SWProjectOld,
 	#superclass : #Object,
 	#instVars : [
 		'client',
@@ -17,7 +17,7 @@ Class {
 }
 
 { #category : #'instance creation' }
-SWProject class >> of: type [
+SWProjectOld class >> of: type [
 	type = #mjs ifTrue: [ 
 		^ SWProjectOfJs new	
 	].
@@ -29,37 +29,37 @@ SWProject class >> of: type [
 ]
 
 { #category : #accessing }
-SWProject >> args [
+SWProjectOld >> args [
 
 	^ args ifNil: [ args := {  } ]
 ]
 
 { #category : #accessing }
-SWProject >> args: anObject [
+SWProjectOld >> args: anObject [
 
 	args := anObject
 ]
 
 { #category : #accessing }
-SWProject >> client [
+SWProjectOld >> client [
 
 	^ client ifNil: [ client := SWClient new ]
 ]
 
 { #category : #accessing }
-SWProject >> client: anObject [
+SWProjectOld >> client: anObject [
 
 	client := anObject
 ]
 
 { #category : #running }
-SWProject >> go [
+SWProjectOld >> go [
 	^ self subclassResponsibility.
 
 ]
 
 { #category : #running }
-SWProject >> goDomestic [
+SWProjectOld >> goDomestic [
 	|aClass|
 	aClass := (Smalltalk globals at: self moduleName) ifNil: [ 
 		(self pool get: self moduleName) programClass
@@ -70,25 +70,25 @@ SWProject >> goDomestic [
 ]
 
 { #category : #initialization }
-SWProject >> initialize [
+SWProjectOld >> initialize [
 	super initialize.
 
 ]
 
 { #category : #accessing }
-SWProject >> moduleName [
+SWProjectOld >> moduleName [
 
 	^ moduleName
 ]
 
 { #category : #accessing }
-SWProject >> moduleName: anObject [
+SWProjectOld >> moduleName: anObject [
 
 	moduleName := anObject
 ]
 
 { #category : #accessing }
-SWProject >> pool [
+SWProjectOld >> pool [
 
 	^ pool ifNil: [
 		pool := SWSourcesPool new
@@ -99,18 +99,18 @@ SWProject >> pool [
 ]
 
 { #category : #accessing }
-SWProject >> pool: anObject [
+SWProjectOld >> pool: anObject [
 
 	pool := anObject
 ]
 
 { #category : #accessing }
-SWProject >> type [
+SWProjectOld >> type [
 
 	^ type
 ]
 
 { #category : #accessing }
-SWProject >> type: aType [
+SWProjectOld >> type: aType [
 	type := aType
 ]

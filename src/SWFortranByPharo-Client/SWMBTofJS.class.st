@@ -8,13 +8,11 @@ Class {
 }
 
 { #category : #'code generation' }
-SWMBTofJS >> putStatement: aStatement [.
-	self << aStatement.
-	self put: ';'.
-	self stream putLine.
+SWMBTofJS >> putStatementDelimiter [
+	self put: ';'
 ]
 
-{ #category : #'as yet unclassified' }
+{ #category : #'code generation' }
 SWMBTofJS >> putVariableDeclarationOf: aVariableInfo [
 	self
 		put: 'var ';

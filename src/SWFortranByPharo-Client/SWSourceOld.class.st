@@ -2,7 +2,7 @@
 This corresponds to a file on server side.
 "
 Class {
-	#name : #SWSource,
+	#name : #SWSourceOld,
 	#superclass : #Object,
 	#instVars : [
 		'classes',
@@ -18,19 +18,19 @@ Class {
 }
 
 { #category : #accessing }
-SWSource >> classes [
+SWSourceOld >> classes [
 
 	^ classes
 ]
 
 { #category : #accessing }
-SWSource >> classes: anObject [
+SWSourceOld >> classes: anObject [
 
 	classes := anObject
 ]
 
 { #category : #accessing }
-SWSource >> contents [
+SWSourceOld >> contents [
 
 	^ contents ifNil: [
 		self error: 'I need be set a contents.'
@@ -38,13 +38,13 @@ SWSource >> contents [
 ]
 
 { #category : #accessing }
-SWSource >> contents: anObject [
+SWSourceOld >> contents: anObject [
 
 	contents := anObject
 ]
 
 { #category : #accessing }
-SWSource >> contentsHash [
+SWSourceOld >> contentsHash [
 
 	^ contentsHash ifNil: [
 		contentsHash := (SHA256 hashMessage: self contents) hex
@@ -52,19 +52,19 @@ SWSource >> contentsHash [
 ]
 
 { #category : #accessing }
-SWSource >> contentsHash: anObject [
+SWSourceOld >> contentsHash: anObject [
 
 	contentsHash := anObject
 ]
 
 { #category : #accessing }
-SWSource >> dirName [
+SWSourceOld >> dirName [
 	^  'cache'
 
 ]
 
 { #category : #accessing }
-SWSource >> filename [
+SWSourceOld >> filename [
 
 	^ filename ifNil: [
 		filename := String streamContents: [:s |
@@ -77,25 +77,25 @@ SWSource >> filename [
 ]
 
 { #category : #accessing }
-SWSource >> filename: anObject [
+SWSourceOld >> filename: anObject [
 
 	filename := anObject
 ]
 
 { #category : #accessing }
-SWSource >> firstClass [
+SWSourceOld >> firstClass [
 	^ firstClass ifNil: [
 		firstClass := self programClass ifNil: [ self classes first ]
 	]
 ]
 
 { #category : #accessing }
-SWSource >> firstClass: anObject [
+SWSourceOld >> firstClass: anObject [
 	firstClass := anObject
 ]
 
 { #category : #accessing }
-SWSource >> moduleName [
+SWSourceOld >> moduleName [
 	^ moduleName ifNil: [
 		moduleName := (self firstClass respondsTo: #moduleName) ifTrue: [
 			self firstClass moduleName
@@ -107,13 +107,13 @@ SWSource >> moduleName [
 ]
 
 { #category : #accessing }
-SWSource >> moduleName: anObject [
+SWSourceOld >> moduleName: anObject [
 
 	moduleName := anObject
 ]
 
 { #category : #accessing }
-SWSource >> programClass [
+SWSourceOld >> programClass [
 
 	^ programClass ifNil: [
 		programClass := self classes detect: [ :aClass |
@@ -123,13 +123,13 @@ SWSource >> programClass [
 ]
 
 { #category : #accessing }
-SWSource >> type [
+SWSourceOld >> type [
 
 	^ type
 ]
 
 { #category : #accessing }
-SWSource >> type: anObject [
+SWSourceOld >> type: anObject [
 
 	type := anObject
 ]
