@@ -19,3 +19,10 @@ SWMethodInfoTest >> testEquals [
 	self assert: set size equals: 2.	
 
 ]
+
+{ #category : #test }
+SWMethodInfoTest >> testMangledName [
+
+	self assert: (SWMethodInfo new: #= types: { SWMethodInfo. SWMethodInfo }) mangledName equals: 'SWMethodInfo_opEqual_swmi'
+
+]

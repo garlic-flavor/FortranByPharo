@@ -295,10 +295,10 @@ SWTranspiler >> putLine: code [
 ]
 
 { #category : #'code generation' }
-SWTranspiler >> putMessage: receiver call: selector with: arguments [
+SWTranspiler >> putMessage: receiver send: selector with: arguments [
 	self logger log.
 	self incMessageNest.
-	super putMessage: receiver call: selector with: arguments.
+	super putMessage: receiver send: selector with: arguments.
 	self decMessageNest.
 ]
 
@@ -316,7 +316,7 @@ SWTranspiler >> putNil [
 ]
 
 { #category : #'code generation' }
-SWTranspiler >> putOrdinaryMessage: receiver call: selector with: arguments [
+SWTranspiler >> putOrdinaryMessage: receiver send: selector with: arguments [
 	receiver transpileUsing: self.
 	selector first isLetter ifTrue: [
 		self putClassAccessor;

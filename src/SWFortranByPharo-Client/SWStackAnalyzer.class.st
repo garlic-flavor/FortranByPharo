@@ -42,11 +42,6 @@ SWStackAnalyzer class >> decode: selector types: types sendStack: ss [
 
 ]
 
-{ #category : #acccessing }
-SWStackAnalyzer class >> definedMethods [
-	^ definedMethods
-]
-
 { #category : #initialization }
 SWStackAnalyzer class >> initialize [
 	self installMethods
@@ -94,7 +89,7 @@ SWStackAnalyzer class >> install_sub [
 
 { #category : #'instance creation' }
 SWStackAnalyzer class >> new: selector types: types [
-	^ self definedMethods at: selector ifPresent: [ :dm |
+	^ definedMethods at: selector ifPresent: [ :dm |
 		dm value: selector value: types
 	] ifAbsent: [
 		super new: selector types: types
@@ -198,6 +193,14 @@ SWStackAnalyzer >> mergeStackTopAndSecond [
 
 ]
 
+{ #category : #protected }
+SWStackAnalyzer >> methodInfoOf: selector super: supered args: args [
+	|aTypes|
+	aTypes := args collect: [ :each | each type ].
+	supered ifTrue: [ aTypes first: aTypes first superclass ].
+	^ self class decode: selector types: aTypes sendStack: self sendStack
+]
+
 { #category : #'instruction decoding' }
 SWStackAnalyzer >> methodReturnConstant: value [
 	self halt.
@@ -253,7 +256,7 @@ SWStackAnalyzer >> popIntoTemporaryVariable: offset [
 
 ]
 
-{ #category : #'private - accessing' }
+{ #category : #private }
 SWStackAnalyzer >> popSendStack: aMethod [
 	aMethod = self sendStack pop ifFalse: [
 		Exception signal: ('A stacking mismatch was detected: ', aMethod)
@@ -317,9 +320,7 @@ SWStackAnalyzer >> pushFullClosure: lit numCopies: numCopied receiverOnStack: rc
 { #category : #'instruction decoding' }
 SWStackAnalyzer >> pushLiteralVariable: anAssociation [
 	self stack push: (SWVariableInfo new
-		type: (anAssociation key
-			ifNil: [ anAssociation value class ]
-			ifNotNil: [anAssociation value ]);
+		type:  anAssociation value class;
 		yourself).
 
 	super pushLiteralVariable: anAssociation.
@@ -368,7 +369,7 @@ SWStackAnalyzer >> pushTemporaryVariable:  offset [
 
 ]
 
-{ #category : #'private - accessing' }
+{ #category : #private }
 SWStackAnalyzer >> pushToSendStack: aMethod [
 	(self sendStack anySatisfy: [ :each | each = aMethod ]) ifTrue: [
 		Exception signal: 'A circular referencing detected: '. aMethod
@@ -377,18 +378,18 @@ SWStackAnalyzer >> pushToSendStack: aMethod [
 
 ]
 
+{ #category : #protected }
+SWStackAnalyzer >> returnInfoOf: selector super: supered args: args [
+	^ SWVariableInfo new
+		initializer: [	(self methodInfoOf: selector super: supered args: args) return type ];
+		yourself
+]
+
 { #category : #'instruction decoding' }
 SWStackAnalyzer >> send: selector super: supered numArgs: numberArguments [
 	|args|
 	args := self stack pop: numberArguments + 1.
-	self stack push: (SWVariableInfo new
-		initializer: [|aTypes|
-			aTypes := args collect: [ :each | each type ].
-			supered ifTrue: [ aTypes first: aTypes first superclass ].
-			(self class decode: selector types: aTypes sendStack: self sendStack) return type
-		];
-		yourself
-	).
+	self stack push: (self returnInfoOf: selector super: supered args: args).
 	
 	super send: selector super: supered numArgs: numberArguments.
 
@@ -396,7 +397,7 @@ SWStackAnalyzer >> send: selector super: supered numArgs: numberArguments [
 
 { #category : #'private - accessing' }
 SWStackAnalyzer >> sendStack [
-
+	"To detect circular referencing."
 	^ sendStack ifNil: [ sendStack := Stack new ]
 ]
 

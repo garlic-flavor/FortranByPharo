@@ -33,3 +33,8 @@ SWFStd class >> f90_print_With: arguments Using: transpiler [
 SWFStd class >> print: msg [
 	Transcript show: msg; cr.
 ]
+
+{ #category : #'as yet unclassified' }
+SWFStd class >> toTranspile [
+	^ #module
+]

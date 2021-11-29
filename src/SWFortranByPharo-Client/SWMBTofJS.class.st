@@ -7,6 +7,11 @@ Class {
 	#category : #'SWFortranByPharo-Client-Transpiler'
 }
 
+{ #category : #accessing }
+SWMBTofJS >> mangledName [
+	^ self class safeSelectorNameOf: self method selector
+]
+
 { #category : #'code generation' }
 SWMBTofJS >> putStatementDelimiter [
 	self put: ';'

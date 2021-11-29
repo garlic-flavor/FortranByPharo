@@ -7,9 +7,19 @@ Class {
 	#category : #'SWFortranByPharo-Client-Tests-Transpiler'
 }
 
+{ #category : #'as yet unclassified' }
+SWMBTofJSTest class >> toTranspile [
+	^ #program
+]
+
 { #category : #'tests - source' }
 SWMBTofJSTest >> program_01 [
 	Transcript show: 'Hello, world!'; cr; cr
+]
+
+{ #category : #'as yet unclassified' }
+SWMBTofJSTest >> program_02 [
+	SWFStd print: 'Hello, World!'
 ]
 
 { #category : #tests }

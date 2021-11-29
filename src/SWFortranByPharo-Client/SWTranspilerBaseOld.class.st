@@ -79,7 +79,7 @@ SWTranspilerBaseOld >> methodBodyGeneratorNameOf: aMethod [
 ]
 
 { #category : #'code generation - protected' }
-SWTranspilerBaseOld >> putMessage: receiver call: selector with: arguments [
+SWTranspilerBaseOld >> putMessage: receiver send: selector with: arguments [
 	self logger log: [receiver asString, '>>', selector asString].
 	self ifUniqueMessageTranspilerExistsOn: receiver of: selector thenDo: [ :receiverClass :selectorName |
 		^ receiverClass perform: selectorName with: arguments with: self
@@ -87,12 +87,12 @@ SWTranspilerBaseOld >> putMessage: receiver call: selector with: arguments [
 	self hasDomainSpecificTranspilerOf: selector ifTrue: [ :dst |
 		^ self perform: dst with: receiver with: arguments
 	].
-	^ self putOrdinaryMessage: receiver call: selector with: arguments.
+	^ self putOrdinaryMessage: receiver send: selector with: arguments.
 
 ]
 
 { #category : #'code generation - protected' }
-SWTranspilerBaseOld >> putOrdinaryMessage: receiver call: selector with: arguments [
+SWTranspilerBaseOld >> putOrdinaryMessage: receiver send: selector with: arguments [
 	^ self subclassResponsibility 
 ]
 

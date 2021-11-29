@@ -154,7 +154,7 @@ SWTranspilerOfFortran >> putMethod: methodInfo [
 ]
 
 { #category : #'code generation' }
-SWTranspilerOfFortran >> putOrdinaryMessage: receiver call: selector with: arguments [
+SWTranspilerOfFortran >> putOrdinaryMessage: receiver send: selector with: arguments [
 	| receiverClass mangledName argumentTypes methodInfo selectorName |
 	self logger log.
 	selectorName := self class safeSelectorNameOf: selector.

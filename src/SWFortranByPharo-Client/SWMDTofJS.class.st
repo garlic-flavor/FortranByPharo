@@ -12,13 +12,13 @@ SWMDTofJS class >> methodBodyTranspilerClass [
 	^ SWMBTofJS
 ]
 
-{ #category : #'public API' }
+{ #category : #'code generation' }
 SWMDTofJS >> putFunctionFooter [
 	self stream putLine: '}'.
 
 ]
 
-{ #category : #'public API' }
+{ #category : #'code generation' }
 SWMDTofJS >> putFunctionHeader [
 	self stream
 		put: 'function ';

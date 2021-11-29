@@ -39,17 +39,17 @@ SWMethodDefinitionTranspiler >> bodyTranspiler: anObject [
 	bodyTranspiler := anObject
 ]
 
-{ #category : #accessing }
+{ #category : #'public API' }
 SWMethodDefinitionTranspiler >> logging: trueOrFalse [
 	self stream logging: trueOrFalse
 ]
 
-{ #category : #'as yet unclassified' }
+{ #category : #'code generation' }
 SWMethodDefinitionTranspiler >> putFunctionFooter [
 	^ self subclassResponsibility 
 ]
 
-{ #category : #'as yet unclassified' }
+{ #category : #'code generation' }
 SWMethodDefinitionTranspiler >> putFunctionHeader [
 	^ self subclassResponsibility 
 ]

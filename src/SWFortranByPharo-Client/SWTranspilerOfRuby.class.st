@@ -81,7 +81,7 @@ SWTranspilerOfRuby >> at_put_For: receiver With: arguments [
 
 { #category : #'as yet unclassified' }
 SWTranspilerOfRuby >> beginsWith_For: receiver With: arguments [
-	self putMessage: receiver call: 'start_with?' with: arguments
+	self putMessage: receiver send: 'start_with?' with: arguments
 ]
 
 { #category : #'as yet unclassified' }
@@ -118,7 +118,7 @@ SWTranspilerOfRuby >> copyReplaceAll_with_For: receiver With: arguments [
 SWTranspilerOfRuby >> descriptionFor: receiver With: arguments [
 	self
 		pushMessageNest;	
-		putMessage: receiver call: 'message' with: arguments;
+		putMessage: receiver send: 'message' with: arguments;
 		popMessageNest
 ]
 
@@ -241,7 +241,7 @@ SWTranspilerOfRuby >> initialize [
 SWTranspilerOfRuby >> join_For: receiver With: arguments [
 	self
 		pushMessageNest;
-		putMessage: (arguments at: 1) call: 'join' with: { receiver };
+		putMessage: (arguments at: 1) send: 'join' with: { receiver };
 		popMessageNest
 ]
 
@@ -298,7 +298,7 @@ SWTranspilerOfRuby >> opNotEqual_For: receiver With: arguments [
 SWTranspilerOfRuby >> perform_For: receiver With: arguments [
 	self
 		pushMessageNest;
-		putMessage: receiver call: 'send' with: arguments;
+		putMessage: receiver send: 'send' with: arguments;
 		popMessageNest.
 ]
 
@@ -426,11 +426,11 @@ SWTranspilerOfRuby >> putMainProgram [
 ]
 
 { #category : #'as yet unclassified' }
-SWTranspilerOfRuby >> putMessage: receiver call: selector with: arguments [
+SWTranspilerOfRuby >> putMessage: receiver send: selector with: arguments [
 	((receiver respondsTo: #name) and: [receiver name = 'super']) ifTrue: [
 		^ self putFunctionCallOf: 'super' with: arguments
 	].
-	^ super putMessage: receiver call: selector with: arguments
+	^ super putMessage: receiver send: selector with: arguments
 ]
 
 { #category : #'as yet unclassified' }

@@ -86,7 +86,7 @@ SWTranspilerOfJs >> at_put_For: receiver With: arguments [
 { #category : #'code generation - domain specific' }
 SWTranspilerOfJs >> beginsWith_For: receiver With: arguments [
 	self logger log.
-	self putMessage: receiver call: 'startsWith' with: arguments
+	self putMessage: receiver send: 'startsWith' with: arguments
 ]
 
 { #category : #'code generation - domain specific' }
@@ -101,7 +101,7 @@ SWTranspilerOfJs >> classFor: receiver With: arguments [
 SWTranspilerOfJs >> collect_For: receiver With: arguments [
 	self logger log.
 	self flag: #ToImplement.
-	self putMessage: receiver call: 'flatMap' with: arguments.
+	self putMessage: receiver send: 'flatMap' with: arguments.
 
 ]
 
@@ -133,7 +133,7 @@ SWTranspilerOfJs >> descriptionFor: receiver With: arguments [
 	self logger log.
 	self
 		pushMessageNest;	
-		putMessage: receiver call: 'message' with: arguments;
+		putMessage: receiver send: 'message' with: arguments;
 		popMessageNest
 ]
 
@@ -304,7 +304,7 @@ SWTranspilerOfJs >> join_For: receiver With: arguments [
 	self logger log.
 	self
 		pushMessageNest;
-		putMessage: (arguments at: 1) call: 'join' with: { receiver };
+		putMessage: (arguments at: 1) send: 'join' with: { receiver };
 		popMessageNest
 ]
 
@@ -396,7 +396,7 @@ SWTranspilerOfJs >> perform_For: receiver With: arguments [
 	self logger log.
 	self
 		pushMessageNest;
-		putMessage: receiver call: 'send' with: arguments;
+		putMessage: receiver send: 'send' with: arguments;
 		popMessageNest.
 ]
 
@@ -698,7 +698,7 @@ SWTranspilerOfJs >> putVariable: aVariableNode [
 
 { #category : #'code generation - domain specific' }
 SWTranspilerOfJs >> upToEndFor: receiver With: arguments [
-	self putMessage: receiver call: 'read' with: arguments
+	self putMessage: receiver send: 'read' with: arguments
 ]
 
 { #category : #'code generation - domain specific' }

@@ -3,12 +3,11 @@ I transpile a method of Pharo class.
 "
 Class {
 	#name : #SWMethodBodyTranspiler,
-	#superclass : #SWStackAnalyzer,
+	#superclass : #SWStackAnalyzerToTranspile,
 	#instVars : [
 		'stream',
 		'type',
-		'messageNest',
-		'dependencies'
+		'messageNest'
 	],
 	#category : #'SWFortranByPharo-Client-Transpiler'
 }
@@ -35,21 +34,17 @@ SWMethodBodyTranspiler >> << anObject [
 ]
 
 { #category : #'private - utilities' }
-SWMethodBodyTranspiler >> classClassOf: receiver [
+SWMethodBodyTranspiler >> classOf: receiver [
 
 	receiver class = RBLiteralValueNode ifTrue: [
-		^ receiver value class class
+		^ receiver value class
 	].
 
 	receiver class = RBVariableNode ifTrue: [
 		^ receiver name first isUppercase ifTrue: [
-			(Smalltalk globals at: receiver name) class
-		] ifFalse: [ |rType|
-			(rType := (self variableInfoOf: receiver name) type)  = Metaclass ifTrue: [
-				rType
-			] ifFalse: [
-				rType class
-			]
+			(Smalltalk globals at: receiver name)
+		] ifFalse: [
+			(self variableInfoOf: receiver name) type
 		]
 	].
 
@@ -68,18 +63,6 @@ SWMethodBodyTranspiler >> decMessageNest [
 
 ]
 
-{ #category : #accessing }
-SWMethodBodyTranspiler >> dependencies [
-
-	^ dependencies ifNil: [ dependencies := Set new ]
-]
-
-{ #category : #accessing }
-SWMethodBodyTranspiler >> dependencies: anObject [
-
-	dependencies := anObject
-]
-
 { #category : #'private - testing' }
 SWMethodBodyTranspiler >> hasOwnMessageTranspilerMethodOf: aSelector ifTrue: aBlock [
 	|otms aMethod|
@@ -96,14 +79,14 @@ SWMethodBodyTranspiler >> hasOwnMessageTranspilerMethodOf: aSelector ifTrue: aBl
 SWMethodBodyTranspiler >> ifUniqueMessageTranspilerExistsOn: receiver of: selector thenDo: aBlock [
 	| receiverClassClass selectorName transpiler |
 
-	receiverClassClass := self classClassOf: receiver.
+	receiverClassClass := self metaclassOf: receiver.
 	selectorName := self class uniqueMessageTranspilerNameFor: selector for: self type.
 	(transpiler := self class search: selectorName in: receiverClassClass) ifNotNil: [
 		aBlock value: [ :arguments |
 			transpiler valueWithReceiver: receiverClassClass arguments: { arguments. self }
 		]
 	].
-	self flag: #toImplement
+
 ]
 
 { #category : #'private - code generation' }
@@ -121,6 +104,16 @@ SWMethodBodyTranspiler >> initialize [
 { #category : #'public API' }
 SWMethodBodyTranspiler >> logging: trueOrFalse [
 	self stream logging: trueOrFalse
+]
+
+{ #category : #'private - utilities' }
+SWMethodBodyTranspiler >> metaclassOf: receiver [
+	|rType|
+	^ (rType := (self classOf: receiver))  class = Metaclass ifTrue: [
+		rType
+	] ifFalse: [
+		rType class
+	]
 ]
 
 { #category : #'code generation' }
@@ -240,15 +233,15 @@ SWMethodBodyTranspiler >> putInteger: anInteger [
 ]
 
 { #category : #'code generation' }
-SWMethodBodyTranspiler >> putMessage: receiver call: selector with: arguments [
+SWMethodBodyTranspiler >> putMessage: receiver send: selector with: arguments [
 	self stream log: [ receiver asString, ' >> ', selector asString ].
 	self incMessageNest.
-	self selectTranspilerFor: receiver call: selector with: arguments.
+	self selectTranspilerFor: receiver send: selector with: arguments.
 	self decMessageNest
 ]
 
 { #category : #'code generation' }
-SWMethodBodyTranspiler >> putOrdinaryMessage: receiver call: selector with: arguments [
+SWMethodBodyTranspiler >> putOrdinaryMessage: receiver send: selector with: arguments [
 	self stream log.
 	self << receiver.
 	selector first isLetter ifTrue: [
@@ -327,7 +320,7 @@ SWMethodBodyTranspiler >> putVariableDeclarationOf: aVariableInfo [
 ]
 
 { #category : #'private - code generation' }
-SWMethodBodyTranspiler >> selectTranspilerFor: receiver call: selector with: arguments [
+SWMethodBodyTranspiler >> selectTranspilerFor: receiver send: selector with: arguments [
 	self stream log: [ receiver asString, ' >> ', selector asString ].
 	self ifUniqueMessageTranspilerExistsOn: receiver of: selector thenDo: [ :proc |
 		^ proc value: arguments
@@ -335,7 +328,7 @@ SWMethodBodyTranspiler >> selectTranspilerFor: receiver call: selector with: arg
 	self hasOwnMessageTranspilerMethodOf: selector ifTrue: [ :proc |
 		^ proc with: receiver with: arguments
 	].
-	^ self putOrdinaryMessage: receiver call: selector with: arguments
+	^ self putOrdinaryMessage: receiver send: selector with: arguments
 
 ]
 
