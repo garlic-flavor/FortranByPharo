@@ -16,7 +16,7 @@ SWMethodDefinitionTranspiler class >> decode: selector types: types [
 	|mdt|
 	mdt := self new.
 	mdt bodyTranspiler: ((self methodBodyTranspilerClass
-		decode: selector types: types)
+		new: selector types: types)
 		stream: mdt stream).
 	^ mdt
 

@@ -26,7 +26,7 @@ SWClassInfo >> getVariableInfoAt: offset [
 SWClassInfo >> getVariableInfoOf: aName [
 	^ ((self targetClass slots collect: [ :each | each name ]) anySatisfy: [ :each | each = aName ]) ifTrue: [
 		self members at: aName ifAbsentPut: [
-			(self class analyzerClass decode: aName asSymbol types: { self targetClass }) return
+			(self class analyzerClass new: aName asSymbol types: { self targetClass }) return
 		]
 	] ifFalse: [
 		nil

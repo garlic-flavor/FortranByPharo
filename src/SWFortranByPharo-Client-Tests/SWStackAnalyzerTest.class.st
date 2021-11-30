@@ -47,7 +47,7 @@ SWStackAnalyzerTest >> program_temp [
 
 { #category : #'private - utility' }
 SWStackAnalyzerTest >> returnTypeOf: aSelector withArgumentTypes: argTypes equals: rType [
-	self assert: (SWStackAnalyzer decode: aSelector types: {self class}, argTypes) return type equals: rType
+	self assert: (SWStackAnalyzer new: aSelector types: {self class}, argTypes) return type equals: rType
 ]
 
 { #category : #tests }

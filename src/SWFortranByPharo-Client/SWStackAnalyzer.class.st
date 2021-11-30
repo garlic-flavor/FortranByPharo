@@ -23,23 +23,10 @@ SWStackAnalyzer class >> binaryOpInfo [
 			types: types;
 			return: (SWVariableInfo new
 				type: (types at: 1);
+				priority: SWVariableInfo wellknownMethodPriority;
 				yourself);
 			yourself
 	]
-]
-
-{ #category : #decoding }
-SWStackAnalyzer class >> decode: selector types: types [
-	^ self decode: selector types: types sendStack: nil
-]
-
-{ #category : #decoding }
-SWStackAnalyzer class >> decode: selector types: types sendStack: ss [
-	^ (self new: selector types: types)
-		sendStack: ss;
-		decoded;
-		yourself
-
 ]
 
 { #category : #initialization }
@@ -71,12 +58,18 @@ SWStackAnalyzer class >> install_lt [
 	^ #< -> self binaryOpInfo
 ]
 
-{ #category : #private }
+{ #category : #initialization }
+SWStackAnalyzer class >> install_mul [
+	^ #* -> self binaryOpInfo
+]
+
+{ #category : #'instance creation' }
 SWStackAnalyzer class >> install_new [
 	^ #new -> [ :selector :types |
 		SWMethodInfo new
 			return: (SWVariableInfo new
 				type: (types at: 1);
+				priority: SWVariableInfo wellknownMethodPriority;
 				yourself);
 			yourself
 	]
@@ -88,11 +81,31 @@ SWStackAnalyzer class >> install_sub [
 ]
 
 { #category : #'instance creation' }
+SWStackAnalyzer class >> install_yourself [
+	^ #yourself -> [ :selector :types |
+		SWMethodInfo new
+			method: Object>>#yourself;
+			return: (SWVariableInfo new
+				type: (types at: 1);
+				priority: SWVariableInfo wellknownMethodPriority;
+				yourself);
+			yourself
+	]
+]
+
+{ #category : #'instance creation' }
 SWStackAnalyzer class >> new: selector types: types [
+	^ self new: selector types: types sendStack: nil
+]
+
+{ #category : #'instance creation' }
+SWStackAnalyzer class >> new: selector types: types sendStack: ss [
 	^ definedMethods at: selector ifPresent: [ :dm |
 		dm value: selector value: types
 	] ifAbsent: [
-		super new: selector types: types
+		(super new: selector types: types)
+			sendStack: ss;
+			yourself
 	]
 
 ]
@@ -118,15 +131,6 @@ SWStackAnalyzer >> blockReturnTop [
 	self halt.
 	
 	super blockReturnTop
-]
-
-{ #category : #api }
-SWStackAnalyzer >> decoded [
-	self return hasAnyType ifTrue: [ ^ self ].
-	self pushToSendStack: self method.
-	self decode.
-	self popSendStack: self method.
-
 ]
 
 { #category : #'instruction decoding' }
@@ -198,7 +202,7 @@ SWStackAnalyzer >> methodInfoOf: selector super: supered args: args [
 	|aTypes|
 	aTypes := args collect: [ :each | each type ].
 	supered ifTrue: [ aTypes first: aTypes first superclass ].
-	^ self class decode: selector types: aTypes sendStack: self sendStack
+	^ self class new: selector types: aTypes sendStack: self sendStack
 ]
 
 { #category : #'instruction decoding' }
@@ -250,6 +254,7 @@ SWStackAnalyzer >> popIntoTemporaryVariable: offset [
 	|left right|
 	left := self stack atOffset: offset.
 	right := self stack pop.
+self halt.
 	left << right.
 
 	super popIntoTemporaryVariable: offset.
@@ -378,11 +383,45 @@ SWStackAnalyzer >> pushToSendStack: aMethod [
 
 ]
 
+{ #category : #accessing }
+SWStackAnalyzer >> return [
+	^ return ifNil: [
+		return := SWVariableInfo new
+			initializer: [
+				self pushToSendStack: self method.
+				self decode.
+				self popSendStack: self method.
+				return type
+			];
+			priority: SWVariableInfo defaultReturnTypePriority;
+			yourself
+	]
+]
+
 { #category : #protected }
 SWStackAnalyzer >> returnInfoOf: selector super: supered args: args [
-	^ SWVariableInfo new
-		initializer: [	(self methodInfoOf: selector super: supered args: args) return type ];
-		yourself
+	^ definedMethods at: selector ifPresent: [ :detected |
+		SWVariableInfo new
+			initializer: [
+				detected value: selector value: (args collect: [:a | a type ]) return type
+			];
+			priority: { SWVariableInfo wellknownMethodPriority. (args collect: [ :a | a priority ]) } flattened min;
+			yourself
+	] ifAbsent: [
+		SWVariableInfo new
+			initializer: [|types|
+				types := args collect: [ :a | a type ].
+				supered ifTrue: [ types first: types first superclass ].
+				(self class new
+					method: (self class search: selector in: types first);
+					types: types;
+					sendStack: self sendStack;
+					yourself) return type
+			];
+			priority: { SWVariableInfo unknownMethodPriority. (args collect: [:a | a priority ]) } flattened min;
+			yourself
+	]
+
 ]
 
 { #category : #'instruction decoding' }

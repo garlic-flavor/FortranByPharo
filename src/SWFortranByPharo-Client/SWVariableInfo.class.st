@@ -18,6 +18,21 @@ Class {
 	#category : #'SWFortranByPharo-Client-Analyzer'
 }
 
+{ #category : #constants }
+SWVariableInfo class >> defaultPriority [
+	^ 0
+]
+
+{ #category : #constants }
+SWVariableInfo class >> defaultReturnTypePriority [
+	^ 500
+]
+
+{ #category : #constants }
+SWVariableInfo class >> exactTypePriority [
+	^ 1000
+]
+
 { #category : #private }
 SWVariableInfo class >> mangledTypeNameOf: aType [
 	^ aType name select: [ :c | c isUppercase ] thenCollect: [ :c | c asLowercase ].
@@ -31,7 +46,7 @@ SWVariableInfo class >> named: aName typed: aType [
 		yourself
 ]
 
-{ #category : #'as yet unclassified' }
+{ #category : #utils }
 SWVariableInfo class >> nextTemporalVariableNameOf: prevName [
 	^ prevName isEmptyOrNil ifTrue: [
 		'a'
@@ -46,10 +61,30 @@ SWVariableInfo class >> nextTemporalVariableNameOf: prevName [
 	].
 ]
 
+{ #category : #constants }
+SWVariableInfo class >> receiverTypePriority [
+	^ 600
+]
+
+{ #category : #constants }
+SWVariableInfo class >> toTranspileMethodPriority [
+	^ 800
+]
+
+{ #category : #constants }
+SWVariableInfo class >> unknownMethodPriority [
+	^ 700
+]
+
+{ #category : #constants }
+SWVariableInfo class >> wellknownMethodPriority [
+	^ 900
+]
+
 { #category : #'accumulator ops' }
 SWVariableInfo >> << rightObject [
 	rightObject original ifNil: [
-		rightObject priority <= self priority ifTrue: [
+		self priority <= rightObject priority ifTrue: [
 			rightObject hasExactType ifTrue: [
 				self type: rightObject type
 			] ifFalse: [
@@ -156,6 +191,9 @@ SWVariableInfo >> printOn: aStream [
 		nextPut: $<;
 		print: type;
 		nextPut: $>;
+		nextPut: $(;
+		print: self priority;
+		nextPut: $);
 		space;
 		nextPutAll: (initializer ifNotNil: [ ' [lazy]' ] ifNil: [ '-' ] );
 		space;
@@ -169,15 +207,15 @@ SWVariableInfo >> priority [
 	^ priority ifNil: [
 		priority := (
 			stackPos = 0 ifTrue: [
-				3 "receiver's priority"
+				self class receiverTypePriority
 			] ifFalse: [
 				type ifNotNil: [
-					1 "highest priority"
+					self class exactTypePriority
 				] ifNil: [
 					initializer ifNotNil: [
-						2 "scond priority"
+						self class unknownMethodPriority
 					] ifNil: [
-						999 "default priority"
+						self class defaultPriority
 					]
 				]
 			]

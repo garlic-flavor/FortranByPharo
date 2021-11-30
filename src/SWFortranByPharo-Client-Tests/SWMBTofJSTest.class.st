@@ -22,10 +22,21 @@ SWMBTofJSTest >> program_02 [
 	SWFStd print: 'Hello, World!'
 ]
 
+{ #category : #'as yet unclassified' }
+SWMBTofJSTest >> program_03 [
+	|pi|
+	pi := SWVariableInfo new
+		type: Float;
+		addProperty: #const;
+		yourself.
+	pi := 3.1415926535.
+	^ pi * 2.23620679
+]
+
 { #category : #tests }
 SWMBTofJSTest >> testTranspile_program_01 [
 	((SWMBTofJS
-		decode: #program_01
+		new: #program_01
 		types: {self class})
 		type: #js;
 		logging: true;

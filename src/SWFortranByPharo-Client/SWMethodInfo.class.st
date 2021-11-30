@@ -16,35 +16,13 @@ Class {
 	#category : #'SWFortranByPharo-Client-Analyzer'
 }
 
-{ #category : #decoding }
-SWMethodInfo class >> decode: selector types: types [
-	^ self new
-		method: (self search: selector in: types first);
-		types: types;
-		yourself
-]
-
-{ #category : #private }
-SWMethodInfo class >> mangledTypeNameOf: aType [
-	aType = Integer ifTrue: [ ^ #i ].
-	aType = Float ifTrue: [ ^ #d ].
-	^ #_
-]
-
-{ #category : #decoding }
+{ #category : #'instance creation' }
 SWMethodInfo class >> new: selector types: types [
 	^ self new
 		method: (self search: selector in: types first);
 		types: types;
 		yourself
 
-]
-
-{ #category : #'instance creation' }
-SWMethodInfo class >> newWith: method [
-	^ self new
-		method: method;
-		yourself
 ]
 
 { #category : #utils }
