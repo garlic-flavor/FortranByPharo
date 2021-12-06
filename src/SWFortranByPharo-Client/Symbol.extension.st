@@ -1,7 +1,7 @@
 Extension { #name : #Symbol }
 
 { #category : #'*SWFortranByPharo-Client' }
-Symbol >> transpileUsing: transpiler [
-	^ transpiler putSymbol: self
+Symbol >> transpileUsing: arg1 [
 
+	^ arg1 putSymbol: self
 ]

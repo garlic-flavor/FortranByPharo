@@ -1,6 +1,3 @@
-"
-I came from: https://www.nag-j.co.jp/fortran/FI_3.html
-"
 Class {
 	#name : #SWNag2,
 	#superclass : #Object,
@@ -11,34 +8,39 @@ Class {
 }
 
 { #category : #running }
-SWNag2 class >> f90_requirements: transpiler [
+SWNag2 class >> f90_requirements: arg1 [
 
+	
 ]
 
 { #category : #running }
-SWNag2 class >> mysub: i [
-	SWFStd print: i.
+SWNag2 class >> mysub: arg1 [
 
+	SWFStd print: arg1
 ]
 
 { #category : #running }
 SWNag2 class >> program [
-	<script>
-	|i|
-	i := SWVariableInfo new type: Integer.
-	i := 99.
-	i := 3.14.
-	self mysub: i.
 
+	<script>
+	| tmp1 |
+	tmp1 := SWVariableInfo new type: Integer.
+	tmp1 := 99.
+	tmp1 := 3.14.
+	self mysub: tmp1
 ]
 
 { #category : #tests }
 SWNag2 class >> test [
-	Transcript show: 'Hello!'; cr.
+
+	Transcript
+		show: 'Hello!';
+		cr.
 	^ (Smalltalk globals at: self name) new
 ]
 
 { #category : #tests }
 SWNag2 >> test2 [
-	^ hoge ifNil: [ hoge := OrderedCollection  new ]
+
+	^ hoge ifNil: [ hoge := OrderedCollection new ] ifNotNil: [ hoge ]
 ]

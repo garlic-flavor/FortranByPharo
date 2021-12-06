@@ -1,6 +1,3 @@
-"
-I transpile CompiledMethod to ECMAScript.
-"
 Class {
 	#name : #SWMDTofJS,
 	#superclass : #SWMethodDefinitionTranspiler,
@@ -9,48 +6,50 @@ Class {
 
 { #category : #'as yet unclassified' }
 SWMDTofJS class >> methodBodyTranspilerClass [
+
 	^ SWMBTofJS
 ]
 
 { #category : #'code generation' }
 SWMDTofJS >> putFunctionFooter [
-	self stream putLine: '}'.
 
+	self stream putLine: '}'
 ]
 
 { #category : #'code generation' }
 SWMDTofJS >> putFunctionHeader [
-	self stream
+
+	| tmp2 |
+	tmp2 := self stream.
+	tmp2
 		put: 'function ';
 		put: self bodyTranspiler method selector;
 		put: '('.
-
-	self bodyTranspiler method tempNames do: [ :vi |
-		self stream put: vi
-	] separatedBy: [
-		self stream put: ', '
-	].
-	self stream putLine: '){'.
-
+	self bodyTranspiler method tempNames
+		do: [ :arg1 | self stream put: arg1 ]
+		separatedBy: [ self stream put: ', ' ].
+	self stream putLine: '){'
 ]
 
 { #category : #'public API' }
 SWMDTofJS >> transpile [
-	self stream
+
+	| tmp2 tmp4 tmp6 |
+	tmp2 := self stream.
+	tmp2
 		put: 'function ';
 		put: self bodyTranspiler method selector;
 		put: '('.
-
-	self bodyTranspiler method tempNames do: [ :vi |
-		self stream put: vi
-	] separatedBy: [
-		self stream put: ', '
-	].
-	self stream
+	self bodyTranspiler method tempNames
+		do: [ :arg1 | self stream put: arg1 ]
+		separatedBy: [ self stream put: ', ' ].
+	tmp4 := self stream.
+	tmp4
 		putLine: '){';
 		incIndent.
 	self bodyTranspiler transpile.
-	self stream
+	tmp6 := self stream.
+	tmp6
 		decIndent;
 		putLine: '}'.
 	^ self stream contents

@@ -1,6 +1,3 @@
-"
-I store temporal variables for cascading statements of Pharo.
-"
 Class {
 	#name : #SWTempStore,
 	#superclass : #Object,
@@ -13,43 +10,45 @@ Class {
 }
 
 { #category : #enumerating }
-SWTempStore >> detect: detectBlock ifNone: noneBlock [
-	^ payload detect: detectBlock ifNone: noneBlock
+SWTempStore >> detect: arg1 ifNone: arg2 [
+
+	^ payload detect: arg1 ifNone: arg2
 ]
 
 { #category : #initialization }
-SWTempStore >> initialize [ 
+SWTempStore >> initialize [
+
 	super initialize.
 	payload := OrderedCollection new
 ]
 
 { #category : #accessing }
-SWTempStore >> method: aMethod [
-	names := aMethod tempNames
+SWTempStore >> method: arg1 [
+
+	names := arg1 tempNames
 ]
 
 { #category : #private }
 SWTempStore >> nextName [
+
 	currentName := SWVariableInfo nextTemporalVariableNameOf: currentName.
-	^ (names anySatisfy: [ :each | each = currentName ]) ifTrue: [
-		self nextName
-	] ifFalse: [
-		currentName
-	]
+	^ (names anySatisfy: [ :arg1 | arg1 = currentName ])
+		  ifTrue: [ self nextName ]
+		  ifFalse: [ currentName ]
 ]
 
 { #category : #removing }
 SWTempStore >> pop [
+
 	^ payload removeFirst
 ]
 
 { #category : #adding }
-SWTempStore >> push: aVariableInfo [
-	(payload isNotEmpty and: [ payload last = aVariableInfo ]) ifTrue: [ ^ false ].
+SWTempStore >> push: arg1 [
 
-	payload add: aVariableInfo.
-	aVariableInfo name isEmptyOrNil ifFalse: [ ^ false ].
-	aVariableInfo name: self nextName.
+	(payload isNotEmpty and: [ payload last = arg1 ]) ifTrue: [ ^ false ].
+	payload add: arg1.
+	arg1 name isEmptyOrNil ifFalse: [ ^ false ].
+	arg1 name: self nextName.
 	^ true
-
 ]

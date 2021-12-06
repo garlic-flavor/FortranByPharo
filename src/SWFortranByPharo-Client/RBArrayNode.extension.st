@@ -1,7 +1,7 @@
 Extension { #name : #RBArrayNode }
 
 { #category : #'*SWFortranByPharo-Client' }
-RBArrayNode >> transpileUsing: transpiler [
-	^ self statements transpileUsing: transpiler
+RBArrayNode >> transpileUsing: arg1 [
 
+	^ self statements transpileUsing: arg1
 ]

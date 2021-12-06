@@ -1,8 +1,3 @@
-"
-I emulate stack like a stack in Context.
-index -1 indicates the type of the recevier.
-index 0 indicates the first argument of the method.
-"
 Class {
 	#name : #SWStack,
 	#superclass : #Object,
@@ -13,85 +8,93 @@ Class {
 }
 
 { #category : #'instance creation' }
-SWStack class >> newFrom: anArray [
-	|s|
-	s := self new.
-	anArray do: [ :each | s push: each ].
-	^ s
+SWStack class >> newFrom: arg1 [
+
+	| tmp1 |
+	tmp1 := self new.
+	arg1 do: [ :arg2 | tmp1 push: arg2 ].
+	^ tmp1
 ]
 
 { #category : #converting }
 SWStack >> asArray [
+
 	^ self payload asArray
 ]
 
 { #category : #accessing }
-SWStack >> at: index [
-	"index is 1 based.".
-	"index 0 responds special to receiver."
-	^ self payload at: (index + 1) ifAbsent: [ nil ].
+SWStack >> at: arg1 [
+
+	^ self payload at: arg1 + 1 ifAbsent: [  ]
 ]
 
 { #category : #accessing }
-SWStack >> atOffset: offset [
-	"offset is  0 based.".
-	"offset 0 responds to the first argument."
-	^ self payload at: (offset + 2) ifAbsent: [ nil ].
+SWStack >> atOffset: arg1 [
+
+	^ self payload at: arg1 + 2 ifAbsent: [  ]
 ]
 
 { #category : #copying }
-SWStack >> copyFrom: start to: end [
-	^ self payload copyFrom: start + 1 to: end + 1
+SWStack >> copyFrom: arg1 to: arg2 [
+
+	^ self payload copyFrom: arg1 + 1 to: arg2 + 1
 ]
 
 { #category : #enumerating }
-SWStack >> detect: needle ifNone: noneBlock [
-	^ self payload detect: needle ifNone: noneBlock
+SWStack >> detect: arg1 ifNone: arg2 [
+
+	^ self payload detect: arg1 ifNone: arg2
 ]
 
 { #category : #accessing }
 SWStack >> payload [
 
-	^ payload ifNil: [ payload := OrderedCollection new ]
+	^ payload
+		  ifNil: [ payload := OrderedCollection new ]
+		  ifNotNil: [ payload ]
 ]
 
 { #category : #accessing }
-SWStack >> payload: anObject [
+SWStack >> payload: arg1 [
 
-	payload := anObject
+	payload := arg1
 ]
 
 { #category : #removing }
 SWStack >> pop [
-	^ self payload removeLast.
+
+	^ self payload removeLast
 ]
 
 { #category : #affecting }
-SWStack >> pop: itemsCount [
-	|arr|
-	arr := OrderedCollection new.
-	itemsCount timesRepeat: [
-		arr addFirst: self pop.
-	].
-	^ arr
+SWStack >> pop: arg1 [
+
+	| tmp1 |
+	tmp1 := OrderedCollection new.
+	arg1 timesRepeat: [ tmp1 addFirst: self pop ].
+	^ tmp1
 ]
 
 { #category : #adding }
-SWStack >> push: anObject [
-	^ self payload addLast: anObject.
+SWStack >> push: arg1 [
+
+	^ self payload addLast: arg1
 ]
 
 { #category : #'as yet unclassified' }
-SWStack >> push: anObject afterIndex: idx [
-	^ self payload add: anObject afterIndex: (idx + 1)
+SWStack >> push: arg1 afterIndex: arg2 [
+
+	^ self payload add: arg1 afterIndex: arg2 + 1
 ]
 
 { #category : #accessing }
 SWStack >> size [
-	^ self payload size.
+
+	^ self payload size
 ]
 
 { #category : #accessing }
 SWStack >> top [
+
 	^ self payload last
 ]

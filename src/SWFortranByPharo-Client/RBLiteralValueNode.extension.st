@@ -1,11 +1,9 @@
 Extension { #name : #RBLiteralValueNode }
 
 { #category : #'*SWFortranByPharo-Client' }
-RBLiteralValueNode >> transpileUsing: transpiler [
-	^ self value ifNotNil: [
-		self value transpileUsing: transpiler
-	] ifNil: [
-		transpiler putNil
-	]
+RBLiteralValueNode >> transpileUsing: arg1 [
 
+	^ self value
+		  ifNil: [ arg1 putNil ]
+		  ifNotNil: [ self value transpileUsing: arg1 ]
 ]

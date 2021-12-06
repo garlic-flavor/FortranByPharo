@@ -1,6 +1,3 @@
-"
-I transpile a Pharo class.
-"
 Class {
 	#name : #SWClassDefinitionTranspiler,
 	#superclass : #SWClassInfo,
@@ -12,41 +9,50 @@ Class {
 
 { #category : #'as yet unclassified' }
 SWClassDefinitionTranspiler class >> methodDefinitionTranspilerClass [
-	^ self subclassResponsibility 
+
+	^ self subclassResponsibility
 ]
 
 { #category : #'as yet unclassified' }
 SWClassDefinitionTranspiler >> putClassFooter [
-	^ self subclassResponsibility 
+
+	^ self subclassResponsibility
 ]
 
 { #category : #'as yet unclassified' }
 SWClassDefinitionTranspiler >> putClassHeader [
-	^ self subclassResponsibility 
+
+	^ self subclassResponsibility
 ]
 
 { #category : #'as yet unclassified' }
-SWClassDefinitionTranspiler >> putMemberVariable: aVariableInfo [
-	^ self subclassResponsibility 
+SWClassDefinitionTranspiler >> putMemberVariable: arg1 [
+
+	^ self subclassResponsibility
 ]
 
 { #category : #'public API' }
-SWClassDefinitionTranspiler >> putMethod: aMethodInfo [
+SWClassDefinitionTranspiler >> putMethod: arg1 [
 
+	
 ]
 
 { #category : #accessing }
 SWClassDefinitionTranspiler >> stream [
 
-	^ stream ifNil: [ stream := SWTranspilerStream new ]
+	^ stream
+		  ifNil: [ stream := SWTranspilerStream new ]
+		  ifNotNil: [ stream ]
 ]
 
 { #category : #accessing }
-SWClassDefinitionTranspiler >> stream: anObject [
+SWClassDefinitionTranspiler >> stream: arg1 [
 
-	stream := anObject
+	stream := arg1
 ]
 
 { #category : #'public API' }
 SWClassDefinitionTranspiler >> transpile [
+
+	
 ]

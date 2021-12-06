@@ -1,6 +1,3 @@
-"
-I generate makefile.
-"
 Class {
 	#name : #SWTranspilerOfMake,
 	#superclass : #SWTranspiler,
@@ -8,38 +5,43 @@ Class {
 }
 
 { #category : #'code generation' }
-SWTranspilerOfMake >> putClassDefinition: aClass [
+SWTranspilerOfMake >> putClassDefinition: arg1 [
+
+	
 ]
 
 { #category : #'public API' }
-SWTranspilerOfMake >> putProgram: aClass [
+SWTranspilerOfMake >> putProgram: arg1 [
+
+	
 ]
 
 { #category : #'code generation' }
 SWTranspilerOfMake >> putRequirements [
-	|exeName objName|
-	exeName := ((Path from: self source filename) withExtension: SWShellEnvironment default exeFileExtension) fullName.
-	objName := ((Path from: self source filename) withExtension: SWShellEnvironment default objFileExtension) fullName.
+
+	| tmp1 tmp2 |
+	tmp1 := ((Path from: self source filename) withExtension:
+		         SWShellEnvironment default exeFileExtension) fullName.
+	tmp2 := ((Path from: self source filename) withExtension:
+		         SWShellEnvironment default objFileExtension) fullName.
 	self
 		put: 'run: ';
-		putLine: exeName;
+		putLine: tmp1;
 		put: String tab;
-		putLine: './$^'.
-
-	self type: self source type.
+		putLine: './$^';
+		type: self source type.
 	super putRequirements.
-
 	self
 		putLine;
-		put: exeName;
+		put: tmp1;
 		put: ' : ';
-		putLine: objName.
-
-	self
+		putLine: tmp2;
 		putLine;
 		putLine: '%.out :';
-		put: String tab; putLine: 'gfortran -o $@ $^';
+		put: String tab;
+		putLine: 'gfortran -o $@ $^';
 		putLine;
 		putLine: '%.o : %.f90';
-		put: String tab; putLine: 'gfortran -c -o $@ $?'.
+		put: String tab;
+		putLine: 'gfortran -c -o $@ $?'
 ]

@@ -1,7 +1,3 @@
-"
-I have an information about a variable.
-about, its type, const or not, and other properties.
-"
 Class {
 	#name : #SWVariableInfo,
 	#superclass : #Object,
@@ -20,118 +16,139 @@ Class {
 
 { #category : #constants }
 SWVariableInfo class >> defaultPriority [
+
 	^ 0
 ]
 
 { #category : #constants }
 SWVariableInfo class >> defaultReturnTypePriority [
+
 	^ 500
 ]
 
 { #category : #constants }
 SWVariableInfo class >> exactTypePriority [
+
 	^ 1000
 ]
 
 { #category : #private }
-SWVariableInfo class >> mangledTypeNameOf: aType [
-	^ aType name select: [ :c | c isUppercase ] thenCollect: [ :c | c asLowercase ].
+SWVariableInfo class >> mangledTypeNameOf: arg1 [
+
+	^ arg1 name
+		  select: [ :arg2 | arg2 isUppercase ]
+		  thenCollect: [ :arg3 | arg3 asLowercase ]
 ]
 
 { #category : #initialization }
-SWVariableInfo class >> named: aName typed: aType [
-	^ self new
-		name: aName;
-		type: aType;
-		yourself
+SWVariableInfo class >> named: arg1 typed: arg2 [
+
+	| tmp2 |
+	tmp2 := self new.
+	tmp2
+		name: arg1;
+		type: arg2.
+	^ tmp2 yourself
 ]
 
 { #category : #utils }
-SWVariableInfo class >> nextTemporalVariableNameOf: prevName [
-	^ prevName isEmptyOrNil ifTrue: [
-		'a'
-	] ifFalse: [|counter|
-		counter := prevName last.
-		counter := Character value: counter charCode + 1.
-		(counter between: $a and: $z) ifTrue: [
-			(prevName copyFrom: 1 to: prevName size - 1), counter asString
-		] ifFalse: [
-			(self nextTemporalVariableNameOf: (prevName copyFrom: 1 to: prevName size - 1)), 'a'
-		]
-	].
+SWVariableInfo class >> nextTemporalVariableNameOf: arg1 [
+
+	| tmp1 |
+	^ arg1 isEmptyOrNil
+		  ifTrue: [ 'a' ]
+		  ifFalse: [ 
+			  tmp1 := arg1 last.
+			  tmp1 := Character value: tmp1 charCode + 1.
+			  (tmp1 between: $a and: $z)
+				  ifTrue: [ (arg1 copyFrom: 1 to: arg1 size - 1) , tmp1 asString ]
+				  ifFalse: [ 
+					  (self nextTemporalVariableNameOf:
+						   (arg1 copyFrom: 1 to: arg1 size - 1)) , 'a' ] ]
 ]
 
 { #category : #constants }
 SWVariableInfo class >> receiverTypePriority [
+
 	^ 600
 ]
 
 { #category : #constants }
 SWVariableInfo class >> toTranspileMethodPriority [
+
 	^ 800
 ]
 
 { #category : #constants }
 SWVariableInfo class >> unknownMethodPriority [
+
 	^ 700
 ]
 
 { #category : #constants }
+SWVariableInfo class >> userSpecifiesTypePriority [
+
+	^ 2000
+]
+
+{ #category : #constants }
 SWVariableInfo class >> wellknownMethodPriority [
+
 	^ 900
 ]
 
 { #category : #'accumulator ops' }
-SWVariableInfo >> << rightObject [
-	rightObject original ifNil: [
-		self priority <= rightObject priority ifTrue: [
-			rightObject hasExactType ifTrue: [
-				self type: rightObject type
-			] ifFalse: [
-				self initializer: [ rightObject type ]
-			].
-			self priority: rightObject priority
-		].
-		self original: (rightObject stackPos ifNotNil: [rightObject] ifNil: [nil]).
-		self properties addAll: rightObject properties.
-		self assignCounter: self assignCounter + 1
-	] ifNotNil: [
-		self << rightObject original
-	]
-		
+SWVariableInfo >> << arg1 [
 
+	arg1 original
+		ifNil: [ 
+			self priority <= arg1 priority ifTrue: [ 
+				arg1 hasExactType
+					ifTrue: [ self type: arg1 type ]
+					ifFalse: [ self initializer: [ arg1 type ] ].
+				self priority: arg1 priority ].
+			self original: (arg1 stackPos ifNotNil: [ arg1 ]).
+			self properties addAll: arg1 properties.
+			self assignCounter: self assignCounter + 1 ]
+		ifNotNil: [ self << arg1 original ]
 ]
 
 { #category : #adding }
-SWVariableInfo >> addProperty: aProp [
-	self properties add: aProp
+SWVariableInfo >> addProperty: arg1 [
+
+	self properties add: arg1
 ]
 
 { #category : #accessing }
 SWVariableInfo >> assignCounter [
 
-	^ assignCounter ifNil: [ assignCounter := 0 ]
+	^ assignCounter
+		  ifNil: [ assignCounter := 0 ]
+		  ifNotNil: [ assignCounter ]
 ]
 
 { #category : #accessing }
-SWVariableInfo >> assignCounter: anObject [
+SWVariableInfo >> assignCounter: arg1 [
 
-	assignCounter := anObject
+	assignCounter := arg1
 ]
 
 { #category : #testing }
 SWVariableInfo >> hasAnyType [
+
 	^ type isNotNil or: [ initializer isNotNil ]
 ]
 
 { #category : #testing }
 SWVariableInfo >> hasExactType [
+
 	^ type isNotNil
 ]
 
 { #category : #testing }
-SWVariableInfo >> hasProperty: aProperty [
-	^ self properties includes: aProperty
+SWVariableInfo >> hasProperty: arg1 [
+
+	^ self properties includes: arg1
 ]
 
 { #category : #accessing }
@@ -141,30 +158,34 @@ SWVariableInfo >> initializer [
 ]
 
 { #category : #accessing }
-SWVariableInfo >> initializer: anObject [
+SWVariableInfo >> initializer: arg1 [
 
-	initializer := anObject.
+	initializer := arg1.
 	self type: nil
 ]
 
 { #category : #testing }
 SWVariableInfo >> isReceiver [
+
 	^ self stackPos = 0
 ]
 
 { #category : #accessing }
 SWVariableInfo >> mangledTypeName [
+
 	^ self class mangledTypeNameOf: self type
 ]
 
 { #category : #accessing }
 SWVariableInfo >> name [
+
 	^ name
 ]
 
 { #category : #accessing }
-SWVariableInfo >> name: aName [
-	name := aName
+SWVariableInfo >> name: arg1 [
+
+	name := arg1
 ]
 
 { #category : #accessing }
@@ -174,14 +195,15 @@ SWVariableInfo >> original [
 ]
 
 { #category : #accessing }
-SWVariableInfo >> original: anObject [
+SWVariableInfo >> original: arg1 [
 
-	original := anObject
+	original := arg1
 ]
 
 { #category : #printing }
-SWVariableInfo >> printOn: aStream [
-	aStream
+SWVariableInfo >> printOn: arg1 [
+
+	arg1
 		nextPut: $[;
 		print: stackPos;
 		nextPut: $];
@@ -195,7 +217,7 @@ SWVariableInfo >> printOn: aStream [
 		print: self priority;
 		nextPut: $);
 		space;
-		nextPutAll: (initializer ifNotNil: [ ' [lazy]' ] ifNil: [ '-' ] );
+		nextPutAll: (initializer ifNil: [ '-' ] ifNotNil: [ ' [lazy]' ]);
 		space;
 		nextPutAll: '<<';
 		print: assignCounter
@@ -203,52 +225,51 @@ SWVariableInfo >> printOn: aStream [
 
 { #category : #accessing }
 SWVariableInfo >> priority [
-	"priority 1 is most significant."
-	^ priority ifNil: [
-		priority := (
-			stackPos = 0 ifTrue: [
-				self class receiverTypePriority
-			] ifFalse: [
-				type ifNotNil: [
-					self class exactTypePriority
-				] ifNil: [
-					initializer ifNotNil: [
-						self class unknownMethodPriority
-					] ifNil: [
-						self class defaultPriority
-					]
-				]
-			]
-		)
-	]
+
+	^ priority
+		  ifNil: [ 
+			  priority := stackPos = 0
+				              ifTrue: [ self class receiverTypePriority ]
+				              ifFalse: [ 
+					              type
+						              ifNil: [ 
+							              initializer
+								              ifNil: [ self class defaultPriority ]
+								              ifNotNil: [ self class unknownMethodPriority ] ]
+						              ifNotNil: [ self class exactTypePriority ] ] ]
+		  ifNotNil: [ priority ]
 ]
 
 { #category : #accessing }
-SWVariableInfo >> priority: anObject [
+SWVariableInfo >> priority: arg1 [
 
-	priority := anObject
+	priority := arg1
 ]
 
 { #category : #accessing }
 SWVariableInfo >> properties [
 
-	^ properties ifNil: [ properties := Set new ]
+	^ properties
+		  ifNil: [ properties := Set new ]
+		  ifNotNil: [ properties ]
 ]
 
 { #category : #accessing }
-SWVariableInfo >> properties: anObject [
+SWVariableInfo >> properties: arg1 [
 
-	properties := anObject
+	properties := arg1
 ]
 
 { #category : #accessing }
-SWVariableInfo >> property: propName [
-	^ self properties at: propName ifAbsent: nil
+SWVariableInfo >> property: arg1 [
+
+	^ self properties at: arg1 ifAbsent: nil
 ]
 
 { #category : #removing }
-SWVariableInfo >> removeProperty: propName [
-	properties remove: propName ifAbsent: [  ].
+SWVariableInfo >> removeProperty: arg1 [
+
+	properties remove: arg1 ifAbsent: [  ]
 ]
 
 { #category : #accessing }
@@ -258,27 +279,23 @@ SWVariableInfo >> stackPos [
 ]
 
 { #category : #accessing }
-SWVariableInfo >> stackPos: anObject [
+SWVariableInfo >> stackPos: arg1 [
 
-	stackPos := anObject
+	stackPos := arg1
 ]
 
 { #category : #accessing }
 SWVariableInfo >> type [
 
-	^ type ifNil: [
-		self initializer ifNotNil: [
-			type := self initializer value
-		] ifNil: [ 
-			nil
-		]
-	]
+	^ type
+		  ifNil: [ 
+		  self initializer ifNotNil: [ type := self initializer value ] ]
+		  ifNotNil: [ type ]
 ]
 
 { #category : #accessing }
-SWVariableInfo >> type: anObject [
+SWVariableInfo >> type: arg1 [
 
-	anObject ifNotNil: [ self initializer: nil ].
-	type := anObject.
-
+	arg1 ifNotNil: [ self initializer: nil ].
+	type := arg1
 ]

@@ -1,6 +1,3 @@
-"
-I hold SWSources and put it to the server.
-"
 Class {
 	#name : #SWSourcesPool,
 	#superclass : #SWSourcesLocalPool,
@@ -12,6 +9,7 @@ Class {
 
 { #category : #initialization }
 SWSourcesPool class >> reset [
+
 	<script>
 	localScriptDirectory := nil
 ]
@@ -19,20 +17,22 @@ SWSourcesPool class >> reset [
 { #category : #accessing }
 SWSourcesPool >> client [
 
-	^ client ifNil: [ client := SWClient new ]
+	^ client ifNil: [ client := SWClient new ] ifNotNil: [ client ]
 ]
 
 { #category : #accessing }
-SWSourcesPool >> client: anObject [
+SWSourcesPool >> client: arg1 [
 
-	client := anObject
+	client := arg1
 ]
 
 { #category : #accessing }
-SWSourcesPool >> get: aModuleName withTranspilerMethodOf: aMethod [
-	^ self sources at: aModuleName ifAbsent: [
-		(super get: aModuleName withTranspilerMethodOf: aMethod)
-			putOn: self client;
-			yourself
-	]
+SWSourcesPool >> get: arg1 withTranspilerMethodOf: arg2 [
+
+	^ self sources at: arg1 ifAbsent: [ 
+		  | tmp2 |
+		  tmp2 := super get: arg1 withTranspilerMethodOf: arg2.
+		  tmp2
+			  putOn: self client;
+			  yourself ]
 ]

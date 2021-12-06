@@ -1,6 +1,3 @@
-"
-I transpile Pharo to ECMAScript.
-"
 Class {
 	#name : #SWMBTofJS,
 	#superclass : #SWMethodBodyTranspiler,
@@ -9,26 +6,28 @@ Class {
 
 { #category : #accessing }
 SWMBTofJS >> mangledName [
+
 	^ self class safeSelectorNameOf: self method selector
 ]
 
 { #category : #'code generation' }
 SWMBTofJS >> putStatementDelimiter [
+
 	self put: ';'
 ]
 
 { #category : #'code generation' }
-SWMBTofJS >> putVariableDeclarationOf: aVariableInfo [
+SWMBTofJS >> putVariableDeclarationOf: arg1 [
+
 	self
 		put: 'var ';
-		put: aVariableInfo name;
+		put: arg1 name;
 		put: ' = null;';
 		cr
-
-		
 ]
 
 { #category : #accessing }
 SWMBTofJS >> type [
-	^ type ifNil: [ type := #js ]
+
+	^ type ifNil: [ type := #js ] ifNotNil: [ type ]
 ]

@@ -1,6 +1,3 @@
-"
-I came from: https://www.nag-j.co.jp/fortran/FI_4.html
-"
 Class {
 	#name : #SWNag3Point,
 	#superclass : #SWType,
@@ -12,18 +9,22 @@ Class {
 }
 
 { #category : #'instance creation' }
-SWNag3Point class >> newWith: arguments [
-	^ self new
-		x: (arguments at: 1);
-		y: (arguments at: 2);
-		yourself
+SWNag3Point class >> newWith: arg1 [
+
+	| tmp2 |
+	tmp2 := self new.
+	tmp2
+		x: (arg1 at: 1);
+		y: (arg1 at: 2).
+	^ tmp2 yourself
 ]
 
 { #category : #initialization }
 SWNag3Point >> initialize [
+
 	super initialize.
 	x := SWVariableInfo new type: Float.
-	y := SWVariableInfo new type: Float.
+	y := SWVariableInfo new type: Float
 ]
 
 { #category : #accessing }
@@ -33,9 +34,9 @@ SWNag3Point >> x [
 ]
 
 { #category : #accessing }
-SWNag3Point >> x: anObject [
+SWNag3Point >> x: arg1 [
 
-	x := anObject
+	x := arg1
 ]
 
 { #category : #accessing }
@@ -45,7 +46,7 @@ SWNag3Point >> y [
 ]
 
 { #category : #accessing }
-SWNag3Point >> y: anObject [
+SWNag3Point >> y: arg1 [
 
-	y := anObject
+	y := arg1
 ]

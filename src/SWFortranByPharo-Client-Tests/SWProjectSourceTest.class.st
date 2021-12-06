@@ -1,6 +1,3 @@
-"
-A SWProjectSourceTest is a test class for testing the behavior of SWProjectSource
-"
 Class {
 	#name : #SWProjectSourceTest,
 	#superclass : #TestCase,
@@ -12,37 +9,38 @@ Class {
 
 { #category : #running }
 SWProjectSourceTest >> setUp [
+
 	super setUp.
-	hello := SWTestHelloWorld new.
-	"Put here a common initialization logic for tests"
+	hello := SWTestHelloWorld new
 ]
 
 { #category : #tests }
 SWProjectSourceTest >> testCodeGeneration [
-	|contents|
-	contents := SWTranspilerOfFortran new
+
+	| tmp1 tmp3 |
+	tmp3 := SWTranspilerOfFortran new.
+	tmp3
 		source: hello;
-		transpileProgram;
-		contents.
-	self assert: contents equals: (String crlf join: {
-		'program HelloWorld'.
-		'    print *, ''Hello, World!'''.
-		'end program HelloWorld'.
-		''
-	})
-	
+		transpileProgram.
+	tmp1 := tmp3 contents.
+	self assert: tmp1 equals: (String crlf join:
+			 { 'program HelloWorld'. '    print *, ''Hello, World!'''.
+			 'end program HelloWorld'. '' })
 ]
 
 { #category : #tests }
 SWProjectSourceTest >> testCodeGenerationOfRuby [
-	|contents|
-	contents := SWTranspilerOfRuby new
+
+	| tmp1 tmp3 |
+	tmp3 := SWTranspilerOfRuby new.
+	tmp3
 		source: hello;
-		transpileProgram;
-		contents.
-	self assert: contents equals: (String crlf join: {
-		'#!/usr/bin/ruby'.
-		'puts("Hello, World!")'.
-		''
-	})
+		transpileProgram.
+	tmp1 := tmp3 contents.
+	self
+		assert: tmp1
+		equals:
+			(String crlf join:
+				 { '#!/usr/bin/ruby'. 'puts("Hello, World!")'.
+				 '' })
 ]

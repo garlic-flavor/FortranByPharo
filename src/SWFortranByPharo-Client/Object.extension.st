@@ -1,6 +1,7 @@
 Extension { #name : #Object }
 
 { #category : #'*SWFortranByPharo-Client' }
-Object >> transpileUsing: transpiler [
-	^ transpiler put: self asString
+Object >> transpileUsing: arg1 [
+
+	^ arg1 put: self asString
 ]

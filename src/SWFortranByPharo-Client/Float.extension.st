@@ -1,6 +1,7 @@
 Extension { #name : #Float }
 
 { #category : #'*SWFortranByPharo-Client' }
-Float >> transpileUsing: transpiler [
-	^ transpiler putFloat: self
+Float >> transpileUsing: arg1 [
+
+	^ arg1 putFloat: self
 ]

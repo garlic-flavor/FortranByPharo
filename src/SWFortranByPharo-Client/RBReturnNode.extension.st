@@ -1,7 +1,7 @@
 Extension { #name : #RBReturnNode }
 
 { #category : #'*SWFortranByPharo-Client' }
-RBReturnNode >> transpileUsing: transpiler [
-	^ transpiler putReturn: self value.
-		
+RBReturnNode >> transpileUsing: arg1 [
+
+	^ arg1 putReturn: self value
 ]

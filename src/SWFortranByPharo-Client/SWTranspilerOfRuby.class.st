@@ -1,6 +1,3 @@
-"
-I am out of order.
-"
 Class {
 	#name : #SWTranspilerOfRuby,
 	#superclass : #SWTranspiler,
@@ -8,545 +5,577 @@ Class {
 }
 
 { #category : #'as yet unclassified' }
-SWTranspilerOfRuby >> and_For: receiver With: arguments [
+SWTranspilerOfRuby >> and_For: arg1 With: arg2 [
+
 	self
-		transpile: receiver;
+		transpile: arg1;
 		put: ' && ';
 		preventNewline;
-		transpile: (arguments at: 1) body.
+		transpile: (arg2 at: 1) body
 ]
 
 { #category : #'as yet unclassified' }
-SWTranspilerOfRuby >> anySatisfy_For: receiver With: arguments [
-	self
-		transpile: receiver;
-		put: '.find';
-		putBlockWithoutProc: (arguments at: 1)
+SWTranspilerOfRuby >> anySatisfy_For: arg1 With: arg2 [
 
+	self
+		transpile: arg1;
+		put: '.find';
+		putBlockWithoutProc: (arg2 at: 1)
 ]
 
 { #category : #converting }
-SWTranspilerOfRuby >> asStringFor: receiver With: arguments [
+SWTranspilerOfRuby >> asStringFor: arg1 With: arg2 [
+
 	self
 		pushMessageNest;
 		put: 'SWString.new(';
-		transpile: receiver;
+		transpile: arg1;
 		put: '.to_s)';
 		popMessageNest
-		
 ]
 
 { #category : #converting }
-SWTranspilerOfRuby >> asSymbolFor: receiver With: arguments [
+SWTranspilerOfRuby >> asSymbolFor: arg1 With: arg2 [
+
 	self
-		transpile: receiver;
+		transpile: arg1;
 		put: '.intern'
 ]
 
 { #category : #accessing }
-SWTranspilerOfRuby >> at_For: receiver With: arguments [
-	self
-		transpile: receiver;
-		put: '[';
-		transpile: (arguments at: 1);
-		put: ']'
+SWTranspilerOfRuby >> at_For: arg1 With: arg2 [
 
+	self
+		transpile: arg1;
+		put: '[';
+		transpile: (arg2 at: 1);
+		put: ']'
 ]
 
 { #category : #accessing }
-SWTranspilerOfRuby >> at_ifAbsent_For: receiver With: arguments [
+SWTranspilerOfRuby >> at_ifAbsent_For: arg1 With: arg2 [
+
 	self
 		put: '(';
-		transpile: receiver;
+		transpile: arg1;
 		put: '[';
-		transpile: (arguments at: 1);
+		transpile: (arg2 at: 1);
 		put: '] || ';
 		preventNewline;
-		transpile: (arguments at: 2) body;
+		transpile: (arg2 at: 2) body;
 		put: ')'
-
 ]
 
 { #category : #accessing }
-SWTranspilerOfRuby >> at_put_For: receiver With: arguments [
+SWTranspilerOfRuby >> at_put_For: arg1 With: arg2 [
+
 	self
-		transpile: receiver;
+		transpile: arg1;
 		pushMessageNest;
 		put: '[';
-		transpile: (arguments at: 1);
+		transpile: (arg2 at: 1);
 		put: '] = ';
-		transpile: (arguments at: 2);
+		transpile: (arg2 at: 2);
 		popMessageNest
 ]
 
 { #category : #'as yet unclassified' }
-SWTranspilerOfRuby >> beginsWith_For: receiver With: arguments [
-	self putMessage: receiver send: 'start_with?' with: arguments
+SWTranspilerOfRuby >> beginsWith_For: arg1 With: arg2 [
+
+	self putMessage: arg1 send: 'start_with?' with: arg2
 ]
 
 { #category : #'as yet unclassified' }
-SWTranspilerOfRuby >> collect_For: receiver With: arguments [
+SWTranspilerOfRuby >> collect_For: arg1 With: arg2 [
+
 	self
-		transpile: receiver;
+		transpile: arg1;
 		put: '.collect';
-		putBlockWithoutProc: (arguments at: 1)
-
+		putBlockWithoutProc: (arg2 at: 1)
 ]
 
 { #category : #'as yet unclassified' }
-SWTranspilerOfRuby >> copyFor:receiver With: arguments [
+SWTranspilerOfRuby >> copyFor: arg1 With: arg2 [
+
 	self
-		transpile: receiver;
+		transpile: arg1;
 		put: '.clone'
 ]
 
 { #category : #copying }
-SWTranspilerOfRuby >> copyReplaceAll_with_For: receiver With: arguments [
+SWTranspilerOfRuby >> copyReplaceAll_with_For: arg1 With: arg2 [
+
 	self
 		incMessageNest;
 		pushMessageNest;
-		transpile: receiver;
+		transpile: arg1;
 		put: '[';
-		transpile: (arguments at: 1);
+		transpile: (arg2 at: 1);
 		put: ']= ';
-		transpile: (arguments at: 2);
+		transpile: (arg2 at: 2);
 		popMessageNest;
 		decMessageNest
 ]
 
 { #category : #'as yet unclassified' }
-SWTranspilerOfRuby >> descriptionFor: receiver With: arguments [
+SWTranspilerOfRuby >> descriptionFor: arg1 With: arg2 [
+
 	self
-		pushMessageNest;	
-		putMessage: receiver send: 'message' with: arguments;
+		pushMessageNest;
+		putMessage: arg1 send: 'message' with: arg2;
 		popMessageNest
 ]
 
 { #category : #'as yet unclassified' }
-SWTranspilerOfRuby >> do_For: receiver With: arguments [
+SWTranspilerOfRuby >> do_For: arg1 With: arg2 [
+
 	self
 		pushMessageNest;
-		transpile: receiver;
+		transpile: arg1;
 		put: '.each';
-		putBlockWithoutProc: (arguments at: 1);
-		popMessageNest.
-
+		putBlockWithoutProc: (arg2 at: 1);
+		popMessageNest
 ]
 
 { #category : #'as yet unclassified' }
-SWTranspilerOfRuby >> ensure_For: receiver With: arguments [
+SWTranspilerOfRuby >> ensure_For: arg1 With: arg2 [
+
 	self
 		pushMessageNest;
 		putLine: 'begin';
-		transpile: receiver body;
+		transpile: arg1 body;
 		putLine: 'ensure';
-		transpile: (arguments at: 1) body;
+		transpile: (arg2 at: 1) body;
 		put: 'end';
 		popMessageNest
-
 ]
 
 { #category : #'as yet unclassified' }
-SWTranspilerOfRuby >> ifFalse_For: receiver With: arguments [
+SWTranspilerOfRuby >> ifFalse_For: arg1 With: arg2 [
+
 	self
 		put: 'if not ';
 		pushMessageNest;
-		transpile: receiver;
+		transpile: arg1;
 		putLine;
-		transpile: (arguments at: 1) body;
+		transpile: (arg2 at: 1) body;
 		popMessageNest;
 		put: 'end'
-
 ]
 
 { #category : #'as yet unclassified' }
-SWTranspilerOfRuby >> ifNil_For: receiver With: arguments [
+SWTranspilerOfRuby >> ifNil_For: arg1 With: arg2 [
+
 	self
 		pushMessageNest;
 		put: '(if ';
-		transpile: receiver;
+		transpile: arg1;
 		putLine: '.nil?';
-		transpile: (arguments at: 1) body;
+		transpile: (arg2 at: 1) body;
 		putLine: 'else';
 		incIndent;
-		transpile: receiver;
+		transpile: arg1;
 		putLine;
 		decIndent;
 		put: 'end)';
 		popMessageNest
-		
 ]
 
 { #category : #'as yet unclassified' }
-SWTranspilerOfRuby >> ifNotNil_For: receiver With: arguments [
+SWTranspilerOfRuby >> ifNotNil_For: arg1 With: arg2 [
+
 	self
 		pushMessageNest;
 		put: '(not (';
-		transpile: receiver;
+		transpile: arg1;
 		putLine: ').nil?) ? (';
-		transpile: (arguments at: 1) body;
+		transpile: (arg2 at: 1) body;
 		put: '): nil';
 		popMessageNest
 ]
 
 { #category : #'as yet unclassified' }
-SWTranspilerOfRuby >> ifNotNil_ifNil_For: receiver With: arguments [
+SWTranspilerOfRuby >> ifNotNil_ifNil_For: arg1 With: arg2 [
+
 	self
 		pushMessageNest;
 		put: 'if not (';
-		transpile: receiver;
+		transpile: arg1;
 		putLine: ').nil?';
-		transpile: (arguments at: 1) body;
+		transpile: (arg2 at: 1) body;
 		putLine: 'else';
-		transpile: (arguments at: 2) body;
+		transpile: (arg2 at: 2) body;
 		put: 'end';
 		popMessageNest
 ]
 
 { #category : #'as yet unclassified' }
-SWTranspilerOfRuby >> ifTrue_For: receiver With: arguments [
+SWTranspilerOfRuby >> ifTrue_For: arg1 With: arg2 [
+
 	self
 		pushMessageNest;
 		put: 'if ';
-		transpile: receiver;
+		transpile: arg1;
 		putLine;
-		transpile: (arguments at: 1) body;
+		transpile: (arg2 at: 1) body;
 		put: 'end'
-
 ]
 
 { #category : #'as yet unclassified' }
-SWTranspilerOfRuby >> ifTrue_ifFalse_For: receiver With: arguments [
+SWTranspilerOfRuby >> ifTrue_ifFalse_For: arg1 With: arg2 [
+
 	self
 		pushMessageNest;
 		put: '(if ';
-		transpile: receiver;
+		transpile: arg1;
 		putLine;
-		transpile: (arguments at: 1) body;
+		transpile: (arg2 at: 1) body;
 		putLine: 'else';
-		transpile: (arguments at: 2) body;
+		transpile: (arg2 at: 2) body;
 		put: 'end)';
 		popMessageNest
 ]
 
 { #category : #initialization }
 SWTranspilerOfRuby >> initialize [
-	super initialize.
-	self newline: String lf.
-	self type: #rb.
 
+	super initialize.
+	self
+		newline: String lf;
+		type: #rb
 ]
 
 { #category : #'as yet unclassified' }
-SWTranspilerOfRuby >> join_For: receiver With: arguments [
+SWTranspilerOfRuby >> join_For: arg1 With: arg2 [
+
 	self
 		pushMessageNest;
-		putMessage: (arguments at: 1) send: 'join' with: { receiver };
+		putMessage: (arg2 at: 1) send: 'join' with: { arg1 };
 		popMessageNest
 ]
 
 { #category : #'as yet unclassified' }
-SWTranspilerOfRuby >> on_do_For: receiver With: arguments [
+SWTranspilerOfRuby >> on_do_For: arg1 With: arg2 [
+
 	self
 		pushMessageNest;
 		putLine: 'begin';
-		transpile: receiver body;
+		transpile: arg1 body;
 		put: 'rescue => ';
-		putLine: ((0 < (arguments at: 2) arguments size) ifTrue: [ (arguments at: 2) argumentNames at: 1 ] ifFalse: ['e']);
-		transpile: (arguments at: 2) body;
+		putLine: (0 < (arg2 at: 2) arguments size
+				 ifTrue: [ (arg2 at: 2) argumentNames at: 1 ]
+				 ifFalse: [ 'e' ]);
+		transpile: (arg2 at: 2) body;
 		put: 'end';
 		popMessageNest
 ]
 
 { #category : #'as yet unclassified' }
-SWTranspilerOfRuby >> opArrow_For: receiver With: arguments [
+SWTranspilerOfRuby >> opArrow_For: arg1 With: arg2 [
+
 	self
 		pushMessageNest;
 		put: 'Association.new(';
-		transpile: receiver;
+		transpile: arg1;
 		put: ', ';
-		transpile: (arguments at: 1);
+		transpile: (arg2 at: 1);
 		put: ')';
-		popMessageNest.
+		popMessageNest
 ]
 
 { #category : #'as yet unclassified' }
-SWTranspilerOfRuby >> opCamma_For: receiver With: arguments [
+SWTranspilerOfRuby >> opCamma_For: arg1 With: arg2 [
+
 	self
-		transpile: receiver;
+		transpile: arg1;
 		put: ' + ';
-		transpile: (arguments at: 1)
+		transpile: (arg2 at: 1)
 ]
 
 { #category : #'as yet unclassified' }
-SWTranspilerOfRuby >> opEqual_For: receiver With: arguments [
+SWTranspilerOfRuby >> opEqual_For: arg1 With: arg2 [
+
 	self
-		transpile: receiver;
+		transpile: arg1;
 		put: ' == ';
-		transpile: (arguments at: 1)
+		transpile: (arg2 at: 1)
 ]
 
 { #category : #'as yet unclassified' }
-SWTranspilerOfRuby >> opNotEqual_For: receiver With: arguments [
+SWTranspilerOfRuby >> opNotEqual_For: arg1 With: arg2 [
+
 	self
-		transpile: receiver;
+		transpile: arg1;
 		put: ' != ';
-		transpile: (arguments at: 1)
+		transpile: (arg2 at: 1)
 ]
 
 { #category : #'as yet unclassified' }
-SWTranspilerOfRuby >> perform_For: receiver With: arguments [
+SWTranspilerOfRuby >> perform_For: arg1 With: arg2 [
+
 	self
 		pushMessageNest;
-		putMessage: receiver send: 'send' with: arguments;
-		popMessageNest.
+		putMessage: arg1 send: 'send' with: arg2;
+		popMessageNest
 ]
 
 { #category : #'code generation' }
-SWTranspilerOfRuby >> putArgumentsOf: selector with: arguments [
-	(0 < arguments size) ifTrue: [
+SWTranspilerOfRuby >> putArgumentsOf: arg1 with: arg2 [
+
+	0 < arg2 size ifTrue: [ 
 		self
 			put: '(';
-			putArray: arguments;
-			put: ')'
-	]
+			putArray: arg2;
+			put: ')' ]
 ]
 
 { #category : #'as yet unclassified' }
-SWTranspilerOfRuby >> putBlock: aBlock [
-	self 
+SWTranspilerOfRuby >> putBlock: arg1 [
+
+	self
 		put: 'proc';
-		putBlockWithoutProc: aBlock
-
+		putBlockWithoutProc: arg1
 ]
 
 { #category : #'as yet unclassified' }
-SWTranspilerOfRuby >> putBlockWithoutProc: aBlock [
-	self 
+SWTranspilerOfRuby >> putBlockWithoutProc: arg1 [
+
+	self
 		pushMessageNest;
 		put: '{'.
-	(0 < aBlock arguments size) ifTrue: [
+	0 < arg1 arguments size ifTrue: [ 
 		self put: '|'.
-		aBlock argumentNames do: [ :each |
-			self put: each asString
-		] separatedBy: [
-			self put: ', '
-		].
-		self put: '|'
-	].
+		arg1 argumentNames
+			do: [ :arg2 | self put: arg2 asString ]
+			separatedBy: [ self put: ', ' ].
+		self put: '|' ].
 	self
 		putLine;
-		transpile: aBlock body;
+		transpile: arg1 body;
 		put: '}';
 		popMessageNest
-
-
 ]
 
 { #category : #'as yet unclassified' }
-SWTranspilerOfRuby >> putClassDefinition: aClass [
-	self putComment: aClass comment.
-	self put: 'class '.
-	self put: aClass name.
-	(aClass superclass = Object) ifFalse: [
-		self put: ' < '; put: aClass superclass name
-	].
-	self putLine.
-	self incIndent.
+SWTranspilerOfRuby >> putClassDefinition: arg1 [
 
-	aClass classVariables do: [ :aVal |
-		self put: '@@'; put: aVal name; putLine: ' = nil'
-	].
-
-	aClass instanceVariables do: [ :aVal |
-		self put: '@'; put: aVal name; putLine: ' = nil'
-	].
-
-	aClass class methods select: [:aMethod | (aMethod protocol beginsWith: 'code generation') not ] thenDo: [ :aMethod |
-		self putMethod: aMethod ofClass: aClass
-	].
-
-	aClass methods select: [ :aMethod | (aMethod protocol beginsWith: 'code generation') not ] thenDo: [ :aMethod |
-		self putMethod: aMethod ofClass: aClass
-	].
-
-	self flag: #toImplement.
-
-	self decIndent.
-	self putLine: 'end'.
+	self
+		putComment: arg1 comment;
+		put: 'class ';
+		put: arg1 name.
+	arg1 superclass = Object ifFalse: [ 
+		self
+			put: ' < ';
+			put: arg1 superclass name ].
+	self
+		putLine;
+		incIndent.
+	arg1 classVariables do: [ :arg2 | 
+		self
+			put: '@@';
+			put: arg2 name;
+			putLine: ' = nil' ].
+	arg1 instanceVariables do: [ :arg3 | 
+		self
+			put: '@';
+			put: arg3 name;
+			putLine: ' = nil' ].
+	arg1 class methods
+		select: [ :arg4 | (arg4 protocol beginsWith: 'code generation') not ]
+		thenDo: [ :arg5 | self putMethod: arg5 ofClass: arg1 ].
+	arg1 methods
+		select: [ :arg6 | (arg6 protocol beginsWith: 'code generation') not ]
+		thenDo: [ :arg7 | self putMethod: arg7 ofClass: arg1 ].
+	self
+		flag: #toImplement;
+		decIndent;
+		putLine: 'end'
 ]
 
 { #category : #'as yet unclassified' }
-SWTranspilerOfRuby >> putClassname: aName [
-	(#(String) anySatisfy: [ :each| each = aName ]) ifTrue: [
-		^ self
-			put: 'SW';
-			put: aName
-	].
+SWTranspilerOfRuby >> putClassname: arg1 [
 
-	^ super putClassname: aName
+	(#( #String ) anySatisfy: [ :arg2 | arg2 = arg1 ]) ifTrue: [ 
+		self put: 'SW'.
+		^ self put: arg1 ].
+	^ super putClassname: arg1
 ]
 
 { #category : #'as yet unclassified' }
-SWTranspilerOfRuby >> putComment: comment [
-	comment ifNotNil: [
-		comment linesDo: [ :aLine |
+SWTranspilerOfRuby >> putComment: arg1 [
+
+	arg1 ifNotNil: [ 
+		arg1 linesDo: [ :arg2 | 
 			self
 				put: '# ';
-				putLine: aLine
-		]
-	]
+				putLine: arg2 ] ]
 ]
 
 { #category : #'as yet unclassified' }
-SWTranspilerOfRuby >> putFileHeaderOf: filename [
-	self putLine: '#!/usr/bin/ruby'.
+SWTranspilerOfRuby >> putFileHeaderOf: arg1 [
 
+	self putLine: '#!/usr/bin/ruby'
 ]
 
 { #category : #'code generation' }
-SWTranspilerOfRuby >> putFunctionCallOf: selector with: arguments [
+SWTranspilerOfRuby >> putFunctionCallOf: arg1 with: arg2 [
+
 	self
 		pushMessageNest;
-		put: (selector asString first isLetter ifTrue: [
-			selector
-		] ifFalse: [
-			' ' join: {''. selector. ''}
-		]);
-		putArgumentsOf: selector with: arguments;
+		put: (arg1 asString first isLetter
+				 ifTrue: [ arg1 ]
+				 ifFalse: [ 
+					 ' ' join: { 
+								 ''.
+								 arg1.
+								 '' } ]);
+		putArgumentsOf: arg1 with: arg2;
 		popMessageNest
 ]
 
 { #category : #tests }
 SWTranspilerOfRuby >> putMainProgram [
-	self putCode: '\
-		(%entryClass%.new).main_(ARGV)
-	\' with: { '%entryClass%' -> self source entryClass }
 
-]
-
-{ #category : #'as yet unclassified' }
-SWTranspilerOfRuby >> putMessage: receiver send: selector with: arguments [
-	((receiver respondsTo: #name) and: [receiver name = 'super']) ifTrue: [
-		^ self putFunctionCallOf: 'super' with: arguments
-	].
-	^ super putMessage: receiver send: selector with: arguments
-]
-
-{ #category : #'as yet unclassified' }
-SWTranspilerOfRuby >> putMethod: aMethod ofClass: aClass [
-	|sel|
 	self
-		putComment: aMethod comment;
+		putCode: '\
+		(%entryClass%.new).main_(ARGV)
+	\'
+		with: { ('%entryClass%' -> self source entryClass) }
+]
+
+{ #category : #'as yet unclassified' }
+SWTranspilerOfRuby >> putMessage: arg1 send: arg2 with: arg3 [
+
+	((arg1 respondsTo: #name) and: [ arg1 name = 'super' ]) ifTrue: [ 
+		^ self putFunctionCallOf: 'super' with: arg3 ].
+	^ super putMessage: arg1 send: arg2 with: arg3
+]
+
+{ #category : #'as yet unclassified' }
+SWTranspilerOfRuby >> putMethod: arg1 ofClass: arg2 [
+
+	| tmp1 |
+	self
+		putComment: arg1 comment;
 		put: 'def ';
-		put: ((aMethod methodClass class = Metaclass) ifTrue: ['self.'] ifFalse: [ '' ]);
-		put: (self class safeSelectorNameOf: aMethod selector);
+		put: (arg1 methodClass class = Metaclass
+				 ifTrue: [ 'self.' ]
+				 ifFalse: [ '' ]);
+		put: (self class safeSelectorNameOf: arg1 selector);
 		put: '(';
-		put: (', ' join: (aMethod argumentNames collect: [ :each | each asString ]));
+		put:
+			(', ' join: (arg1 argumentNames collect: [ :arg3 | arg3 asString ]));
 		putLine: ')';
 		pushMessageNest.
-	sel := self safeSelectorNameOf: aMethod.
-	(aClass respondsTo: sel) ifTrue: [
-		self incIndent.
-		aClass perform: sel with: self.
-		self decIndent.
-		self putLine.
-	] ifFalse: [
-		aMethod transpileUsing: self.
-	].
+	tmp1 := self safeSelectorNameOf: arg1.
+	(arg2 respondsTo: tmp1)
+		ifTrue: [ 
+			self incIndent.
+			arg2 perform: tmp1 with: self.
+			self
+				decIndent;
+				putLine ]
+		ifFalse: [ arg1 transpileUsing: self ].
 	self
 		putLine: 'end';
-		popMessageNest.
+		popMessageNest
 ]
 
 { #category : #'as yet unclassified' }
 SWTranspilerOfRuby >> putNil [
+
 	self put: 'nil'
 ]
 
 { #category : #'code generation' }
 SWTranspilerOfRuby >> putRequirements [
-	|sel|
-	sel := #'rb_requirements'.
-	self source classes do: [:aClass |
-		(aClass respondsTo: sel) ifTrue: [
-			(aClass perform: sel) do: [ :dependence |
-				dependence isString ifTrue: [
-					self put: 'require '''; put: dependence; putLine: ''''
-				] ifFalse: [|dep|
-					dep := SWSourceOld new
-						classes: { dependence };
-						type: self type;
-						client: self client;
-						put;
-						yourself.
-					self put: 'require '''; put: dep filename; putLine: ''''
-				]
-			]
-		]
-	]
 
+	| tmp1 |
+	tmp1 := #rb_requirements.
+	self source classes do: [ :arg1 | 
+		(arg1 respondsTo: tmp1) ifTrue: [ 
+			(arg1 perform: tmp1) do: [ :arg2 | 
+				| tmp2 |
+				arg2 isString
+					ifTrue: [ 
+						self
+							put: 'require ''';
+							put: arg2;
+							putLine: '''' ]
+					ifFalse: [ 
+						| tmp4 |
+						tmp4 := SWSourceOld new.
+						tmp4
+							classes: { arg2 };
+							type: self type;
+							client: self client;
+							put.
+						tmp2 := tmp4 yourself.
+						self
+							put: 'require ''';
+							put: tmp2 filename;
+							putLine: '''' ] ] ] ]
 ]
 
 { #category : #'as yet unclassified' }
-SWTranspilerOfRuby >> putSymbol: aSymbol [
+SWTranspilerOfRuby >> putSymbol: arg1 [
+
 	self
 		put: ':';
-		put: (self class safeSelectorNameOf: aSymbol)
+		put: (self class safeSelectorNameOf: arg1)
 ]
 
 { #category : #'as yet unclassified' }
 SWTranspilerOfRuby >> putTestRunner [
+
 	self
 		put: 'runner = ';
 		put: self source firstClass asString;
 		putLine: '.new'.
-	(self source firstClass methods select: [ :each |
-		each protocol beginsWith: 'test'
-	]) do: [ :each |
+	(self source firstClass methods select: [ :arg1 | 
+		 arg1 protocol beginsWith: 'test' ]) do: [ :arg2 | 
 		self
 			putLine: 'runner.setUp';
 			put: 'runner.';
-			putLine: each selector asString;
-			putLine: 'runner.tearDown'
-	]
-
+			putLine: arg2 selector asString;
+			putLine: 'runner.tearDown' ]
 ]
 
 { #category : #'as yet unclassified' }
-SWTranspilerOfRuby >> putVariable: aVariableNode [
-	(#(String Dictionary) anySatisfy: [ :each| each = aVariableNode name ]) ifTrue: [
-		^ self
-			put: 'SW';
-			put: aVariableNode name
-	].
+SWTranspilerOfRuby >> putVariable: arg1 [
 
-	(aVariableNode isInstanceVariable) ifTrue: [
-		^ self put: '@'; put: aVariableNode name
-	].
-
-	(aVariableNode isClassVariable) ifTrue: [
-		^ self put: '@@'; put: aVariableNode name
-	].
-	^ super putVariable: aVariableNode
+	(#( #String #Dictionary ) anySatisfy: [ :arg2 | arg2 = arg1 name ]) 
+		ifTrue: [ 
+			self put: 'SW'.
+			^ self put: arg1 name ].
+	arg1 isInstanceVariable ifTrue: [ 
+		self put: '@'.
+		^ self put: arg1 name ].
+	arg1 isClassVariable ifTrue: [ 
+		self put: '@@'.
+		^ self put: arg1 name ].
+	^ super putVariable: arg1
 ]
 
 { #category : #'as yet unclassified' }
-SWTranspilerOfRuby >> valueFor: receiver With: argunents [
+SWTranspilerOfRuby >> valueFor: arg1 With: arg2 [
+
 	self
-		transpile: receiver;
+		transpile: arg1;
 		put: '.call'
 ]
 
 { #category : #'as yet unclassified' }
-SWTranspilerOfRuby >> value_For: receiver With: arguments [
+SWTranspilerOfRuby >> value_For: arg1 With: arg2 [
+
 	self
-		transpile: receiver;
+		transpile: arg1;
 		put: '.';
-		putFunctionCallOf: 'call' with: arguments
+		putFunctionCallOf: 'call' with: arg2
 ]
 
 { #category : #'as yet unclassified' }
-SWTranspilerOfRuby >> yourselfFor: receiver With:arguments [
-	self transpile: receiver
+SWTranspilerOfRuby >> yourselfFor: arg1 With: arg2 [
+
+	self transpile: arg1
 ]

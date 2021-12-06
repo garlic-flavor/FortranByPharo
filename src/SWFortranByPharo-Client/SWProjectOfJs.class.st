@@ -1,6 +1,3 @@
-"
-I have imformations about a Project that can be run with NodeJs.
-"
 Class {
 	#name : #SWProjectOfJs,
 	#superclass : #SWProjectOld,
@@ -9,14 +6,15 @@ Class {
 
 { #category : #running }
 SWProjectOfJs >> go [
-	|aSource|
-	aSource := self pool get: self moduleName.
-	^ self client exec: 'node' with: ({ aSource filename }, self args).
 
+	| tmp1 |
+	tmp1 := self pool get: self moduleName.
+	^ self client exec: 'node' with: { tmp1 filename } , self args
 ]
 
 { #category : #initialization }
 SWProjectOfJs >> initialize [
+
 	super initialize.
 	self type: #mjs
 ]

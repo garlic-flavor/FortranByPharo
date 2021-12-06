@@ -1,6 +1,3 @@
-"
-I transpile CompiledMethod.
-"
 Class {
 	#name : #SWMethodDefinitionTranspiler,
 	#superclass : #Object,
@@ -12,19 +9,20 @@ Class {
 }
 
 { #category : #decoding }
-SWMethodDefinitionTranspiler class >> decode: selector types: types [
-	|mdt|
-	mdt := self new.
-	mdt bodyTranspiler: ((self methodBodyTranspilerClass
-		new: selector types: types)
-		stream: mdt stream).
-	^ mdt
+SWMethodDefinitionTranspiler class >> decode: arg1 types: arg2 [
 
+	| tmp1 |
+	tmp1 := self new.
+	tmp1 bodyTranspiler:
+		((self methodBodyTranspilerClass new: arg1 types: arg2) stream:
+			 tmp1 stream).
+	^ tmp1
 ]
 
 { #category : #'as yet unclassified' }
 SWMethodDefinitionTranspiler class >> methodBodyTranspilerClass [
-	^ self subclassResponsibility 
+
+	^ self subclassResponsibility
 ]
 
 { #category : #accessing }
@@ -34,40 +32,46 @@ SWMethodDefinitionTranspiler >> bodyTranspiler [
 ]
 
 { #category : #accessing }
-SWMethodDefinitionTranspiler >> bodyTranspiler: anObject [
+SWMethodDefinitionTranspiler >> bodyTranspiler: arg1 [
 
-	bodyTranspiler := anObject
+	bodyTranspiler := arg1
 ]
 
 { #category : #'public API' }
-SWMethodDefinitionTranspiler >> logging: trueOrFalse [
-	self stream logging: trueOrFalse
+SWMethodDefinitionTranspiler >> logging: arg1 [
+
+	self stream logging: arg1
 ]
 
 { #category : #'code generation' }
 SWMethodDefinitionTranspiler >> putFunctionFooter [
-	^ self subclassResponsibility 
+
+	^ self subclassResponsibility
 ]
 
 { #category : #'code generation' }
 SWMethodDefinitionTranspiler >> putFunctionHeader [
-	^ self subclassResponsibility 
+
+	^ self subclassResponsibility
 ]
 
 { #category : #accessing }
 SWMethodDefinitionTranspiler >> stream [
 
-	^ stream ifNil: [ stream := SWTranspilerStream new ]
+	^ stream
+		  ifNil: [ stream := SWTranspilerStream new ]
+		  ifNotNil: [ stream ]
 ]
 
 { #category : #accessing }
-SWMethodDefinitionTranspiler >> stream: anObject [
+SWMethodDefinitionTranspiler >> stream: arg1 [
 
-	stream := anObject
+	stream := arg1
 ]
 
 { #category : #'public API' }
 SWMethodDefinitionTranspiler >> transpile [
+
 	self putFunctionHeader.
 	self stream incIndent.
 	self bodyTranspiler transpile.

@@ -1,6 +1,3 @@
-"
-I hold type informatino about a class.
-"
 Class {
 	#name : #SWClassInfo,
 	#superclass : #Object,
@@ -14,45 +11,49 @@ Class {
 
 { #category : #accessing }
 SWClassInfo class >> analyzerClass [
+
 	^ SWStackAnalyzer
 ]
 
 { #category : #accessing }
-SWClassInfo >> getVariableInfoAt: offset [
-	^ self getVariableInfoOf: (self targetClass slots at: offset + 1) name
+SWClassInfo >> getVariableInfoAt: arg1 [
+
+	^ self getVariableInfoOf: (self targetClass slots at: arg1 + 1) name
 ]
 
 { #category : #accessing }
-SWClassInfo >> getVariableInfoOf: aName [
-	^ ((self targetClass slots collect: [ :each | each name ]) anySatisfy: [ :each | each = aName ]) ifTrue: [
-		self members at: aName ifAbsentPut: [
-			(self class analyzerClass new: aName asSymbol types: { self targetClass }) return
-		]
-	] ifFalse: [
-		nil
-	]
+SWClassInfo >> getVariableInfoOf: arg1 [
 
+	^ ((self targetClass slots collect: [ :arg2 | arg2 name ]) 
+		   anySatisfy: [ :arg3 | arg3 = arg1 ]) ifTrue: [ 
+		  self members at: arg1 ifAbsentPut: [ 
+			  (self class analyzerClass
+				   new: arg1 asSymbol
+				   types: { self targetClass }) return ] ]
 ]
 
 { #category : #accessing }
 SWClassInfo >> members [
 
-	^ members ifNil: [ members := Dictionary new ]
+	^ members ifNil: [ members := Dictionary new ] ifNotNil: [ members ]
 ]
 
 { #category : #accessing }
-SWClassInfo >> members: anObject [
+SWClassInfo >> members: arg1 [
 
-	members := anObject
+	members := arg1
 ]
 
 { #category : #accessing }
 SWClassInfo >> sourceHash [
-	^ sourceHash ifNil: [
-		sourceHash := SHA256 hashMessage: ((self targetClass methods collect: [
-			:each | SHA256 hashMessage: each sourceCode
-		]) flatCollect: [ :each | each ])
-	]
+
+	^ sourceHash
+		  ifNil: [ 
+			  sourceHash := SHA256 hashMessage:
+				                ((self targetClass methods collect: [ :arg1 | 
+					                  SHA256 hashMessage: arg1 sourceCode ]) 
+					                 flatCollect: [ :arg2 | arg2 ]) ]
+		  ifNotNil: [ sourceHash ]
 ]
 
 { #category : #accessing }
@@ -62,7 +63,7 @@ SWClassInfo >> targetClass [
 ]
 
 { #category : #accessing }
-SWClassInfo >> targetClass: anObject [
+SWClassInfo >> targetClass: arg1 [
 
-	targetClass := anObject
+	targetClass := arg1
 ]

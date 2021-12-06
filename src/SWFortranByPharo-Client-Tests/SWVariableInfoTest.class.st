@@ -1,6 +1,3 @@
-"
-A SWVariableInfoTest is a test class for testing the behavior of SWVariableInfo
-"
 Class {
 	#name : #SWVariableInfoTest,
 	#superclass : #TestCase,
@@ -9,13 +6,12 @@ Class {
 
 { #category : #tests }
 SWVariableInfoTest >> testNextTemporalVariableNameOf [
-	|dict name|
-	dict := Set new.
-	name := nil.
-	256 timesRepeat: [
-		name := SWVariableInfo nextTemporalVariableNameOf: name.
-		self deny: (dict includes: name).
-		dict add: name
-	].
 
+	| tmp1 tmp3 |
+	tmp1 := Set new.
+	tmp3 := nil.
+	256 timesRepeat: [ 
+		tmp3 := SWVariableInfo nextTemporalVariableNameOf: tmp3.
+		self deny: (tmp1 includes: tmp3).
+		tmp1 add: tmp3 ]
 ]

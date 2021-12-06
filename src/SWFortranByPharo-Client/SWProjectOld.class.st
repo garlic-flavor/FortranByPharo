@@ -1,8 +1,3 @@
-"
-I have informations about a Project that can be run on the server.
-SWProject>>#go runs the project on the server.
-SWProject>>#goDomestic runs the project inside this Pharo image.
-"
 Class {
 	#name : #SWProjectOld,
 	#superclass : #Object,
@@ -17,62 +12,60 @@ Class {
 }
 
 { #category : #'instance creation' }
-SWProjectOld class >> of: type [
-	type = #mjs ifTrue: [ 
-		^ SWProjectOfJs new	
-	].
-	type = #f90 ifTrue: [
-		^ SWProjectOfFortran new
-	].
-	self flag: #ToImplement.
-	self halt.
+SWProjectOld class >> of: arg1 [
+
+	arg1 = #mjs ifTrue: [ ^ SWProjectOfJs new ].
+	arg1 = #f90 ifTrue: [ ^ SWProjectOfFortran new ].
+	self
+		flag: #ToImplement;
+		halt
 ]
 
 { #category : #accessing }
 SWProjectOld >> args [
 
-	^ args ifNil: [ args := {  } ]
+	^ args ifNil: [ args := {  } ] ifNotNil: [ args ]
 ]
 
 { #category : #accessing }
-SWProjectOld >> args: anObject [
+SWProjectOld >> args: arg1 [
 
-	args := anObject
+	args := arg1
 ]
 
 { #category : #accessing }
 SWProjectOld >> client [
 
-	^ client ifNil: [ client := SWClient new ]
+	^ client ifNil: [ client := SWClient new ] ifNotNil: [ client ]
 ]
 
 { #category : #accessing }
-SWProjectOld >> client: anObject [
+SWProjectOld >> client: arg1 [
 
-	client := anObject
+	client := arg1
 ]
 
 { #category : #running }
 SWProjectOld >> go [
-	^ self subclassResponsibility.
 
+	^ self subclassResponsibility
 ]
 
 { #category : #running }
 SWProjectOld >> goDomestic [
-	|aClass|
-	aClass := (Smalltalk globals at: self moduleName) ifNil: [ 
-		(self pool get: self moduleName) programClass
-	].
-	
-	^ aClass program
 
+	| tmp1 tmp3 |
+	tmp3 := Smalltalk globals at: self moduleName.
+	tmp1 := tmp3
+		        ifNil: [ (self pool get: self moduleName) programClass ]
+		        ifNotNil: [ tmp3 ].
+	^ tmp1 program
 ]
 
 { #category : #initialization }
 SWProjectOld >> initialize [
-	super initialize.
 
+	super initialize
 ]
 
 { #category : #accessing }
@@ -82,26 +75,29 @@ SWProjectOld >> moduleName [
 ]
 
 { #category : #accessing }
-SWProjectOld >> moduleName: anObject [
+SWProjectOld >> moduleName: arg1 [
 
-	moduleName := anObject
+	moduleName := arg1
 ]
 
 { #category : #accessing }
 SWProjectOld >> pool [
 
-	^ pool ifNil: [
-		pool := SWSourcesPool new
-			type: self type;
-			client: self client;
-			yourself
-	]
+	^ pool
+		  ifNil: [ 
+			  | tmp2 |
+			  tmp2 := SWSourcesPool new.
+			  tmp2
+				  type: self type;
+				  client: self client.
+			  pool := tmp2 yourself ]
+		  ifNotNil: [ pool ]
 ]
 
 { #category : #accessing }
-SWProjectOld >> pool: anObject [
+SWProjectOld >> pool: arg1 [
 
-	pool := anObject
+	pool := arg1
 ]
 
 { #category : #accessing }
@@ -111,6 +107,7 @@ SWProjectOld >> type [
 ]
 
 { #category : #accessing }
-SWProjectOld >> type: aType [
-	type := aType
+SWProjectOld >> type: arg1 [
+
+	type := arg1
 ]

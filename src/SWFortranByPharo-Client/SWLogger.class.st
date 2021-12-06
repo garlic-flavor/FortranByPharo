@@ -1,9 +1,3 @@
-"
-I am a logger class for SWTranspiler and its inherited classes.
-I display logs to Transcript window while a transpiling process.
-My main interface is SWLogger>>#log: method.
-
-"
 Class {
 	#name : #SWLogger,
 	#superclass : #Object,
@@ -17,54 +11,62 @@ Class {
 { #category : #accessing }
 SWLogger >> enabled [
 
-	^ enabled ifNil: [ enabled := false ]
+	^ enabled ifNil: [ enabled := false ] ifNotNil: [ enabled ]
 ]
 
 { #category : #accessing }
-SWLogger >> enabled: anObject [
+SWLogger >> enabled: arg1 [
 
-	enabled := anObject
+	enabled := arg1
 ]
 
 { #category : #private }
-SWLogger >> getDepthOf: aContext [
-	aContext ifNil: [ ^ 0	].
-	(self selector value: aContext) ifTrue: [ 
-		^ 1 + (self getDepthOf: aContext sender)
-	] ifFalse: [
-		^ self getDepthOf: aContext sender
-	]
+SWLogger >> getDepthOf: arg1 [
+
+	arg1 ifNil: [ ^ 0 ].
+	(self selector value: arg1) ifTrue: [ 
+		^ 1 + (self getDepthOf: arg1 sender) ].
+	^ self getDepthOf: arg1 sender
 ]
 
 { #category : #public }
 SWLogger >> log [
-	self log: '' withContext: thisContext sender.
+
+	self log: '' withContext: thisContext sender
 ]
 
 { #category : #public }
-SWLogger >> log: msg [
-	self log: msg withContext: thisContext sender
+SWLogger >> log: arg1 [
+
+	self log: arg1 withContext: thisContext sender
 ]
 
 { #category : #private }
-SWLogger >> log: msg withContext: aContext [
-	|depth|
-	self enabled ifFalse: [ ^ self ].
-	depth := self getDepthOf: aContext.
-	Transcript << ('  ' repeat: depth); << aContext asString; << '> '; << msg value; cr; flush
+SWLogger >> log: arg1 withContext: arg2 [
 
+	| tmp1 |
+	self enabled ifFalse: [ ^ self ].
+	tmp1 := self getDepthOf: arg2.
+	Transcript
+		<< ('  ' repeat: tmp1);
+		<< arg2 asString;
+		<< '> ';
+		<< arg1 value;
+		cr;
+		flush
 ]
 
 { #category : #accessing }
 SWLogger >> selector [
-	^ selector ifNil: [
-		selector := [ :aContext |
-			aContext receiver className beginsWith: 'SW'
-		]
-	]
+
+	^ selector
+		  ifNil: [ 
+		  selector := [ :arg1 | arg1 receiver className beginsWith: 'SW' ] ]
+		  ifNotNil: [ selector ]
 ]
 
 { #category : #accessing }
-SWLogger >> selector: aSelectorBlock [
-	selector := aSelectorBlock 
+SWLogger >> selector: arg1 [
+
+	selector := arg1
 ]
