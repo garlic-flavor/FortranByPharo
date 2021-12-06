@@ -1,3 +1,6 @@
+"
+I'm a stream for transpilers.
+"
 Class {
 	#name : #SWTranspilerStream,
 	#superclass : #Object,
@@ -15,125 +18,114 @@ Class {
 
 { #category : #accessing }
 SWTranspilerStream >> contents [
-
 	^ payload contents
 ]
 
 { #category : #api }
 SWTranspilerStream >> decIndent [
-
 	indent := indent - 1.
 	indent < 0 ifTrue: [ self error: 'Indentation clauses mismatch.' ]
 ]
 
 { #category : #api }
 SWTranspilerStream >> incIndent [
-
-	indent := indent + 1
+	indent := indent + 1.
 ]
 
 { #category : #initialization }
 SWTranspilerStream >> initialize [
-
 	super initialize.
 	payload := String new writeStream.
 	indent := 0.
 	isNewline := false.
-	preventNewline := false
+	preventNewline := false.
 ]
 
 { #category : #api }
 SWTranspilerStream >> log [
-
 	self logger log: '' withContext: thisContext sender
 ]
 
 { #category : #api }
-SWTranspilerStream >> log: arg1 [
-
-	self logger log: arg1 withContext: thisContext sender
+SWTranspilerStream >> log: msg [
+	self logger log: msg withContext: thisContext sender
 ]
 
 { #category : #accessing }
 SWTranspilerStream >> logger [
 
-	^ logger ifNil: [ logger := SWLogger new ] ifNotNil: [ logger ]
+	^ logger ifNil: [ logger := SWLogger new ]
 ]
 
 { #category : #accessing }
-SWTranspilerStream >> logger: arg1 [
+SWTranspilerStream >> logger: anObject [
 
-	logger := arg1
+	logger := anObject
 ]
 
 { #category : #api }
-SWTranspilerStream >> logging: arg1 [
-
-	self logger enabled: arg1
+SWTranspilerStream >> logging: trueOrFalse [
+	self logger enabled: trueOrFalse
 ]
 
 { #category : #accessing }
 SWTranspilerStream >> newline [
 
-	^ newline ifNil: [ newline := String crlf ] ifNotNil: [ newline ]
+	^ newline ifNil: [ newline := String crlf ]
 ]
 
 { #category : #accessing }
-SWTranspilerStream >> newline: arg1 [
+SWTranspilerStream >> newline: anObject [
 
-	newline := arg1
+	newline := anObject
 ]
 
 { #category : #api }
 SWTranspilerStream >> preventNewline [
-
 	preventNewline := true
 ]
 
 { #category : #api }
-SWTranspilerStream >> put: arg1 [
-
-	self logger log: arg1.
+SWTranspilerStream >> put: code [
+	self logger log: code.
 	self putIndent.
-	payload nextPutAll: arg1
+	payload nextPutAll: code.
 ]
 
 { #category : #private }
 SWTranspilerStream >> putIndent [
-
 	isNewline ifFalse: [ ^ self ].
-	payload nextPutAll: (' ' repeat: { 
-				 0.
-				 (self tabWidth * indent) } max).
-	isNewline := false
+	payload nextPutAll: (' ' repeat: {0. (self tabWidth * indent)} max).
+	isNewline := false.
+
 ]
 
 { #category : #api }
 SWTranspilerStream >> putLine [
-
 	preventNewline
 		ifTrue: [ preventNewline := false ]
-		ifFalse: [ 
+		ifFalse: [
 			payload << self newline.
-			isNewline := true ]
+			isNewline := true.
+		].
+
 ]
 
 { #category : #api }
-SWTranspilerStream >> putLine: arg1 [
+SWTranspilerStream >> putLine: code [
+	self put: code.
+	self putLine.
 
-	self
-		put: arg1;
-		putLine
 ]
 
 { #category : #accessing }
 SWTranspilerStream >> tabWidth [
 
-	^ tabWidth ifNil: [ tabWidth := 4 ] ifNotNil: [ tabWidth ]
+	^ tabWidth ifNil: [ tabWidth := 4 ]
 ]
 
 { #category : #accessing }
-SWTranspilerStream >> tabWidth: arg1 [
+SWTranspilerStream >> tabWidth: anObject [
 
-	tabWidth := arg1
+	tabWidth := anObject
 ]

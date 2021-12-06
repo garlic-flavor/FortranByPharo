@@ -1,3 +1,6 @@
+"
+I transpile a method of Pharo class.
+"
 Class {
 	#name : #SWMethodBodyTranspiler,
 	#superclass : #SWStackAnalyzerToTranspile,
@@ -10,344 +13,341 @@ Class {
 }
 
 { #category : #utils }
-SWMethodBodyTranspiler class >> messageTranspilerMethodNameFor: arg1 [
-
-	^ ((self safeSelectorNameOf: arg1) , 'For:With:') asSymbol
+SWMethodBodyTranspiler class >> messageTranspilerMethodNameFor: aSelector [
+	^ ((self safeSelectorNameOf: aSelector), 'For:With:') asSymbol
 ]
 
 { #category : #utils }
-SWMethodBodyTranspiler class >> uniqueMessageTranspilerNameFor: arg1 for: arg2 [
+SWMethodBodyTranspiler class >> uniqueMessageTranspilerNameFor: aSelector for: type [
+	^ (String streamContents: [ :s |
+		s << type; <<  '_'; << (self safeSelectorNameOf: aSelector); << 'For:With:Using:'
+	]) asSymbol
+	
 
-	^ (String streamContents: [ :arg3 | 
-		   arg3
-			   << arg2;
-			   << '_';
-			   << (self safeSelectorNameOf: arg1);
-			   << 'For:With:Using:' ]) asSymbol
 ]
 
 { #category : #'code generation' }
-SWMethodBodyTranspiler >> << arg1 [
-
+SWMethodBodyTranspiler >> << anObject [
 	self stream log.
-	arg1 transpileUsing: self
+	anObject transpileUsing: self
+
 ]
 
 { #category : #'private - utilities' }
-SWMethodBodyTranspiler >> classOf: arg1 [
+SWMethodBodyTranspiler >> classOf: receiver [
 
-	arg1 class = RBLiteralValueNode ifTrue: [ ^ arg1 value class ].
-	arg1 class = RBVariableNode ifTrue: [ 
-		^ arg1 name first isUppercase
-			  ifTrue: [ Smalltalk globals at: arg1 name ]
-			  ifFalse: [ (self variableInfoOf: arg1 name) type ] ].
-	self halt
+	receiver class = RBLiteralValueNode ifTrue: [
+		^ receiver value class
+	].
+
+	receiver class = RBVariableNode ifTrue: [
+		^ receiver name first isUppercase ifTrue: [
+			(Smalltalk globals at: receiver name)
+		] ifFalse: [
+			(self variableInfoOf: receiver name) type
+		]
+	].
+
+	self halt.
 ]
 
 { #category : #'code generation' }
 SWMethodBodyTranspiler >> cr [
-
 	self stream putLine
 ]
 
 { #category : #'private - code generation' }
 SWMethodBodyTranspiler >> decMessageNest [
+	messageNest push: { 0. messageNest pop - 1 } max.
+	0 < messageNest top ifTrue: [ self put: ')' ].
 
-	messageNest push: { 
-			0.
-			(messageNest pop - 1) } max.
-	0 < messageNest top ifTrue: [ self put: ')' ]
 ]
 
 { #category : #'private - testing' }
-SWMethodBodyTranspiler >> hasOwnMessageTranspilerMethodOf: arg1 ifTrue: arg2 [
+SWMethodBodyTranspiler >> hasOwnMessageTranspilerMethodOf: aSelector ifTrue: aBlock [
+	|otms aMethod|
+	otms := self class messageTranspilerMethodNameFor: aSelector.
+	(aMethod := self class search: otms in: self class) ifNotNil: [
+		aBlock value: [ :receiver :arguments |
+			aMethod valueWithReceiver: self arguments: { receiver. arguments }
+		]
+	]
 
-	| tmp1 tmp2 |
-	tmp1 := self class messageTranspilerMethodNameFor: arg1.
-	(tmp2 := self class search: tmp1 in: self class) ifNotNil: [ 
-		arg2 value: [ :arg3 :arg4 | 
-			tmp2 valueWithReceiver: self arguments: { 
-					arg3.
-					arg4 } ] ]
 ]
 
 { #category : #'private - testing' }
-SWMethodBodyTranspiler >> ifUniqueMessageTranspilerExistsOn: arg1 of: arg2 thenDo: arg3 [
+SWMethodBodyTranspiler >> ifUniqueMessageTranspilerExistsOn: receiver of: selector thenDo: aBlock [
+	| receiverClassClass selectorName transpiler |
 
-	| tmp1 tmp2 tmp3 |
-	tmp1 := self metaclassOf: arg1.
-	tmp2 := self class
-		        uniqueMessageTranspilerNameFor: arg2
-		        for: self type.
-	(tmp3 := self class search: tmp2 in: tmp1) ifNotNil: [ 
-		arg3 value: [ :arg4 | 
-			tmp3 valueWithReceiver: tmp1 arguments: { 
-					arg4.
-					self } ] ]
+	receiverClassClass := self metaclassOf: receiver.
+	selectorName := self class uniqueMessageTranspilerNameFor: selector for: self type.
+	(transpiler := self class search: selectorName in: receiverClassClass) ifNotNil: [
+		aBlock value: [ :arguments |
+			transpiler valueWithReceiver: receiverClassClass arguments: { arguments. self }
+		]
+	].
+
 ]
 
 { #category : #'private - code generation' }
 SWMethodBodyTranspiler >> incMessageNest [
-
-	messageNest push: messageNest pop + 1.
-	1 < messageNest top ifTrue: [ self put: '(' ]
+	messageNest push: (messageNest pop + 1).
+	1 < messageNest top ifTrue: [ self put: '(' ].
 ]
 
 { #category : #initialization }
 SWMethodBodyTranspiler >> initialize [
-
 	super initialize.
-	messageNest := Stack newFrom: { 0 }
+	messageNest := Stack newFrom: { 0 }.
 ]
 
 { #category : #'public API' }
-SWMethodBodyTranspiler >> logging: arg1 [
-
-	self stream logging: arg1
+SWMethodBodyTranspiler >> logging: trueOrFalse [
+	self stream logging: trueOrFalse
 ]
 
 { #category : #'private - utilities' }
-SWMethodBodyTranspiler >> metaclassOf: arg1 [
-
-	| tmp1 |
-	^ (tmp1 := self classOf: arg1) class = Metaclass
-		  ifTrue: [ tmp1 ]
-		  ifFalse: [ tmp1 class ]
+SWMethodBodyTranspiler >> metaclassOf: receiver [
+	|rType|
+	^ (rType := (self classOf: receiver))  class = Metaclass ifTrue: [
+		rType
+	] ifFalse: [
+		rType class
+	]
 ]
 
 { #category : #'code generation' }
-SWMethodBodyTranspiler >> opEqual_For: arg1 With: arg2 [
-
-	self stream log: [ arg1 asString , ' == ' , (arg2 at: 1) asString ].
+SWMethodBodyTranspiler >> opEqual_For: receiver With: arguments [
+	self stream log: [ receiver asString, ' == ', (arguments at: 1) asString ].
 	self
-		<< arg1;
+		<< receiver;
 		put: ' == ';
-		<< (arg2 at: 1)
+		<< (arguments at: 1).
+
 ]
 
 { #category : #'code generation' }
-SWMethodBodyTranspiler >> put: arg1 [
-
-	self stream put: arg1 asString
+SWMethodBodyTranspiler >> put: anObject [
+	self stream put: anObject asString
 ]
 
 { #category : #'code generation' }
-SWMethodBodyTranspiler >> putArguments: arg1 [
-
+SWMethodBodyTranspiler >> putArguments: arguments [
 	self stream log.
 	self put: '('.
-	arg1 do: [ :arg2 | self << arg2 ] separatedBy: [ self put: ', ' ].
+	arguments do: [ :each |
+		self << each
+	] separatedBy: [
+		self put: ', '
+	].
 	self put: ')'
+
 ]
 
 { #category : #'code generation' }
-SWMethodBodyTranspiler >> putArray: arg1 [
-
+SWMethodBodyTranspiler >> putArray: anArray [
 	self stream log.
 	self put: '['.
-	arg1 do: [ :arg2 | self << arg2 ] separatedBy: [ self put: ', ' ].
-	self put: ']'
+	anArray do: [:each |
+		self << each
+	] separatedBy: [
+		self put: ', '
+	].
+	self put: ']'.
+
 ]
 
 { #category : #'code generation' }
-SWMethodBodyTranspiler >> putAssignTo: arg1 with: arg2 [
-
-	self stream log: [ arg1 asString , ' = ' , arg2 asString ].
+SWMethodBodyTranspiler >> putAssignTo: key with: value [
+	self stream log: [ key asString, ' = ', value asString ].
 	self
-		<< arg1;
+		<< key;
 		put: ' = ';
-		<< arg2
+		<< value
+
 ]
 
 { #category : #'code generation' }
-SWMethodBodyTranspiler >> putCascade: arg1 [
+SWMethodBodyTranspiler >> putCascade: aRBCascadeNode [
+	|seq tmp|
+	tmp := RBVariableNode new
+		name: self tempStore pop name;
+		yourself.
+	seq := RBSequenceNode new
+		addNode: (RBAssignmentNode variable: tmp value: aRBCascadeNode leftmostChainReceiver );
+		addNodes: (aRBCascadeNode messages collect: [:each |
+			each copy
+				receiver: tmp;
+				yourself
+		]);
+		yourself.
+	self putSequence: seq.
 
-	| tmp1 tmp2 tmp4 tmp6 |
-	tmp4 := RBVariableNode new.
-	tmp4 name: self tempStore pop name.
-	tmp2 := tmp4 yourself.
-	tmp6 := RBSequenceNode new.
-	tmp6
-		addNode:
-			(RBAssignmentNode variable: tmp2 value: arg1 leftmostChainReceiver);
-		addNodes: (arg1 messages collect: [ :arg2 | 
-					 | tmp8 |
-					 tmp8 := arg2 copy.
-					 tmp8
-						 receiver: tmp2;
-						 yourself ]).
-	tmp1 := tmp6 yourself.
-	self putSequence: tmp1
 ]
 
 { #category : #'code generation' }
-SWMethodBodyTranspiler >> putCharacter: arg1 [
-
+SWMethodBodyTranspiler >> putCharacter: c [
 	self stream log.
+
 	self
 		put: '"';
-		put: arg1 asString;
-		put: '"'
+		put: c asString;
+		put: '"'.
 ]
 
 { #category : #'code generation' }
 SWMethodBodyTranspiler >> putClassAccessor [
-
 	self put: '.'
 ]
 
 { #category : #'code generation' }
-SWMethodBodyTranspiler >> putCode: arg1 [
-
-	^ self putCode: arg1 with: {  }
+SWMethodBodyTranspiler >> putCode: code [
+	^ self putCode: code with: {  }
 ]
 
 { #category : #'code generation' }
-SWMethodBodyTranspiler >> putCode: arg1 with: arg2 [
-
-	| tmp1 tmp2 tmp4 |
+SWMethodBodyTranspiler >> putCode: code with: anAssociationArray [
+	"when a line in code ends with $\, the line continues to the next."
+	|matcher leftPad escaped|
 	self stream log.
-	tmp1 := RxMatcher forString: '(\\\r|\s+\\$)'.
-	tmp4 := tmp1 copy: arg1 replacingMatchesWith: ''.
-	tmp2 := (tmp4 findFirst: [ :arg3 | arg3 ~= Character tab ]) - 1.
-	tmp1 := RxMatcher forString: '\t+'.
-	tmp4 := tmp1
-		        copy: tmp4
-		        translatingMatchesUsing: [ :arg4 | 
-		        String tab repeat: arg4 size - tmp2 ].
-	arg2 do: [ :arg5 | 
-		tmp4 := tmp4 copyReplaceAll: arg5 key with: arg5 value ].
-	self put: tmp4
+
+	matcher := RxMatcher forString: '(\\\r|\s+\\$)'.
+	escaped := matcher copy: code replacingMatchesWith: ''.
+	leftPad := (escaped findFirst: [ :c | c ~= Character tab ])-1.
+	matcher := RxMatcher forString: '\t+'.
+	escaped := matcher copy: escaped translatingMatchesUsing: [ :m |
+		String tab repeat: (m size - leftPad)
+	].
+	anAssociationArray do: [ :each |
+		escaped := escaped copyReplaceAll: each key with: each value.
+	].
+	self put: escaped.
+
+
 ]
 
 { #category : #'code generation' }
-SWMethodBodyTranspiler >> putInteger: arg1 [
-
+SWMethodBodyTranspiler >> putInteger: anInteger [
 	self stream log.
-	self put: arg1 asString
+	self put: anInteger asString
 ]
 
 { #category : #'code generation' }
-SWMethodBodyTranspiler >> putMessage: arg1 send: arg2 with: arg3 [
-
-	self stream log: [ arg1 asString , ' >> ' , arg2 asString ].
-	self
-		incMessageNest;
-		selectTranspilerFor: arg1 send: arg2 with: arg3;
-		decMessageNest
+SWMethodBodyTranspiler >> putMessage: receiver send: selector with: arguments [
+	self stream log: [ receiver asString, ' >> ', selector asString ].
+	self incMessageNest.
+	self selectTranspilerFor: receiver send: selector with: arguments.
+	self decMessageNest
 ]
 
 { #category : #'code generation' }
-SWMethodBodyTranspiler >> putOrdinaryMessage: arg1 send: arg2 with: arg3 [
-
+SWMethodBodyTranspiler >> putOrdinaryMessage: receiver send: selector with: arguments [
 	self stream log.
-	self << arg1.
-	arg2 first isLetter
-		ifTrue: [ 
-			self
-				putClassAccessor;
-				put: (self class safeSelectorNameOf: arg2);
-				putArguments: arg3 ]
-		ifFalse: [ 
-			self
-				put: arg2;
-				<< (arg3 at: 1) ]
+	self << receiver.
+	selector first isLetter ifTrue: [
+		self
+			putClassAccessor;
+			put: (self class safeSelectorNameOf: selector);
+			putArguments: arguments.
+	] ifFalse: [
+		self
+			put: selector;
+			<< (arguments at: 1)
+	]
+
+
 ]
 
 { #category : #'code generation' }
-SWMethodBodyTranspiler >> putParameters: arg1 [
-
+SWMethodBodyTranspiler >> putParameters: anArray [
 	self stream log.
-	arg1
-		do: [ :arg2 | self put: arg2 asString ]
-		separatedBy: [ self put: ', ' ]
+	anArray do: [:each |
+		self put: each asString
+	] separatedBy: [
+		self put: ', '
+	]
+
 ]
 
 { #category : #'code generation' }
-SWMethodBodyTranspiler >> putReturn: arg1 [
-
+SWMethodBodyTranspiler >> putReturn: value [
 	self stream log.
-	self put: 'return '.
-	^ self << arg1
+	^ self
+		put: 'return ';
+		<< value.
 ]
 
 { #category : #'code generation' }
-SWMethodBodyTranspiler >> putSequence: arg1 [
-
-	arg1 statements do: [ :arg2 | self putStatement: arg2 ]
+SWMethodBodyTranspiler >> putSequence: aSequence [
+	aSequence statements do: [ :each |
+		self putStatement: each
+	]
 ]
 
 { #category : #'code generation' }
-SWMethodBodyTranspiler >> putStatement: arg1 [
-
-	self << arg1.
-	arg1 class = RBCascadeNode ifTrue: [ ^ self ].
+SWMethodBodyTranspiler >> putStatement: aStatement [
+	self << aStatement.
+	aStatement class = RBCascadeNode ifTrue: [ ^ self ].
 	self
 		putStatementDelimiter;
 		cr
+
 ]
 
 { #category : #'code generation' }
 SWMethodBodyTranspiler >> putStatementDelimiter [
-
-	^ self subclassResponsibility
+	^ self subclassResponsibility 
 ]
 
 { #category : #'code generation' }
-SWMethodBodyTranspiler >> putString: arg1 [
-
+SWMethodBodyTranspiler >> putString: aString [
 	self stream log.
 	self
 		put: '"';
-		put: arg1;
-		put: '"'
+		put: aString;
+		put: '"'.
 ]
 
 { #category : #'code generation' }
-SWMethodBodyTranspiler >> putVariable: arg1 [
-
-	self stream log: arg1 name.
-	self put: arg1 name
+SWMethodBodyTranspiler >> putVariable: aVariableNode [
+	self stream log: aVariableNode name.
+	self put: aVariableNode name
 ]
 
 { #category : #'code generation' }
-SWMethodBodyTranspiler >> putVariableDeclarationOf: arg1 [
-
-	^ self subclassResponsibility
+SWMethodBodyTranspiler >> putVariableDeclarationOf: aVariableInfo [
+	^ self subclassResponsibility 
 ]
 
 { #category : #'private - code generation' }
-SWMethodBodyTranspiler >> selectTranspilerFor: arg1 send: arg2 with: arg3 [
+SWMethodBodyTranspiler >> selectTranspilerFor: receiver send: selector with: arguments [
+	self stream log: [ receiver asString, ' >> ', selector asString ].
+	self ifUniqueMessageTranspilerExistsOn: receiver of: selector thenDo: [ :proc |
+		^ proc value: arguments
+	].
+	self hasOwnMessageTranspilerMethodOf: selector ifTrue: [ :proc |
+		^ proc with: receiver with: arguments
+	].
+	^ self putOrdinaryMessage: receiver send: selector with: arguments
 
-	self stream log: [ arg1 asString , ' >> ' , arg2 asString ].
-	self
-		ifUniqueMessageTranspilerExistsOn: arg1
-		of: arg2
-		thenDo: [ :arg4 | ^ arg4 value: arg3 ];
-		hasOwnMessageTranspilerMethodOf: arg2
-		ifTrue: [ :arg5 | ^ arg5 with: arg1 with: arg3 ].
-	^ self putOrdinaryMessage: arg1 send: arg2 with: arg3
 ]
 
 { #category : #accessing }
 SWMethodBodyTranspiler >> stream [
 
-	^ stream
-		  ifNil: [ stream := SWTranspilerStream new ]
-		  ifNotNil: [ stream ]
+	^ stream ifNil: [ stream := SWTranspilerStream new ]
 ]
 
 { #category : #accessing }
-SWMethodBodyTranspiler >> stream: arg1 [
+SWMethodBodyTranspiler >> stream: anObject [
 
-	stream := arg1
+	stream := anObject
 ]
 
 { #category : #'public API' }
 SWMethodBodyTranspiler >> transpile [
-
 	self stream log.
-	self locals do: [ :arg1 | self putVariableDeclarationOf: arg1 ].
+	self locals do: [ :each | self putVariableDeclarationOf: each ].
 	self putSequence: self method sourceNode body.
 	^ self stream contents
 ]
@@ -359,7 +359,7 @@ SWMethodBodyTranspiler >> type [
 ]
 
 { #category : #accessing }
-SWMethodBodyTranspiler >> type: arg1 [
+SWMethodBodyTranspiler >> type: anObject [
 
-	type := arg1
+	type := anObject
 ]

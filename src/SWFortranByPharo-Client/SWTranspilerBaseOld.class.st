@@ -1,3 +1,6 @@
+"
+I implements base functionality for transpilers.
+"
 Class {
 	#name : #SWTranspilerBaseOld,
 	#superclass : #Object,
@@ -10,93 +13,87 @@ Class {
 
 { #category : #accessing }
 SWTranspilerBaseOld class >> analyzerClass [
-
 	^ SWMethodInfo
 ]
 
 { #category : #utils }
-SWTranspilerBaseOld class >> domainSpecificMessageTranspilerOf: arg1 [
-
-	^ ((self safeSelectorNameOf: arg1) , 'For:With:') asSymbol
+SWTranspilerBaseOld class >> domainSpecificMessageTranspilerOf: aSelector [
+	^ ((self safeSelectorNameOf: aSelector), 'For:With:') asSymbol
 ]
 
 { #category : #utils }
-SWTranspilerBaseOld class >> safeSelectorNameOf: arg1 [
+SWTranspilerBaseOld class >> safeSelectorNameOf: selector [
+	selector = '=' ifTrue: [ ^ 'opEqual_' ].
+	selector = '~=' ifTrue: [ ^ 'opNotEqual_' ].
+	selector = ',' ifTrue: [ ^ 'opCamma_' ].
+	selector = '->' ifTrue: [ ^ 'opArrow_' ].
+	selector = '/' ifTrue: [ ^ 'opDiv_' ].
+	selector = '<<' ifTrue: [ ^ 'opWrite_' ].
+	^ selector collect: [:c | (#' >#:/' anySatisfy: [ :each | each = c]) ifTrue: [ $_ ] ifFalse: [ c ] ]
 
-	arg1 = '=' ifTrue: [ ^ 'opEqual_' ].
-	arg1 = '~=' ifTrue: [ ^ 'opNotEqual_' ].
-	arg1 = ',' ifTrue: [ ^ 'opCamma_' ].
-	arg1 = '->' ifTrue: [ ^ 'opArrow_' ].
-	arg1 = '/' ifTrue: [ ^ 'opDiv_' ].
-	arg1 = '<<' ifTrue: [ ^ 'opWrite_' ].
-	^ arg1 collect: [ :arg2 | 
-		  (#' >#:/' anySatisfy: [ :arg3 | arg3 = arg2 ])
-			  ifTrue: [ $_ ]
-			  ifFalse: [ arg2 ] ]
 ]
 
 { #category : #testing }
-SWTranspilerBaseOld >> hasDomainSpecificTranspilerOf: arg1 ifTrue: arg2 [
-
-	| tmp1 |
-	tmp1 := self class domainSpecificMessageTranspilerOf: arg1.
-	(self respondsTo: tmp1) ifTrue: [ arg2 value: tmp1 ]
+SWTranspilerBaseOld >> hasDomainSpecificTranspilerOf: aSelecter ifTrue: aBlock [
+	|dst|
+	dst := self class domainSpecificMessageTranspilerOf: aSelecter.
+	(self respondsTo: dst) ifTrue: [
+		aBlock value: dst
+	]
 ]
 
 { #category : #testing }
-SWTranspilerBaseOld >> ifUniqueMessageTranspilerExistsOn: arg1 of: arg2 thenDo: arg3 [
+SWTranspilerBaseOld >> ifUniqueMessageTranspilerExistsOn: receiver of: selector thenDo: aBlock [
+	|receiverClass selectorName|
+	self halt.
+	self flag: #ToImplement.
+	receiverClass := receiver transpileUsing: self analyzer .
+	receiverClass class = Metaclass ifFalse: [ ^ self ].
+	selectorName := self uniqueMessageTranspilerOf: selector.
+	(receiverClass methodDict includesKey: selectorName) ifTrue: [
+		aBlock value: receiverClass soleInstance value: selectorName
+	]
 
-	| tmp1 tmp2 |
-	self
-		halt;
-		flag: #ToImplement.
-	tmp1 := arg1 transpileUsing: self analyzer.
-	tmp1 class = Metaclass ifFalse: [ ^ self ].
-	tmp2 := self uniqueMessageTranspilerOf: arg2.
-	(tmp1 methodDict includesKey: tmp2) ifTrue: [ 
-		arg3 value: tmp1 soleInstance value: tmp2 ]
 ]
 
 { #category : #accessing }
 SWTranspilerBaseOld >> logger [
-
-	^ logger ifNil: [ logger := SWLogger new ] ifNotNil: [ logger ]
+	^ logger ifNil: [ logger := SWLogger new ]
 ]
 
 { #category : #accessing }
-SWTranspilerBaseOld >> logging: arg1 [
-
-	self logger enabled: arg1
+SWTranspilerBaseOld >> logging: trueOrFalse [
+	self logger enabled: trueOrFalse
 ]
 
 { #category : #utils }
-SWTranspilerBaseOld >> methodBodyGeneratorNameOf: arg1 [
+SWTranspilerBaseOld >> methodBodyGeneratorNameOf: aMethod [
+	^ (String streamContents: [ :s |
+		s
+			<< self type;
+			<< '_';
+			<< (self class safeSelectorNameOf: aMethod selector);
+			<< 'Using:'
+	]) asSymbol.
 
-	^ (String streamContents: [ :arg2 | 
-		   arg2
-			   << self type;
-			   << '_';
-			   << (self class safeSelectorNameOf: arg1 selector);
-			   << 'Using:' ]) asSymbol
 ]
 
 { #category : #'code generation - protected' }
-SWTranspilerBaseOld >> putMessage: arg1 send: arg2 with: arg3 [
+SWTranspilerBaseOld >> putMessage: receiver send: selector with: arguments [
+	self logger log: [receiver asString, '>>', selector asString].
+	self ifUniqueMessageTranspilerExistsOn: receiver of: selector thenDo: [ :receiverClass :selectorName |
+		^ receiverClass perform: selectorName with: arguments with: self
+	].
+	self hasDomainSpecificTranspilerOf: selector ifTrue: [ :dst |
+		^ self perform: dst with: receiver with: arguments
+	].
+	^ self putOrdinaryMessage: receiver send: selector with: arguments.
 
-	self logger log: [ arg1 asString , '>>' , arg2 asString ].
-	self
-		ifUniqueMessageTranspilerExistsOn: arg1
-		of: arg2
-		thenDo: [ :arg4 :arg5 | ^ arg4 perform: arg5 with: arg3 with: self ];
-		hasDomainSpecificTranspilerOf: arg2
-		ifTrue: [ :arg6 | ^ self perform: arg6 with: arg1 with: arg3 ].
-	^ self putOrdinaryMessage: arg1 send: arg2 with: arg3
 ]
 
 { #category : #'code generation - protected' }
-SWTranspilerBaseOld >> putOrdinaryMessage: arg1 send: arg2 with: arg3 [
-
-	^ self subclassResponsibility
+SWTranspilerBaseOld >> putOrdinaryMessage: receiver send: selector with: arguments [
+	^ self subclassResponsibility 
 ]
 
 { #category : #'public - accessing' }
@@ -106,18 +103,16 @@ SWTranspilerBaseOld >> type [
 ]
 
 { #category : #'public - accessing' }
-SWTranspilerBaseOld >> type: arg1 [
+SWTranspilerBaseOld >> type: anObject [
 
-	type := arg1
+	type := anObject
 ]
 
 { #category : #utils }
-SWTranspilerBaseOld >> uniqueMessageTranspilerOf: arg1 [
+SWTranspilerBaseOld >> uniqueMessageTranspilerOf: aSelector [
+	^ (String streamContents: [ :s |
+		s << self type; <<  '_'; << (self class safeSelectorNameOf: aSelector); << 'With:Using:'
+	]) asSymbol
+	
 
-	^ (String streamContents: [ :arg2 | 
-		   arg2
-			   << self type;
-			   << '_';
-			   << (self class safeSelectorNameOf: arg1);
-			   << 'With:Using:' ]) asSymbol
 ]

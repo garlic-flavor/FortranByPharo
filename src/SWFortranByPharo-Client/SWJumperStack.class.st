@@ -1,3 +1,6 @@
+"
+I represent jumper's stack in SWStackAnalyzer
+"
 Class {
 	#name : #SWJumperStack,
 	#superclass : #Object,
@@ -9,21 +12,20 @@ Class {
 }
 
 { #category : #testing }
-SWJumperStack >> nextPeriodIs: arg1 [
-
-	^ 0 < self payload size and: [ self payload top = arg1 ]
+SWJumperStack >> nextPeriodIs: pc [
+	^ (0 < self payload size and: [ self payload top = pc ])
 ]
 
 { #category : #accessing }
 SWJumperStack >> payload [
 
-	^ payload ifNil: [ payload := Stack new ] ifNotNil: [ payload ]
+	^ payload ifNil: [ payload := Stack new ]
 ]
 
 { #category : #accessing }
-SWJumperStack >> payload: arg1 [
+SWJumperStack >> payload: anObject [
 
-	payload := arg1
+	payload := anObject
 ]
 
 { #category : #accessing }
@@ -33,32 +35,31 @@ SWJumperStack >> period [
 ]
 
 { #category : #accessing }
-SWJumperStack >> period: arg1 [
+SWJumperStack >> period: anObject [
 
-	period := arg1
+	period := anObject
 ]
 
 { #category : #removing }
 SWJumperStack >> pop [
-
-	| tmp1 |
-	tmp1 := self payload pop value.
-	self payload
-		ifNotEmpty: [ self period: self payload top ]
-		ifEmpty: [ self period: nil ].
-	^ tmp1
+	|val|
+	val := self payload pop value.
+	self payload ifNotEmpty: [
+		self period: self payload top
+	] ifEmpty: [
+		self period: nil
+	].
+	^ val
 ]
 
 { #category : #accessing }
-SWJumperStack >> pushAt: arg1 period: arg2 [
-
-	self period: arg2.
-	(0 < self payload size and: [ self payload top = arg1 ])
-		ifTrue: [ 
-			| tmp2 |
-			tmp2 := self payload.
-			tmp2
-				pop;
-				push: arg2 ]
-		ifFalse: [ self payload push: arg2 ]
+SWJumperStack >> pushAt: pc period: aPeriod [
+	self period: aPeriod.
+	(0 < self payload size and: [ self payload top = pc ]) ifTrue: [
+		(self payload)
+			pop;
+			push: aPeriod
+	] ifFalse: [
+		self payload push: aPeriod 
+	]
 ]

@@ -1,7 +1,7 @@
 Extension { #name : #FullBlockClosure }
 
 { #category : #'*SWFortranByPharo-Client' }
-FullBlockClosure >> transpileUsing: arg1 [
+FullBlockClosure >> transpileUsing: transpiler [
+	^ self sourceNode transpileUsing: transpiler.
 
-	^ self sourceNode transpileUsing: arg1
 ]

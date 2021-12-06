@@ -1,3 +1,6 @@
+"
+I make a zip directory.
+"
 Class {
 	#name : #SWSourcesLocalPoolArchived,
 	#superclass : #SWSourcesLocalPool,
@@ -8,41 +11,35 @@ Class {
 }
 
 { #category : #public }
-SWSourcesLocalPoolArchived >> get: arg1 [
-
-	^ self sources at: arg1 ifAbsent: [ 
-		  | tmp2 |
-		  tmp2 := super get: arg1.
-		  tmp2
-			  putOn: self;
-			  yourself ]
+SWSourcesLocalPoolArchived >> get: aModuleName [
+	^ self sources at: aModuleName ifAbsent: [
+		(super get: aModuleName)
+			putOn: self;
+			yourself
+	]
 ]
 
 { #category : #public }
-SWSourcesLocalPoolArchived >> nextPut: arg1 [
-
-	| tmp2 |
-	tmp2 := ZipStringMember new.
-	tmp2
-		localFileName: arg1 filename;
-		contents: arg1 contents.
-	self zip addMember: tmp2 yourself
+SWSourcesLocalPoolArchived >> nextPut: aSource [
+	self zip addMember: (ZipStringMember new
+		localFileName: aSource filename;
+		contents: aSource contents;
+		yourself)
 ]
 
 { #category : #writing }
-SWSourcesLocalPoolArchived >> writeToFile: arg1 [
-
-	self zip writeToFile: arg1
+SWSourcesLocalPoolArchived >> writeToFile: aPath [
+	self zip writeToFile: aPath
 ]
 
 { #category : #accessing }
 SWSourcesLocalPoolArchived >> zip [
 
-	^ zip ifNil: [ zip := ZipArchive new ] ifNotNil: [ zip ]
+	^ zip ifNil: [ zip := ZipArchive new ]
 ]
 
 { #category : #accessing }
-SWSourcesLocalPoolArchived >> zip: arg1 [
+SWSourcesLocalPoolArchived >> zip: anObject [
 
-	zip := arg1
+	zip := anObject
 ]

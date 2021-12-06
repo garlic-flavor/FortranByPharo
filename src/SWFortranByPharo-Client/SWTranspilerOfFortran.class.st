@@ -1,3 +1,6 @@
+"
+This transpile Pharo to Fortran.
+"
 Class {
 	#name : #SWTranspilerOfFortran,
 	#superclass : #SWTranspiler,
@@ -5,262 +8,259 @@ Class {
 }
 
 { #category : #'as yet unclassified' }
-SWTranspilerOfFortran class >> typeNameFor: arg1 [
+SWTranspilerOfFortran class >> typeNameFor: aClass [
+	aClass = Integer ifTrue: [
+		^ #integer
+	].
+	aClass = Float ifTrue: [
+		^ #'double precision'
+	].
+	(aClass inheritsFrom: SWType) ifTrue: [
+		^ (String streamContents: [ :s | s << 'type('; << aClass name; << ')' ]) asSymbol
+	].
+	^ #'no_implementation'.
 
-	arg1 = Integer ifTrue: [ ^ #integer ].
-	arg1 = Float ifTrue: [ ^ #'double precision' ].
-	(arg1 inheritsFrom: SWType) ifTrue: [ 
-		^ (String streamContents: [ :arg2 | 
-			   arg2
-				   << 'type(';
-				   << arg1 name;
-				   << ')' ]) asSymbol ].
-	^ #no_implementation
 ]
 
 { #category : #accessing }
 SWTranspilerOfFortran >> analyzer [
-
-	^ analyzer
-		  ifNil: [ analyzer := SWAnalyzer new ]
-		  ifNotNil: [ analyzer ]
+	^ analyzer ifNil: [ analyzer := SWAnalyzer new ]
 ]
 
 { #category : #'code generation' }
-SWTranspilerOfFortran >> assign: arg1 with: arg2 [
+SWTranspilerOfFortran >> assign: key with: value [
+	self analyzer variables at: key name ifPresent: [:vi |
+		vi initialValue ifNotNil: [ self preventNewline. ^ self ].
+		(value transpileUsing: self analyzer) = SWVariableInfo class ifTrue: [ self preventNewline. ^ self ]
+	].
+	super assign: key with: value.
 
-	self analyzer variables at: arg1 name ifPresent: [ :arg3 | 
-		arg3 initialValue ifNotNil: [ 
-			self preventNewline.
-			^ self ].
-		(arg2 transpileUsing: self analyzer) = SWVariableInfo class ifTrue: [ 
-			self preventNewline.
-			^ self ] ].
-	super assign: arg1 with: arg2
 ]
 
 { #category : #initialization }
 SWTranspilerOfFortran >> initialize [
-
-	super initialize.
-	self type: #f90
+	super initialize. 
+	self type: #f90.
 ]
 
 { #category : #'instance creation' }
-SWTranspilerOfFortran >> newWith_For: arg1 With: arg2 [
-
+SWTranspilerOfFortran >> newWith_For: receiver With: arguments [
 	self
-		transpile: arg1;
-		putArguments: arg2;
+		transpile: receiver;
+		putArguments: arguments;
 		putLine
 ]
 
 { #category : #'code generation' }
-SWTranspilerOfFortran >> putArguments: arg1 [
-
+SWTranspilerOfFortran >> putArguments: arguments [
 	self logger log.
 	self
 		put: '(';
-		putArray: arg1;
+		putArray: arguments;
 		put: ')'
+
 ]
 
 { #category : #'code generation' }
-SWTranspilerOfFortran >> putArgumentsOf: arg1 with: arg2 [
-
+SWTranspilerOfFortran >> putArgumentsOf: selector with: arguments [
 	self logger log.
 	self
 		put: '(';
-		putArray: arg2;
+		putArray: arguments;
 		put: ')'
+
 ]
 
 { #category : #'code generation' }
 SWTranspilerOfFortran >> putClassAccessor [
-
 	self put: '_'
 ]
 
 { #category : #'code generation' }
-SWTranspilerOfFortran >> putClassDefinition: arg1 [
-
-	| tmp1 |
+SWTranspilerOfFortran >> putClassDefinition: aClass [
+	|va|
 	self logger log.
-	(arg1 inheritsFrom: SWType) ifFalse: [ ^ self ].
+	(aClass inheritsFrom: SWType) ifFalse: [ ^self ].
+
 	self
 		incIndent;
-		putComment: arg1 comment;
+		putComment: aClass comment;
 		put: 'type ';
-		putLine: arg1 name;
+		putLine: aClass name;
 		incIndent.
-	tmp1 := (self analyzer subAnalyzer
-		         analyze: arg1 >> #initialize
-		         with: #(  )) variables.
-	arg1 instanceVariables
-		collect: [ :arg2 | tmp1 at: arg2 name ]
-		thenDo: [ :arg3 | self putVariableDeclarationOf: arg3 ].
+	va := (self analyzer subAnalyzer analyze: aClass >> #initialize with: #()) variables.
+	aClass instanceVariables collect: [ :slot | va at: slot name ] thenDo: [ :vi |
+		self putVariableDeclarationOf: vi
+	].
+	
 	self
 		decIndent;
 		put: 'end type ';
-		putLine: arg1 name;
+		putLine: aClass name;
 		decIndent
+	
 ]
 
 { #category : #'code generation' }
-SWTranspilerOfFortran >> putComment: arg1 [
-
+SWTranspilerOfFortran >> putComment: comment [
 	self logger log.
-	arg1 ifNotNil: [ 
-		arg1 linesDo: [ :arg2 | 
+	comment ifNotNil: [
+		comment linesDo: [ :aLine |
 			self
 				put: '! ';
-				putLine: arg2 ] ]
+				putLine: aLine
+		]
+	]
 ]
 
 { #category : #'code generation' }
-SWTranspilerOfFortran >> putFileFooterOf: arg1 [
-
+SWTranspilerOfFortran >> putFileFooterOf: aModuleName [
 	self
 		put: 'end program ';
-		putLine: arg1
+		putLine: aModuleName
 ]
 
 { #category : #'code generation' }
-SWTranspilerOfFortran >> putFileHeaderOf: arg1 [
-
+SWTranspilerOfFortran >> putFileHeaderOf: aModuleName [
 	self
 		putComment: self source programClass comment;
 		put: 'program ';
-		putLine: arg1;
+		putLine: aModuleName;
 		incIndent;
 		putLine: 'implicit none';
-		decIndent
+		decIndent.
 ]
 
 { #category : #'public API' }
-SWTranspilerOfFortran >> putMethod: arg1 [
-
-	| tmp1 |
+SWTranspilerOfFortran >> putMethod: methodInfo [
+	|uniqueTranspiler|
 	self logger log.
 	self incIndent.
-	arg1 variables values
-		select: [ :arg2 | arg2 name ~= #self ]
-		thenDo: [ :arg3 | self putVariableDeclarationOf: arg3 ].
-	tmp1 := self methodBodyGeneratorNameOf:
-		        (arg1 owner methodDictionary at: arg1 name).
-	(arg1 owner respondsTo: tmp1)
-		ifTrue: [ arg1 owner perform: tmp1 with: self ]
-		ifFalse: [ 
-			(arg1 owner methodDictionary at: arg1 name) sourceNode body
-				statements do: [ :arg4 | 
-				self
-					transpile: arg4;
-					putLine ] ].
+	methodInfo variables values select: [ :val | val name ~= #self ] thenDo: [ :val |
+		self putVariableDeclarationOf: val
+	].
+	uniqueTranspiler := self methodBodyGeneratorNameOf: (methodInfo owner methodDictionary at: methodInfo name).
+	(methodInfo owner respondsTo: uniqueTranspiler) ifTrue: [
+		methodInfo owner perform: uniqueTranspiler with: self.
+	] ifFalse: [
+		(methodInfo owner methodDictionary at: methodInfo name) sourceNode body statements do: [ :each |
+			self
+				transpile: each;
+				putLine
+		]
+	].
 	self decIndent
+
 ]
 
 { #category : #'code generation' }
-SWTranspilerOfFortran >> putOrdinaryMessage: arg1 send: arg2 with: arg3 [
-
-	| tmp1 tmp2 tmp3 tmp4 tmp5 |
+SWTranspilerOfFortran >> putOrdinaryMessage: receiver send: selector with: arguments [
+	| receiverClass mangledName argumentTypes methodInfo selectorName |
 	self logger log.
-	tmp5 := self class safeSelectorNameOf: arg2.
-	tmp1 := arg1 transpileUsing: self analyzer.
-	tmp3 := arg3 collect: [ :arg4 | arg4 transpileUsing: self analyzer ].
-	tmp2 := self analyzer class mangledNameOf: tmp1 >> arg2 with: tmp3.
-	tmp4 := self analyzer methods at: tmp2 ifAbsent: [ 
-		        | tmp7 |
-		        tmp7 := SWMethodInfo new.
-		        tmp7
-			        mangledName: arg2;
-			        yourself ].
-	tmp4 hasReturn
-		ifTrue: [ self flag: #ToImplement ]
-		ifFalse: [ 
+	selectorName := self class safeSelectorNameOf: selector.
+	receiverClass := receiver transpileUsing: self analyzer.
+	argumentTypes := arguments collect: [ :each | 
+                 each transpileUsing: self analyzer
+	].
+	mangledName := self analyzer class mangledNameOf: receiverClass >> selector with: argumentTypes.
+	methodInfo := self analyzer methods at: mangledName ifAbsent: [
+		SWMethodInfo new
+			mangledName: selector;
+			yourself.
+	].
+	methodInfo hasReturn
+		ifTrue: [
+			self flag: #ToImplement
+		] ifFalse: [ 
 			self
 				put: 'call ';
-				put: (self class safeSelectorNameOf: tmp2);
+				put: (self class safeSelectorNameOf: mangledName);
 				pushMessageNest;
-				putArguments: arg3;
-				popMessageNest ]
+				putArguments: arguments;
+				popMessageNest
+		]
+
 ]
 
 { #category : #'public API' }
-SWTranspilerOfFortran >> putProgram: arg1 [
-
-	| tmp1 |
-	tmp1 := self analyzer analyze: arg1 class >> #program with: #(  ).
+SWTranspilerOfFortran >> putProgram: programClass [
+	|methodInfo|
+	methodInfo := self analyzer analyze: programClass class >> #program with: #().
 	self
-		putMethod: tmp1;
+		putMethod: methodInfo;
 		putLine: 'contains';
 		putSubprograms: analyzer methods
+
 ]
 
 { #category : #'code generation' }
-SWTranspilerOfFortran >> putSequence: arg1 [
-
+SWTranspilerOfFortran >> putSequence: aSequence [
 	self logger log.
 	self incIndent.
-	arg1 statements do: [ :arg2 | 
+	aSequence statements do: [ :child |
 		self
-			transpile: arg2;
-			putLine ].
+			transpile: child;
+			putLine
+	].
 	self decIndent
 ]
 
 { #category : #'as yet unclassified' }
-SWTranspilerOfFortran >> putString: arg1 [
-
+SWTranspilerOfFortran >> putString: aString [
 	self
 		put: '''';
-		put: arg1;
-		put: ''''
+		put: aString;
+		put: ''''.
 ]
 
 { #category : #'as yet unclassified' }
-SWTranspilerOfFortran >> putSubprograms: arg1 [
-
+SWTranspilerOfFortran >> putSubprograms: methods [
 	self logger log.
 	self incIndent.
-	arg1 valuesDo: [ :arg2 | 
-		| tmp1 tmp2 tmp3 |
-		tmp1 := arg2 owner >> arg2 name.
-		tmp2 := self class safeSelectorNameOf: arg2 mangledName.
-		tmp3 := arg2 hasReturn
-			        ifTrue: [ 'function ' ]
-			        ifFalse: [ 'subroutine ' ].
+	methods valuesDo: [ :methodInfo ||method methodName methodType|
+		method := methodInfo owner >> methodInfo name.
+		methodName := self class safeSelectorNameOf: methodInfo mangledName.
+		methodType := methodInfo hasReturn ifTrue: [ 
+			'function '.
+		] ifFalse: [
+			 'subroutine '.
+		].
 		self
-			put: tmp3;
-			put: tmp2;
+			put: methodType;
+			put: methodName;
 			put: '(';
-			putArray: tmp1 argumentNames;
+			putArray: method argumentNames;
 			putLine: ')'.
-		self analyzer variables: arg2 variables.
+		self analyzer variables: methodInfo variables.
+		self putMethod: methodInfo.
 		self
-			putMethod: arg2;
 			put: 'end ';
-			put: tmp3;
-			putLine: tmp2 ].
-	self decIndent
+			put: methodType;
+			putLine: methodName
+	].
+	self decIndent.
 ]
 
 { #category : #'code generation' }
-SWTranspilerOfFortran >> putSymbol: arg1 [
-
-	self put: arg1 asString
+SWTranspilerOfFortran >> putSymbol: aSymbol [
+	self put: aSymbol asString.
 ]
 
 { #category : #'as yet unclassified' }
-SWTranspilerOfFortran >> putVariableDeclarationOf: arg1 [
-
-	self put: (self class typeNameFor: arg1 type).
-	(arg1 const and: [ arg1 initialValue isNotNil ]) ifTrue: [ 
-		self put: ', parameter' ].
+SWTranspilerOfFortran >> putVariableDeclarationOf: aVariableInfo [
+	self put:  ( self class typeNameFor: aVariableInfo type).
+	(aVariableInfo const and: [ aVariableInfo initialValue isNotNil ]) ifTrue: [
+		self put: ', parameter'
+	].
 	self
 		put: ' :: ';
-		put: arg1 name.
-	arg1 initialValue ifNil: [ self putLine ] ifNotNil: [ 
+		put: aVariableInfo name.
+	aVariableInfo initialValue ifNotNil: [
 		self
 			put: ' = ';
-			putLine: arg1 initialValue asString ]
+			putLine: aVariableInfo initialValue asString
+	] ifNil: [
+		self putLine
+	]
+
 ]

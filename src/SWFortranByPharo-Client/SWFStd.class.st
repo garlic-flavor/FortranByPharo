@@ -1,3 +1,7 @@
+"
+I implement Fortran specific functionality.
+My main functionalities are in class side of me.
+"
 Class {
 	#name : #SWFStd,
 	#superclass : #Object,
@@ -5,44 +9,32 @@ Class {
 }
 
 { #category : #'as yet unclassified' }
-SWFStd class >> a_declare_With: arg1 Using: arg2 [
-
-	
+SWFStd class >> a_declare_With: arguments Using: transpiler [
 ]
 
 { #category : #'code generation - property' }
-SWFStd class >> declare: arg1 [
-
-	^ arg1
-		  detect: [ :arg2 | arg2 isAssociation and: [ arg2 key = #value ] ]
-		  ifFound: [ :arg3 | arg3 value ]
-		  ifNone: [  ]
+SWFStd class >> declare: properties [
+	^ properties detect: [ :p | p isAssociation  and: [p key = #value ]] ifFound: [ :p | p value ] ifNone: [ nil ]
 ]
 
 { #category : #'code generation - property' }
-SWFStd class >> f90_declare_With: arg1 Using: arg2 [
+SWFStd class >> f90_declare_With: arguments Using: transpiler [
 
-	
 ]
 
 { #category : #'as yet unclassified' }
-SWFStd class >> f90_print_With: arg1 Using: arg2 [
-
-	arg2
+SWFStd class >> f90_print_With: arguments Using: transpiler [
+	transpiler
 		put: 'print *, ';
-		transpile: (arg1 at: 1)
+		transpile: (arguments at: 1)
 ]
 
 { #category : #printing }
-SWFStd class >> print: arg1 [
-
-	Transcript
-		show: arg1;
-		cr
+SWFStd class >> print: msg [
+	Transcript show: msg; cr.
 ]
 
 { #category : #'as yet unclassified' }
 SWFStd class >> toTranspile [
-
 	^ #module
 ]

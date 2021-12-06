@@ -1,7 +1,7 @@
 Extension { #name : #RBVariableNode }
 
 { #category : #'*SWFortranByPharo-Client' }
-RBVariableNode >> transpileUsing: arg1 [
+RBVariableNode >> transpileUsing: transpiler [
+	^ transpiler putVariable: self
 
-	^ arg1 putVariable: self
 ]

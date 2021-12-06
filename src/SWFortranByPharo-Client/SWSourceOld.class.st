@@ -1,3 +1,6 @@
+"
+This corresponds to a file on server side.
+"
 Class {
 	#name : #SWSourceOld,
 	#superclass : #Object,
@@ -21,114 +24,102 @@ SWSourceOld >> classes [
 ]
 
 { #category : #accessing }
-SWSourceOld >> classes: arg1 [
+SWSourceOld >> classes: anObject [
 
-	classes := arg1
+	classes := anObject
 ]
 
 { #category : #accessing }
 SWSourceOld >> contents [
 
-	^ contents
-		  ifNil: [ self error: 'I need be set a contents.' ]
-		  ifNotNil: [ contents ]
+	^ contents ifNil: [
+		self error: 'I need be set a contents.'
+	]
 ]
 
 { #category : #accessing }
-SWSourceOld >> contents: arg1 [
+SWSourceOld >> contents: anObject [
 
-	contents := arg1
+	contents := anObject
 ]
 
 { #category : #accessing }
 SWSourceOld >> contentsHash [
 
-	^ contentsHash
-		  ifNil: [ contentsHash := (SHA256 hashMessage: self contents) hex ]
-		  ifNotNil: [ contentsHash ]
+	^ contentsHash ifNil: [
+		contentsHash := (SHA256 hashMessage: self contents) hex
+	]
 ]
 
 { #category : #accessing }
-SWSourceOld >> contentsHash: arg1 [
+SWSourceOld >> contentsHash: anObject [
 
-	contentsHash := arg1
+	contentsHash := anObject
 ]
 
 { #category : #accessing }
 SWSourceOld >> dirName [
+	^  'cache'
 
-	^ 'cache'
 ]
 
 { #category : #accessing }
 SWSourceOld >> filename [
 
-	^ filename
-		  ifNil: [ 
-			  filename := String streamContents: [ :arg1 | 
-				              arg1
-					              << self dirName;
-					              << '/';
-					              << self moduleName;
-					              << '/';
-					              << self contentsHash;
-					              << '.';
-					              << self type ] ]
-		  ifNotNil: [ filename ]
+	^ filename ifNil: [
+		filename := String streamContents: [:s |
+			s
+				<< self dirName; << '/';
+				<< self moduleName; << '/';
+				<< self contentsHash; << '.'; << self type
+		]
+	]
 ]
 
 { #category : #accessing }
-SWSourceOld >> filename: arg1 [
+SWSourceOld >> filename: anObject [
 
-	filename := arg1
+	filename := anObject
 ]
 
 { #category : #accessing }
 SWSourceOld >> firstClass [
-
-	^ firstClass
-		  ifNil: [ 
-			  | tmp2 |
-			  tmp2 := self programClass.
-			  firstClass := tmp2
-				                ifNil: [ self classes first ]
-				                ifNotNil: [ tmp2 ] ]
-		  ifNotNil: [ firstClass ]
+	^ firstClass ifNil: [
+		firstClass := self programClass ifNil: [ self classes first ]
+	]
 ]
 
 { #category : #accessing }
-SWSourceOld >> firstClass: arg1 [
-
-	firstClass := arg1
+SWSourceOld >> firstClass: anObject [
+	firstClass := anObject
 ]
 
 { #category : #accessing }
 SWSourceOld >> moduleName [
+	^ moduleName ifNil: [
+		moduleName := (self firstClass respondsTo: #moduleName) ifTrue: [
+			self firstClass moduleName
+		] ifFalse: [
+			self firstClass name
+		]
+	]
 
-	^ moduleName
-		  ifNil: [ 
-			  moduleName := (self firstClass respondsTo: #moduleName)
-				                ifTrue: [ self firstClass moduleName ]
-				                ifFalse: [ self firstClass name ] ]
-		  ifNotNil: [ moduleName ]
 ]
 
 { #category : #accessing }
-SWSourceOld >> moduleName: arg1 [
+SWSourceOld >> moduleName: anObject [
 
-	moduleName := arg1
+	moduleName := anObject
 ]
 
 { #category : #accessing }
 SWSourceOld >> programClass [
 
-	^ programClass
-		  ifNil: [ 
-			  programClass := self classes
-				                  detect: [ :arg1 | arg1 respondsTo: #program ]
-				                  ifFound: [ :arg2 | arg2 ]
-				                  ifNone: [  ] ]
-		  ifNotNil: [ programClass ]
+	^ programClass ifNil: [
+		programClass := self classes detect: [ :aClass |
+			aClass respondsTo: #program
+		] ifFound: [ :aClass | aClass ] ifNone: [ nil ]
+	]
 ]
 
 { #category : #accessing }
@@ -138,7 +129,7 @@ SWSourceOld >> type [
 ]
 
 { #category : #accessing }
-SWSourceOld >> type: arg1 [
+SWSourceOld >> type: anObject [
 
-	type := arg1
+	type := anObject
 ]

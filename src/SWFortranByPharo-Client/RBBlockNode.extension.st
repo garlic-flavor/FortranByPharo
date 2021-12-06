@@ -1,7 +1,7 @@
 Extension { #name : #RBBlockNode }
 
 { #category : #'*SWFortranByPharo-Client' }
-RBBlockNode >> transpileUsing: arg1 [
+RBBlockNode >> transpileUsing: transpiler [
+	^ transpiler putBlock: self
 
-	^ arg1 putBlock: self
 ]
