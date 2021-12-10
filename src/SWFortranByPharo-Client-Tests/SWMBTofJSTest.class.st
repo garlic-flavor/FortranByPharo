@@ -19,22 +19,22 @@ SWMBTofJSTest >> program_01 [
 		cr
 ]
 
-{ #category : #'as yet unclassified' }
+{ #category : #'tests - source' }
 SWMBTofJSTest >> program_02 [
 
 	SWFStd print: 'Hello, World!'
 ]
 
-{ #category : #'as yet unclassified' }
+{ #category : #'tests - source' }
 SWMBTofJSTest >> program_03 [
 
-	| tmp1 tmp2 |
-	tmp2 := SWVariableInfo new.
-	tmp2
-		type: Float;
-		addProperty: #const.
-	tmp1 := tmp2 yourself.
+	| tmp1 |
+	tmp1 := SWVariableInfo new
+		type: Integer;
+		addProperty: #const;
+		yourself.
 	tmp1 := 3.1415926535.
+
 	^ tmp1 * 2.23620679
 ]
 
