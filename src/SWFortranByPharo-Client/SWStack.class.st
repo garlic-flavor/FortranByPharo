@@ -39,6 +39,13 @@ SWStack >> atOffset: offset [
 	^ self payload at: (offset + 2) ifAbsent: [ nil ].
 ]
 
+{ #category : #accessing }
+SWStack >> atOffset: offset put: anObject [
+	"offset is  0 based.".
+	"offset 0 responds to the first argument."
+	^ self payload at: (offset + 2) put: anObject.
+]
+
 { #category : #copying }
 SWStack >> copyFrom: start to: end [
 	^ self payload copyFrom: start + 1 to: end + 1

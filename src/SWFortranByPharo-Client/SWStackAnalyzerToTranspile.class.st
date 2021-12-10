@@ -36,7 +36,7 @@ SWStackAnalyzerToTranspile class >> willTranspile: aMethod [
 { #category : #accessing }
 SWStackAnalyzerToTranspile >> dependencies [
 
-	^ dependencies ifNil: [ dependencies := Set new ]
+	^ dependencies ifNil: [ dependencies := Dictionary new ]
 ]
 
 { #category : #accessing }
@@ -51,15 +51,10 @@ SWStackAnalyzerToTranspile >> returnInfoOf: selector super: supered args: args [
 
 	aMethod := self class search: selector in: args first type.
 	^ (self class willTranspile: aMethod) ifTrue: [ |mi|
-		mi := SWMethodInfo new
-			method: aMethod;
-			types: (args collect: [ :one | one type ]);
-			yourself.
-		(self dependencies detect: [ :one | one = mi ] ifFound: [ :detected |
-			detected
-		] ifNone: [
-			self dependencies add: (self methodInfoOf: selector super: supered args: args)
-		]) return
+		mi := self methodInfoOf: selector super: supered args: args.
+		self dependencies values detect: [ :one | one = mi ] ifFound: [ :detected | mi := detected ].
+		self dependencies at: (self method sourceNodeForPC: oldPC) put: mi.
+		mi return
 	] ifFalse: [
 		super returnInfoOf: selector super: supered args: args
 	]

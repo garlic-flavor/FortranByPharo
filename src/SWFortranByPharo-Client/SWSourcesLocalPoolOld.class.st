@@ -2,7 +2,7 @@
 I manage SWSources.
 "
 Class {
-	#name : #SWSourcesLocalPool,
+	#name : #SWSourcesLocalPoolOld,
 	#superclass : #Object,
 	#instVars : [
 		'sources',
@@ -15,18 +15,18 @@ Class {
 }
 
 { #category : #adding }
-SWSourcesLocalPool >> add: aSource [
+SWSourcesLocalPoolOld >> add: aSource [
 	self sources at: aSource moduleName put: aSource
 ]
 
 { #category : #'as yet unclassified' }
-SWSourcesLocalPool >> get: aModuleName [
+SWSourcesLocalPoolOld >> get: aModuleName [
 	^ self get: aModuleName withTranspilerMethodOf: #transpile.
 
 ]
 
 { #category : #'as yet unclassified' }
-SWSourcesLocalPool >> get: aModuleName withTranspilerMethodOf: aMethod [
+SWSourcesLocalPoolOld >> get: aModuleName withTranspilerMethodOf: aMethod [
 	^ self sources at: aModuleName ifAbsentPut: [|source transpiler|
 			source := SWSourceOld new
 				type: self type;
@@ -44,29 +44,29 @@ SWSourcesLocalPool >> get: aModuleName withTranspilerMethodOf: aMethod [
 ]
 
 { #category : #'as yet unclassified' }
-SWSourcesLocalPool >> getAsSub: aModuleName [
+SWSourcesLocalPoolOld >> getAsSub: aModuleName [
 	^ self get: aModuleName withTranspilerMethodOf: #transpileAsModule
 ]
 
 { #category : #initialization }
-SWSourcesLocalPool >> reset: aModuleName [
+SWSourcesLocalPoolOld >> reset: aModuleName [
 	self sources removeKey: aModuleName ifAbsent: [  ]
 ]
 
 { #category : #accessing }
-SWSourcesLocalPool >> sources [
+SWSourcesLocalPoolOld >> sources [
 
 	^ sources ifNil: [ sources := Dictionary new ]
 ]
 
 { #category : #accessing }
-SWSourcesLocalPool >> sources: anObject [
+SWSourcesLocalPoolOld >> sources: anObject [
 
 	sources := anObject
 ]
 
 { #category : #accessing }
-SWSourcesLocalPool >> transpilerClass [ 
+SWSourcesLocalPoolOld >> transpilerClass [ 
 	self type = #f90 ifTrue: [ ^ SWTranspilerOfFortran ].
 	self type = #rb ifTrue: [ ^ SWTranspilerOfRuby ].
 	self type = #mjs ifTrue: [ ^ SWTranspilerOfJs ].
@@ -74,13 +74,13 @@ SWSourcesLocalPool >> transpilerClass [
 ]
 
 { #category : #accessing }
-SWSourcesLocalPool >> type [
+SWSourcesLocalPoolOld >> type [
 	
 	^ type
 ]
 
 { #category : #accessing }
-SWSourcesLocalPool >> type: anObject [
+SWSourcesLocalPoolOld >> type: anObject [
 
 	type := anObject
 ]

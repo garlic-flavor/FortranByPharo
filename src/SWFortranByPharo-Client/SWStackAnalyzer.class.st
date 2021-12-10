@@ -68,7 +68,7 @@ SWStackAnalyzer class >> install_new [
 	^ #new -> [ :selector :types |
 		SWMethodInfo new
 			return: (SWVariableInfo new
-				type: (types at: 1);
+				type: (types at: 1) soleInstance;
 				priority: SWVariableInfo wellknownMethodPriority;
 				yourself);
 			yourself
@@ -131,6 +131,14 @@ SWStackAnalyzer >> blockReturnTop [
 	self halt.
 	
 	super blockReturnTop
+]
+
+{ #category : #api }
+SWStackAnalyzer >> decode [
+	self pushToSendStack: self method.
+	super decode.
+	self popSendStack: self method.
+
 ]
 
 { #category : #'instruction decoding' }
@@ -254,8 +262,15 @@ SWStackAnalyzer >> popIntoTemporaryVariable: offset [
 	|left right|
 	left := self stack atOffset: offset.
 	right := self stack pop.
-self halt.
-	left << right.
+	(SWVariableInfo wellknownMethodPriority <= right priority and: [ right type = SWVariableInfo ]) ifTrue: [
+		left << (	((self method sourceNodeForPC: oldPC) evaluate)
+			priority: SWVariableInfo userSpecifiesTypePriority;
+			yourself);
+			assignCounter: 0
+	] ifFalse: [
+		left << right.
+	].
+
 
 	super popIntoTemporaryVariable: offset.
 
@@ -383,14 +398,17 @@ SWStackAnalyzer >> pushToSendStack: aMethod [
 
 ]
 
+{ #category : #'code generation - accessing' }
+SWStackAnalyzer >> ready [
+	^ self return type isNotNil
+]
+
 { #category : #accessing }
 SWStackAnalyzer >> return [
 	^ return ifNil: [
 		return := SWVariableInfo new
 			initializer: [
-				self pushToSendStack: self method.
 				self decode.
-				self popSendStack: self method.
 				return type
 			];
 			priority: SWVariableInfo defaultReturnTypePriority;
@@ -490,4 +508,12 @@ SWStackAnalyzer >> tempStore: anObject [
 SWStackAnalyzer >> trap [
 	self halt.
 	super trap
+]
+
+{ #category : #accessing }
+SWStackAnalyzer >> variableInfoOf: aName [
+	^ self return type ifNotNil: [
+		super variableInfoOf: aName
+	]
+
 ]

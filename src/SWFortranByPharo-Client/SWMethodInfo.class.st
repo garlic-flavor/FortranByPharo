@@ -106,7 +106,7 @@ SWMethodInfo >> locals [
 
 { #category : #accessing }
 SWMethodInfo >> mangledName [
-	^ mangledName ifNil: [ mangledName := String streamContents: [ : s ||owner|
+	^ mangledName ifNil: [ mangledName := String streamContents: [ :s ||owner|
 		owner := self method methodClass.
 		owner class = Metaclass ifTrue: [ 
 			s << owner soleInstance name; << 'C'

@@ -41,10 +41,24 @@ SWMBTofJSTest >> program_03 [
 { #category : #tests }
 SWMBTofJSTest >> testTranspile_program_01 [
 
-	| tmp2 |
-	tmp2 := SWMBTofJS new: #program_01 types: { self class }.
-	tmp2
+	(self transpile_program: #program_01)
+		stream contents inspect
+]
+
+{ #category : #tests }
+SWMBTofJSTest >> testTranspile_program_02 [
+
+	(self transpile_program: #program_02)
+		inspect
+]
+
+{ #category : #tests }
+SWMBTofJSTest >> transpile_program: selector [
+
+	^ (SWMBTofJS new: selector types: { self class })
 		type: #js;
-		logging: true.
-	tmp2 transpile inspect
+		logging: true;
+		transpile;
+		yourself.
+
 ]

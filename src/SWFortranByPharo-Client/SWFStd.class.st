@@ -29,12 +29,15 @@ SWFStd class >> f90_print_With: arguments Using: transpiler [
 		transpile: (arguments at: 1)
 ]
 
+{ #category : #'as yet unclassified' }
+SWFStd class >> js_print_With: arguments Using: transpiler [
+	transpiler
+		put: 'console.log';
+		putArguments: arguments
+		
+]
+
 { #category : #printing }
 SWFStd class >> print: msg [
 	Transcript show: msg; cr.
-]
-
-{ #category : #'as yet unclassified' }
-SWFStd class >> toTranspile [
-	^ #module
 ]

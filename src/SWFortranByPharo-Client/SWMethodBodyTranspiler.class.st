@@ -20,7 +20,7 @@ SWMethodBodyTranspiler class >> messageTranspilerMethodNameFor: aSelector [
 { #category : #utils }
 SWMethodBodyTranspiler class >> uniqueMessageTranspilerNameFor: aSelector for: type [
 	^ (String streamContents: [ :s |
-		s << type; <<  '_'; << (self safeSelectorNameOf: aSelector); << 'For:With:Using:'
+		s << type; <<  '_'; << (self safeSelectorNameOf: aSelector); << 'With:Using:'
 	]) asSymbol
 	
 
@@ -34,21 +34,21 @@ SWMethodBodyTranspiler >> << anObject [
 ]
 
 { #category : #'private - utilities' }
-SWMethodBodyTranspiler >> classOf: receiver [
-
-	receiver class = RBLiteralValueNode ifTrue: [
-		^ receiver value class
-	].
-
-	receiver class = RBVariableNode ifTrue: [
-		^ receiver name first isUppercase ifTrue: [
-			(Smalltalk globals at: receiver name)
+SWMethodBodyTranspiler >> classOf: aNode [
+	aNode class = RBVariableNode ifTrue: [
+		^ aNode name first isUppercase ifTrue: [
+			(Smalltalk globals at: aNode name asSymbol) class
 		] ifFalse: [
-			(self variableInfoOf: receiver name) type
+			(self variableInfoOf: aNode name) type
 		]
 	].
 
-	self halt.
+	aNode class = RBLiteralValueNode ifTrue: [
+		^ aNode value class
+	].
+
+	self error: 'to implement'.
+	self flag: #toImplement.
 ]
 
 { #category : #'code generation' }
@@ -233,26 +233,26 @@ SWMethodBodyTranspiler >> putInteger: anInteger [
 ]
 
 { #category : #'code generation' }
-SWMethodBodyTranspiler >> putMessage: receiver send: selector with: arguments [
-	self stream log: [ receiver asString, ' >> ', selector asString ].
+SWMethodBodyTranspiler >> putMessage: aNode [
+	self stream log: [ aNode receiver asString, ' >> ', aNode selector asString ].
 	self incMessageNest.
-	self selectTranspilerFor: receiver send: selector with: arguments.
+	self selectTranspiler: aNode.
 	self decMessageNest
 ]
 
 { #category : #'code generation' }
-SWMethodBodyTranspiler >> putOrdinaryMessage: receiver send: selector with: arguments [
+SWMethodBodyTranspiler >> putOrdinaryMessage: aNode [
 	self stream log.
-	self << receiver.
-	selector first isLetter ifTrue: [
+	self << aNode receiver.
+	aNode selector first isLetter ifTrue: [
 		self
 			putClassAccessor;
-			put: (self class safeSelectorNameOf: selector);
-			putArguments: arguments.
+			put: (dependencies at: aNode) mangledName;
+			putArguments: aNode arguments.
 	] ifFalse: [
 		self
-			put: selector;
-			<< (arguments at: 1)
+			put: aNode selector;
+			<< (aNode arguments at: 1)
 	]
 
 
@@ -320,16 +320,23 @@ SWMethodBodyTranspiler >> putVariableDeclarationOf: aVariableInfo [
 ]
 
 { #category : #'private - code generation' }
-SWMethodBodyTranspiler >> selectTranspilerFor: receiver send: selector with: arguments [
-	self stream log: [ receiver asString, ' >> ', selector asString ].
-	self ifUniqueMessageTranspilerExistsOn: receiver of: selector thenDo: [ :proc |
-		^ proc value: arguments
+SWMethodBodyTranspiler >> selectTranspiler: aNode [
+	self stream log: [ aNode receiver asString, ' >> ', aNode selector asString ].
+	self ifUniqueMessageTranspilerExistsOn: aNode receiver of: aNode selector thenDo: [ :proc |
+		^ proc value: aNode arguments
 	].
-	self hasOwnMessageTranspilerMethodOf: selector ifTrue: [ :proc |
-		^ proc with: receiver with: arguments
+	self hasOwnMessageTranspilerMethodOf: aNode selector ifTrue: [ :proc |
+		^ proc with: aNode receiver with: aNode arguments
 	].
-	^ self putOrdinaryMessage: receiver send: selector with: arguments
+	^ self putOrdinaryMessage: aNode
 
+]
+
+{ #category : #'as yet unclassified' }
+SWMethodBodyTranspiler >> solveDependencies [
+	^ (self dependencies groupedBy: [ :each | each method methodClass ]) collect: [ :each |
+		
+	]
 ]
 
 { #category : #accessing }
@@ -347,6 +354,7 @@ SWMethodBodyTranspiler >> stream: anObject [
 { #category : #'public API' }
 SWMethodBodyTranspiler >> transpile [
 	self stream log.
+	self ready ifFalse: [ ^ Exception signal: 'something go wrong.' ].
 	self locals do: [ :each | self putVariableDeclarationOf: each ].
 	self putSequence: self method sourceNode body.
 	^ self stream contents

@@ -91,7 +91,7 @@ SWProjectOld >> moduleName: anObject [
 SWProjectOld >> pool [
 
 	^ pool ifNil: [
-		pool := SWSourcesPool new
+		pool := SWSourcesPoolOld new
 			type: self type;
 			client: self client;
 			yourself

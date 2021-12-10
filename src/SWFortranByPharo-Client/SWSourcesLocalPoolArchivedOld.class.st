@@ -2,8 +2,8 @@
 I make a zip directory.
 "
 Class {
-	#name : #SWSourcesLocalPoolArchived,
-	#superclass : #SWSourcesLocalPool,
+	#name : #SWSourcesLocalPoolArchivedOld,
+	#superclass : #SWSourcesLocalPoolOld,
 	#instVars : [
 		'zip'
 	],
@@ -11,7 +11,7 @@ Class {
 }
 
 { #category : #public }
-SWSourcesLocalPoolArchived >> get: aModuleName [
+SWSourcesLocalPoolArchivedOld >> get: aModuleName [
 	^ self sources at: aModuleName ifAbsent: [
 		(super get: aModuleName)
 			putOn: self;
@@ -20,7 +20,7 @@ SWSourcesLocalPoolArchived >> get: aModuleName [
 ]
 
 { #category : #public }
-SWSourcesLocalPoolArchived >> nextPut: aSource [
+SWSourcesLocalPoolArchivedOld >> nextPut: aSource [
 	self zip addMember: (ZipStringMember new
 		localFileName: aSource filename;
 		contents: aSource contents;
@@ -28,18 +28,18 @@ SWSourcesLocalPoolArchived >> nextPut: aSource [
 ]
 
 { #category : #writing }
-SWSourcesLocalPoolArchived >> writeToFile: aPath [
+SWSourcesLocalPoolArchivedOld >> writeToFile: aPath [
 	self zip writeToFile: aPath
 ]
 
 { #category : #accessing }
-SWSourcesLocalPoolArchived >> zip [
+SWSourcesLocalPoolArchivedOld >> zip [
 
 	^ zip ifNil: [ zip := ZipArchive new ]
 ]
 
 { #category : #accessing }
-SWSourcesLocalPoolArchived >> zip: anObject [
+SWSourcesLocalPoolArchivedOld >> zip: anObject [
 
 	zip := anObject
 ]

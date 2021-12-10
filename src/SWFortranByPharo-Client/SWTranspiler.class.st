@@ -109,7 +109,7 @@ SWTranspiler >> opEqual_For: receiver With: arguments [
 { #category : #accessing }
 SWTranspiler >> pool [
 
-	^ pool ifNil: [ pool := SWSourcesPool new type: self type; yourself ]
+	^ pool ifNil: [ pool := SWSourcesPoolOld new type: self type; yourself ]
 ]
 
 { #category : #accessing }

@@ -17,6 +17,11 @@ SWClassInfo class >> analyzerClass [
 	^ SWStackAnalyzer
 ]
 
+{ #category : #adding }
+SWClassInfo >> addMember: aMethodInfo [
+	self members at: aMethodInfo mangledName put: aMethodInfo
+]
+
 { #category : #accessing }
 SWClassInfo >> getVariableInfoAt: offset [
 	^ self getVariableInfoOf: (self targetClass slots at: offset + 1) name
@@ -24,11 +29,11 @@ SWClassInfo >> getVariableInfoAt: offset [
 
 { #category : #accessing }
 SWClassInfo >> getVariableInfoOf: aName [
-	^ ((self targetClass slots collect: [ :each | each name ]) anySatisfy: [ :each | each = aName ]) ifTrue: [
+	^ self targetClass slots detect: [ :each | each name = aName ] ifFound: [ :detected |
 		self members at: aName ifAbsentPut: [
 			(self class analyzerClass new: aName asSymbol types: { self targetClass }) return
 		]
-	] ifFalse: [
+	] ifNone: [
 		nil
 	]
 
@@ -49,9 +54,9 @@ SWClassInfo >> members: anObject [
 { #category : #accessing }
 SWClassInfo >> sourceHash [
 	^ sourceHash ifNil: [
-		sourceHash := SHA256 hashMessage: ((self targetClass methods collect: [
-			:each | SHA256 hashMessage: each sourceCode
-		]) flatCollect: [ :each | each ])
+		sourceHash := SHA256 hashMessage: ((self members collect: [:each |
+			SHA256 hashMessage: each method sourceCode
+		]) flattened)
 	]
 ]
 
