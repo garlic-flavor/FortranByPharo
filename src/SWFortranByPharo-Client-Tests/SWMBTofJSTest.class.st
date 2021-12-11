@@ -39,6 +39,11 @@ SWMBTofJSTest >> program_03 [
 ]
 
 { #category : #tests }
+SWMBTofJSTest >> testAnalyze_program_01 [
+	(SWStackAnalyzer new: #program_01 types: { self class }) inspect
+]
+
+{ #category : #tests }
 SWMBTofJSTest >> testTranspile_program_01 [
 
 	(self transpile_program: #program_01)

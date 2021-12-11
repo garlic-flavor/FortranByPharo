@@ -1,7 +1,7 @@
 "
-I emulate stack like a stack in Context.
-index -1 indicates the type of the recevier.
-index 0 indicates the first argument of the method.
+I emulate a stack like of usedn in Context class.
+index 0 indicates the recevier.
+index 1 indicates the first argument of the method.
 "
 Class {
 	#name : #SWStack,
@@ -29,14 +29,14 @@ SWStack >> asArray [
 SWStack >> at: index [
 	"index is 1 based.".
 	"index 0 responds special to receiver."
-	^ self payload at: (index + 1) ifAbsent: [ nil ].
+	^ self payload at: (index + 1) ifAbsentPut: [ SWVariableInfo new ].
 ]
 
 { #category : #accessing }
 SWStack >> atOffset: offset [
 	"offset is  0 based.".
 	"offset 0 responds to the first argument."
-	^ self payload at: (offset + 2) ifAbsent: [ nil ].
+	^ self payload at: (offset + 2) ifAbsentPut: [ SWVariableInfo new ].
 ]
 
 { #category : #accessing }
@@ -54,6 +54,11 @@ SWStack >> copyFrom: start to: end [
 { #category : #enumerating }
 SWStack >> detect: needle ifNone: noneBlock [
 	^ self payload detect: needle ifNone: noneBlock
+]
+
+{ #category : #accessing }
+SWStack >> first [
+	^ payload first
 ]
 
 { #category : #accessing }
@@ -88,7 +93,7 @@ SWStack >> push: anObject [
 	^ self payload addLast: anObject.
 ]
 
-{ #category : #'as yet unclassified' }
+{ #category : #adding }
 SWStack >> push: anObject afterIndex: idx [
 	^ self payload add: anObject afterIndex: (idx + 1)
 ]

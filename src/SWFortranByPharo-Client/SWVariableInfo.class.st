@@ -11,7 +11,6 @@ Class {
 		'type',
 		'properties',
 		'original',
-		'initializer',
 		'assignCounter',
 		'priority'
 	],
@@ -93,7 +92,7 @@ SWVariableInfo >> << rightObject [
 			rightObject hasExactType ifTrue: [
 				self type: rightObject type
 			] ifFalse: [
-				self initializer: [ rightObject type ]
+				self type: [ rightObject type ]
 			].
 			self priority: rightObject priority
 		].
@@ -124,32 +123,26 @@ SWVariableInfo >> assignCounter: anObject [
 	assignCounter := anObject
 ]
 
+{ #category : #copying }
+SWVariableInfo >> copyAsSuper [
+	^ self copy
+		type: [ self type superclass ];
+		yourself.
+]
+
 { #category : #testing }
 SWVariableInfo >> hasAnyType [
-	^ type isNotNil or: [ initializer isNotNil ]
+	^ type isNotNil
 ]
 
 { #category : #testing }
 SWVariableInfo >> hasExactType [
-	^ type isNotNil
+	^ type isNotNil and: [ type class ~= FullBlockClosure ]
 ]
 
 { #category : #testing }
 SWVariableInfo >> hasProperty: aProperty [
 	^ self properties includes: aProperty
-]
-
-{ #category : #accessing }
-SWVariableInfo >> initializer [
-
-	^ initializer
-]
-
-{ #category : #accessing }
-SWVariableInfo >> initializer: anObject [
-
-	initializer := anObject.
-	self type: nil
 ]
 
 { #category : #testing }
@@ -194,13 +187,12 @@ SWVariableInfo >> printOn: aStream [
 		print: name;
 		space;
 		nextPut: $<;
-		print: type;
+		print: (type class = FullBlockClosure ifTrue: ['lazy'] ifFalse: [ type ]);
 		nextPut: $>;
 		nextPut: $(;
 		print: self priority;
 		nextPut: $);
 		space;
-		nextPutAll: (initializer ifNotNil: [ ' [lazy]' ] ifNil: [ '-' ] );
 		space;
 		nextPutAll: '<<';
 		print: assignCounter
@@ -213,10 +205,15 @@ SWVariableInfo >> priority [
 		priority := stackPos = 0 ifTrue: [
 			self class receiverTypePriority
 		] ifFalse: [ 
-			type ifNil: [ 
-				initializer ifNil: [ self class defaultPriority ]
-				ifNotNil: [ self class unknownMethodPriority ]
-			] ifNotNil: [ self class exactTypePriority ]
+			type ifNil: [
+				self class defaultPriority
+			] ifNotNil: [
+				type class = FullBlockClosure ifTrue: [
+					self class unknownMethodPriority
+				] ifFalse: [
+					self class exactTypePriority
+				]
+			]
 		]
 	]
 
@@ -265,19 +262,17 @@ SWVariableInfo >> stackPos: anObject [
 { #category : #accessing }
 SWVariableInfo >> type [
 
-	^ type ifNil: [
-		self initializer ifNotNil: [
-			type := self initializer value
-		] ifNil: [ 
-			nil
-		]
-	]
+	^ type := type value
 ]
 
 { #category : #accessing }
 SWVariableInfo >> type: anObject [
 
-	anObject ifNotNil: [ self initializer: nil ].
 	type := anObject.
 
+]
+
+{ #category : #accessing }
+SWVariableInfo >> value [
+	^ self type
 ]

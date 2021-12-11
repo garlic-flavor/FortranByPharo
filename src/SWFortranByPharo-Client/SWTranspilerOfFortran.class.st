@@ -15,7 +15,7 @@ SWTranspilerOfFortran class >> typeNameFor: aClass [
 	aClass = Float ifTrue: [
 		^ #'double precision'
 	].
-	(aClass inheritsFrom: SWType) ifTrue: [
+	(aClass inheritsFrom: SWTypeOld) ifTrue: [
 		^ (String streamContents: [ :s | s << 'type('; << aClass name; << ')' ]) asSymbol
 	].
 	^ #'no_implementation'.
@@ -80,7 +80,7 @@ SWTranspilerOfFortran >> putClassAccessor [
 SWTranspilerOfFortran >> putClassDefinition: aClass [
 	|va|
 	self logger log.
-	(aClass inheritsFrom: SWType) ifFalse: [ ^self ].
+	(aClass inheritsFrom: SWTypeOld) ifFalse: [ ^self ].
 
 	self
 		incIndent;

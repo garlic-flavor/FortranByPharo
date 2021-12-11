@@ -1,6 +1,6 @@
 Class {
 	#name : #SWNag3Point,
-	#superclass : #SWType,
+	#superclass : #SWTypeOld,
 	#instVars : [
 		'x',
 		'y'

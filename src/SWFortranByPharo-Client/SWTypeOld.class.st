@@ -2,7 +2,7 @@
 I correspond to structure in C like functionality.
 "
 Class {
-	#name : #SWType,
+	#name : #SWTypeOld,
 	#superclass : #Object,
 	#category : #'SWFortranByPharo-Client-Analyzer'
 }

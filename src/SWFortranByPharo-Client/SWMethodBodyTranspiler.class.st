@@ -3,7 +3,7 @@ I transpile a method of Pharo class.
 "
 Class {
 	#name : #SWMethodBodyTranspiler,
-	#superclass : #SWStackAnalyzerToTranspile,
+	#superclass : #SWStackAnalyzer,
 	#instVars : [
 		'stream',
 		'type',
@@ -169,19 +169,20 @@ SWMethodBodyTranspiler >> putAssignTo: key with: value [
 
 { #category : #'code generation' }
 SWMethodBodyTranspiler >> putCascade: aRBCascadeNode [
-	|seq tmp|
+	|tmp|
 	tmp := RBVariableNode new
 		name: self tempStore pop name;
 		yourself.
-	seq := RBSequenceNode new
-		addNode: (RBAssignmentNode variable: tmp value: aRBCascadeNode leftmostChainReceiver );
-		addNodes: (aRBCascadeNode messages collect: [:each |
-			each copy
-				receiver: tmp;
-				yourself
-		]);
-		yourself.
-	self putSequence: seq.
+	self
+		putAssignTo: tmp with: aRBCascadeNode leftmostChainReceiver;
+		putStatementDelimiter;
+		cr.
+	aRBCascadeNode messages do: [ :msgNode | 
+		self
+			putMessage: msgNode withReceiver: tmp;
+			putStatementDelimiter;
+			cr
+	].
 
 ]
 
@@ -233,21 +234,21 @@ SWMethodBodyTranspiler >> putInteger: anInteger [
 ]
 
 { #category : #'code generation' }
-SWMethodBodyTranspiler >> putMessage: aNode [
+SWMethodBodyTranspiler >> putMessage: aNode withReceiver: aRNode [
 	self stream log: [ aNode receiver asString, ' >> ', aNode selector asString ].
 	self incMessageNest.
-	self selectTranspiler: aNode.
+	self selectTranspiler: aNode withReceiver: aRNode.
 	self decMessageNest
 ]
 
 { #category : #'code generation' }
-SWMethodBodyTranspiler >> putOrdinaryMessage: aNode [
+SWMethodBodyTranspiler >> putOrdinaryMessage: aNode withReceiver: aRNode [
 	self stream log.
-	self << aNode receiver.
+	self << aRNode.
 	aNode selector first isLetter ifTrue: [
 		self
 			putClassAccessor;
-			put: (dependencies at: aNode) mangledName;
+			put: (self sends at: aNode) mangledName;
 			putArguments: aNode arguments.
 	] ifFalse: [
 		self
@@ -320,15 +321,15 @@ SWMethodBodyTranspiler >> putVariableDeclarationOf: aVariableInfo [
 ]
 
 { #category : #'private - code generation' }
-SWMethodBodyTranspiler >> selectTranspiler: aNode [
+SWMethodBodyTranspiler >> selectTranspiler: aNode withReceiver: aRNode [
 	self stream log: [ aNode receiver asString, ' >> ', aNode selector asString ].
-	self ifUniqueMessageTranspilerExistsOn: aNode receiver of: aNode selector thenDo: [ :proc |
+	self ifUniqueMessageTranspilerExistsOn: aRNode of: aNode selector thenDo: [ :proc |
 		^ proc value: aNode arguments
 	].
 	self hasOwnMessageTranspilerMethodOf: aNode selector ifTrue: [ :proc |
-		^ proc with: aNode receiver with: aNode arguments
+		^ proc with: aRNode with: aNode arguments
 	].
-	^ self putOrdinaryMessage: aNode
+	^ self putOrdinaryMessage: aNode withReceiver: aRNode
 
 ]
 

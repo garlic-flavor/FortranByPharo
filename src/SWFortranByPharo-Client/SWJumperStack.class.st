@@ -1,5 +1,7 @@
 "
-I represent jumper's stack in SWStackAnalyzer
+I represent jumper's stack in SWStackAnalyzer.
+When 'jump' occur, the stack status become 'unpredictable' depends on its operand.
+So when the step reaches to the destination of the jumper, the stack needs be rewind its status before the jumper.
 "
 Class {
 	#name : #SWJumperStack,

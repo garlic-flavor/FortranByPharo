@@ -1,13 +1,13 @@
 "
-I analyze bytecodes of a method. See also, SymbolicBytecodeBuilder.
+I fork decode process of SymbolicBytecodeBuilder to emulate stack status.
 "
 Class {
 	#name : #SWStackAnalyzer,
 	#superclass : #SWMethodInfo,
 	#instVars : [
-		'sendStack',
 		'jumperStack',
-		'tempStore'
+		'tempStore',
+		'sends'
 	],
 	#classVars : [
 		'definedMethods'
@@ -17,13 +17,13 @@ Class {
 
 { #category : #private }
 SWStackAnalyzer class >> binaryOpInfo [
-	^ [ :selector :types |
+	^ [ :selector :args |
 		SWMethodInfo new
-			method: (self search: selector in: types first);
-			types: types;
+			method: selector;
+			types: args;
 			return: (SWVariableInfo new
-				type: (types at: 1);
-				priority: SWVariableInfo wellknownMethodPriority;
+				type: [ args first type ];
+				priority: { SWVariableInfo wellknownMethodPriority. (args collect: [:a | a priority]) } flattened min;
 				yourself);
 			yourself
 	]
@@ -65,11 +65,11 @@ SWStackAnalyzer class >> install_mul [
 
 { #category : #'instance creation' }
 SWStackAnalyzer class >> install_new [
-	^ #new -> [ :selector :types |
+	^ #new -> [ :selector :args |
 		SWMethodInfo new
 			return: (SWVariableInfo new
-				type: (types at: 1) soleInstance;
-				priority: SWVariableInfo wellknownMethodPriority;
+				type: args first type soleInstance;
+				priority: {SWVariableInfo wellknownMethodPriority. args first priority} min;
 				yourself);
 			yourself
 	]
@@ -82,12 +82,12 @@ SWStackAnalyzer class >> install_sub [
 
 { #category : #'instance creation' }
 SWStackAnalyzer class >> install_yourself [
-	^ #yourself -> [ :selector :types |
+	^ #yourself -> [ :selector :args |
 		SWMethodInfo new
 			method: Object>>#yourself;
 			return: (SWVariableInfo new
-				type: (types at: 1);
-				priority: SWVariableInfo wellknownMethodPriority;
+				type: [args first type];
+				priority: { SWVariableInfo wellknownMethodPriority. args first priority } min;
 				yourself);
 			yourself
 	]
@@ -95,16 +95,12 @@ SWStackAnalyzer class >> install_yourself [
 
 { #category : #'instance creation' }
 SWStackAnalyzer class >> new: selector types: types [
-	^ self new: selector types: types sendStack: nil
-]
-
-{ #category : #'instance creation' }
-SWStackAnalyzer class >> new: selector types: types sendStack: ss [
 	^ definedMethods at: selector ifPresent: [ :dm |
 		dm value: selector value: types
 	] ifAbsent: [
-		(super new: selector types: types)
-			sendStack: ss;
+		self new
+			method: selector;
+			types: types;
 			yourself
 	]
 
@@ -131,14 +127,6 @@ SWStackAnalyzer >> blockReturnTop [
 	self halt.
 	
 	super blockReturnTop
-]
-
-{ #category : #api }
-SWStackAnalyzer >> decode [
-	self pushToSendStack: self method.
-	super decode.
-	self popSendStack: self method.
-
 ]
 
 { #category : #'instruction decoding' }
@@ -206,11 +194,13 @@ SWStackAnalyzer >> mergeStackTopAndSecond [
 ]
 
 { #category : #protected }
-SWStackAnalyzer >> methodInfoOf: selector super: supered args: args [
-	|aTypes|
-	aTypes := args collect: [ :each | each type ].
-	supered ifTrue: [ aTypes first: aTypes first superclass ].
-	^ self class new: selector types: aTypes sendStack: self sendStack
+SWStackAnalyzer >> methodInfoOf: selector args: args [
+	^ definedMethods at: selector ifPresent: [ :detected |
+		detected
+	] ifAbsent: [
+		self class new: selector types: args.
+	]
+
 ]
 
 { #category : #'instruction decoding' }
@@ -366,7 +356,7 @@ SWStackAnalyzer >> pushReceiver [
 { #category : #'instruction decoding' }
 SWStackAnalyzer >> pushReceiverVariable: offset [
 	self stack push: (SWVariableInfo new
-		initializer: [
+		type: [
 			(self classInfo getVariableInfoAt: offset) type
 		];
 		priority: 10;
@@ -398,7 +388,7 @@ SWStackAnalyzer >> pushToSendStack: aMethod [
 
 ]
 
-{ #category : #'code generation - accessing' }
+{ #category : #api }
 SWStackAnalyzer >> ready [
 	^ self return type isNotNil
 ]
@@ -407,7 +397,7 @@ SWStackAnalyzer >> ready [
 SWStackAnalyzer >> return [
 	^ return ifNil: [
 		return := SWVariableInfo new
-			initializer: [
+			type: [
 				self decode.
 				return type
 			];
@@ -416,52 +406,30 @@ SWStackAnalyzer >> return [
 	]
 ]
 
-{ #category : #protected }
-SWStackAnalyzer >> returnInfoOf: selector super: supered args: args [
-	^ definedMethods at: selector ifPresent: [ :detected |
-		SWVariableInfo new
-			initializer: [
-				(detected value: selector value: (args collect: [:a | a type ])) return type
-			];
-			priority: { SWVariableInfo wellknownMethodPriority. (args collect: [ :a | a priority ]) } flattened min;
-			yourself
-	] ifAbsent: [
-		SWVariableInfo new
-			initializer: [|types|
-				types := args collect: [ :a | a type ].
-				supered ifTrue: [ types first: types first superclass ].
-				(self class new
-					method: (self class search: selector in: types first);
-					types: types;
-					sendStack: self sendStack;
-					yourself) return type
-			];
-			priority: { SWVariableInfo unknownMethodPriority. (args collect: [:a | a priority ]) } flattened min;
-			yourself
-	]
-
-]
-
 { #category : #'instruction decoding' }
 SWStackAnalyzer >> send: selector super: supered numArgs: numberArguments [
-	|args|
+	|args methodInfo|
 	args := self stack pop: numberArguments + 1.
-	self stack push: (self returnInfoOf: selector super: supered args: args).
+	supered ifTrue: [ args first: args first copyAsSuper ].
+	methodInfo := self methodInfoOf: selector args: args.
+
+	self sends at: (self method sourceNodeForPC: oldPC) put: methodInfo.
+	self stack push: methodInfo return.
 	
 	super send: selector super: supered numArgs: numberArguments.
 
 ]
 
-{ #category : #'private - accessing' }
-SWStackAnalyzer >> sendStack [
-	"To detect circular referencing."
-	^ sendStack ifNil: [ sendStack := Stack new ]
+{ #category : #accessing }
+SWStackAnalyzer >> sends [
+
+	^ sends ifNil: [ sends := Dictionary new ]
 ]
 
-{ #category : #'private - accessing' }
-SWStackAnalyzer >> sendStack: anObject [
+{ #category : #accessing }
+SWStackAnalyzer >> sends: anObject [
 
-	sendStack := anObject
+	sends := anObject
 ]
 
 { #category : #'instruction decoding' }

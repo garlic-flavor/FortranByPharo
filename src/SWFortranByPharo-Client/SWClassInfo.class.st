@@ -1,5 +1,6 @@
 "
-I hold type informatino about a class.
+I hold type information about a class to transpile.
+
 "
 Class {
 	#name : #SWClassInfo,
@@ -19,16 +20,22 @@ SWClassInfo class >> analyzerClass [
 
 { #category : #adding }
 SWClassInfo >> addMember: aMethodInfo [
+	"Add aMethodInfo to my list to be transpiled."
+	
 	self members at: aMethodInfo mangledName put: aMethodInfo
 ]
 
 { #category : #accessing }
 SWClassInfo >> getVariableInfoAt: offset [
+	"Return SWVariableInfo in slots at offset."
+
 	^ self getVariableInfoOf: (self targetClass slots at: offset + 1) name
 ]
 
 { #category : #accessing }
 SWClassInfo >> getVariableInfoOf: aName [
+	"Return SWVariableInfo searched by its name."
+
 	^ self targetClass slots detect: [ :each | each name = aName ] ifFound: [ :detected |
 		self members at: aName ifAbsentPut: [
 			(self class analyzerClass new: aName asSymbol types: { self targetClass }) return
@@ -41,6 +48,7 @@ SWClassInfo >> getVariableInfoOf: aName [
 
 { #category : #accessing }
 SWClassInfo >> members [
+	"A Dictionary that contains SWMethodInfo to be transpiled, with its mangled name as key."
 
 	^ members ifNil: [ members := Dictionary new ]
 ]
@@ -53,6 +61,8 @@ SWClassInfo >> members: anObject [
 
 { #category : #accessing }
 SWClassInfo >> sourceHash [
+	"Return an accumulated hash consists of whole source code of targetClass."
+
 	^ sourceHash ifNil: [
 		sourceHash := SHA256 hashMessage: ((self members collect: [:each |
 			SHA256 hashMessage: each method sourceCode

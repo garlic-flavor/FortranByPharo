@@ -39,7 +39,7 @@ SWModuleTranspiler >> putClass: aClassInfo [
 { #category : #'code generation - protected' }
 SWModuleTranspiler >> putMainProgram: aMethodBodyTranspiler [
 	aMethodBodyTranspiler ready ifFalse: [ self error: 'something go wrong.' ].
-	self putRequirements: aMethodBodyTranspiler dependencies values.
+	self putRequirements: aMethodBodyTranspiler sends values.
 	aMethodBodyTranspiler stream: self stream.
 	aMethodBodyTranspiler transpile.
 ]

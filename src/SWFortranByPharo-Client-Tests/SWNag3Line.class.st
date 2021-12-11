@@ -1,6 +1,6 @@
 Class {
 	#name : #SWNag3Line,
-	#superclass : #SWType,
+	#superclass : #SWTypeOld,
 	#instVars : [
 		'p1',
 		'p2'
