@@ -46,8 +46,8 @@ SWMBTofJSTest >> testAnalyze_program_01 [
 { #category : #tests }
 SWMBTofJSTest >> testTranspile_program_01 [
 
-	(self transpile_program: #program_01)
-		stream contents inspect
+	(self transpile_program: #program_01) stream contents inspect
+
 ]
 
 { #category : #tests }
@@ -61,7 +61,6 @@ SWMBTofJSTest >> testTranspile_program_02 [
 SWMBTofJSTest >> transpile_program: selector [
 
 	^ (SWMBTofJS new: selector types: { self class })
-		type: #js;
 		logging: true;
 		transpile;
 		yourself.

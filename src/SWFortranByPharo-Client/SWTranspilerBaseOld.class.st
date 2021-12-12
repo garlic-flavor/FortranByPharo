@@ -8,7 +8,7 @@ Class {
 		'type',
 		'logger'
 	],
-	#category : #'SWFortranByPharo-Client-Transpiler'
+	#category : #'SWFortranByPharo-Client-Transpiler-Deprecated'
 }
 
 { #category : #accessing }

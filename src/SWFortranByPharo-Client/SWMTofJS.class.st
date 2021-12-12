@@ -7,10 +7,12 @@ Class {
 	#category : #'SWFortranByPharo-Client-Transpiler'
 }
 
-{ #category : #'code generation - protected' }
-SWMTofJS >> putRequireLine: aClass [
-	self stream
-		<< 'import ';
-		<< aClass name;
-		<< ';'
+{ #category : #constants }
+SWMTofJS class >> extension [
+	^ #js
+]
+
+{ #category : #generators }
+SWMTofJS class >> mainProgramTranspilerFrom: aClass [
+	^ SWMBTofJS new: #main types: { self asMetaclassOf: aClass }
 ]

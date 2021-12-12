@@ -28,8 +28,8 @@ SWStackTest >> testAt [
 		assert: (stack at: 0) equals: 1;
 		assert: (stack at: 1) equals: 2;
 		assert: (stack at: 3) equals: 4;
-		assert: (stack at: 4) equals: nil;
-		assert: (stack at:  -1) equals: nil
+		assert: (stack at: 4) type equals: nil;
+		should: [stack at:  -1] raise: SubscriptOutOfBounds
 ]
 
 { #category : #tests }

@@ -5,7 +5,7 @@ Class {
 		'project',
 		'client'
 	],
-	#category : #'SWFortranByPharo-Client-Tests-Client'
+	#category : #'SWFortranByPharo-Client-Tests-Deprecated'
 }
 
 { #category : #running }

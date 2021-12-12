@@ -5,26 +5,39 @@ Class {
 	#name : #SWModuleTranspiler,
 	#superclass : #Object,
 	#instVars : [
-		'stream'
+		'stream',
+		'toTranspiles',
+		'name'
 	],
 	#category : #'SWFortranByPharo-Client-Transpiler'
 }
 
+{ #category : #converting }
+SWModuleTranspiler class >> asMetaclassOf: aClass [
+	^ aClass class = Metaclass ifTrue: [ aClass ] ifFalse: [ aClass class ]
+]
+
+{ #category : #constants }
+SWModuleTranspiler class >> extension [
+	^ self subclassResponsibility 
+]
+
+{ #category : #generators }
+SWModuleTranspiler class >> mainProgramTranspilerFrom: aClass [
+	^ self subclassResponsibility 
+]
+
+{ #category : #'instance creation' }
+SWModuleTranspiler class >> newMainProgramFrom: aClass [
+	^ self new
+		<< (self mainProgramTranspilerFrom: aClass);
+		name: (self asMetaclassOf: aClass) soleInstance name, 'Program';
+		yourself
+]
+
 { #category : #streaming }
-SWModuleTranspiler >> << aObject [
-	(aObject class inheritsFrom: SWMethodBodyTranspiler) ifTrue: [
-		^ self putMainProgram: aObject
-	].
-
-	(aObject class inheritsFrom: SWMethodDefinitionTranspiler) ifTrue: [
-		^ self putMethod: aObject
-	].
-
-	(aObject class inheritsFrom: SWClassDefinitionTranspiler) ifTrue: [
-		^ self putClass: aObject
-	].
-
-	self error: 'not implemented yet.'
+SWModuleTranspiler >> << aTranspiler [
+	self toTranspiles add: aTranspiler
 ]
 
 { #category : #accessing }
@@ -32,32 +45,31 @@ SWModuleTranspiler >> contents [
 	^ self stream contents
 ]
 
-{ #category : #'code generation - protected' }
-SWModuleTranspiler >> putClass: aClassInfo [
+{ #category : #accessing }
+SWModuleTranspiler >> filename [
+	^ self name, '.', self class extension
 ]
 
-{ #category : #'code generation - protected' }
-SWModuleTranspiler >> putMainProgram: aMethodBodyTranspiler [
-	aMethodBodyTranspiler ready ifFalse: [ self error: 'something go wrong.' ].
-	self putRequirements: aMethodBodyTranspiler sends values.
-	aMethodBodyTranspiler stream: self stream.
-	aMethodBodyTranspiler transpile.
+{ #category : #comparing }
+SWModuleTranspiler >> hash [
+	|ws|
+	ws := ReadWriteStream with: {}.
+	self toTranspiles do: [ :each | ws << each hash ].
+	ws reset.
+	^ SHA256 hashStream: ws
+
 ]
 
-{ #category : #'code generation - protected' }
-SWModuleTranspiler >> putMethod: aMethodDefinitionTranspiler [
+{ #category : #accessing }
+SWModuleTranspiler >> name [
+
+	^ name
 ]
 
-{ #category : #'code generation - protected' }
-SWModuleTranspiler >> putRequireLine: aClass [
-	self subclassResponsibility 
-]
+{ #category : #accessing }
+SWModuleTranspiler >> name: anObject [
 
-{ #category : #'code generation - protected' }
-SWModuleTranspiler >> putRequirements: anArrayOfTranspiler [
-	(anArrayOfTranspiler collect: [ :each | each method methodClass ]) asSet do: [ :each |
-		self putRequireLine: each
-	]
+	name := anObject
 ]
 
 { #category : #accessing }
@@ -70,4 +82,25 @@ SWModuleTranspiler >> stream [
 SWModuleTranspiler >> stream: anObject [
 
 	stream := anObject
+]
+
+{ #category : #accessing }
+SWModuleTranspiler >> toTranspiles [
+
+	^ toTranspiles ifNil: [ toTranspiles := OrderedCollection new ]
+]
+
+{ #category : #accessing }
+SWModuleTranspiler >> toTranspiles: anObject [
+
+	toTranspiles := anObject
+]
+
+{ #category : #'public API' }
+SWModuleTranspiler >> transpile [
+	self toTranspiles do: [ :each |
+		each
+			stream: self stream;
+			transpile
+	]
 ]

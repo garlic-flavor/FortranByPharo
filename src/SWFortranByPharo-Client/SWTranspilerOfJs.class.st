@@ -4,7 +4,7 @@ I am a Pharo to ECMAScript (with node.js) transpiler.
 Class {
 	#name : #SWTranspilerOfJs,
 	#superclass : #SWTranspiler,
-	#category : #'SWFortranByPharo-Client-Transpiler'
+	#category : #'SWFortranByPharo-Client-Transpiler-Deprecated'
 }
 
 { #category : #'code generation - domain specific' }

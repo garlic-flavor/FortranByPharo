@@ -1,32 +1,28 @@
 Class {
 	#name : #SWTestServer,
 	#superclass : #Object,
-	#category : #'SWFortranByPharo-Client-Tests'
+	#category : #'SWFortranByPharo-Client-Tests-Client'
 }
 
 { #category : #accessing }
 SWTestServer >> start [
 
-	| tmp2 |
 	ZnServer startDefaultOn: 50000.
-	tmp2 := ZnServer default delegate.
-	tmp2
-		map: 'manage' to: [ :arg1 | 
-			| tmp3 |
-			(arg1 method = #HEAD or: [ arg1 method = #PUT ])
-				ifTrue: [ 
-					tmp3 := ZnResponse ok: (ZnEntity text: '').
-					tmp3 headers at: #'Last-Modified' put: 'last modified time'.
-					tmp3 ]
-				ifFalse: [ 
-					[ 
-					ZnResponse ok: (ZnEntity text:
-									 (String streamContents: [ :arg2 | arg1 writeOn: arg2 ])) ]
-						on: ConnectionClosed
-						do: [  ] ] ];
+	(ZnServer default delegate)
+		map: 'manage' to: [ :request |
+			(#(PUT HEAD) anySatisfy: [:one | one = request method ]) ifTrue: [|res|
+				res := (ZnResponse ok: (ZnEntity text: '')).
+				res headers at: #'Last-Modified' put: 'last modified time'.
+				res
+			] ifFalse: [ 
+				[ 
+					ZnResponse ok: (ZnEntity text:(String streamContents: [ :s | request writeOn: s ]))
+				] on: ConnectionClosed do: [ ZnResponse serverError: 'Something go wrong.' ]
+			].
+		];
 		map: 'execute' to: (SWWebSocketDelegate
 				 map: 'execute'
-				 to: [ :arg3 | arg3 sendMessage: arg3 uri asString ])
+				 to: [ :ws | ws sendMessage: '{ "code": "ok", "message": "', ws uri asString, '"}' ])
 ]
 
 { #category : #accessing }

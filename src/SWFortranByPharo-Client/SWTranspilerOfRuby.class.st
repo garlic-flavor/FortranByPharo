@@ -4,7 +4,7 @@ I am out of order.
 Class {
 	#name : #SWTranspilerOfRuby,
 	#superclass : #SWTranspiler,
-	#category : #'SWFortranByPharo-Client-Transpiler'
+	#category : #'SWFortranByPharo-Client-Transpiler-Deprecated'
 }
 
 { #category : #'as yet unclassified' }

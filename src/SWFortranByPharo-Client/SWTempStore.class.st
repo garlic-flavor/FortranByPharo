@@ -46,6 +46,8 @@ SWTempStore >> pop [
 { #category : #adding }
 SWTempStore >> push: aVariableInfo [
 	(payload isNotEmpty and: [ payload last = aVariableInfo ]) ifTrue: [ ^ false ].
+	aVariableInfo stackPos ifNotNil: [ ^ false ].
+	SWVariableInfo exactTypePriority <= aVariableInfo priority ifTrue: [ ^ false ].
 
 	payload add: aVariableInfo.
 	aVariableInfo name isEmptyOrNil ifFalse: [ ^ false ].

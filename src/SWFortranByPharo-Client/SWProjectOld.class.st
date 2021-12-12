@@ -13,7 +13,7 @@ Class {
 		'args',
 		'type'
 	],
-	#category : #'SWFortranByPharo-Client-Client'
+	#category : #'SWFortranByPharo-Client-Client-Deprecated'
 }
 
 { #category : #'instance creation' }

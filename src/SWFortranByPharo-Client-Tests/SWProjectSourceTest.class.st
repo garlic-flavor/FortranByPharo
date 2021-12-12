@@ -4,7 +4,7 @@ Class {
 	#instVars : [
 		'hello'
 	],
-	#category : #'SWFortranByPharo-Client-Tests-Transpiler'
+	#category : #'SWFortranByPharo-Client-Tests-Deprecated'
 }
 
 { #category : #running }

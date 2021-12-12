@@ -4,7 +4,7 @@ Class {
 	#instVars : [
 		'hoge'
 	],
-	#category : #'SWFortranByPharo-Client-Tests-Uncategorized'
+	#category : #'SWFortranByPharo-Client-Tests'
 }
 
 { #category : #running }

@@ -11,18 +11,16 @@ Class {
 { #category : #running }
 SWClientTest >> setUp [
 
-	| tmp2 |
 	super setUp.
-	tmp2 := SWTestServer new.
-	tmp2 start.
-	server := tmp2 yourself.
+	server := SWTestServer new
+		start;
+		yourself.
 	client := SWClient new
 ]
 
 { #category : #running }
 SWClientTest >> tearDown [
 
-	client close.
 	server stop.
 	super tearDown
 ]
@@ -32,7 +30,7 @@ SWClientTest >> testExecWith [
 
 	| tmp1 |
 	tmp1 := client exec: 'node' with: { '-v' }.
-	self assert: tmp1 readMessage equals: '/execute?target=node&args=-v'
+	self assert: tmp1 message equals: '/execute?target=node&args=-v'
 ]
 
 { #category : #tests }
@@ -43,7 +41,7 @@ SWClientTest >> testGet [
 	self
 		assert: (self toCr: tmp1)
 		equals: 'GET /manage?target=hogehoge HTTP/1.1
-User-Agent: Zinc HTTP Components 1.0 (Pharo/9.0)
+User-Agent: Zinc HTTP Components 1.0 (Pharo/10.0)
 Accept: */*
 Host: localhost:50000
 X-Zinc-Remote-Address: 127.0.0.1

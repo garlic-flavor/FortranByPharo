@@ -7,6 +7,7 @@ Class {
 	#category : #'SWFortranByPharo-Client-Transpiler'
 }
 
-{ #category : #accessing }
-SWPTofJS >> main: aClass [
+{ #category : #protected }
+SWPTofJS class >> mainModuleFrom: aClass [
+	^ SWMTofJS newMainProgramFrom: aClass
 ]

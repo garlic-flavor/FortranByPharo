@@ -169,20 +169,25 @@ SWMethodBodyTranspiler >> putAssignTo: key with: value [
 
 { #category : #'code generation' }
 SWMethodBodyTranspiler >> putCascade: aRBCascadeNode [
-	|tmp|
-	tmp := RBVariableNode new
-		name: self tempStore pop name;
-		yourself.
-	self
-		putAssignTo: tmp with: aRBCascadeNode leftmostChainReceiver;
-		putStatementDelimiter;
-		cr.
-	aRBCascadeNode messages do: [ :msgNode | 
+	({ RBVariableNode. RBLiteralValueNode } anySatisfy: [ :each | each = aRBCascadeNode leftmostChainReceiver class ]) ifTrue: [
+		aRBCascadeNode messages do: [ :msgNode |
+			self putStatement: msgNode
+		]
+	] ifFalse: [|tmp|
+		tmp := RBVariableNode new
+			name: self tempStore pop name;
+			yourself.
 		self
-			putMessage: msgNode withReceiver: tmp;
+			putAssignTo: tmp with: aRBCascadeNode leftmostChainReceiver;
 			putStatementDelimiter;
-			cr
-	].
+			cr.
+		aRBCascadeNode messages do: [ :msgNode | 
+			self
+				putMessage: msgNode withReceiver: tmp;
+				putStatementDelimiter;
+				cr
+		]
+	]
 
 ]
 

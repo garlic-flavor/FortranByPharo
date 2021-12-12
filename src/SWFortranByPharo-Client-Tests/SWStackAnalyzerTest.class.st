@@ -40,16 +40,12 @@ SWStackAnalyzerTest >> program_04: arg1 [
 { #category : #tests }
 SWStackAnalyzerTest >> program_05 [
 
-	| tmp1 tmp2 tmp3 tmp4 tmp5 tmp6 tmp7 tmp8 tmp9 tmp11 |
-	tmp11 := SWVariableInfo new.
-	tmp11 const: true.
-	^ tmp9 := tmp11 yourself
-]
+	| tmp1 tmp2 tmp3 tmp4 tmp5 tmp6 tmp7 tmp8 tmp9 |
 
-{ #category : #'as yet unclassified' }
-SWStackAnalyzerTest >> program_temp [
+	^ tmp9 := SWVariableInfo new
+		addProperty: #mutable;
+		yourself
 
-	Transcript show: 'hello'
 ]
 
 { #category : #'private - utility' }

@@ -4,7 +4,7 @@ I have imformations about a Project that can be run with NodeJs.
 Class {
 	#name : #SWProjectOfJs,
 	#superclass : #SWProjectOld,
-	#category : #'SWFortranByPharo-Client-Client'
+	#category : #'SWFortranByPharo-Client-Client-Deprecated'
 }
 
 { #category : #running }

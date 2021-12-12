@@ -196,7 +196,7 @@ SWStackAnalyzer >> mergeStackTopAndSecond [
 { #category : #protected }
 SWStackAnalyzer >> methodInfoOf: selector args: args [
 	^ definedMethods at: selector ifPresent: [ :detected |
-		detected
+		detected value: selector value: args
 	] ifAbsent: [
 		self class new: selector types: args.
 	]

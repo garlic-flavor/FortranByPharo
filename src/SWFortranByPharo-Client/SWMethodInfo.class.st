@@ -108,10 +108,12 @@ SWMethodInfo >> hasExplicitReturn [
 
 { #category : #comparing }
 SWMethodInfo >> hash [
-	^ OrderedCollection new
-		add: self method hash;
-		addAll: (self arguments collect: [ :each | each type hash ]);
-		hash
+	|ws|
+	ws := ReadWriteStream with: ''.
+	ws << self method sourceCode.
+	self arguments do: [ :each | ws << each type name ].
+	ws reset.
+	^ SHA256 hashStream: ws.
 
 ]
 

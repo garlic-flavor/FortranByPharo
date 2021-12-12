@@ -7,7 +7,7 @@ Class {
 	#instVars : [
 		'zip'
 	],
-	#category : #'SWFortranByPharo-Client-Client'
+	#category : #'SWFortranByPharo-Client-Client-Deprecated'
 }
 
 { #category : #public }

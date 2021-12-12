@@ -11,7 +11,7 @@ Class {
 	#classVars : [
 		'localDirectory'
 	],
-	#category : #'SWFortranByPharo-Client-Client'
+	#category : #'SWFortranByPharo-Client-Client-Deprecated'
 }
 
 { #category : #adding }

@@ -4,7 +4,7 @@ This transpile Pharo to Fortran.
 Class {
 	#name : #SWTranspilerOfFortran,
 	#superclass : #SWTranspiler,
-	#category : #'SWFortranByPharo-Client-Transpiler'
+	#category : #'SWFortranByPharo-Client-Transpiler-Deprecated'
 }
 
 { #category : #'as yet unclassified' }
