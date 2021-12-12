@@ -12,16 +12,20 @@ Class {
 SWClientTest >> setUp [
 
 	super setUp.
+"
 	server := SWTestServer new
 		start;
 		yourself.
+"
 	client := SWClient new
 ]
 
 { #category : #running }
 SWClientTest >> tearDown [
 
+"
 	server stop.
+"
 	super tearDown
 ]
 
@@ -53,8 +57,10 @@ X-Zinc-Remote-Address: 127.0.0.1
 SWClientTest >> testHead [
 
 	| tmp1 |
-	tmp1 := client head: 'test.js'.
+	tmp1 := client head: 'hoge.txt'.
+"
 	self assert: tmp1 equals: 'last modified time'
+"
 ]
 
 { #category : #tests }
@@ -62,7 +68,10 @@ SWClientTest >> testPut [
 
 	| tmp1 |
 	tmp1 := client put: 'hoge.txt' contents: 'Hello, World!'.
+	tmp1 inspect
+"
 	self assert: tmp1 equals: 'last modified time'
+"
 ]
 
 { #category : #'as yet unclassified' }

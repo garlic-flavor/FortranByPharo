@@ -11,6 +11,13 @@ Class {
 	#category : #'SWFortranByPharo-Client-Client'
 }
 
+{ #category : #'instance creation' }
+SWProjectRunner class >> newFrom: aProject [
+	^ self new
+		project: aProject;
+		yourself
+]
+
 { #category : #accessing }
 SWProjectRunner >> client [
 
@@ -23,9 +30,16 @@ SWProjectRunner >> client: anObject [
 	client := anObject
 ]
 
-{ #category : #api }
-SWProjectRunner >> go: arguments [
+{ #category : #execution }
+SWProjectRunner >> execute [
 	^ self subclassResponsibility 
+]
+
+{ #category : #api }
+SWProjectRunner >> go [
+	^ self
+		putAll;
+		execute
 ]
 
 { #category : #accessing }
@@ -38,4 +52,19 @@ SWProjectRunner >> project [
 SWProjectRunner >> project: anObject [
 
 	project := anObject
+]
+
+{ #category : #'code generation' }
+SWProjectRunner >> put: aModule [
+	(self client head: aModule filename) ifNil: [
+		aModule transpile.
+		self client put: aModule filename contents: aModule contents
+	]
+]
+
+{ #category : #execution }
+SWProjectRunner >> putAll [
+	self project modules do: [ :aModule |
+		self put: aModule
+	]
 ]

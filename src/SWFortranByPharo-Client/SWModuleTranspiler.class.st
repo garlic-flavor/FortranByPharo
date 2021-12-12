@@ -7,7 +7,8 @@ Class {
 	#instVars : [
 		'stream',
 		'toTranspiles',
-		'name'
+		'name',
+		'filename'
 	],
 	#category : #'SWFortranByPharo-Client-Transpiler'
 }
@@ -47,7 +48,7 @@ SWModuleTranspiler >> contents [
 
 { #category : #accessing }
 SWModuleTranspiler >> filename [
-	^ self name, '.', self class extension
+	^ filename ifNil: [ filename := 'cache/', self name, '/', self hash hex, '.', self class extension ]
 ]
 
 { #category : #comparing }

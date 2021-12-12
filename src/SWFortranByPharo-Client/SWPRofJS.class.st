@@ -7,6 +7,7 @@ Class {
 	#category : #'SWFortranByPharo-Client-Client'
 }
 
-{ #category : #api }
-SWPRofJS >> go: arguments [
+{ #category : #execution }
+SWPRofJS >> execute [
+	^ self client exec: 'node' with: { self project main filename }
 ]

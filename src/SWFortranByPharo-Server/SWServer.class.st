@@ -36,7 +36,7 @@ SWServer class >> filePathOf: aName [
 	|path|
 	path := SWShellEnvironment default localDirectory joinPath: (aName asString trimLeft: [ :c | c = $/ ]).
 	(SWShellEnvironment default localDirectory contains: path) ifFalse: [
-		path := SWShellEnvironment default localDirectory
+		self error: aName, ' is in out of the local directory.'
 	].
 	^ path
 
@@ -175,6 +175,7 @@ SWServer >> head: target [
 	^ target exists ifTrue: [
 		(ZnResponse statusLine: ZnStatusLine ok)
 			headers: (ZnHeaders defaultResponseHeaders
+				at: #'Content-Location' put: (target relativeTo: FileLocator imageDirectory) fullName;
 				at: #'Last-Modified' put: target changeTime asString;
 				yourself);
 			yourself
@@ -235,7 +236,9 @@ SWServer >> put: target contents: contents [
 			<< contents.
 	].
 	res := ZnResponse ok: (ZnEntity text: '').
-	res headers at: #'Last-Modified' put: target changeTime asString.
+	res headers
+		at: #'Content-Location' put: (target relativeTo: FileLocator imageDirectory) fullName;
+		at: #'Last-Modified' put: target changeTime asString.
 	^ res
 ]
 

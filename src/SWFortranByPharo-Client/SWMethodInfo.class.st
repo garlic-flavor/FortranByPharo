@@ -108,12 +108,14 @@ SWMethodInfo >> hasExplicitReturn [
 
 { #category : #comparing }
 SWMethodInfo >> hash [
-	|ws|
-	ws := ReadWriteStream with: ''.
-	ws << self method sourceCode.
-	self arguments do: [ :each | ws << each type name ].
-	ws reset.
-	^ SHA256 hashStream: ws.
+	^ SHA256 hashStream: (
+		(ReadWriteStream with: '')
+			<< self mangledName;
+			cr;
+			<< self method sourceCode;
+			reset;
+			yourself
+	)
 
 ]
 

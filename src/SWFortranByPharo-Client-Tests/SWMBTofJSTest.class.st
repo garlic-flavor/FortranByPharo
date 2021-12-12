@@ -14,7 +14,7 @@ SWMBTofJSTest class >> toTranspile [
 SWMBTofJSTest >> program_01 [
 
 	Transcript
-		show: 'Hello, world!';
+		show: 'Hello, good-bye!';
 		cr;
 		cr
 ]
@@ -41,6 +41,13 @@ SWMBTofJSTest >> program_03 [
 { #category : #tests }
 SWMBTofJSTest >> testAnalyze_program_01 [
 	(SWStackAnalyzer new: #program_01 types: { self class }) inspect
+]
+
+{ #category : #tests }
+SWMBTofJSTest >> testHash [
+	self
+		deny: (SWMBTofJS new: #program_01 types: {self class}) hash
+		equals: (SWMBTofJS new: #program_02 types: {self class}) hash
 ]
 
 { #category : #tests }
