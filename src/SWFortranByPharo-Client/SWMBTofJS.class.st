@@ -9,7 +9,12 @@ Class {
 
 { #category : #accessing }
 SWMBTofJS >> mangledName [
-	^ self class safeSelectorNameOf: self method selector
+	^ self class safeSelectorNameOf: (method class = ByteSymbol ifTrue: [ method ] ifFalse: [ self method selector ])
+]
+
+{ #category : #'code generation' }
+SWMBTofJS >> putSelf [
+	self put: (self method methodClass class = Metaclass ifTrue: [ self method methodClass soleInstance name ] ifFalse: [ 'this' ])
 ]
 
 { #category : #'code generation' }

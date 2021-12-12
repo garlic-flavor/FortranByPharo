@@ -30,7 +30,7 @@ SWModuleTranspiler class >> mainProgramTranspilerFrom: aClass [
 
 { #category : #'instance creation' }
 SWModuleTranspiler class >> newMainProgramFrom: aClass [
-	^ self new
+	^ (self new)
 		<< (self mainProgramTranspilerFrom: aClass);
 		name: (self asMetaclassOf: aClass) soleInstance name, 'Program';
 		yourself

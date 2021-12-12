@@ -9,7 +9,7 @@ Class {
 
 { #category : #constants }
 SWMTofJS class >> extension [
-	^ #js
+	^ #mjs
 ]
 
 { #category : #generators }

@@ -4,7 +4,7 @@ I add a functionality of accessing to request line.
 Class {
 	#name : #SWWebSocketDelegate,
 	#superclass : #ZnWebSocketDelegate,
-	#category : #'SWFortranByPharo-Server'
+	#category : #'SWFortranByPharo-Server-Wrapper'
 }
 
 { #category : #public }

@@ -9,9 +9,6 @@ Class {
 		'tempStore',
 		'sends'
 	],
-	#classVars : [
-		'definedMethods'
-	],
 	#category : #'SWFortranByPharo-Client-Analyzer'
 }
 
@@ -29,44 +26,22 @@ SWStackAnalyzer class >> binaryOpInfo [
 	]
 ]
 
-{ #category : #initialization }
-SWStackAnalyzer class >> initialize [
-	self installMethods
-]
-
-{ #category : #initialization }
-SWStackAnalyzer class >> installMethods [
-	definedMethods := Dictionary newFrom: (self class methods select: [ :method |
-		method selector beginsWith: 'install_'
-	] thenCollect: [ :method |
-		method valueWithReceiver: self arguments: #().
-	])
-]
-
-{ #category : #initialization }
-SWStackAnalyzer class >> install_add [
-	^ #+ -> self binaryOpInfo
-]
-
-{ #category : #initialization }
-SWStackAnalyzer class >> install_eq [
-	^ #= -> self binaryOpInfo
-]
-
-{ #category : #initialization }
-SWStackAnalyzer class >> install_lt [
-	^ #< -> self binaryOpInfo
-]
-
-{ #category : #initialization }
-SWStackAnalyzer class >> install_mul [
-	^ #* -> self binaryOpInfo
+{ #category : #'as yet unclassified' }
+SWStackAnalyzer class >> definedMethod: selector ifPresent: presentBlock ifAbsent: absentBlock [
+	|generatorSelector|
+	generatorSelector := #defined_, (self safeSelectorNameOf: selector).
+	^ (self respondsTo: generatorSelector) ifTrue: [
+		presentBlock value: (self perform: generatorSelector)
+	] ifFalse: [
+		absentBlock value
+	]
 ]
 
 { #category : #'instance creation' }
-SWStackAnalyzer class >> install_new [
-	^ #new -> [ :selector :args |
-		SWMethodInfo new
+SWStackAnalyzer class >> defined_new [
+	^ [ :selector :args |
+		self new
+			method: #new;
 			return: (SWVariableInfo new
 				type: args first type soleInstance;
 				priority: {SWVariableInfo wellknownMethodPriority. args first priority} min;
@@ -76,13 +51,33 @@ SWStackAnalyzer class >> install_new [
 ]
 
 { #category : #initialization }
-SWStackAnalyzer class >> install_sub [
-	^ #- -> self binaryOpInfo
+SWStackAnalyzer class >> defined_opEqual_ [
+	^ self binaryOpInfo
+]
+
+{ #category : #initialization }
+SWStackAnalyzer class >> defined_opLT_ [
+	^ self binaryOpInfo
+]
+
+{ #category : #initialization }
+SWStackAnalyzer class >> defined_opMul_ [
+	^ self binaryOpInfo
+]
+
+{ #category : #initialization }
+SWStackAnalyzer class >> defined_opPlus_ [
+	^ self binaryOpInfo
+]
+
+{ #category : #initialization }
+SWStackAnalyzer class >> defined_opSub_ [
+	^ self binaryOpInfo
 ]
 
 { #category : #'instance creation' }
-SWStackAnalyzer class >> install_yourself [
-	^ #yourself -> [ :selector :args |
+SWStackAnalyzer class >> defined_yourself [
+	^ [ :selector :args |
 		SWMethodInfo new
 			method: Object>>#yourself;
 			return: (SWVariableInfo new
@@ -95,7 +90,7 @@ SWStackAnalyzer class >> install_yourself [
 
 { #category : #'instance creation' }
 SWStackAnalyzer class >> new: selector types: types [
-	^ definedMethods at: selector ifPresent: [ :dm |
+	^ self definedMethod: selector ifPresent: [ :dm |
 		dm value: selector value: types
 	] ifAbsent: [
 		self new
@@ -190,16 +185,6 @@ SWStackAnalyzer >> mergeStackTopAndSecond [
 	result << self stack pop.
 
 	self stack push: result
-
-]
-
-{ #category : #protected }
-SWStackAnalyzer >> methodInfoOf: selector args: args [
-	^ definedMethods at: selector ifPresent: [ :detected |
-		detected value: selector value: args
-	] ifAbsent: [
-		self class new: selector types: args.
-	]
 
 ]
 
@@ -411,7 +396,7 @@ SWStackAnalyzer >> send: selector super: supered numArgs: numberArguments [
 	|args methodInfo|
 	args := self stack pop: numberArguments + 1.
 	supered ifTrue: [ args first: args first copyAsSuper ].
-	methodInfo := self methodInfoOf: selector args: args.
+	methodInfo := self class new: selector types: args.
 
 	self sends at: (self method sourceNodeForPC: oldPC) put: methodInfo.
 	self stack push: methodInfo return.

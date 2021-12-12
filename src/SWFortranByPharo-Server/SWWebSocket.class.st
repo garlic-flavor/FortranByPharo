@@ -7,7 +7,7 @@ Class {
 	#instVars : [
 		'uri'
 	],
-	#category : #'SWFortranByPharo-Server'
+	#category : #'SWFortranByPharo-Server-Wrapper'
 }
 
 { #category : #accessing }

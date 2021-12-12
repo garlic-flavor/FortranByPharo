@@ -47,6 +47,10 @@ SWMethodBodyTranspiler >> classOf: aNode [
 		^ aNode value class
 	].
 
+	aNode class = RBMessageNode ifTrue: [
+		^ (self sends at: aNode) return type
+	].
+
 	self error: 'to implement'.
 	self flag: #toImplement.
 ]
@@ -239,6 +243,11 @@ SWMethodBodyTranspiler >> putInteger: anInteger [
 ]
 
 { #category : #'code generation' }
+SWMethodBodyTranspiler >> putLine: anObject [
+	self stream putLine: anObject asString
+]
+
+{ #category : #'code generation' }
 SWMethodBodyTranspiler >> putMessage: aNode withReceiver: aRNode [
 	self stream log: [ aNode receiver asString, ' >> ', aNode selector asString ].
 	self incMessageNest.
@@ -284,6 +293,11 @@ SWMethodBodyTranspiler >> putReturn: value [
 ]
 
 { #category : #'code generation' }
+SWMethodBodyTranspiler >> putSelf [
+	^ self subclassResponsibility 
+]
+
+{ #category : #'code generation' }
 SWMethodBodyTranspiler >> putSequence: aSequence [
 	aSequence statements do: [ :each |
 		self putStatement: each
@@ -317,7 +331,11 @@ SWMethodBodyTranspiler >> putString: aString [
 { #category : #'code generation' }
 SWMethodBodyTranspiler >> putVariable: aVariableNode [
 	self stream log: aVariableNode name.
-	self put: aVariableNode name
+	aVariableNode name = #self ifTrue: [
+		self putSelf
+	] ifFalse: [
+		self put: aVariableNode name
+	]
 ]
 
 { #category : #'code generation' }

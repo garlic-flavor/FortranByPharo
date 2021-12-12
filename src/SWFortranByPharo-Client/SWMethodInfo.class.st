@@ -35,6 +35,9 @@ SWMethodInfo class >> safeSelectorNameOf: selector [
 	selector = '/' ifTrue: [ ^ 'opDiv_' ].
 	selector = '<<' ifTrue: [ ^ 'opWrite_' ].
 	selector = '+' ifTrue: [ ^ 'opPlus_' ].
+	selector = '<' ifTrue: [ ^ 'opLT_' ].
+	selector = '*' ifTrue: [ ^ 'opMul_' ].
+	selector = '-' ifTrue: [ ^ 'opSub_' ].
 	^ selector collect: [:c | (#' >#:/' anySatisfy: [ :each | each = c]) ifTrue: [ $_ ] ifFalse: [ c ] ]
 
 ]
@@ -127,7 +130,7 @@ SWMethodInfo >> locals [
 { #category : #accessing }
 SWMethodInfo >> mangledName [
 	^ mangledName ifNil: [ mangledName := String streamContents: [ :s ||owner|
-		owner := self method methodClass.
+		owner := (method class = ByteString ifTrue: [ self return type ] ifFalse: [ self method methodClass ]).
 		owner class = Metaclass ifTrue: [ 
 			s << owner soleInstance name; << 'C'
 		] ifFalse: [
@@ -137,7 +140,7 @@ SWMethodInfo >> mangledName [
 		(self const ifTrue: ['C'] ifFalse: ['_']).
 "
 		s
-			<< (self class safeSelectorNameOf: self method selector);
+			<< (method class = ByteString ifTrue: [ method ] ifFalse: [ method selector ]);
 			<< (self arguments collect: [ :v |
 				v mangledTypeName
 			])

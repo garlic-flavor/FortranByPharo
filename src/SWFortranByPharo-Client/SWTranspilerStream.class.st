@@ -13,7 +13,7 @@ Class {
 		'newline',
 		'preventNewline'
 	],
-	#category : #'SWFortranByPharo-Client-Transpiler-Deprecated'
+	#category : #'SWFortranByPharo-Client-Transpiler'
 }
 
 { #category : #accessing }

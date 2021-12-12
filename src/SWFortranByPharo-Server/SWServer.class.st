@@ -13,19 +13,6 @@ Class {
 	#category : #'SWFortranByPharo-Server-Server'
 }
 
-{ #category : #'code generation' }
-SWServer class >> _rb_startOn_using: transpiler [
-	transpiler putCode: '\
-		EM.run{
-			EM::WebSocket.run(:host => "0.0.0.0", :port=>portNumber) do |ws|
-				ws.onmessage {  |msg|
-					self.dispatch_on_(msg, ws)
-				}
-			end
-		}' with: {}.
-
-]
-
 { #category : #accessing }
 SWServer class >> default [
 	^ default
@@ -47,31 +34,12 @@ SWServer class >> isRunning [
 	^ ZnServer default isRunning
 ]
 
-{ #category : #'code generation' }
-SWServer class >> mjs_requirements: transpiler [
-	transpiler
-		putImportNative: {'PharoObject'. 'Transcript'. 'FileLocator'} from: 'Pharo.mjs';
-		putImportNative: { 'ZnServer'. 'SWWebSocketDelegate'. 'ZnResponse'. 'ZnEntity'. 'ZnStatusLine'. 'ZnHeaders' } from: 'ZnServer.mjs';
-		putImportClass: SWServerStatus;
-		putImportClass: SWShellEnvironment;
-		putImportClass: SWShell
-]
-
 { #category : #'code generation - deprecated' }
-SWServer class >> program [
+SWServer class >> main [
+	SWFStd
+		import: #(PharoObject Transcript FileLocator) from: 'Pharo';
+		import: #(ZnServer SWWebSocketDelegate ZnResponse ZnEntity ZnStatusLine ZnHeaders) from: 'ZnServer'.
 	self new startOn: 50000
-]
-
-{ #category : #'code generation' }
-SWServer class >> rb_requirements [
-	^ {
-		SWStd.
-		SWSession.
-		SWServerInstruction.
-		SWServerStatus.
-		SWShell.
-		'ZnServer.rb'.
-	}
 ]
 
 { #category : #'as yet unclassified' }
