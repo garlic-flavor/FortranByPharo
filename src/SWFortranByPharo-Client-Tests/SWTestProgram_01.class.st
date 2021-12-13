@@ -6,5 +6,5 @@ Class {
 
 { #category : #accessing }
 SWTestProgram_01 class >> main [
-	SWFStd print: 'Hello, good-bye!'
+	SWStd print: 'Hello, good-bye!'
 ]

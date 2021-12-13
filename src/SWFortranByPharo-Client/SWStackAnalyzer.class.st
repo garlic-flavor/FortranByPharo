@@ -6,8 +6,7 @@ Class {
 	#superclass : #SWMethodInfo,
 	#instVars : [
 		'jumperStack',
-		'tempStore',
-		'sends'
+		'tempStore'
 	],
 	#category : #'SWFortranByPharo-Client-Analyzer'
 }
@@ -46,6 +45,11 @@ SWStackAnalyzer class >> defined_new [
 				type: args first type soleInstance;
 				priority: {SWVariableInfo wellknownMethodPriority. args first priority} min;
 				yourself);
+			types: {
+				(SWVariableInfo new
+					type: [ args first type ];
+					yourself)
+			};
 			yourself
 	]
 ]
@@ -344,7 +348,7 @@ SWStackAnalyzer >> pushReceiverVariable: offset [
 		type: [
 			(self classInfo getVariableInfoAt: offset) type
 		];
-		priority: 10;
+		priority: SWVariableInfo receiverTypePriority;
 		yourself
 	).
 	super pushReceiverVariable: offset
@@ -398,23 +402,11 @@ SWStackAnalyzer >> send: selector super: supered numArgs: numberArguments [
 	supered ifTrue: [ args first: args first copyAsSuper ].
 	methodInfo := self class new: selector types: args.
 
-	self sends at: (self method sourceNodeForPC: oldPC) put: methodInfo.
+	self messages at: (self method sourceNodeForPC: oldPC) put: methodInfo.
 	self stack push: methodInfo return.
 	
 	super send: selector super: supered numArgs: numberArguments.
 
-]
-
-{ #category : #accessing }
-SWStackAnalyzer >> sends [
-
-	^ sends ifNil: [ sends := Dictionary new ]
-]
-
-{ #category : #accessing }
-SWStackAnalyzer >> sends: anObject [
-
-	sends := anObject
 ]
 
 { #category : #'instruction decoding' }

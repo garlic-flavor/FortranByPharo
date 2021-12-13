@@ -13,5 +13,5 @@ SWServerProgram class >> build [
 	|project|
 	project := SWPTofJS newFrom: SWServer.
 	project transpile.
-	project main contents inspect.
+	project inspect.
 ]

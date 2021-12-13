@@ -36,7 +36,7 @@ SWServer class >> isRunning [
 
 { #category : #'code generation - deprecated' }
 SWServer class >> main [
-	SWFStd
+	SWStd
 		import: #(PharoObject Transcript FileLocator) from: 'Pharo';
 		import: #(ZnServer SWWebSocketDelegate ZnResponse ZnEntity ZnStatusLine ZnHeaders) from: 'ZnServer'.
 	self new startOn: 50000
@@ -64,6 +64,11 @@ SWServer class >> stop [
 SWServer class >> testRunning [
 	<sampleInstance>
 	^ ZnServer default isRunning ifTrue: [ 'The server is running' ] ifFalse: [ 'The server is not running' ]
+]
+
+{ #category : #'as yet unclassified' }
+SWServer class >> toTranspile [
+	^ #main
 ]
 
 { #category : #accessing }

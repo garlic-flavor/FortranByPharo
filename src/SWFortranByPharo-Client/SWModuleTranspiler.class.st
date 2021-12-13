@@ -6,17 +6,12 @@ Class {
 	#superclass : #Object,
 	#instVars : [
 		'stream',
-		'toTranspiles',
+		'payload',
 		'name',
 		'filename'
 	],
 	#category : #'SWFortranByPharo-Client-Transpiler'
 }
-
-{ #category : #converting }
-SWModuleTranspiler class >> asMetaclassOf: aClass [
-	^ aClass class = Metaclass ifTrue: [ aClass ] ifFalse: [ aClass class ]
-]
 
 { #category : #constants }
 SWModuleTranspiler class >> extension [
@@ -31,14 +26,9 @@ SWModuleTranspiler class >> mainProgramTranspilerFrom: aClass [
 { #category : #'instance creation' }
 SWModuleTranspiler class >> newMainProgramFrom: aClass [
 	^ (self new)
-		<< (self mainProgramTranspilerFrom: aClass);
-		name: (self asMetaclassOf: aClass) soleInstance name, 'Program';
+		payload: (self mainProgramTranspilerFrom: aClass);
+		name: aClass instanceSide name, 'Program';
 		yourself
-]
-
-{ #category : #streaming }
-SWModuleTranspiler >> << aTranspiler [
-	self toTranspiles add: aTranspiler
 ]
 
 { #category : #accessing }
@@ -46,19 +36,15 @@ SWModuleTranspiler >> contents [
 	^ self stream contents
 ]
 
-{ #category : #accessing }
-SWModuleTranspiler >> filename [
-	^ filename ifNil: [ filename := 'cache/', self name, '/', self hash hex, '.', self class extension ]
+{ #category : #'as yet unclassified' }
+SWModuleTranspiler >> dependingMethodsToTranspile [
+	^ self payload dependingMethodsToTranspile
+
 ]
 
-{ #category : #comparing }
-SWModuleTranspiler >> hash [
-	|ws|
-	ws := ReadWriteStream with: {}.
-	self toTranspiles do: [ :each | ws << each hash ].
-	ws reset.
-	^ SHA256 hashStream: ws
-
+{ #category : #accessing }
+SWModuleTranspiler >> filename [
+	^ filename ifNil: [ filename := 'cache/', self name, '/', self sourceHash hex, '.', self class extension ]
 ]
 
 { #category : #accessing }
@@ -74,6 +60,30 @@ SWModuleTranspiler >> name: anObject [
 ]
 
 { #category : #accessing }
+SWModuleTranspiler >> payload [
+
+	^ payload
+]
+
+{ #category : #accessing }
+SWModuleTranspiler >> payload: anObject [
+
+	payload := anObject
+]
+
+{ #category : #'public API' }
+SWModuleTranspiler >> ready [
+	^ self payload ready
+
+]
+
+{ #category : #comparing }
+SWModuleTranspiler >> sourceHash [
+
+	^ self payload sourceHash
+]
+
+{ #category : #accessing }
 SWModuleTranspiler >> stream [
 
 	^ stream ifNil: [ stream := SWTranspilerStream new ]
@@ -85,23 +95,10 @@ SWModuleTranspiler >> stream: anObject [
 	stream := anObject
 ]
 
-{ #category : #accessing }
-SWModuleTranspiler >> toTranspiles [
-
-	^ toTranspiles ifNil: [ toTranspiles := OrderedCollection new ]
-]
-
-{ #category : #accessing }
-SWModuleTranspiler >> toTranspiles: anObject [
-
-	toTranspiles := anObject
-]
-
 { #category : #'public API' }
 SWModuleTranspiler >> transpile [
-	self toTranspiles do: [ :each |
-		each
-			stream: self stream;
-			transpile
-	]
+	self payload
+		stream: self stream;
+		transpile
+
 ]

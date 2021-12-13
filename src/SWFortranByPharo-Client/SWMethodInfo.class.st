@@ -12,7 +12,8 @@ Class {
 		'return',
 		'sourceHash',
 		'classInfo',
-		'numTemps'
+		'numTemps',
+		'messages'
 	],
 	#category : #'SWFortranByPharo-Client-Analyzer'
 }
@@ -91,6 +92,8 @@ SWMethodInfo >> classInfo: anObject [
 
 { #category : #api }
 SWMethodInfo >> decode [
+	oldPC ifNotNil: [ ^ self ].
+
 	(stack at: 0)
 		name: 'self';
 		stackPos: 0.
@@ -104,22 +107,23 @@ SWMethodInfo >> decode [
 
 ]
 
+{ #category : #'as yet unclassified' }
+SWMethodInfo >> dependingMethodsToTranspile [
+	^ Set newFrom: (self messages values select: [ :each |
+		each isReceiverMethod and: [
+			each receiverClass classSide methodDict includesKey: #toTranspile
+		]
+	])
+]
+
 { #category : #testing }
 SWMethodInfo >> hasExplicitReturn [
 	^ self  return stackPos ~= -1
 ]
 
-{ #category : #comparing }
-SWMethodInfo >> hash [
-	^ SHA256 hashStream: (
-		(ReadWriteStream with: '')
-			<< self mangledName;
-			cr;
-			<< self method sourceCode;
-			reset;
-			yourself
-	)
-
+{ #category : #testing }
+SWMethodInfo >> isReceiverMethod [
+	^ self receiverClass = self method methodClass
 ]
 
 { #category : #accessing }
@@ -154,9 +158,21 @@ SWMethodInfo >> mangledName: anObject [
 ]
 
 { #category : #accessing }
+SWMethodInfo >> messages [
+
+	^ messages ifNil: [ messages := Dictionary new ]
+]
+
+{ #category : #accessing }
+SWMethodInfo >> messages: anObject [
+
+	messages := anObject
+]
+
+{ #category : #accessing }
 SWMethodInfo >> method [
 	^ method class = ByteSymbol ifTrue: [
-		method := (self class search: method in: self stack first type).
+		method := (self class search: method in: self receiverClass).
 	] ifFalse: [ method ].
 
 ]
@@ -179,6 +195,16 @@ SWMethodInfo >> numTemps: anObject [
 	numTemps := anObject
 ]
 
+{ #category : #api }
+SWMethodInfo >> ready [
+	^ self subclassResponsibility 
+]
+
+{ #category : #NOCompletion }
+SWMethodInfo >> receiverClass [
+	^ (self stack at: 0) type
+]
+
 { #category : #accessing }
 SWMethodInfo >> return [
 
@@ -193,9 +219,17 @@ SWMethodInfo >> return: anObject [
 	return := anObject
 ]
 
-{ #category : #accessing }
+{ #category : #comparing }
 SWMethodInfo >> sourceHash [
-	^ sourceHash ifNil: [ sourceHash := SHA256 hashMessage: self method sourceCode ]
+	^ SHA256 hashStream: (
+		(ReadWriteStream with: '')
+			<< self mangledName;
+			cr;
+			<< self method sourceCode;
+			reset;
+			yourself
+	)
+
 ]
 
 { #category : #accessing }

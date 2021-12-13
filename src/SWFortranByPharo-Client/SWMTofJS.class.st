@@ -14,5 +14,5 @@ SWMTofJS class >> extension [
 
 { #category : #generators }
 SWMTofJS class >> mainProgramTranspilerFrom: aClass [
-	^ SWMBTofJS new: #main types: { self asMetaclassOf: aClass }
+	^ SWMBTofJS new: #main types: { aClass classSide }
 ]

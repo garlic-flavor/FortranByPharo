@@ -16,7 +16,7 @@ SWNag2 class >> f90_requirements: arg1 [
 { #category : #running }
 SWNag2 class >> mysub: arg1 [
 
-	SWFStd print: arg1
+	SWStd print: arg1
 ]
 
 { #category : #running }

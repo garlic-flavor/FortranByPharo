@@ -13,7 +13,7 @@ SWTestHelloWorld class >> mjs_requirements [
 { #category : #running }
 SWTestHelloWorld class >> program [
 
-	SWFStd print: 'Hello, World!'
+	SWStd print: 'Hello, World!'
 ]
 
 { #category : #accessing }

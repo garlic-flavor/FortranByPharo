@@ -22,7 +22,7 @@ SWMBTofJSTest >> program_01 [
 { #category : #'tests - source' }
 SWMBTofJSTest >> program_02 [
 
-	SWFStd print: 'Hello, World!'
+	SWStd print: 'Hello, World!'
 ]
 
 { #category : #'tests - source' }
@@ -44,10 +44,10 @@ SWMBTofJSTest >> testAnalyze_program_01 [
 ]
 
 { #category : #tests }
-SWMBTofJSTest >> testHash [
+SWMBTofJSTest >> testSourceHash [
 	self
-		deny: (SWMBTofJS new: #program_01 types: {self class}) hash
-		equals: (SWMBTofJS new: #program_02 types: {self class}) hash
+		deny: (SWMBTofJS new: #program_01 types: {self class}) sourceHash
+		equals: (SWMBTofJS new: #program_02 types: {self class}) sourceHash
 ]
 
 { #category : #tests }

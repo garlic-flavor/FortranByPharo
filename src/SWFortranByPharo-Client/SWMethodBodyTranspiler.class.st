@@ -48,7 +48,7 @@ SWMethodBodyTranspiler >> classOf: aNode [
 	].
 
 	aNode class = RBMessageNode ifTrue: [
-		^ (self sends at: aNode) return type
+		^ (self messages at: aNode) return type
 	].
 
 	self error: 'to implement'.
@@ -262,7 +262,7 @@ SWMethodBodyTranspiler >> putOrdinaryMessage: aNode withReceiver: aRNode [
 	aNode selector first isLetter ifTrue: [
 		self
 			putClassAccessor;
-			put: (self sends at: aNode) mangledName;
+			put: (self messages at: aNode) mangledName;
 			putArguments: aNode arguments.
 	] ifFalse: [
 		self
