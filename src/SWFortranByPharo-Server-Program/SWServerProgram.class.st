@@ -12,6 +12,6 @@ SWServerProgram class >> build [
 	<script>
 	|project|
 	project := SWPTofJS newFrom: SWServer.
-	project transpile.
-	project inspect.
+	project solveDependencies inspect.
+
 ]

@@ -7,7 +7,7 @@ Class {
 	#instVars : [
 		'env'
 	],
-	#classVars : [
+	#classInstVars : [
 		'default'
 	],
 	#category : #'SWFortranByPharo-Server-Server'

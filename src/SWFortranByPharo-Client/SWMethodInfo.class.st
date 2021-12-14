@@ -107,15 +107,6 @@ SWMethodInfo >> decode [
 
 ]
 
-{ #category : #'as yet unclassified' }
-SWMethodInfo >> dependingMethodsToTranspile [
-	^ Set newFrom: (self messages values select: [ :each |
-		each isReceiverMethod and: [
-			each receiverClass classSide methodDict includesKey: #toTranspile
-		]
-	])
-]
-
 { #category : #testing }
 SWMethodInfo >> hasExplicitReturn [
 	^ self  return stackPos ~= -1
@@ -124,6 +115,11 @@ SWMethodInfo >> hasExplicitReturn [
 { #category : #testing }
 SWMethodInfo >> isReceiverMethod [
 	^ self receiverClass = self method methodClass
+]
+
+{ #category : #testing }
+SWMethodInfo >> isToTranspile [
+	^ self method methodClass classSide methodDict includesKey: #toTranspile
 ]
 
 { #category : #accessing }
@@ -160,7 +156,7 @@ SWMethodInfo >> mangledName: anObject [
 { #category : #accessing }
 SWMethodInfo >> messages [
 
-	^ messages ifNil: [ messages := Dictionary new ]
+	^ messages ifNil: [ messages := OrderedDictionary new ]
 ]
 
 { #category : #accessing }

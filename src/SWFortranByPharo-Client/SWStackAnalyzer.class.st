@@ -255,13 +255,6 @@ SWStackAnalyzer >> popIntoTemporaryVariable: offset [
 
 ]
 
-{ #category : #private }
-SWStackAnalyzer >> popSendStack: aMethod [
-	aMethod = self sendStack pop ifFalse: [
-		Exception signal: ('A stacking mismatch was detected: ', aMethod)
-	].
-]
-
 { #category : #'instruction decoding' }
 SWStackAnalyzer >> pushActiveContext [ 
 	self halt.
@@ -368,15 +361,6 @@ SWStackAnalyzer >> pushTemporaryVariable:  offset [
 
 ]
 
-{ #category : #private }
-SWStackAnalyzer >> pushToSendStack: aMethod [
-	(self sendStack anySatisfy: [ :each | each = aMethod ]) ifTrue: [
-		Exception signal: 'A circular referencing detected: '. aMethod
-	].
-	self sendStack push: aMethod.
-
-]
-
 { #category : #api }
 SWStackAnalyzer >> ready [
 	^ self return type isNotNil
@@ -415,6 +399,12 @@ SWStackAnalyzer >> storeIntoLiteralVariable: anAssociation [
 	self halt.
 	
 	super storeIntoLiteralVariable: anAssociation
+]
+
+{ #category : #'instruction decoding' }
+SWStackAnalyzer >> storeIntoReceiverVariable: offset [
+	self halt.
+	super storeIntoReceiverVariable: offset
 ]
 
 { #category : #'instruction decoding' }

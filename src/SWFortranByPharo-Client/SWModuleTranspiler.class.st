@@ -36,15 +36,14 @@ SWModuleTranspiler >> contents [
 	^ self stream contents
 ]
 
-{ #category : #'as yet unclassified' }
-SWModuleTranspiler >> dependingMethodsToTranspile [
-	^ self payload dependingMethodsToTranspile
-
-]
-
 { #category : #accessing }
 SWModuleTranspiler >> filename [
 	^ filename ifNil: [ filename := 'cache/', self name, '/', self sourceHash hex, '.', self class extension ]
+]
+
+{ #category : #accessing }
+SWModuleTranspiler >> messages [
+	^ self payload messages
 ]
 
 { #category : #accessing }
