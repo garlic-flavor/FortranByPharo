@@ -11,23 +11,6 @@ Class {
 	#category : #'SWFortranByPharo-Client-Transpiler'
 }
 
-{ #category : #'as yet unclassified' }
-SWProjectTranspiler class >> accDependenciesOf: aMethodInfo to: aClassDict [
-	|classInfo|
-	classInfo := aClassDict at: aMethodInfo method methodClass ifAbsentPut: (
-		SWClassInfo new
-			targetClass: aMethodInfo method methodClass;
-			yourself
-	).
-	classInfo addMember: aMethodInfo ifAbsent: [
-		aMethodInfo ready.
-		aMethodInfo dependingMethodsToTranspile do: [ :mi |
-			self accDependenciesOf: mi to: aClassDict
-		]		
-	]
-
-]
-
 { #category : #protected }
 SWProjectTranspiler class >> mainModuleFrom: aClass [
 	^ self subclassResponsibility 
@@ -67,13 +50,13 @@ SWProjectTranspiler >> modules: anObject [
 
 { #category : #'as yet unclassified' }
 SWProjectTranspiler >> solveDependencies [
-	|classDict|
+	|pool|
 	self main ready.
-	classDict := Dictionary new.
-	self main messages do: [ :aMethodInfo |
-		self class accDependenciesOf: aMethodInfo to: classDict
+	pool := self main pool.
+	pool select: [ :ci | ci isToTranspile ] thenDo: [ :ci |
+		self halt.
 	].
-	^ classDict
+
 ]
 
 { #category : #'public API' }

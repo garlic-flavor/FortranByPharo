@@ -40,7 +40,7 @@ SWMBTofJSTest >> program_03 [
 
 { #category : #tests }
 SWMBTofJSTest >> testAnalyze_program_01 [
-	(SWStackAnalyzer new: #program_01 types: { self class }) inspect
+	(SWStackAnalyzer new: #program_01 types: { self class }) ready; inspect
 ]
 
 { #category : #tests }

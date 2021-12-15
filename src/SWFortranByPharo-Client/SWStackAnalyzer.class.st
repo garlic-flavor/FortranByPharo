@@ -337,13 +337,8 @@ SWStackAnalyzer >> pushReceiver [
 
 { #category : #'instruction decoding' }
 SWStackAnalyzer >> pushReceiverVariable: offset [
-	self stack push: (SWVariableInfo new
-		type: [
-			(self classInfo getVariableInfoAt: offset) type
-		];
-		priority: SWVariableInfo receiverTypePriority;
-		yourself
-	).
+	self halt.
+	self stack push: (self classInfo getVariableInfoAt: offset).
 	super pushReceiverVariable: offset
 ]
 
@@ -384,7 +379,7 @@ SWStackAnalyzer >> send: selector super: supered numArgs: numberArguments [
 	|args methodInfo|
 	args := self stack pop: numberArguments + 1.
 	supered ifTrue: [ args first: args first copyAsSuper ].
-	methodInfo := self class new: selector types: args.
+	methodInfo := self pool new: selector types: args.
 
 	self messages at: (self method sourceNodeForPC: oldPC) put: methodInfo.
 	self stack push: methodInfo return.

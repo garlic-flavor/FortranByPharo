@@ -13,7 +13,8 @@ Class {
 		'sourceHash',
 		'classInfo',
 		'numTemps',
-		'messages'
+		'messages',
+		'pool'
 	],
 	#category : #'SWFortranByPharo-Client-Analyzer'
 }
@@ -25,6 +26,13 @@ SWMethodInfo class >> new: selector types: types [
 		types: types;
 		yourself
 
+]
+
+{ #category : #'instance creation' }
+SWMethodInfo class >> newDefaultPool [
+	^ SWPool new
+		transpilerClass: self;
+		yourself
 ]
 
 { #category : #utils }
@@ -117,11 +125,6 @@ SWMethodInfo >> isReceiverMethod [
 	^ self receiverClass = self method methodClass
 ]
 
-{ #category : #testing }
-SWMethodInfo >> isToTranspile [
-	^ self method methodClass classSide methodDict includesKey: #toTranspile
-]
-
 { #category : #accessing }
 SWMethodInfo >> locals [
 	^ self stack copyFrom: self method numArgs + 1 to: self numTemps
@@ -140,7 +143,7 @@ SWMethodInfo >> mangledName [
 		(self const ifTrue: ['C'] ifFalse: ['_']).
 "
 		s
-			<< (method class = ByteString ifTrue: [ method ] ifFalse: [ method selector ]);
+			<< (self class safeSelectorNameOf: (method class = ByteString ifTrue: [ method ] ifFalse: [ method selector ]));
 			<< (self arguments collect: [ :v |
 				v mangledTypeName
 			])
@@ -189,6 +192,18 @@ SWMethodInfo >> numTemps [
 SWMethodInfo >> numTemps: anObject [
 
 	numTemps := anObject
+]
+
+{ #category : #accessing }
+SWMethodInfo >> pool [
+
+	^ pool ifNil: [ pool := self class newDefaultPool ]
+]
+
+{ #category : #accessing }
+SWMethodInfo >> pool: anObject [
+
+	pool := anObject
 ]
 
 { #category : #api }

@@ -25,10 +25,13 @@ SWClassInfo >> addMember: aMethodInfo [
 SWClassInfo >> addMember: aMethodInfo ifAbsent: absentBlock [
 	"Add aMethodInfo to my list to be transpiled."
 	
-	self members at: aMethodInfo mangledName ifAbsent: [
+	^ self members at: aMethodInfo mangledName ifPresent: [ :mi |
+		mi
+	] ifAbsent: [
 		aMethodInfo classInfo: self.
 		self members at: aMethodInfo mangledName put: aMethodInfo.
 		absentBlock value.
+		aMethodInfo
 	].
 
 ]
@@ -55,6 +58,11 @@ SWClassInfo >> getVariableInfoOf: aName [
 
 ]
 
+{ #category : #testing }
+SWClassInfo >> isToTranspile [
+	^ self targetClass classSide methodDict includesKey: #toTranspile
+]
+
 { #category : #accessing }
 SWClassInfo >> members [
 	"A Dictionary that contains SWMethodInfo to be transpiled, with its mangled name as key."
@@ -76,6 +84,7 @@ SWClassInfo >> slot [
 			self targetClass slots collect: [ :assoc |
 				SWVariableInfo new
 					name: assoc name;
+					priority: SWVariableInfo class receiverTypePriority;
 					yourself
 			])
 	]

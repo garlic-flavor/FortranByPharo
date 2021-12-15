@@ -42,11 +42,6 @@ SWModuleTranspiler >> filename [
 ]
 
 { #category : #accessing }
-SWModuleTranspiler >> messages [
-	^ self payload messages
-]
-
-{ #category : #accessing }
 SWModuleTranspiler >> name [
 
 	^ name
@@ -68,6 +63,11 @@ SWModuleTranspiler >> payload [
 SWModuleTranspiler >> payload: anObject [
 
 	payload := anObject
+]
+
+{ #category : #accessing }
+SWModuleTranspiler >> pool [
+	^ self payload pool
 ]
 
 { #category : #'public API' }
