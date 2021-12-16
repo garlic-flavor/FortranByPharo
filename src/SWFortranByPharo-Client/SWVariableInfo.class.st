@@ -23,18 +23,13 @@ SWVariableInfo class >> defaultPriority [
 ]
 
 { #category : #constants }
-SWVariableInfo class >> defaultReturnTypePriority [
-	^ 500
-]
-
-{ #category : #constants }
 SWVariableInfo class >> exactTypePriority [
 	^ 1000
 ]
 
 { #category : #private }
 SWVariableInfo class >> mangledTypeNameOf: aType [
-	^ aType name select: [ :c | c isUppercase ] thenCollect: [ :c | c asLowercase ].
+	^ aType ifNil: [ '_' ] ifNotNil: [ aType name select: [ :c | c isUppercase ] thenCollect: [ :c | c asLowercase ] ].
 ]
 
 { #category : #initialization }
@@ -85,6 +80,11 @@ SWVariableInfo class >> wellknownMethodPriority [
 	^ 900
 ]
 
+{ #category : #'as yet unclassified' }
+SWVariableInfo class >> wellknownMethodPriorityWith: anArrayOfVariableInfo [
+	^ { self wellknownMethodPriority. (anArrayOfVariableInfo collect: [:each | each priority ]) min } min
+]
+
 { #category : #'accumulator ops' }
 SWVariableInfo >> << rightObject [
 	rightObject original ifNil: [
@@ -94,7 +94,11 @@ SWVariableInfo >> << rightObject [
 			] ifFalse: [
 				self type: [ rightObject type ]
 			].
-			self priority: rightObject priority
+			self class wellknownMethodPriority <= rightObject priority ifTrue: [
+				self priority: rightObject priority
+			] ifFalse: [
+				self priority: nil
+			]
 		].
 		self original: (rightObject stackPos ifNotNil: [rightObject] ifNil: [nil]).
 		self properties addAll: rightObject properties.
@@ -211,7 +215,11 @@ SWVariableInfo >> priority [
 				type class = FullBlockClosure ifTrue: [
 					self class unknownMethodPriority
 				] ifFalse: [
-					self class exactTypePriority
+					type = UndefinedObject ifTrue: [
+						self class defaultPriority
+					] ifFalse: [
+						self class exactTypePriority
+					]
 				]
 			]
 		]

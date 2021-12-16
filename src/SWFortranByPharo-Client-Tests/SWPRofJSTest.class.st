@@ -13,6 +13,7 @@ Class {
 
 { #category : #tests }
 SWPRofJSTest >> setUp [
+	super setUp.
 	project := SWPTofJS newFrom: SWTestProgram_01.
 	runner := SWPRofJS newFrom: project.
 

@@ -20,10 +20,10 @@ Class {
 }
 
 { #category : #'instance creation' }
-SWMethodInfo class >> new: selector types: types [
+SWMethodInfo class >> new: aMethodOrSelector with: anArrayOfVariableInfoOrTypes [
 	^ self new
-		method: selector;
-		types: types;
+		method: aMethodOrSelector;
+		types: anArrayOfVariableInfoOrTypes;
 		yourself
 
 ]
@@ -38,6 +38,7 @@ SWMethodInfo class >> newDefaultPool [
 { #category : #utils }
 SWMethodInfo class >> safeSelectorNameOf: selector [
 	selector = '=' ifTrue: [ ^ 'opEqual_' ].
+	selector = '==' ifTrue: [ ^ 'opEqual_' ].
 	selector = '~=' ifTrue: [ ^ 'opNotEqual_' ].
 	selector = ',' ifTrue: [ ^ 'opCamma_' ].
 	selector = '->' ifTrue: [ ^ 'opArrow_' ].
@@ -89,7 +90,9 @@ SWMethodInfo >> arguments [
 { #category : #accessing }
 SWMethodInfo >> classInfo [
 
-	^ classInfo
+	^ classInfo ifNil: [
+		classInfo := (self pool add: self) classInfo.
+	]
 ]
 
 { #category : #accessing }
@@ -111,8 +114,18 @@ SWMethodInfo >> decode [
 			name: var name;
 			stackPos: idx
 	].
+	self classInfo ifNil: [ self error: 'something wrong.' ].
+
 	super decode.
 
+]
+
+{ #category : #'as yet unclassified' }
+SWMethodInfo >> decodeAllOf: aNeedle [
+	self decode.
+	self messages do: [ :mi |
+		(aNeedle value: mi) ifTrue: [ mi decodeAllOf: aNeedle ]
+	]
 ]
 
 { #category : #testing }
@@ -171,8 +184,8 @@ SWMethodInfo >> messages: anObject [
 { #category : #accessing }
 SWMethodInfo >> method [
 	^ method class = ByteSymbol ifTrue: [
-		method := (self class search: method in: self receiverClass).
-	] ifFalse: [ method ].
+		method := (self class search: method in: self receiverClass) ifNil: [ self error ]
+	] ifFalse: [ method ]
 
 ]
 

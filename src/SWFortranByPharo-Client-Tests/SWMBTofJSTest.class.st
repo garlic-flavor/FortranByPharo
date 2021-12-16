@@ -40,14 +40,14 @@ SWMBTofJSTest >> program_03 [
 
 { #category : #tests }
 SWMBTofJSTest >> testAnalyze_program_01 [
-	(SWStackAnalyzer new: #program_01 types: { self class }) ready; inspect
+	(SWStackAnalyzer new: #program_01 with: { self class }) ready; inspect
 ]
 
 { #category : #tests }
 SWMBTofJSTest >> testSourceHash [
 	self
-		deny: (SWMBTofJS new: #program_01 types: {self class}) sourceHash
-		equals: (SWMBTofJS new: #program_02 types: {self class}) sourceHash
+		deny: (SWMBTofJS new: #program_01 with: {self class}) sourceHash
+		equals: (SWMBTofJS new: #program_02 with: {self class}) sourceHash
 ]
 
 { #category : #tests }
@@ -67,7 +67,7 @@ SWMBTofJSTest >> testTranspile_program_02 [
 { #category : #tests }
 SWMBTofJSTest >> transpile_program: selector [
 
-	^ (SWMBTofJS new: selector types: { self class })
+	^ (SWMBTofJS new: selector with: { self class })
 		logging: true;
 		transpile;
 		yourself.

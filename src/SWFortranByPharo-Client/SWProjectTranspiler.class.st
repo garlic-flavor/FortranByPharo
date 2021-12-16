@@ -50,13 +50,7 @@ SWProjectTranspiler >> modules: anObject [
 
 { #category : #'as yet unclassified' }
 SWProjectTranspiler >> solveDependencies [
-	|pool|
-	self main ready.
-	pool := self main pool.
-	pool select: [ :ci | ci isToTranspile ] thenDo: [ :ci |
-		self halt.
-	].
-
+	^ self main solveDependencies 
 ]
 
 { #category : #'public API' }

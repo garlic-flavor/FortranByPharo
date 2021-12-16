@@ -10,14 +10,6 @@ Class {
 	#category : #'SWFortranByPharo-Client-Analyzer'
 }
 
-{ #category : #'instance creation' }
-SWSlot class >> newFrom: anArray [
-	^ (self new)
-		payload: (OrderedCollection newFrom: anArray);
-		yourself
-
-]
-
 { #category : #converting }
 SWSlot >> asArray [
 	^ self payload asArray
@@ -35,11 +27,9 @@ SWSlot >> atOffset: offset [
 	^ self payload at: (offset + 1) ifAbsentPut: [ SWVariableInfo new ].
 ]
 
-{ #category : #accessing }
-SWSlot >> atOffset: offset put: anObject [
-	"offset is  0 based.".
-	"offset 0 responds to the first argument."
-	^ self payload at: (offset + 1) put: anObject.
+{ #category : #enumerating }
+SWSlot >> detect: aNeedle [
+	^ self payload detect: aNeedle
 ]
 
 { #category : #enumerating }

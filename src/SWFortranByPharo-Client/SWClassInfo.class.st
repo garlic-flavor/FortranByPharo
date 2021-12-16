@@ -9,15 +9,39 @@ Class {
 		'targetClass',
 		'members',
 		'sourceHash',
-		'slot'
+		'slot',
+		'pool'
 	],
 	#category : #'SWFortranByPharo-Client-Analyzer'
 }
 
+{ #category : #'as yet unclassified' }
+SWClassInfo class >> installClassInfoBuilderFor: aClass [
+	|pool|
+	self halt.
+	self flag: #toRemove.
+	pool := SWPool new
+		transpilerClass: SWStackAnalyzer;
+		onClassAdded: [ :c |
+			Transcript show: 'class: '; show: c targetClass name; cr
+		];
+		onMethodAdded: [ :mi |
+			Transcript show: 'method: '; show: mi method selector; cr.
+			mi classInfo isToTranspile ifTrue: [ mi decode ]
+		];
+		yourself.
+	aClass methodDict valuesDo: [ :method |
+		(aClass slots anySatisfy: [ :slot | slot isWrittenIn: method ]) ifTrue: [
+			(pool new: method with: {aClass}) decode
+		]
+	].
+	^ pool payload at: aClass
+]
+
 { #category : #adding }
 SWClassInfo >> addMember: aMethodInfo [
 	"Add aMethodInfo to my list to be transpiled."
-	self addMember: aMethodInfo ifAbsent: nil.
+	^ self addMember: aMethodInfo ifAbsent: nil.
 
 ]
 
@@ -37,7 +61,7 @@ SWClassInfo >> addMember: aMethodInfo ifAbsent: absentBlock [
 ]
 
 { #category : #accessing }
-SWClassInfo >> getVariableInfoAt: offset [
+SWClassInfo >> getVariableInfoAtOffset: offset [
 	"Return SWVariableInfo in slots at offset."
 	^ self slot atOffset: offset.
 ]
@@ -45,16 +69,7 @@ SWClassInfo >> getVariableInfoAt: offset [
 { #category : #accessing }
 SWClassInfo >> getVariableInfoOf: aName [
 	"Return SWVariableInfo searched by its name."
-	self halt.
-"
-	^ self targetClass slots detect: [ :each | each name = aName ] ifFound: [ :detected |
-		self members at: aName ifAbsentPut: [
-			(self class analyzerClass new: aName asSymbol types: { self targetClass }) return
-		]
-	] ifNone: [
-		nil
-	]
-"
+	^ self slot detect: [ :each | each name = aName ]
 
 ]
 
@@ -76,17 +91,63 @@ SWClassInfo >> members: anObject [
 	members := anObject
 ]
 
+{ #category : #'as yet unclassified' }
+SWClassInfo >> method: aName arguments: args is: rType [
+	self addMember: (SWMethodInfo new
+		method: aName;
+		types: args;
+		return: (SWVariableInfo new
+			type: rType;
+			yourself
+		);
+		yourself)
+	
+]
+
+{ #category : #accessing }
+SWClassInfo >> pool [
+
+	^ pool
+]
+
+{ #category : #accessing }
+SWClassInfo >> pool: anObject [
+
+	pool := anObject
+]
+
+{ #category : #printing }
+SWClassInfo >> printInitializerOn: aStream [
+	aStream
+		<< 'predefinedClassInfo'; cr;
+		tab; << '^ '; << self class name; space; << 'new'; cr;
+		tab; tab; << 'targetClass: '; << self targetClass name; << ';'; cr;
+		tab; tab; << 'yourself'
+]
+
+{ #category : #accessing }
+SWClassInfo >> readySlotAt: index [
+	self targetClass methodDict values select: [ :m | m writesField: index ] thenDo: [ :m |
+		(self pool new: m with: { self targetClass }) decode
+	]
+
+]
+
 { #category : #accessing }
 SWClassInfo >> slot [
 
 	^ slot ifNil: [
-		slot := SWSlot newFrom: (
-			self targetClass slots collect: [ :assoc |
-				SWVariableInfo new
-					name: assoc name;
-					priority: SWVariableInfo class receiverTypePriority;
-					yourself
-			])
+		slot := SWSlot new.
+		self targetClass slots do: [ :ids |
+			(slot at: ids index)
+				name: ids name;
+				priority: SWVariableInfo defaultPriority;
+				type: [
+					self readySlotAt: ids index.
+					(self slot at: ids index) type
+				]
+		].
+		slot
 	]
 ]
 
@@ -117,4 +178,11 @@ SWClassInfo >> targetClass [
 SWClassInfo >> targetClass: anObject [
 
 	targetClass := anObject
+]
+
+{ #category : #'as yet unclassified' }
+SWClassInfo >> typeOf: aName is: aType [
+	(self getVariableInfoOf: aName)
+		type: aType
+
 ]

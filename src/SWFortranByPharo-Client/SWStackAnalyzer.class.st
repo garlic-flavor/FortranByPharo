@@ -12,100 +12,6 @@ Class {
 }
 
 { #category : #private }
-SWStackAnalyzer class >> binaryOpInfo [
-	^ [ :selector :args |
-		SWMethodInfo new
-			method: selector;
-			types: args;
-			return: (SWVariableInfo new
-				type: [ args first type ];
-				priority: { SWVariableInfo wellknownMethodPriority. (args collect: [:a | a priority]) } flattened min;
-				yourself);
-			yourself
-	]
-]
-
-{ #category : #'as yet unclassified' }
-SWStackAnalyzer class >> definedMethod: selector ifPresent: presentBlock ifAbsent: absentBlock [
-	|generatorSelector|
-	generatorSelector := #defined_, (self safeSelectorNameOf: selector).
-	^ (self respondsTo: generatorSelector) ifTrue: [
-		presentBlock value: (self perform: generatorSelector)
-	] ifFalse: [
-		absentBlock value
-	]
-]
-
-{ #category : #'instance creation' }
-SWStackAnalyzer class >> defined_new [
-	^ [ :selector :args |
-		self new
-			method: #new;
-			return: (SWVariableInfo new
-				type: args first type soleInstance;
-				priority: {SWVariableInfo wellknownMethodPriority. args first priority} min;
-				yourself);
-			types: {
-				(SWVariableInfo new
-					type: [ args first type ];
-					yourself)
-			};
-			yourself
-	]
-]
-
-{ #category : #initialization }
-SWStackAnalyzer class >> defined_opEqual_ [
-	^ self binaryOpInfo
-]
-
-{ #category : #initialization }
-SWStackAnalyzer class >> defined_opLT_ [
-	^ self binaryOpInfo
-]
-
-{ #category : #initialization }
-SWStackAnalyzer class >> defined_opMul_ [
-	^ self binaryOpInfo
-]
-
-{ #category : #initialization }
-SWStackAnalyzer class >> defined_opPlus_ [
-	^ self binaryOpInfo
-]
-
-{ #category : #initialization }
-SWStackAnalyzer class >> defined_opSub_ [
-	^ self binaryOpInfo
-]
-
-{ #category : #'instance creation' }
-SWStackAnalyzer class >> defined_yourself [
-	^ [ :selector :args |
-		SWMethodInfo new
-			method: Object>>#yourself;
-			return: (SWVariableInfo new
-				type: [args first type];
-				priority: { SWVariableInfo wellknownMethodPriority. args first priority } min;
-				yourself);
-			yourself
-	]
-]
-
-{ #category : #'instance creation' }
-SWStackAnalyzer class >> new: selector types: types [
-	^ self definedMethod: selector ifPresent: [ :dm |
-		dm value: selector value: types
-	] ifAbsent: [
-		self new
-			method: selector;
-			types: types;
-			yourself
-	]
-
-]
-
-{ #category : #private }
 SWStackAnalyzer >> addBytecode: description [
 	super addBytecode: description.
 	(self jumperStack nextPeriodIs: scanner pc) ifFalse: [ ^ self  ].
@@ -222,9 +128,7 @@ SWStackAnalyzer >> popIntoLiteralVariable: anAssociation [
 
 { #category : #'instruction decoding' }
 SWStackAnalyzer >> popIntoReceiverVariable: offset [
-
-	self halt.
-	
+	(self classInfo getVariableInfoAtOffset: offset) << self stack pop.
 	super popIntoReceiverVariable: offset
 ]
 
@@ -286,7 +190,12 @@ SWStackAnalyzer >> pushClosureTemps: numTemps [
 { #category : #'instruction decoding' }
 SWStackAnalyzer >> pushConsArrayWithElements: numElements [
 
-	self halt.
+	|args|
+	args := self stack pop: numElements.
+	self flag: #toImplement.
+	self stack push: (SWVariableInfo new
+		type: Array;
+		yourself).
 	
 	super pushConsArrayWithElements: numElements
 ]
@@ -337,8 +246,7 @@ SWStackAnalyzer >> pushReceiver [
 
 { #category : #'instruction decoding' }
 SWStackAnalyzer >> pushReceiverVariable: offset [
-	self halt.
-	self stack push: (self classInfo getVariableInfoAt: offset).
+	self stack push: (self classInfo getVariableInfoAtOffset: offset).
 	super pushReceiverVariable: offset
 ]
 
@@ -369,7 +277,7 @@ SWStackAnalyzer >> return [
 				self decode.
 				return type
 			];
-			priority: SWVariableInfo defaultReturnTypePriority;
+			priority: SWVariableInfo defaultPriority;
 			yourself
 	]
 ]
@@ -378,8 +286,8 @@ SWStackAnalyzer >> return [
 SWStackAnalyzer >> send: selector super: supered numArgs: numberArguments [
 	|args methodInfo|
 	args := self stack pop: numberArguments + 1.
-	supered ifTrue: [ args first: args first copyAsSuper ].
-	methodInfo := self pool new: selector types: args.
+	supered ifTrue: [ args at: 1 put: args first copyAsSuper ].
+	methodInfo := self pool new: selector with: args.
 
 	self messages at: (self method sourceNodeForPC: oldPC) put: methodInfo.
 	self stack push: methodInfo return.
@@ -398,7 +306,7 @@ SWStackAnalyzer >> storeIntoLiteralVariable: anAssociation [
 
 { #category : #'instruction decoding' }
 SWStackAnalyzer >> storeIntoReceiverVariable: offset [
-	self halt.
+	(self classInfo getVariableInfoAtOffset: offset) << self stack top.
 	super storeIntoReceiverVariable: offset
 ]
 

@@ -65,14 +65,12 @@ SWModuleTranspiler >> payload: anObject [
 	payload := anObject
 ]
 
-{ #category : #accessing }
-SWModuleTranspiler >> pool [
+{ #category : #'as yet unclassified' }
+SWModuleTranspiler >> solveDependencies [
+	self payload decodeAllOf: [ :mi |
+		mi classInfo isToTranspile
+	].
 	^ self payload pool
-]
-
-{ #category : #'public API' }
-SWModuleTranspiler >> ready [
-	^ self payload ready
 
 ]
 

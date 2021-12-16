@@ -25,14 +25,6 @@ SWStack >> atOffset: offset [
 
 ]
 
-{ #category : #accessing }
-SWStack >> atOffset: offset put: anObject [
-	"offset is  0 based.".
-	"offset 0 responds to the first argument."
-	^ super atOffset: (offset + 1) put: anObject
-
-]
-
 { #category : #copying }
 SWStack >> copyFrom: start to: end [
 	^ self payload copyFrom: start + 1 to: end + 1
