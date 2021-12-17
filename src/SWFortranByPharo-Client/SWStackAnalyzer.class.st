@@ -211,10 +211,23 @@ SWStackAnalyzer >> pushConstant: obj [
 ]
 
 { #category : #'instruction decoding' }
-SWStackAnalyzer >> pushFullClosure: lit numCopies: numCopied receiverOnStack: rcvr ignoreOuterContext: ignore [
-
-	self halt.
-	
+SWStackAnalyzer >> pushFullClosure: lit numCopied: numCopied receiverOnStack: rcvr ignoreOuterContext: ignore [
+	|args|
+	self flag: #toImplement.
+	rcvr ifTrue: [ self error ].
+	ignore ifTrue: [ self error ].
+	args := self stack pop: numCopied.
+	args addFirst: self stack first.
+	self stack push: (SWVariableInfo new
+		type: [|mi|
+			(SWMethodInfo new
+				method: lit;
+				classInfo: self classInfo;
+				pool: self pool;
+				types: args;
+				yourself) return type
+		];
+		yourself).
 	super pushFullClosure: lit numCopied: numCopied  receiverOnStack: rcvr ignoreOuterContext: ignore 
 ]
 
@@ -285,10 +298,10 @@ SWStackAnalyzer >> return [
 { #category : #'instruction decoding' }
 SWStackAnalyzer >> send: selector super: supered numArgs: numberArguments [
 	|args methodInfo|
+selector = #value ifTrue: [ self halt ].
 	args := self stack pop: numberArguments + 1.
 	supered ifTrue: [ args at: 1 put: args first copyAsSuper ].
 	methodInfo := self pool new: selector with: args.
-
 	self messages at: (self method sourceNodeForPC: oldPC) put: methodInfo.
 	self stack push: methodInfo return.
 	
