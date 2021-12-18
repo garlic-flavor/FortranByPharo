@@ -25,7 +25,7 @@ SWTempStore >> initialize [
 
 { #category : #accessing }
 SWTempStore >> method: aMethod [
-	names := aMethod tempNames
+	names := aMethod method tempNames
 ]
 
 { #category : #private }

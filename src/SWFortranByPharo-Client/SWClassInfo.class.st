@@ -10,7 +10,9 @@ Class {
 		'members',
 		'sourceHash',
 		'slot',
-		'pool'
+		'pool',
+		'instanceSide',
+		'classSide'
 	],
 	#category : #'SWFortranByPharo-Client-Analyzer'
 }
@@ -61,6 +63,20 @@ SWClassInfo >> addMember: aMethodInfo ifAbsent: absentBlock [
 ]
 
 { #category : #accessing }
+SWClassInfo >> classSide [
+
+	^ classSide ifNil: [
+		classSide := self targetClass isClassSide ifTrue: [ self ] ifFalse: [ nil ]
+	]
+]
+
+{ #category : #accessing }
+SWClassInfo >> classSide: anObject [
+
+	classSide := anObject
+]
+
+{ #category : #accessing }
 SWClassInfo >> getVariableInfoAtOffset: offset [
 	"Return SWVariableInfo in slots at offset."
 	^ self slot atOffset: offset.
@@ -71,6 +87,20 @@ SWClassInfo >> getVariableInfoOf: aName [
 	"Return SWVariableInfo searched by its name."
 	^ self slot detect: [ :each | each name = aName ]
 
+]
+
+{ #category : #accessing }
+SWClassInfo >> instanceSide [
+
+	^ instanceSide ifNil: [
+		instanceSide := self targetClass isInstanceSide ifTrue: [ self ] ifFalse: [ nil ]
+	]
+]
+
+{ #category : #accessing }
+SWClassInfo >> instanceSide: anObject [
+
+	instanceSide := anObject
 ]
 
 { #category : #testing }

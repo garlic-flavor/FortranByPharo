@@ -17,6 +17,15 @@ Class {
 	#category : #'SWFortranByPharo-Client-Analyzer'
 }
 
+{ #category : #'as yet unclassified' }
+SWVariableInfo class >> declare: aName as: aType [
+	^ self new
+		name: aName;
+		type: aType;
+		priority: self userSpecifiesTypePriority;
+		yourself
+]
+
 { #category : #constants }
 SWVariableInfo class >> defaultPriority [
 	^ 0
@@ -30,14 +39,6 @@ SWVariableInfo class >> exactTypePriority [
 { #category : #private }
 SWVariableInfo class >> mangledTypeNameOf: aType [
 	^ aType ifNil: [ '_' ] ifNotNil: [ aType name select: [ :c | c isUppercase ] thenCollect: [ :c | c asLowercase ] ].
-]
-
-{ #category : #initialization }
-SWVariableInfo class >> named: aName typed: aType [
-	^ self new
-		name: aName;
-		type: aType;
-		yourself
 ]
 
 { #category : #utils }
@@ -135,24 +136,19 @@ SWVariableInfo >> copyAsSuper [
 		yourself.
 ]
 
-{ #category : #testing }
-SWVariableInfo >> hasAnyType [
-	^ type isNotNil
+{ #category : #'as yet unclassified' }
+SWVariableInfo >> easyType [
+	^ self class exactTypePriority <= self priority ifTrue: [ self type ] ifFalse: [ nil ]
 ]
 
-{ #category : #testing }
-SWVariableInfo >> hasExactType [
-	^ type isNotNil and: [ type class ~= FullBlockClosure ]
+{ #category : #'as yet unclassified' }
+SWVariableInfo >> easyTypeIs: aType [
+	^ self class exactTypePriority <= self priority and: [ self type = aType ]
 ]
 
 { #category : #testing }
 SWVariableInfo >> hasProperty: aProperty [
 	^ self properties includes: aProperty
-]
-
-{ #category : #testing }
-SWVariableInfo >> isReceiver [
-	^ self stackPos = 0
 ]
 
 { #category : #accessing }

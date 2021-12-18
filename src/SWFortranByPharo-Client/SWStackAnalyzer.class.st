@@ -212,23 +212,24 @@ SWStackAnalyzer >> pushConstant: obj [
 
 { #category : #'instruction decoding' }
 SWStackAnalyzer >> pushFullClosure: lit numCopied: numCopied receiverOnStack: rcvr ignoreOuterContext: ignore [
-	|args|
+	|args mi|
 	self flag: #toImplement.
 	rcvr ifTrue: [ self error ].
 	ignore ifTrue: [ self error ].
-	args := self stack pop: numCopied.
-	args addFirst: self stack first.
-	self stack push: (SWVariableInfo new
-		type: [|mi|
-			mi := self pool new: lit with: args.
-			mi classInfo: self classInfo.
-			mi decode.
-			lit hasMethodReturn ifTrue: [
-				self return << mi return
-			].
-			mi return type
-		];
-		yourself).
+	args := OrderedCollection new: numCopied + 1.
+	args add: self stack first.
+	args addAll: (self stack pop: numCopied).
+	
+	"I only interest in type information on the stack.
+	So, I decode a closure before invoking. it's ok."
+	mi := self pool new: lit with: args.
+	mi classInfo: self classInfo.
+	mi decode.
+	lit hasMethodReturn ifTrue: [
+		self return << mi return
+	].
+	self messages addAll: mi messages.
+	self stack push: mi return.
 	super pushFullClosure: lit numCopied: numCopied  receiverOnStack: rcvr ignoreOuterContext: ignore 
 ]
 
@@ -278,11 +279,6 @@ SWStackAnalyzer >> pushTemporaryVariable:  offset [
 
 ]
 
-{ #category : #api }
-SWStackAnalyzer >> ready [
-	^ self return type isNotNil
-]
-
 { #category : #accessing }
 SWStackAnalyzer >> return [
 	^ return ifNil: [
@@ -304,7 +300,12 @@ SWStackAnalyzer >> send: selector super: supered numArgs: numberArguments [
 	methodInfo := self pool new: selector with: args.
 	self messages at: (self method sourceNodeForPC: oldPC) put: methodInfo.
 	self stack push: methodInfo return.
-	
+
+	"A special case for user specifying."
+	(selector = #declare:as: and: [ args first easyType = SWVariableInfo class ]) ifTrue: [|vi|
+		vi := (self method sourceNodeForPC: oldPC) evaluate.
+		(self variableInfoOf: vi name) << vi.
+	].
 	super send: selector super: supered numArgs: numberArguments.
 
 ]
@@ -359,12 +360,4 @@ SWStackAnalyzer >> tempStore: anObject [
 SWStackAnalyzer >> trap [
 	self halt.
 	super trap
-]
-
-{ #category : #accessing }
-SWStackAnalyzer >> variableInfoOf: aName [
-	^ self return type ifNotNil: [
-		super variableInfoOf: aName
-	]
-
 ]

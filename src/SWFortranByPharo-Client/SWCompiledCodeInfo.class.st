@@ -91,7 +91,7 @@ SWCompiledCodeInfo >> arguments [
 SWCompiledCodeInfo >> classInfo [
 
 	^ classInfo ifNil: [
-		classInfo := (self pool add: self) classInfo.
+		classInfo := (self pool addMethodInfo: self) classInfo.
 	]
 ]
 
@@ -219,11 +219,6 @@ SWCompiledCodeInfo >> pool [
 SWCompiledCodeInfo >> pool: anObject [
 
 	pool := anObject
-]
-
-{ #category : #api }
-SWCompiledCodeInfo >> ready [
-	^ self subclassResponsibility 
 ]
 
 { #category : #NOCompletion }

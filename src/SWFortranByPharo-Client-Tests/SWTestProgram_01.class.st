@@ -25,3 +25,11 @@ SWTestProgram_01 >> hoge2 [
 	arg4 := Dictionary new.
 	arg4 at: 3 ifAbsentPut: [ self hoge. arg3, arg2, arg1 ].
 ]
+
+{ #category : #'as yet unclassified' }
+SWTestProgram_01 >> hoge3 [
+	|fuga|
+	fuga := nil.
+	SWVariableInfo declare: #fuga as: SmallInteger.
+	^ fuga
+]

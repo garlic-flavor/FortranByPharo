@@ -80,18 +80,34 @@ SWPool class >> defined_yourself [
 ]
 
 { #category : #adding }
-SWPool >> add: aMethodInfo [
-	^ (self payload at: aMethodInfo method methodClass ifPresent: [ :ci | ci ] ifAbsent: [|ci|
+SWPool >> addMethodInfo: aMethodInfo [
+	|instanceSideClass classinfo|
+	instanceSideClass := aMethodInfo method methodClass instanceSide.
+	classinfo := self payload at: instanceSideClass ifPresent: [ :ci | ci ] ifAbsent: [ |ci|
 		ci := SWClassInfo new
-			targetClass: aMethodInfo method methodClass;
+			targetClass: instanceSideClass;
 			pool: self;
 			yourself.
-		self payload at: aMethodInfo method methodClass put: ci.
+		self payload at: instanceSideClass put: ci.
 		self onClassAdded value: ci.
-		ci.
-	]) addMember: aMethodInfo ifAbsent: [
+		ci
+	].
+	aMethodInfo method methodClass isClassSide ifTrue: [
+		classinfo classSide ifNil: [|ci|
+			ci := SWClassInfo new
+				targetClass: aMethodInfo method methodClass;
+				pool: self;
+				yourself.
+			classinfo classSide: ci.
+			self onClassAdded value: ci.
+		].
+		classinfo := classinfo classSide
+	].
+	
+	^ classinfo addMember: aMethodInfo ifAbsent: [
 		self onMethodAdded value: aMethodInfo
 	]
+
 ]
 
 { #category : #'as yet unclassified' }
