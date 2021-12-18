@@ -105,15 +105,22 @@ SWCompiledCodeInfo >> classInfo: anObject [
 SWCompiledCodeInfo >> decode [
 	oldPC ifNotNil: [ ^ self ].
 
-	(stack at: 0)
+	(self stack at: 0)
 		name: 'self';
 		stackPos: 0.
 	(self method class inheritsFrom: CompiledCode) ifFalse: [ self error: 'something go wrong.' ].
 	self classInfo ifNil: [ self error: 'something wrong.' ].
 	self method class = CompiledMethod ifTrue: [
 		self method temporaryVariables doWithIndex: [ :var :idx |
-			(stack at: idx)
+			(self stack at: idx)
 				name: var name;
+				stackPos: idx
+		]
+	].
+	self method class = CompiledBlock ifTrue: [
+		self method argumentNames doWithIndex: [ :name :idx |
+			(self stack at: idx)
+				name: name;
 				stackPos: idx
 		]
 	].

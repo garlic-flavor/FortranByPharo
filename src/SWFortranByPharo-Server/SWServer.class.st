@@ -221,6 +221,7 @@ SWServer >> startOn: portNumber [
 	ZnServer default delegate
 		map: 'manage'
 		to: [ :request |
+			SWVariableInfo declare: #request as: ZnRequest.
 			[
 				self manage: request
 			] on: Exception do: [:e |
@@ -229,6 +230,7 @@ SWServer >> startOn: portNumber [
 		];
 		map: 'execute'
 		to: (SWWebSocketDelegate handler: [:webSocket |
+			SWVariableInfo declare: #webSocket as: SWWebSocket.
 			[
 				[ 
 					webSocket sendMessage: ((self execute: webSocket)

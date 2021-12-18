@@ -84,10 +84,14 @@ SWPool >> addMethodInfo: aMethodInfo [
 	|instanceSideClass classinfo|
 	instanceSideClass := aMethodInfo method methodClass instanceSide.
 	classinfo := self payload at: instanceSideClass ifPresent: [ :ci | ci ] ifAbsent: [ |ci|
-		ci := SWClassInfo new
-			targetClass: instanceSideClass;
-			pool: self;
-			yourself.
+		ci :=(instanceSideClass classSide methodDict includesKey: #predefinedClassInfo) ifTrue: [
+			instanceSideClass perform: #predefinedClassInfo
+		] ifFalse: [
+			SWClassInfo new
+				targetClass: instanceSideClass;
+				pool: self;
+				yourself
+		].
 		self payload at: instanceSideClass put: ci.
 		self onClassAdded value: ci.
 		ci
