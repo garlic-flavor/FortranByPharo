@@ -4,7 +4,7 @@ I'm designed as very lazy to avoid problems like circular referencing of methods
 
 "
 Class {
-	#name : #SWMethodInfo,
+	#name : #SWCompiledCodeInfo,
 	#superclass : #SymbolicBytecodeBuilder,
 	#instVars : [
 		'mangledName',
@@ -20,7 +20,7 @@ Class {
 }
 
 { #category : #'instance creation' }
-SWMethodInfo class >> new: aMethodOrSelector with: anArrayOfVariableInfoOrTypes [
+SWCompiledCodeInfo class >> new: aMethodOrSelector with: anArrayOfVariableInfoOrTypes [
 	^ self new
 		method: aMethodOrSelector;
 		types: anArrayOfVariableInfoOrTypes;
@@ -29,14 +29,14 @@ SWMethodInfo class >> new: aMethodOrSelector with: anArrayOfVariableInfoOrTypes 
 ]
 
 { #category : #'instance creation' }
-SWMethodInfo class >> newDefaultPool [
+SWCompiledCodeInfo class >> newDefaultPool [
 	^ SWPool new
 		transpilerClass: self;
 		yourself
 ]
 
 { #category : #utils }
-SWMethodInfo class >> safeSelectorNameOf: selector [
+SWCompiledCodeInfo class >> safeSelectorNameOf: selector [
 	selector = '=' ifTrue: [ ^ 'opEqual_' ].
 	selector = '==' ifTrue: [ ^ 'opEqual_' ].
 	selector = '~=' ifTrue: [ ^ 'opNotEqual_' ].
@@ -53,7 +53,7 @@ SWMethodInfo class >> safeSelectorNameOf: selector [
 ]
 
 { #category : #utils }
-SWMethodInfo class >> search: selector in: aClass [
+SWCompiledCodeInfo class >> search: selector in: aClass [
 	^ aClass ifNil: [
 		nil
 	] ifNotNil: [
@@ -64,31 +64,31 @@ SWMethodInfo class >> search: selector in: aClass [
 ]
 
 { #category : #comparing }
-SWMethodInfo >> = right [
+SWCompiledCodeInfo >> = right [
 	self method = right method ifFalse: [ ^ false ].
 	self arguments with: right arguments do: [ :l :r | l type = r type ifFalse: [ ^ false ] ].
 	^ true
 ]
 
 { #category : #adding }
-SWMethodInfo >> addLocalVariable: aVariableInfo [
+SWCompiledCodeInfo >> addLocalVariable: aVariableInfo [
 	self stack push: aVariableInfo afterIndex: self numTemps.
 	self numTemps: self numTemps + 1.
 	aVariableInfo stackPos: self numTemps.
 ]
 
 { #category : #accessing }
-SWMethodInfo >> allTemps [
+SWCompiledCodeInfo >> allTemps [
 	^ self stack copyFrom: 1 to: self numTemps
 ]
 
 { #category : #accessing }
-SWMethodInfo >> arguments [
+SWCompiledCodeInfo >> arguments [
 	^ self stack copyFrom: 1 to: self method numArgs
 ]
 
 { #category : #accessing }
-SWMethodInfo >> classInfo [
+SWCompiledCodeInfo >> classInfo [
 
 	^ classInfo ifNil: [
 		classInfo := (self pool add: self) classInfo.
@@ -96,32 +96,34 @@ SWMethodInfo >> classInfo [
 ]
 
 { #category : #accessing }
-SWMethodInfo >> classInfo: anObject [
+SWCompiledCodeInfo >> classInfo: anObject [
 
 	classInfo := anObject
 ]
 
 { #category : #api }
-SWMethodInfo >> decode [
+SWCompiledCodeInfo >> decode [
 	oldPC ifNotNil: [ ^ self ].
 
 	(stack at: 0)
 		name: 'self';
 		stackPos: 0.
-	self method class = CompiledMethod ifFalse: [ self error: 'something go wrong.' ].
-	self method temporaryVariables doWithIndex: [ :var :idx |
-		(stack at: idx)
-			name: var name;
-			stackPos: idx
-	].
+	(self method class inheritsFrom: CompiledCode) ifFalse: [ self error: 'something go wrong.' ].
 	self classInfo ifNil: [ self error: 'something wrong.' ].
+	self method class = CompiledMethod ifTrue: [
+		self method temporaryVariables doWithIndex: [ :var :idx |
+			(stack at: idx)
+				name: var name;
+				stackPos: idx
+		]
+	].
 
 	super decode.
 
 ]
 
 { #category : #'as yet unclassified' }
-SWMethodInfo >> decodeAllOf: aNeedle [
+SWCompiledCodeInfo >> decodeAllOf: aNeedle [
 	self decode.
 	self messages do: [ :mi |
 		(aNeedle value: mi) ifTrue: [ mi decodeAllOf: aNeedle ]
@@ -129,22 +131,22 @@ SWMethodInfo >> decodeAllOf: aNeedle [
 ]
 
 { #category : #testing }
-SWMethodInfo >> hasExplicitReturn [
+SWCompiledCodeInfo >> hasExplicitReturn [
 	^ self  return stackPos ~= -1
 ]
 
 { #category : #testing }
-SWMethodInfo >> isReceiverMethod [
+SWCompiledCodeInfo >> isReceiverMethod [
 	^ self receiverClass = self method methodClass
 ]
 
 { #category : #accessing }
-SWMethodInfo >> locals [
+SWCompiledCodeInfo >> locals [
 	^ self stack copyFrom: self method numArgs + 1 to: self numTemps
 ]
 
 { #category : #accessing }
-SWMethodInfo >> mangledName [
+SWCompiledCodeInfo >> mangledName [
 	^ mangledName ifNil: [ mangledName := String streamContents: [ :s ||owner|
 		owner := (method class = ByteString ifTrue: [ self return type ] ifFalse: [ self method methodClass ]).
 		owner class = Metaclass ifTrue: [ 
@@ -164,25 +166,25 @@ SWMethodInfo >> mangledName [
 ]
 
 { #category : #accessing }
-SWMethodInfo >> mangledName: anObject [
+SWCompiledCodeInfo >> mangledName: anObject [
 
 	mangledName := anObject
 ]
 
 { #category : #accessing }
-SWMethodInfo >> messages [
+SWCompiledCodeInfo >> messages [
 
 	^ messages ifNil: [ messages := OrderedDictionary new ]
 ]
 
 { #category : #accessing }
-SWMethodInfo >> messages: anObject [
+SWCompiledCodeInfo >> messages: anObject [
 
 	messages := anObject
 ]
 
 { #category : #accessing }
-SWMethodInfo >> method [
+SWCompiledCodeInfo >> method [
 	^ method class = ByteSymbol ifTrue: [
 		method := (self class search: method in: self receiverClass) ifNil: [ self error ]
 	] ifFalse: [ method ]
@@ -190,47 +192,47 @@ SWMethodInfo >> method [
 ]
 
 { #category : #accessing }
-SWMethodInfo >> name [
+SWCompiledCodeInfo >> name [
 
 	^ self method selector asString
 ]
 
 { #category : #accessing }
-SWMethodInfo >> numTemps [
+SWCompiledCodeInfo >> numTemps [
 
 	^ numTemps ifNil: [ numTemps := self method numTemps ]
 ]
 
 { #category : #accessing }
-SWMethodInfo >> numTemps: anObject [
+SWCompiledCodeInfo >> numTemps: anObject [
 
 	numTemps := anObject
 ]
 
 { #category : #accessing }
-SWMethodInfo >> pool [
+SWCompiledCodeInfo >> pool [
 
 	^ pool ifNil: [ pool := self class newDefaultPool ]
 ]
 
 { #category : #accessing }
-SWMethodInfo >> pool: anObject [
+SWCompiledCodeInfo >> pool: anObject [
 
 	pool := anObject
 ]
 
 { #category : #api }
-SWMethodInfo >> ready [
+SWCompiledCodeInfo >> ready [
 	^ self subclassResponsibility 
 ]
 
 { #category : #NOCompletion }
-SWMethodInfo >> receiverClass [
+SWCompiledCodeInfo >> receiverClass [
 	^ (self stack at: 0) type
 ]
 
 { #category : #accessing }
-SWMethodInfo >> return [
+SWCompiledCodeInfo >> return [
 
 	^ return ifNil: [
 		return := SWVariableInfo new
@@ -238,13 +240,13 @@ SWMethodInfo >> return [
 ]
 
 { #category : #accessing }
-SWMethodInfo >> return: anObject [
+SWCompiledCodeInfo >> return: anObject [
 
 	return := anObject
 ]
 
 { #category : #comparing }
-SWMethodInfo >> sourceHash [
+SWCompiledCodeInfo >> sourceHash [
 	^ SHA256 hashStream: (
 		(ReadWriteStream with: '')
 			<< self mangledName;
@@ -257,19 +259,19 @@ SWMethodInfo >> sourceHash [
 ]
 
 { #category : #accessing }
-SWMethodInfo >> stack [
+SWCompiledCodeInfo >> stack [
 
 	^ stack ifNil: [ stack := SWStack new ]
 ]
 
 { #category : #accessing }
-SWMethodInfo >> stack: anObject [
+SWCompiledCodeInfo >> stack: anObject [
 
 	stack := anObject
 ]
 
 { #category : #accessing }
-SWMethodInfo >> types: anObject [
+SWCompiledCodeInfo >> types: anObject [
 
 	anObject doWithIndex: [ :type :idx |
 		type class = SWVariableInfo ifTrue: [
@@ -282,7 +284,7 @@ SWMethodInfo >> types: anObject [
 ]
 
 { #category : #accessing }
-SWMethodInfo >> variableInfoOf: aName [
+SWCompiledCodeInfo >> variableInfoOf: aName [
 	^ self stack detect: [ :vi |
 		vi name = aName
 	] ifNone: [

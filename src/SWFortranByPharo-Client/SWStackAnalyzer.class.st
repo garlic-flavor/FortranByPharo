@@ -3,7 +3,7 @@ I fork decode process of SymbolicBytecodeBuilder to emulate stack status.
 "
 Class {
 	#name : #SWStackAnalyzer,
-	#superclass : #SWMethodInfo,
+	#superclass : #SWCompiledCodeInfo,
 	#instVars : [
 		'jumperStack',
 		'tempStore'
@@ -29,7 +29,7 @@ SWStackAnalyzer >> blockReturnConstant: cst [
 
 { #category : #'instruction decoding' }
 SWStackAnalyzer >> blockReturnTop [
-	self halt.
+	self return << self stack top.
 	
 	super blockReturnTop
 ]
@@ -220,12 +220,13 @@ SWStackAnalyzer >> pushFullClosure: lit numCopied: numCopied receiverOnStack: rc
 	args addFirst: self stack first.
 	self stack push: (SWVariableInfo new
 		type: [|mi|
-			(SWMethodInfo new
-				method: lit;
-				classInfo: self classInfo;
-				pool: self pool;
-				types: args;
-				yourself) return type
+			mi := self pool new: lit with: args.
+			mi classInfo: self classInfo.
+			mi decode.
+			lit hasMethodReturn ifTrue: [
+				self return << mi return
+			].
+			mi return type
 		];
 		yourself).
 	super pushFullClosure: lit numCopied: numCopied  receiverOnStack: rcvr ignoreOuterContext: ignore 
@@ -298,7 +299,6 @@ SWStackAnalyzer >> return [
 { #category : #'instruction decoding' }
 SWStackAnalyzer >> send: selector super: supered numArgs: numberArguments [
 	|args methodInfo|
-selector = #value ifTrue: [ self halt ].
 	args := self stack pop: numberArguments + 1.
 	supered ifTrue: [ args at: 1 put: args first copyAsSuper ].
 	methodInfo := self pool new: selector with: args.

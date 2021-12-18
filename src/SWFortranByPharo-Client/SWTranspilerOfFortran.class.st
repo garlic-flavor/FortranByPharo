@@ -164,7 +164,7 @@ SWTranspilerOfFortran >> putOrdinaryMessage: receiver send: selector with: argum
 	].
 	mangledName := self analyzer class mangledNameOf: receiverClass >> selector with: argumentTypes.
 	methodInfo := self analyzer methods at: mangledName ifAbsent: [
-		SWMethodInfo new
+		SWCompiledCodeInfo new
 			mangledName: selector;
 			yourself.
 	].

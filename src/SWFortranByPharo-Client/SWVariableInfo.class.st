@@ -89,16 +89,12 @@ SWVariableInfo class >> wellknownMethodPriorityWith: anArrayOfVariableInfo [
 SWVariableInfo >> << rightObject [
 	rightObject original ifNil: [
 		self priority <= rightObject priority ifTrue: [
-			rightObject hasExactType ifTrue: [
-				self type: rightObject type
+			self type: rightObject bareType.
+			self priority: (self class wellknownMethodPriority <= rightObject priority ifTrue: [
+				rightObject priority
 			] ifFalse: [
-				self type: [ rightObject type ]
-			].
-			self class wellknownMethodPriority <= rightObject priority ifTrue: [
-				self priority: rightObject priority
-			] ifFalse: [
-				self priority: nil
-			]
+				nil
+			]).
 		].
 		self original: (rightObject stackPos ifNotNil: [rightObject] ifNil: [nil]).
 		self properties addAll: rightObject properties.
@@ -125,6 +121,11 @@ SWVariableInfo >> assignCounter [
 SWVariableInfo >> assignCounter: anObject [
 
 	assignCounter := anObject
+]
+
+{ #category : #'as yet unclassified' }
+SWVariableInfo >> bareType [
+	^ type
 ]
 
 { #category : #copying }

@@ -356,13 +356,6 @@ SWMethodBodyTranspiler >> selectTranspiler: aNode withReceiver: aRNode [
 
 ]
 
-{ #category : #'as yet unclassified' }
-SWMethodBodyTranspiler >> solveDependencies [
-	^ (self dependencies groupedBy: [ :each | each method methodClass ]) collect: [ :each |
-		
-	]
-]
-
 { #category : #accessing }
 SWMethodBodyTranspiler >> stream [
 

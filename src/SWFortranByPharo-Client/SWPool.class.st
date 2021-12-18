@@ -16,7 +16,7 @@ Class {
 { #category : #private }
 SWPool class >> binaryOpInfo [
 	^ [ :selector :args |
-		SWMethodInfo new
+		SWCompiledCodeInfo new
 			method: selector;
 			types: args;
 			return: (args first copy
@@ -29,7 +29,7 @@ SWPool class >> binaryOpInfo [
 { #category : #'instance creation' }
 SWPool class >> defined_new [
 	^ [ :selector :args |
-		SWMethodInfo new
+		SWCompiledCodeInfo new
 			method: #new;
 			return: (SWVariableInfo new
 				type: args first type soleInstance;
@@ -68,7 +68,7 @@ SWPool class >> defined_opSub_ [
 { #category : #'instance creation' }
 SWPool class >> defined_yourself [
 	^ [ :selector :args |
-		SWMethodInfo new
+		SWCompiledCodeInfo new
 			method: Object>>#yourself;
 			return: (SWVariableInfo new
 				type: [args first type];
@@ -102,6 +102,7 @@ SWPool >> definedMethod: aMethodOrSelector ifPresent: presentBlock [
 { #category : #'as yet unclassified' }
 SWPool >> definedMethod: aMethodOrSelector ifPresent: presentBlock ifAbsent: absentBlock [
 	|generatorSelector selector|
+	aMethodOrSelector class = CompiledBlock ifTrue: [ ^ absentBlock value ].
 	selector := aMethodOrSelector class = CompiledMethod ifTrue: [ aMethodOrSelector selector ] ifFalse: [ aMethodOrSelector  ].
 	generatorSelector := #defined_, (self transpilerClass safeSelectorNameOf: selector).
 	^ (self class respondsTo: generatorSelector) ifTrue: [

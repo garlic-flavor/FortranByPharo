@@ -93,7 +93,7 @@ SWClassInfo >> members: anObject [
 
 { #category : #'as yet unclassified' }
 SWClassInfo >> method: aName arguments: args is: rType [
-	self addMember: (SWMethodInfo new
+	self addMember: (SWCompiledCodeInfo new
 		method: aName;
 		types: args;
 		return: (SWVariableInfo new
