@@ -20,8 +20,6 @@ Class {
 { #category : #'as yet unclassified' }
 SWClassInfo class >> installClassInfoBuilderFor: aClass [
 	|pool|
-	self halt.
-	self flag: #toRemove.
 	pool := SWPool new
 		transpilerClass: SWStackAnalyzer;
 		onClassAdded: [ :c |
@@ -33,9 +31,7 @@ SWClassInfo class >> installClassInfoBuilderFor: aClass [
 		];
 		yourself.
 	aClass methodDict valuesDo: [ :method |
-		(aClass slots anySatisfy: [ :slot | slot isWrittenIn: method ]) ifTrue: [
-			(pool new: method with: {aClass}) decode
-		]
+		(pool new: method with: {aClass}) decode
 	].
 	^ pool payload at: aClass
 ]

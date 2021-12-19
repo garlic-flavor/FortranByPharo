@@ -41,6 +41,32 @@ SWVariableInfo class >> mangledTypeNameOf: aType [
 	^ aType ifNil: [ '_' ] ifNotNil: [ aType name select: [ :c | c isUppercase ] thenCollect: [ :c | c asLowercase ] ].
 ]
 
+{ #category : #'as yet unclassified' }
+SWVariableInfo class >> nameOfPriorityOf: aPriority [
+	^ ((self class methodDict values select: [ :m |
+		m selector endsWith: 'Priority'
+	] thenCollect: [ :m |
+		(m valueWithReceiver: self arguments: #()) -> m
+	]) sort: [ :a :b | b key < a key ]) detect: [ :m | m key <= aPriority ] ifFound: [ :m |
+		m value selector
+	] ifNone: [
+		#defaultPriority
+	]
+
+	
+]
+
+{ #category : #'instance creation' }
+SWVariableInfo class >> newFrom: anArg [
+	^ (anArg class inheritsFrom: SWVariableInfo) ifTrue: [
+		anArg copy
+	] ifFalse: [
+		self new
+			type: anArg;
+			yourself
+	]
+]
+
 { #category : #utils }
 SWVariableInfo class >> nextTemporalVariableNameOf: prevName [
 	^ prevName isEmptyOrNil ifTrue: [
@@ -83,7 +109,9 @@ SWVariableInfo class >> wellknownMethodPriority [
 
 { #category : #'as yet unclassified' }
 SWVariableInfo class >> wellknownMethodPriorityWith: anArrayOfVariableInfo [
-	^ { self wellknownMethodPriority. (anArrayOfVariableInfo collect: [:each | each priority ]) min } min
+	^ { self wellknownMethodPriority. (anArrayOfVariableInfo collect: [:each |
+			each class = SWVariableInfo ifTrue: [ each priority ] ifFalse: [ SWVariableInfo exactTypePriority ]]
+	) min } min
 ]
 
 { #category : #'accumulator ops' }
@@ -127,6 +155,17 @@ SWVariableInfo >> assignCounter: anObject [
 { #category : #'as yet unclassified' }
 SWVariableInfo >> bareType [
 	^ type
+]
+
+{ #category : #'as yet unclassified' }
+SWVariableInfo >> calcThisPriority [
+	stackPos = 0 ifTrue: [ ^ self class receiverTypePriority ].
+	type ifNil: [ ^ self class defaultPriority ].
+	type = UndefinedClass ifTrue: [ ^ self class defaultPriority ].
+	type class = FullBlockClosure ifTrue: [ ^ self class unknownMethodPriority ].
+
+	^ self class exactTypePriority	
+
 ]
 
 { #category : #copying }
@@ -191,7 +230,7 @@ SWVariableInfo >> printOn: aStream [
 		print: (type class = FullBlockClosure ifTrue: ['lazy'] ifFalse: [ type ]);
 		nextPut: $>;
 		nextPut: $(;
-		print: self priority;
+		print: (self class nameOfPriorityOf: self priority);
 		nextPut: $);
 		space;
 		space;
@@ -202,25 +241,7 @@ SWVariableInfo >> printOn: aStream [
 { #category : #accessing }
 SWVariableInfo >> priority [
 
-	^ priority ifNil: [ 
-		priority := stackPos = 0 ifTrue: [
-			self class receiverTypePriority
-		] ifFalse: [ 
-			type ifNil: [
-				self class defaultPriority
-			] ifNotNil: [
-				type class = FullBlockClosure ifTrue: [
-					self class unknownMethodPriority
-				] ifFalse: [
-					type = UndefinedObject ifTrue: [
-						self class defaultPriority
-					] ifFalse: [
-						self class exactTypePriority
-					]
-				]
-			]
-		]
-	]
+	^ priority ifNil: [ priority := self calcThisPriority ]
 
 ]
 

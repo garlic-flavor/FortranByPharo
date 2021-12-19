@@ -10,6 +10,13 @@ Class {
 	#category : #'SWFortranByPharo-Client-Analyzer'
 }
 
+{ #category : #'instance creation' }
+SWSlot >> allocate: size [
+	[ self payload size < size ] whileTrue: [
+		self payload add: SWVariableInfo new
+	]
+]
+
 { #category : #converting }
 SWSlot >> asArray [
 	^ self payload asArray

@@ -19,7 +19,7 @@ SWPool class >> binaryOpInfo [
 		SWCompiledCodeInfo new
 			method: selector;
 			types: args;
-			return: (args first copy
+			return: ((SWVariableInfo newFrom: args first)
 				priority: (SWVariableInfo wellknownMethodPriorityWith: args);
 				yourself);
 			yourself

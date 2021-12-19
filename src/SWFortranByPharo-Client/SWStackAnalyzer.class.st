@@ -100,7 +100,11 @@ SWStackAnalyzer >> mergeStackTopAndSecond [
 
 { #category : #'instruction decoding' }
 SWStackAnalyzer >> methodReturnConstant: value [
-	self halt.
+	value ifNotNil: [
+		self return << (SWVariableInfo new
+			type: value class;
+			yourself)
+	].
 	super methodReturnConstant: value
 ]
 

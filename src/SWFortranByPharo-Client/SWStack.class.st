@@ -27,6 +27,8 @@ SWStack >> atOffset: offset [
 
 { #category : #copying }
 SWStack >> copyFrom: start to: end [
+	|ret|
+	self allocate: end + 1.
 	^ self payload copyFrom: start + 1 to: end + 1
 ]
 
