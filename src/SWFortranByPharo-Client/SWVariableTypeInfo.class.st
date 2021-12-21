@@ -46,22 +46,13 @@ SWVariableTypeInfo class >> nextTemporalVariableNameOf: prevName [
 
 { #category : #'accumulator ops' }
 SWVariableTypeInfo >> << rightObject [
-	rightObject original ifNil: [
-		self priority <= rightObject priority ifTrue: [
-			self type: rightObject bareType.
-			self priority: (self class wellknownMethodPriority <= rightObject priority ifTrue: [
-				rightObject priority
-			] ifFalse: [
-				nil
-			]).
-		].
-		self original: (rightObject stackPos ifNotNil: [rightObject] ifNil: [nil]).
+	(rightObject class includesBehavior: SWVariableTypeInfo) ifTrue: [
+		self type << rightObject type.
 		self properties addAll: rightObject properties.
-		self assignCounter: self assignCounter + 1
-	] ifNotNil: [
-		self << rightObject original
+		self assignCounter: self assignCounter + 1.
+	] ifFalse: [
+		self type << rightObject
 	]
-		
 
 ]
 

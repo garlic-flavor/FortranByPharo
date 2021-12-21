@@ -32,6 +32,7 @@ SWCompiledCodeInfo class >> new: aMethod with: anArrayOfVariableTypeInfoOrTypes 
 SWCompiledCodeInfo class >> newDefaultPool [
 	^ SWPool new
 		transpilerClass: self;
+		classTranspilerClass: SWClass;
 		yourself
 ]
 

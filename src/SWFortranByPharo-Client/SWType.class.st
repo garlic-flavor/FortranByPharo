@@ -150,5 +150,8 @@ SWType >> putOn: aStream [
 
 { #category : #accessing }
 SWType >> value [
-	^ payload := payload value
+	^ payload class = FullBlockClosure ifTrue: [
+		self priority: nil.
+		payload := payload value
+	] ifFalse: [ payload ]
 ]
