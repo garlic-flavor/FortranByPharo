@@ -29,7 +29,7 @@ SWMBTofJSTest >> program_02 [
 SWMBTofJSTest >> program_03 [
 
 	| tmp1 |
-	tmp1 := SWVariableInfo new
+	tmp1 := SWVariableTypeInfo new
 		type: Integer;
 		addProperty: #const;
 		yourself.

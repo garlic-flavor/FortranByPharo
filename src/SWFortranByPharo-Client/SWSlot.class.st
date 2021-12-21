@@ -13,7 +13,7 @@ Class {
 { #category : #'instance creation' }
 SWSlot >> allocate: size [
 	[ self payload size < size ] whileTrue: [
-		self payload add: SWVariableInfo new
+		self payload add: SWVariableTypeInfo new
 	]
 ]
 
@@ -24,14 +24,14 @@ SWSlot >> asArray [
 
 { #category : #accessing }
 SWSlot >> at: index [
-	^ self payload at: index ifAbsentPut: [ SWVariableInfo new ].
+	^ self payload at: index ifAbsentPut: [ SWVariableTypeInfo new ].
 ]
 
 { #category : #accessing }
 SWSlot >> atOffset: offset [
 	"offset is  0 based.".
 	"offset 0 responds to the first argument."
-	^ self payload at: (offset + 1) ifAbsentPut: [ SWVariableInfo new ].
+	^ self payload at: (offset + 1) ifAbsentPut: [ SWVariableTypeInfo new ].
 ]
 
 { #category : #enumerating }

@@ -24,7 +24,7 @@ SWNag2 class >> program [
 
 	<script>
 	| tmp1 |
-	tmp1 := SWVariableInfo new type: Integer.
+	tmp1 := SWVariableTypeInfo new type: Integer.
 	tmp1 := 99.
 	tmp1 := 3.14.
 	self mysub: tmp1

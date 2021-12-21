@@ -23,8 +23,8 @@ SWNag3Point class >> newWith: arg1 [
 SWNag3Point >> initialize [
 
 	super initialize.
-	x := SWVariableInfo new type: Float.
-	y := SWVariableInfo new type: Float
+	x := SWVariableTypeInfo new type: Float.
+	y := SWVariableTypeInfo new type: Float
 ]
 
 { #category : #accessing }

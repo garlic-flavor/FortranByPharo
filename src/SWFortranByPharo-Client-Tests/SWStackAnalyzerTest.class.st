@@ -42,7 +42,7 @@ SWStackAnalyzerTest >> program_05 [
 
 	| tmp1 tmp2 tmp3 tmp4 tmp5 tmp6 tmp7 tmp8 tmp9 |
 
-	^ tmp9 := SWVariableInfo new
+	^ tmp9 := SWVariableTypeInfo new
 		addProperty: #mutable;
 		yourself
 
@@ -102,7 +102,7 @@ SWStackAnalyzerTest >> testDecode_05 [
 	self
 		returnTypeOf: #program_05
 		withArgumentTypes: {  }
-		equals: SWVariableInfo
+		equals: SWVariableTypeInfo
 ]
 
 { #category : #tests }

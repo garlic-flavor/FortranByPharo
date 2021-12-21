@@ -13,28 +13,17 @@ Class {
 	#category : #'SWFortranByPharo-Client-Analyzer'
 }
 
-{ #category : #private }
-SWPool class >> binaryOpInfo [
-	^ [ :selector :args |
-		SWCompiledCodeInfo new
-			method: selector;
-			types: args;
-			return: ((SWVariableInfo newFrom: args first)
-				priority: (SWVariableInfo wellknownMethodPriorityWith: args);
-				yourself);
-			yourself
-	]
+{ #category : #'as yet unclassified' }
+SWPool class >> defined_copy [
+	^ self returnReceiverOp
 ]
 
 { #category : #'instance creation' }
 SWPool class >> defined_new [
-	^ [ :selector :args |
+	^ [ :method :args |
 		SWCompiledCodeInfo new
-			method: #new;
-			return: (SWVariableInfo new
-				type: args first type soleInstance;
-				priority: {SWVariableInfo wellknownMethodPriority. args first priority} min;
-				yourself);
+			method: method;
+			return: (SWVariableTypeInfo newAs: args first value soleInstance with: args first priority);
 			types: args;
 			yourself
 	]
@@ -42,38 +31,40 @@ SWPool class >> defined_new [
 
 { #category : #initialization }
 SWPool class >> defined_opEqual_ [
-	^ self binaryOpInfo
+	^ self returnReceiverOp
 ]
 
 { #category : #initialization }
 SWPool class >> defined_opLT_ [
-	^ self binaryOpInfo
+	^ self returnReceiverOp
 ]
 
 { #category : #initialization }
 SWPool class >> defined_opMul_ [
-	^ self binaryOpInfo
+	^ self returnReceiverOp
 ]
 
 { #category : #initialization }
 SWPool class >> defined_opPlus_ [
-	^ self binaryOpInfo
+	^ self returnReceiverOp
 ]
 
 { #category : #initialization }
 SWPool class >> defined_opSub_ [
-	^ self binaryOpInfo
+	^ self returnReceiverOp
 ]
 
 { #category : #'instance creation' }
 SWPool class >> defined_yourself [
-	^ [ :selector :args |
+	^ self returnReceiverOp
+]
+
+{ #category : #'instance creation' }
+SWPool class >> returnReceiverOp [
+	^ [ :method :args |
 		SWCompiledCodeInfo new
-			method: Object>>#yourself;
-			return: (SWVariableInfo new
-				type: [args first type];
-				priority: { SWVariableInfo wellknownMethodPriority. args first priority } min;
-				yourself);
+			method: method;
+			return: args first;
 			types: args;
 			yourself
 	]
@@ -82,6 +73,7 @@ SWPool class >> defined_yourself [
 { #category : #adding }
 SWPool >> addMethodInfo: aMethodInfo [
 	|instanceSideClass classinfo|
+	self halt.
 	instanceSideClass := aMethodInfo method methodClass instanceSide.
 	classinfo := self payload at: instanceSideClass ifPresent: [ :ci | ci ] ifAbsent: [ |ci|
 		ci :=(instanceSideClass classSide methodDict includesKey: #predefinedClassInfo) ifTrue: [
@@ -115,29 +107,24 @@ SWPool >> addMethodInfo: aMethodInfo [
 ]
 
 { #category : #'as yet unclassified' }
-SWPool >> definedMethod: aMethodOrSelector ifPresent: presentBlock [
-	^ self definedMethod: aMethodOrSelector ifPresent: presentBlock ifAbsent: nil
-]
+SWPool >> definedMethod: selector ifPresent: presentBlock ifAbsent: absentBlock [
+	|generatorSelector|
 
-{ #category : #'as yet unclassified' }
-SWPool >> definedMethod: aMethodOrSelector ifPresent: presentBlock ifAbsent: absentBlock [
-	|generatorSelector selector|
-	aMethodOrSelector class = CompiledBlock ifTrue: [ ^ absentBlock value ].
-	selector := aMethodOrSelector class = CompiledMethod ifTrue: [ aMethodOrSelector selector ] ifFalse: [ aMethodOrSelector  ].
 	generatorSelector := #defined_, (self transpilerClass safeSelectorNameOf: selector).
 	^ (self class respondsTo: generatorSelector) ifTrue: [
 		presentBlock value: (self class perform: generatorSelector)
 	] ifFalse: [
 		absentBlock value
 	]
+
 ]
 
 { #category : #'instance creation' }
-SWPool >> new: aMethodOrSelector with: anArrayOfVariableInfoOrType [
-	^ (self definedMethod: aMethodOrSelector ifPresent: [ :mi |
-		mi value: aMethodOrSelector value: anArrayOfVariableInfoOrType
+SWPool >> new: aMethodFinder [
+	^ (self definedMethod: aMethodFinder selector ifPresent: [ :mi |
+		mi value: aMethodFinder method value: aMethodFinder args
 	] ifAbsent: [
-		self transpilerClass new: aMethodOrSelector with: anArrayOfVariableInfoOrType
+		self transpilerClass new: aMethodFinder method with: aMethodFinder args
 	])
 		pool: self;
 		yourself

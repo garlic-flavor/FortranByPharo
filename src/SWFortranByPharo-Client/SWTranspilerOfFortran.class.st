@@ -31,7 +31,7 @@ SWTranspilerOfFortran >> analyzer [
 SWTranspilerOfFortran >> assign: key with: value [
 	self analyzer variables at: key name ifPresent: [:vi |
 		vi initialValue ifNotNil: [ self preventNewline. ^ self ].
-		(value transpileUsing: self analyzer) = SWVariableInfo class ifTrue: [ self preventNewline. ^ self ]
+		(value transpileUsing: self analyzer) = SWVariableTypeInfo class ifTrue: [ self preventNewline. ^ self ]
 	].
 	super assign: key with: value.
 

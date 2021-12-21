@@ -30,6 +30,6 @@ SWTestProgram_01 >> hoge2 [
 SWTestProgram_01 >> hoge3 [
 	|fuga|
 	fuga := nil.
-	SWVariableInfo declare: #fuga as: SmallInteger.
+	SWVariableTypeInfo declare: #fuga as: SmallInteger.
 	^ fuga
 ]

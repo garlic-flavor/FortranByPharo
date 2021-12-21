@@ -30,7 +30,7 @@ SWTempStore >> method: aMethod [
 
 { #category : #private }
 SWTempStore >> nextName [
-	currentName := SWVariableInfo nextTemporalVariableNameOf: currentName.
+	currentName := SWVariableTypeInfo nextTemporalVariableNameOf: currentName.
 	^ (names anySatisfy: [ :each | each = currentName ]) ifTrue: [
 		self nextName
 	] ifFalse: [
@@ -45,12 +45,13 @@ SWTempStore >> pop [
 
 { #category : #adding }
 SWTempStore >> push: aVariableInfo [
+
 	(payload isNotEmpty and: [ payload last = aVariableInfo ]) ifTrue: [ ^ false ].
 	aVariableInfo stackPos ifNotNil: [ ^ false ].
-	SWVariableInfo exactTypePriority <= aVariableInfo priority ifTrue: [ ^ false ].
+	SWType exactTypePriority <= aVariableInfo priority ifTrue: [ ^ false ].
+	aVariableInfo name isEmptyOrNil ifFalse: [ ^ false ].
 
 	payload add: aVariableInfo.
-	aVariableInfo name isEmptyOrNil ifFalse: [ ^ false ].
 	aVariableInfo name: self nextName.
 	^ true
 

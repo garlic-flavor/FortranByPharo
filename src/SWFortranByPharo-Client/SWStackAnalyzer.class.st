@@ -47,6 +47,7 @@ SWStackAnalyzer >> doDup [
 	|top|
 	top := self stack top.
 	self stack push: top.
+	"For a cascade node, create new variable."
 	(self tempStore push: top) ifTrue: [
 		self addLocalVariable: top
 	].
@@ -89,22 +90,16 @@ SWStackAnalyzer >> jumperStack: anObject [
 
 { #category : #private }
 SWStackAnalyzer >> mergeStackTopAndSecond [
-	|result|
-	result := SWVariableInfo new.
-	result << self stack pop.
-	result << self stack pop.
+	|right|
+	right := self stack pop.
+	self stack top << right.
 
-	self stack push: result
 
 ]
 
 { #category : #'instruction decoding' }
 SWStackAnalyzer >> methodReturnConstant: value [
-	value ifNotNil: [
-		self return << (SWVariableInfo new
-			type: value class;
-			yourself)
-	].
+	self return << SWVariableTypeInfo newAs: value class.
 	super methodReturnConstant: value
 ]
 
@@ -119,6 +114,16 @@ SWStackAnalyzer >> methodReturnReceiver [
 SWStackAnalyzer >> methodReturnTop [
 	self return << self stack top.
 	super methodReturnTop.
+
+]
+
+{ #category : #'instance creation' }
+SWStackAnalyzer >> newFullClosure: lit with: args [
+	^ (self class new: lit with: args)
+		pool: self pool;
+		classInfo: self classInfo;
+		yourself
+
 
 ]
 
@@ -147,17 +152,11 @@ SWStackAnalyzer >> popIntoRemoteTemp: remoteTempIndex inVectorAt: tempVectorInde
 { #category : #'instruction decoding' }
 SWStackAnalyzer >> popIntoTemporaryVariable: offset [
 	|left right|
+
 	left := self stack atOffset: offset.
 	right := self stack pop.
-	(SWVariableInfo wellknownMethodPriority <= right priority and: [ right type = SWVariableInfo ]) ifTrue: [
-		left << (	((self method sourceNodeForPC: oldPC) evaluate)
-			priority: SWVariableInfo userSpecifiesTypePriority;
-			yourself);
-			assignCounter: 0
-	] ifFalse: [
-		left << right.
-	].
 
+	left << right.
 
 	super popIntoTemporaryVariable: offset.
 
@@ -197,18 +196,14 @@ SWStackAnalyzer >> pushConsArrayWithElements: numElements [
 	|args|
 	args := self stack pop: numElements.
 	self flag: #toImplement.
-	self stack push: (SWVariableInfo new
-		type: Array;
-		yourself).
+	self stack push: (SWVariableTypeInfo newAs: Array).
 	
 	super pushConsArrayWithElements: numElements
 ]
 
 { #category : #'instruction decoding' }
 SWStackAnalyzer >> pushConstant: obj [
-	self stack push: (SWVariableInfo new
-		type: obj class;
-		yourself).
+	self stack push: (SWVariableTypeInfo newAs: obj class).
 
 	super pushConstant: obj.
 
@@ -217,7 +212,7 @@ SWStackAnalyzer >> pushConstant: obj [
 { #category : #'instruction decoding' }
 SWStackAnalyzer >> pushFullClosure: lit numCopied: numCopied receiverOnStack: rcvr ignoreOuterContext: ignore [
 	|args mi|
-	self flag: #toImplement.
+
 	rcvr ifTrue: [ self error ].
 	ignore ifTrue: [ self error ].
 	args := OrderedCollection new: numCopied + 1.
@@ -226,22 +221,20 @@ SWStackAnalyzer >> pushFullClosure: lit numCopied: numCopied receiverOnStack: rc
 	
 	"I only interest in type information on the stack.
 	So, I decode a closure before invoking. it's ok."
-	mi := self pool new: lit with: args.
-	mi classInfo: self classInfo.
+	mi := self newFullClosure: lit with: args.
 	mi decode.
 	lit hasMethodReturn ifTrue: [
 		self return << mi return
 	].
 	self messages addAll: mi messages.
 	self stack push: mi return.
+
 	super pushFullClosure: lit numCopied: numCopied  receiverOnStack: rcvr ignoreOuterContext: ignore 
 ]
 
 { #category : #'instruction decoding' }
 SWStackAnalyzer >> pushLiteralVariable: anAssociation [
-	self stack push: (SWVariableInfo new
-		type:  anAssociation value class;
-		yourself).
+	self stack push: (SWVariableTypeInfo newAs: anAssociation value class).
 
 	super pushLiteralVariable: anAssociation.
 
@@ -285,28 +278,34 @@ SWStackAnalyzer >> pushTemporaryVariable:  offset [
 
 { #category : #accessing }
 SWStackAnalyzer >> return [
+
 	^ return ifNil: [
-		return := SWVariableInfo new
-			type: [
-				self decode.
-				return type
-			];
-			priority: SWVariableInfo defaultPriority;
-			yourself
+		return := SWVariableTypeInfo newAs: [
+			self decode.
+			return type
+		] with: SWType defaultPriority
 	]
 ]
 
 { #category : #'instruction decoding' }
 SWStackAnalyzer >> send: selector super: supered numArgs: numberArguments [
-	|args methodInfo|
+	|args methodFinder|
+
 	args := self stack pop: numberArguments + 1.
-	supered ifTrue: [ args at: 1 put: args first copyAsSuper ].
-	methodInfo := self pool new: selector with: args.
-	self messages at: (self method sourceNodeForPC: oldPC) put: methodInfo.
-	self stack push: methodInfo return.
+	args at: 1 put: (supered ifTrue: [ args first copyAsSuper ] ifFalse: [ args first copy ]).
+
+	methodFinder := SWMethodFinder new
+		selector: selector;
+		args: args;
+		yourself.
+	self messages at: (self method sourceNodeForPC: oldPC) put: methodFinder.
+	self stack push: (SWVariableTypeInfo newAs: [|mi|
+		mi := self pool new: methodFinder.
+		mi return value.
+	]).
 
 	"A special case for user specifying."
-	(selector = #declare:as: and: [ args first easyType = SWVariableInfo class ]) ifTrue: [|vi|
+	(selector = #declare:as: and: [ args first easyType = SWVariableTypeInfo class ]) ifTrue: [|vi|
 		vi := (self method sourceNodeForPC: oldPC) evaluate.
 		(self variableInfoOf: vi name) << vi.
 	].

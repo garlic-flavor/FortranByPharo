@@ -27,7 +27,6 @@ SWStack >> atOffset: offset [
 
 { #category : #copying }
 SWStack >> copyFrom: start to: end [
-	|ret|
 	self allocate: end + 1.
 	^ self payload copyFrom: start + 1 to: end + 1
 ]
@@ -40,10 +39,8 @@ SWStack >> pop [
 { #category : #affecting }
 SWStack >> pop: itemsCount [
 	|arr|
-	arr := OrderedCollection new.
-	itemsCount timesRepeat: [
-		arr addFirst: self pop.
-	].
+	arr := self payload copyFrom: self payload size - itemsCount + 1 to: self payload size.
+	itemsCount timesRepeat: [ self pop ].
 	^ arr
 ]
 

@@ -12,6 +12,6 @@ Class {
 SWNag3Line >> initialize [
 
 	super initialize.
-	p1 := SWVariableInfo new type: SWNag3Point.
-	p2 := SWVariableInfo new type: SWNag3Point
+	p1 := SWVariableTypeInfo new type: SWNag3Point.
+	p2 := SWVariableTypeInfo new type: SWNag3Point
 ]

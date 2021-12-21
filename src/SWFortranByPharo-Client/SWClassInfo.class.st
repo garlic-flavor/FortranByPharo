@@ -33,7 +33,8 @@ SWClassInfo class >> installClassInfoBuilderFor: aClass [
 	aClass methodDict valuesDo: [ :method |
 		(pool new: method with: {aClass}) decode
 	].
-	^ pool payload at: aClass
+	self flag: #toImplement.
+	^ pool payload at: aClass instanceSide
 ]
 
 { #category : #adding }
@@ -70,6 +71,15 @@ SWClassInfo >> classSide [
 SWClassInfo >> classSide: anObject [
 
 	classSide := anObject
+]
+
+{ #category : #'as yet unclassified' }
+SWClassInfo >> defineSlot: aName as: aType [
+	self halt.
+	(self getVariableInfoOf: aName)
+		type: aType;
+		priority: SWVariableTypeInfo userSpecifiesTypePriority
+		
 ]
 
 { #category : #accessing }
@@ -122,7 +132,7 @@ SWClassInfo >> method: aName arguments: args is: rType [
 	self addMember: (SWCompiledCodeInfo new
 		method: aName;
 		types: args;
-		return: (SWVariableInfo new
+		return: (SWVariableTypeInfo new
 			type: rType;
 			yourself
 		);
@@ -152,6 +162,15 @@ SWClassInfo >> printInitializerOn: aStream [
 ]
 
 { #category : #accessing }
+SWClassInfo >> readyAllSlots [
+	self targetClass methodDict valuesDo: [ :m |
+		(self pool new: m with: { self targetClass }) decode
+	].
+	^ self
+
+]
+
+{ #category : #accessing }
 SWClassInfo >> readySlotAt: index [
 	self targetClass methodDict values select: [ :m | m writesField: index ] thenDo: [ :m |
 		(self pool new: m with: { self targetClass }) decode
@@ -161,13 +180,13 @@ SWClassInfo >> readySlotAt: index [
 
 { #category : #accessing }
 SWClassInfo >> slot [
-
+self halt.
 	^ slot ifNil: [
 		slot := SWSlot new.
 		self targetClass slots do: [ :ids |
 			(slot at: ids index)
 				name: ids name;
-				priority: SWVariableInfo defaultPriority;
+				priority: SWVariableTypeInfo defaultPriority;
 				type: [
 					self readySlotAt: ids index.
 					(self slot at: ids index) type

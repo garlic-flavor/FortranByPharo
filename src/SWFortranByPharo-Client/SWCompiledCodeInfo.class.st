@@ -20,10 +20,10 @@ Class {
 }
 
 { #category : #'instance creation' }
-SWCompiledCodeInfo class >> new: aMethodOrSelector with: anArrayOfVariableInfoOrTypes [
+SWCompiledCodeInfo class >> new: aMethod with: anArrayOfVariableTypeInfoOrTypes [
 	^ self new
-		method: aMethodOrSelector;
-		types: anArrayOfVariableInfoOrTypes;
+		method: aMethod;
+		types: anArrayOfVariableTypeInfoOrTypes;
 		yourself
 
 ]
@@ -52,24 +52,6 @@ SWCompiledCodeInfo class >> safeSelectorNameOf: selector [
 
 ]
 
-{ #category : #utils }
-SWCompiledCodeInfo class >> search: selector in: aClass [
-	^ aClass ifNil: [
-		nil
-	] ifNotNil: [
-		aClass methodDict at: selector ifAbsent: [
-			self search: selector in: aClass superclass
-		]
-	]
-]
-
-{ #category : #comparing }
-SWCompiledCodeInfo >> = right [
-	self method = right method ifFalse: [ ^ false ].
-	self arguments with: right arguments do: [ :l :r | l type = r type ifFalse: [ ^ false ] ].
-	^ true
-]
-
 { #category : #adding }
 SWCompiledCodeInfo >> addLocalVariable: aVariableInfo [
 	self stack push: aVariableInfo afterIndex: self numTemps.
@@ -90,9 +72,7 @@ SWCompiledCodeInfo >> arguments [
 { #category : #accessing }
 SWCompiledCodeInfo >> classInfo [
 
-	^ classInfo ifNil: [
-		classInfo := (self pool addMethodInfo: self) classInfo.
-	]
+	^ classInfo
 ]
 
 { #category : #accessing }
@@ -108,8 +88,7 @@ SWCompiledCodeInfo >> decode [
 	(self stack at: 0)
 		name: 'self';
 		stackPos: 0.
-	(self method class inheritsFrom: CompiledCode) ifFalse: [ self error: 'something go wrong.' ].
-	self classInfo ifNil: [ self error: 'something wrong.' ].
+
 	self method class = CompiledMethod ifTrue: [
 		self method temporaryVariables doWithIndex: [ :var :idx |
 			(self stack at: idx)
@@ -117,11 +96,16 @@ SWCompiledCodeInfo >> decode [
 				stackPos: idx
 		]
 	].
-	self method class = CompiledBlock ifTrue: [
+	self method class = FullBlockClosure ifTrue: [
 		self method argumentNames doWithIndex: [ :name :idx |
 			(self stack at: idx)
 				name: name;
 				stackPos: idx
+		].
+		self method tempNames doWithIndex: [ :name :idx |
+			(self stack at: idx)
+				name: name;
+				stackPos: idx + self method numArgs
 		]
 	].
 
@@ -137,16 +121,6 @@ SWCompiledCodeInfo >> decodeAllOf: aNeedle [
 	]
 ]
 
-{ #category : #testing }
-SWCompiledCodeInfo >> hasExplicitReturn [
-	^ self  return stackPos ~= -1
-]
-
-{ #category : #testing }
-SWCompiledCodeInfo >> isReceiverMethod [
-	^ self receiverClass = self method methodClass
-]
-
 { #category : #accessing }
 SWCompiledCodeInfo >> locals [
 	^ self stack copyFrom: self method numArgs + 1 to: self numTemps
@@ -155,8 +129,8 @@ SWCompiledCodeInfo >> locals [
 { #category : #accessing }
 SWCompiledCodeInfo >> mangledName [
 	^ mangledName ifNil: [ mangledName := String streamContents: [ :s ||owner|
-		owner := (method class = ByteString ifTrue: [ self return type ] ifFalse: [ self method methodClass ]).
-		owner class = Metaclass ifTrue: [ 
+		owner := (self method methodClass).
+		owner isClassSide ifTrue: [ 
 			s << owner soleInstance name; << 'C'
 		] ifFalse: [
 			s << owner name; << '_'
@@ -165,9 +139,9 @@ SWCompiledCodeInfo >> mangledName [
 		(self const ifTrue: ['C'] ifFalse: ['_']).
 "
 		s
-			<< (self class safeSelectorNameOf: (method class = ByteString ifTrue: [ method ] ifFalse: [ method selector ]));
+			<< (self class safeSelectorNameOf: method selector);
 			<< (self arguments collect: [ :v |
-				v mangledTypeName
+				v mangledName
 			])
 	] ]
 ]
@@ -192,10 +166,7 @@ SWCompiledCodeInfo >> messages: anObject [
 
 { #category : #accessing }
 SWCompiledCodeInfo >> method [
-	^ method class = ByteSymbol ifTrue: [
-		method := (self class search: method in: self receiverClass) ifNil: [ self error ]
-	] ifFalse: [ method ]
-
+	^ method
 ]
 
 { #category : #accessing }
@@ -230,14 +201,14 @@ SWCompiledCodeInfo >> pool: anObject [
 
 { #category : #NOCompletion }
 SWCompiledCodeInfo >> receiverClass [
-	^ (self stack at: 0) type
+	^ (self stack at: 0) value
 ]
 
 { #category : #accessing }
 SWCompiledCodeInfo >> return [
 
 	^ return ifNil: [
-		return := SWVariableInfo new
+		return := SWVariableTypeInfo new
 	]
 ]
 
@@ -274,19 +245,14 @@ SWCompiledCodeInfo >> stack: anObject [
 
 { #category : #accessing }
 SWCompiledCodeInfo >> types: anObject [
-
 	anObject doWithIndex: [ :type :idx |
-		type class = SWVariableInfo ifTrue: [
-			(self stack at: idx - 1) << type
-		] ifFalse: [
-			(self stack at: idx - 1)
-				type: type
-		]
+		(self stack at: idx - 1) << type
 	]
 ]
 
 { #category : #accessing }
 SWCompiledCodeInfo >> variableInfoOf: aName [
+
 	^ self stack detect: [ :vi |
 		vi name = aName
 	] ifNone: [
