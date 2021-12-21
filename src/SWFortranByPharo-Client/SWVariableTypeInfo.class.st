@@ -16,25 +16,13 @@ Class {
 	#category : #'SWFortranByPharo-Client-Analyzer'
 }
 
-{ #category : #'as yet unclassified' }
-SWVariableTypeInfo class >> declare: aName as: aType [
-self halt.
-	^ self new
-		name: aName;
-		type: aType;
-		priority: self userSpecifiesTypePriority;
-		yourself
+{ #category : #'instance creation' }
+SWVariableTypeInfo class >> new: aType [
+	^ self new: aType with: nil
 ]
 
 { #category : #'instance creation' }
-SWVariableTypeInfo class >> newAs: aType [
-	^ self new
-		type: aType;
-		yourself.
-]
-
-{ #category : #'instance creation' }
-SWVariableTypeInfo class >> newAs: aType with: aPriority [
+SWVariableTypeInfo class >> new: aType with: aPriority [
 	^ self new
 		type: aType;
 		priority: aPriority;
@@ -58,9 +46,22 @@ SWVariableTypeInfo class >> nextTemporalVariableNameOf: prevName [
 
 { #category : #'accumulator ops' }
 SWVariableTypeInfo >> << rightObject [
-	self type << rightObject type.
-	self properties addAll: rightObject properties.
-	self assignCounter: self assignCounter + 1
+	rightObject original ifNil: [
+		self priority <= rightObject priority ifTrue: [
+			self type: rightObject bareType.
+			self priority: (self class wellknownMethodPriority <= rightObject priority ifTrue: [
+				rightObject priority
+			] ifFalse: [
+				nil
+			]).
+		].
+		self original: (rightObject stackPos ifNotNil: [rightObject] ifNil: [nil]).
+		self properties addAll: rightObject properties.
+		self assignCounter: self assignCounter + 1
+	] ifNotNil: [
+		self << rightObject original
+	]
+		
 
 ]
 
@@ -83,7 +84,6 @@ SWVariableTypeInfo >> assignCounter: anObject [
 
 { #category : #copying }
 SWVariableTypeInfo >> copyAsSuper [
-self halt.
 	^ self copy
 		type: [ self type superclass ];
 		yourself.
@@ -118,13 +118,14 @@ SWVariableTypeInfo >> name: aName [
 { #category : #accessing }
 SWVariableTypeInfo >> priority [
 
-	^ self type priority
+	^ priority ifNil: [ priority := self calcThisPriority ]
 
 ]
 
 { #category : #accessing }
 SWVariableTypeInfo >> priority: anObject [
-	self type priority: anObject
+
+	priority := anObject
 ]
 
 { #category : #accessing }
@@ -193,5 +194,5 @@ SWVariableTypeInfo >> type: anObject [
 
 { #category : #accessing }
 SWVariableTypeInfo >> value [
-	^ self type value
+	^ self type
 ]

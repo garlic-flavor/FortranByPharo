@@ -3,23 +3,25 @@ I hold type information about a class to transpile.
 
 "
 Class {
-	#name : #SWClassInfo,
+	#name : #SWClass,
 	#superclass : #Object,
 	#instVars : [
 		'targetClass',
-		'members',
+		'methods',
+		'referenced',
 		'sourceHash',
 		'slot',
-		'pool',
 		'instanceSide',
-		'classSide'
+		'classSide',
+		'transpilerClass'
 	],
 	#category : #'SWFortranByPharo-Client-Analyzer'
 }
 
 { #category : #'as yet unclassified' }
-SWClassInfo class >> installClassInfoBuilderFor: aClass [
+SWClass class >> installClassInfoBuilderFor: aClass [
 	|pool|
+	self halt.
 	pool := SWPool new
 		transpilerClass: SWStackAnalyzer;
 		onClassAdded: [ :c |
@@ -37,30 +39,8 @@ SWClassInfo class >> installClassInfoBuilderFor: aClass [
 	^ pool payload at: aClass instanceSide
 ]
 
-{ #category : #adding }
-SWClassInfo >> addMember: aMethodInfo [
-	"Add aMethodInfo to my list to be transpiled."
-	^ self addMember: aMethodInfo ifAbsent: nil.
-
-]
-
-{ #category : #adding }
-SWClassInfo >> addMember: aMethodInfo ifAbsent: absentBlock [
-	"Add aMethodInfo to my list to be transpiled."
-	
-	^ self members at: aMethodInfo mangledName ifPresent: [ :mi |
-		mi
-	] ifAbsent: [
-		aMethodInfo classInfo: self.
-		self members at: aMethodInfo mangledName put: aMethodInfo.
-		absentBlock value.
-		aMethodInfo
-	].
-
-]
-
 { #category : #accessing }
-SWClassInfo >> classSide [
+SWClass >> classSide [
 
 	^ classSide ifNil: [
 		classSide := self targetClass isClassSide ifTrue: [ self ] ifFalse: [ nil ]
@@ -68,35 +48,26 @@ SWClassInfo >> classSide [
 ]
 
 { #category : #accessing }
-SWClassInfo >> classSide: anObject [
+SWClass >> classSide: anObject [
 
-	classSide := anObject
-]
-
-{ #category : #'as yet unclassified' }
-SWClassInfo >> defineSlot: aName as: aType [
-	self halt.
-	(self getVariableInfoOf: aName)
-		type: aType;
-		priority: SWVariableTypeInfo userSpecifiesTypePriority
-		
+	^ classSide := anObject
 ]
 
 { #category : #accessing }
-SWClassInfo >> getVariableInfoAtOffset: offset [
+SWClass >> getVariableInfoAtOffset: offset [
 	"Return SWVariableInfo in slots at offset."
 	^ self slot atOffset: offset.
 ]
 
 { #category : #accessing }
-SWClassInfo >> getVariableInfoOf: aName [
+SWClass >> getVariableInfoOf: aName [
 	"Return SWVariableInfo searched by its name."
 	^ self slot detect: [ :each | each name = aName ]
 
 ]
 
 { #category : #accessing }
-SWClassInfo >> instanceSide [
+SWClass >> instanceSide [
 
 	^ instanceSide ifNil: [
 		instanceSide := self targetClass isInstanceSide ifTrue: [ self ] ifFalse: [ nil ]
@@ -104,31 +75,24 @@ SWClassInfo >> instanceSide [
 ]
 
 { #category : #accessing }
-SWClassInfo >> instanceSide: anObject [
+SWClass >> instanceSide: anObject [
 
-	instanceSide := anObject
+	^ instanceSide := anObject
 ]
 
 { #category : #testing }
-SWClassInfo >> isToTranspile [
+SWClass >> isToTranspile [
 	^ self targetClass classSide methodDict includesKey: #toTranspile
 ]
 
 { #category : #accessing }
-SWClassInfo >> members [
-	"A Dictionary that contains SWMethodInfo to be transpiled, with its mangled name as key."
-
-	^ members ifNil: [ members := Dictionary new ]
-]
-
-{ #category : #accessing }
-SWClassInfo >> members: anObject [
-
-	members := anObject
+SWClass >> method: aSelector [
+	^ self methods at: aSelector
 ]
 
 { #category : #'as yet unclassified' }
-SWClassInfo >> method: aName arguments: args is: rType [
+SWClass >> method: aName arguments: args is: rType [
+	self halt.
 	self addMember: (SWCompiledCodeInfo new
 		method: aName;
 		types: args;
@@ -141,19 +105,26 @@ SWClassInfo >> method: aName arguments: args is: rType [
 ]
 
 { #category : #accessing }
-SWClassInfo >> pool [
+SWClass >> methods [
 
-	^ pool
+	^ methods ifNil: [methods := Dictionary newFrom: (
+		self targetClass methodDict collect: [ :method |
+			(self transpilerClass new: method with: { self targetClass })
+				decode;
+				yourself
+		]
+	)]
 ]
 
 { #category : #accessing }
-SWClassInfo >> pool: anObject [
+SWClass >> methods: anObject [
 
-	pool := anObject
+	methods := anObject
 ]
 
 { #category : #printing }
-SWClassInfo >> printInitializerOn: aStream [
+SWClass >> printInitializerOn: aStream [
+	self halt.
 	aStream
 		<< 'predefinedClassInfo'; cr;
 		tab; << '^ '; << self class name; space; << 'new'; cr;
@@ -162,48 +133,38 @@ SWClassInfo >> printInitializerOn: aStream [
 ]
 
 { #category : #accessing }
-SWClassInfo >> readyAllSlots [
-	self targetClass methodDict valuesDo: [ :m |
-		(self pool new: m with: { self targetClass }) decode
-	].
-	^ self
+SWClass >> referenced [
 
+	^ referenced ifNil: [ referenced := Dictionary new ]
 ]
 
 { #category : #accessing }
-SWClassInfo >> readySlotAt: index [
-	self targetClass methodDict values select: [ :m | m writesField: index ] thenDo: [ :m |
-		(self pool new: m with: { self targetClass }) decode
-	]
+SWClass >> referenced: anObject [
 
+	referenced := anObject
 ]
 
 { #category : #accessing }
-SWClassInfo >> slot [
-self halt.
+SWClass >> slot [
 	^ slot ifNil: [
 		slot := SWSlot new.
 		self targetClass slots do: [ :ids |
 			(slot at: ids index)
 				name: ids name;
-				priority: SWVariableTypeInfo defaultPriority;
-				type: [
-					self readySlotAt: ids index.
-					(self slot at: ids index) type
-				]
+				stackPos: ids index
 		].
 		slot
 	]
 ]
 
 { #category : #accessing }
-SWClassInfo >> slot: anObject [
+SWClass >> slot: anObject [
 
 	slot := anObject
 ]
 
 { #category : #accessing }
-SWClassInfo >> sourceHash [
+SWClass >> sourceHash [
 	"Return an accumulated hash consists of whole source code of targetClass."
 
 	^ sourceHash ifNil: [
@@ -214,19 +175,32 @@ SWClassInfo >> sourceHash [
 ]
 
 { #category : #accessing }
-SWClassInfo >> targetClass [
+SWClass >> targetClass [
 
 	^ targetClass
 ]
 
 { #category : #accessing }
-SWClassInfo >> targetClass: anObject [
+SWClass >> targetClass: anObject [
 
 	targetClass := anObject
 ]
 
+{ #category : #accessing }
+SWClass >> transpilerClass [
+
+	^ transpilerClass
+]
+
+{ #category : #accessing }
+SWClass >> transpilerClass: anObject [
+
+	transpilerClass := anObject
+]
+
 { #category : #'as yet unclassified' }
-SWClassInfo >> typeOf: aName is: aType [
+SWClass >> typeOf: aName is: aType [
+	self halt.
 	(self getVariableInfoOf: aName)
 		type: aType
 

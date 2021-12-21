@@ -53,7 +53,7 @@ SWStackAnalyzerTest >> returnTypeOf: arg1 withArgumentTypes: arg2 equals: arg3 [
 
 	self
 		assert:
-		(SWStackAnalyzer new: arg1 with: { self class } , arg2) return type
+		(SWStackAnalyzer new: self class>>arg1 with: { self class } , arg2) return type
 		equals: arg3
 ]
 

@@ -99,7 +99,7 @@ SWStackAnalyzer >> mergeStackTopAndSecond [
 
 { #category : #'instruction decoding' }
 SWStackAnalyzer >> methodReturnConstant: value [
-	self return << SWVariableTypeInfo newAs: value class.
+	self return << SWVariableTypeInfo new: value class.
 	super methodReturnConstant: value
 ]
 
@@ -196,14 +196,14 @@ SWStackAnalyzer >> pushConsArrayWithElements: numElements [
 	|args|
 	args := self stack pop: numElements.
 	self flag: #toImplement.
-	self stack push: (SWVariableTypeInfo newAs: Array).
+	self stack push: (SWVariableTypeInfo new: Array).
 	
 	super pushConsArrayWithElements: numElements
 ]
 
 { #category : #'instruction decoding' }
 SWStackAnalyzer >> pushConstant: obj [
-	self stack push: (SWVariableTypeInfo newAs: obj class).
+	self stack push: (SWVariableTypeInfo new: obj class).
 
 	super pushConstant: obj.
 
@@ -234,7 +234,7 @@ SWStackAnalyzer >> pushFullClosure: lit numCopied: numCopied receiverOnStack: rc
 
 { #category : #'instruction decoding' }
 SWStackAnalyzer >> pushLiteralVariable: anAssociation [
-	self stack push: (SWVariableTypeInfo newAs: anAssociation value class).
+	self stack push: (SWVariableTypeInfo new: anAssociation value class).
 
 	super pushLiteralVariable: anAssociation.
 
@@ -280,7 +280,7 @@ SWStackAnalyzer >> pushTemporaryVariable:  offset [
 SWStackAnalyzer >> return [
 
 	^ return ifNil: [
-		return := SWVariableTypeInfo newAs: [
+		return := SWVariableTypeInfo new: [
 			self decode.
 			return type
 		] with: SWType defaultPriority
@@ -299,15 +299,15 @@ SWStackAnalyzer >> send: selector super: supered numArgs: numberArguments [
 		args: args;
 		yourself.
 	self messages at: (self method sourceNodeForPC: oldPC) put: methodFinder.
-	self stack push: (SWVariableTypeInfo newAs: [|mi|
+	self stack push: (SWVariableTypeInfo new: [|mi|
 		mi := self pool new: methodFinder.
 		mi return value.
 	]).
 
 	"A special case for user specifying."
-	(selector = #declare:as: and: [ args first easyType = SWVariableTypeInfo class ]) ifTrue: [|vi|
-		vi := (self method sourceNodeForPC: oldPC) evaluate.
-		(self variableInfoOf: vi name) << vi.
+	(selector = #declare:as: and: [ args first easyType = SWType class ]) ifTrue: [|assoc|
+		assoc := (self method sourceNodeForPC: oldPC) evaluate.
+		(self variableInfoOf: assoc key) << assoc value
 	].
 	super send: selector super: supered numArgs: numberArguments.
 

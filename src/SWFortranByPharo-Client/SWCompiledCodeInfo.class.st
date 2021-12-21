@@ -94,9 +94,14 @@ SWCompiledCodeInfo >> decode [
 			(self stack at: idx)
 				name: var name;
 				stackPos: idx
+		].
+		self method argumentNames doWithIndex: [ :var :idx |
+			(self stack at: idx)
+				priority: SWType argumentTypePriority
 		]
 	].
 	self method class = FullBlockClosure ifTrue: [
+		self halt.
 		self method argumentNames doWithIndex: [ :name :idx |
 			(self stack at: idx)
 				name: name;

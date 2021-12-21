@@ -11,12 +11,25 @@ Class {
 	#category : #'SWFortranByPharo-Client-Analyzer'
 }
 
+{ #category : #'as yet unclassified' }
+SWType class >> argumentTypePriority [
+	^ 80
+]
+
 { #category : #utils }
 SWType class >> calcPriorityOf: aClass [
 	aClass ifNil: [ ^ self defaultPriority ].
 	aClass = UndefinedObject ifTrue: [ ^ self defaultPriority ].
 	aClass class = FullBlockClosure ifTrue: [ ^ self unknownMethodPriority ].
 	^ self exactTypePriority 
+]
+
+{ #category : #'as yet unclassified' }
+SWType class >> declare: aName as: aType [
+	^ aName -> (self new
+		type: aType;
+		priority: self userSpecifyingPriority;
+		yourself)
 ]
 
 { #category : #constants }
@@ -81,13 +94,14 @@ SWType class >> userSpecifyingPriority [
 
 { #category : #streaming }
 SWType >> << rightType [
-	(rightType class includesBehavior: self class) ifTrue: [
+	(rightType class includesBehavior: SWType) ifTrue: [
 		rightType priority < self priority ifTrue: [ ^ self ].
 
 		self payload: rightType payload.
 		self priority: rightType priority.
 	] ifFalse: [
 		self payload: rightType.
+		self priority: nil.
 	]
 
 ]

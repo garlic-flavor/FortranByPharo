@@ -27,12 +27,12 @@ SWTypeGroup class >> newFor: aVariableInfo as: aType with: aPriority [
 { #category : #adding }
 SWTypeGroup >> << rightGroup [
 	super << rightGroup.
-	(rightGroup includesBehavior: SWTypeGroup) ifTrue: [
-		self group addAll: rightGroup group.
-		rightGroup group do: [ :vi |
-			vi type: self
-		]
+	(rightGroup class includesBehavior: SWTypeGroup) ifFalse: [ ^ self ].
+	self group addAll: rightGroup group.
+	rightGroup group do: [ :vi |
+		vi type: self
 	]
+
 ]
 
 { #category : #adding }

@@ -3,7 +3,7 @@ I transpile a Pharo class.
 "
 Class {
 	#name : #SWClassDefinitionTranspiler,
-	#superclass : #SWClassInfo,
+	#superclass : #SWClass,
 	#instVars : [
 		'stream'
 	],
