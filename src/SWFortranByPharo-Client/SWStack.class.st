@@ -1,5 +1,5 @@
 "
-I emulate a stack like of usedn in Context class.
+I emulate a stack like of one used in Context class.
 index 0 indicates the recevier.
 index 1 indicates the first argument of the method.
 "
@@ -27,8 +27,8 @@ SWStack >> atOffset: offset [
 
 { #category : #copying }
 SWStack >> copyFrom: start to: end [
-	self allocate: end + 1.
-	^ self payload copyFrom: start + 1 to: end + 1
+	^ super copyFrom: start + 1 to: end + 1
+
 ]
 
 { #category : #removing }

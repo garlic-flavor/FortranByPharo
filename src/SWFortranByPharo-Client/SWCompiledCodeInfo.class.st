@@ -102,7 +102,6 @@ SWCompiledCodeInfo >> decode [
 		]
 	].
 	self method class = FullBlockClosure ifTrue: [
-		self halt.
 		self method argumentNames doWithIndex: [ :name :idx |
 			(self stack at: idx)
 				name: name;
@@ -112,7 +111,8 @@ SWCompiledCodeInfo >> decode [
 			(self stack at: idx)
 				name: name;
 				stackPos: idx + self method numArgs
-		]
+		].
+		self method: self method compiledBlock
 	].
 
 	super decode.

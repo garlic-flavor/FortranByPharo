@@ -108,12 +108,14 @@ SWClass >> method: aName arguments: args is: rType [
 SWClass >> methods [
 
 	^ methods ifNil: [methods := Dictionary newFrom: (
-		self targetClass methodDict collect: [ :method |
-			(self transpilerClass new: method with: { self targetClass })
+		self targetClass methodDict values select: [ :method |
+			method category ~= #'code generation'
+		] thenCollect: [ :method |
+			method selector -> ((self transpilerClass new: method with: { self targetClass })
 				decode;
-				yourself
-		]
-	)]
+				yourself)
+		])
+	]
 ]
 
 { #category : #accessing }

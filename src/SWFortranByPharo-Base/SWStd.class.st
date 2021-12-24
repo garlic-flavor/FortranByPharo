@@ -8,18 +8,18 @@ Class {
 	#category : #'SWFortranByPharo-Base-Standards'
 }
 
-{ #category : #'as yet unclassified' }
+{ #category : #'code generation' }
 SWStd class >> f90_print_With: arguments Using: transpiler [
 	transpiler
 		put: 'print *, ';
 		transpile: (arguments at: 1)
 ]
 
-{ #category : #'as yet unclassified' }
+{ #category : #'code generation' }
 SWStd class >> import: identifiers from: aFile [
 ]
 
-{ #category : #'as yet unclassified' }
+{ #category : #'code generation' }
 SWStd class >> js_import_from_With: arguments Using: transpiler [
 	transpiler put: 'import {'.
 	(arguments at: 1) value do: [ :each |
@@ -33,7 +33,7 @@ SWStd class >> js_import_from_With: arguments Using: transpiler [
 		put: ''''
 ]
 
-{ #category : #'as yet unclassified' }
+{ #category : #'code generation' }
 SWStd class >> js_print_With: arguments Using: transpiler [
 	transpiler
 		put: 'console.log';

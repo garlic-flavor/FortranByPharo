@@ -10,8 +10,7 @@ Class {
 		'name',
 		'type',
 		'properties',
-		'assignCounter',
-		'priority'
+		'assignCounter'
 	],
 	#category : #'SWFortranByPharo-Client-Analyzer'
 }
@@ -24,7 +23,7 @@ SWVariableTypeInfo class >> new: aType [
 { #category : #'instance creation' }
 SWVariableTypeInfo class >> new: aType with: aPriority [
 	^ self new
-		type: aType;
+		<< aType;
 		priority: aPriority;
 		yourself.
 ]
@@ -106,17 +105,23 @@ SWVariableTypeInfo >> name: aName [
 	name := aName
 ]
 
+{ #category : #printing }
+SWVariableTypeInfo >> printOn: aStream [
+
+	^ self putOn: aStream
+]
+
 { #category : #accessing }
 SWVariableTypeInfo >> priority [
 
-	^ priority ifNil: [ priority := self calcThisPriority ]
+	^ self type priority
 
 ]
 
 { #category : #accessing }
 SWVariableTypeInfo >> priority: anObject [
 
-	priority := anObject
+	^ self type priority: anObject.
 ]
 
 { #category : #accessing }
@@ -140,17 +145,17 @@ SWVariableTypeInfo >> property: propName [
 SWVariableTypeInfo >> putOn: aStream [
 	aStream
 		<< $[;
-		<< stackPos asString;
+		<< (stackPos ifNil: [ $- ] ifNotNil: [ stackPos asString ]);
 		<< $];
 		space;
-		<< name;
+		<< name asString;
 		space;
 		<< $<;
 		<< self type;
 		<< $>;
 		space;
 		<< '<< ';
-		<< assignCounter asString
+		<< self assignCounter asString
 ]
 
 { #category : #removing }
@@ -179,11 +184,11 @@ SWVariableTypeInfo >> type [
 { #category : #accessing }
 SWVariableTypeInfo >> type: anObject [
 
-	self type << anObject
+	type := anObject
 
 ]
 
 { #category : #accessing }
 SWVariableTypeInfo >> value [
-	^ self type
+	^ self type value
 ]

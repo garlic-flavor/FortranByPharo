@@ -5,13 +5,13 @@ Class {
 }
 
 { #category : #'tests - source' }
-SWStackAnalyzerTest >> program_01 [
+SWStackAnalyzerTest >> _01_return_constant [
 
 	^ 345
 ]
 
 { #category : #'tests - source' }
-SWStackAnalyzerTest >> program_02: arg1 [
+SWStackAnalyzerTest >> _02_call_wellknown_message: arg1 [
 
 	| tmp1 |
 	tmp1 := 123.
@@ -19,7 +19,7 @@ SWStackAnalyzerTest >> program_02: arg1 [
 ]
 
 { #category : #'tests - source' }
-SWStackAnalyzerTest >> program_03: arg1 [
+SWStackAnalyzerTest >> _03_ifTrue_ifFalse: arg1 [
 
 	| tmp1 |
 	^ arg1 = 5
@@ -30,15 +30,15 @@ SWStackAnalyzerTest >> program_03: arg1 [
 ]
 
 { #category : #'tests - source' }
-SWStackAnalyzerTest >> program_04: arg1 [
+SWStackAnalyzerTest >> _04_recursive_message_call: arg1 [
 
 	^ 0 < arg1
-		  ifTrue: [ arg1 + (self program_04: arg1 - 1) ]
+		  ifTrue: [ arg1 + (self _04_recursive_message_call: arg1 - 1) ]
 		  ifFalse: [ 0 ]
 ]
 
 { #category : #tests }
-SWStackAnalyzerTest >> program_05 [
+SWStackAnalyzerTest >> _05_local_variables [
 
 	| tmp1 tmp2 tmp3 tmp4 tmp5 tmp6 tmp7 tmp8 tmp9 |
 
@@ -48,67 +48,86 @@ SWStackAnalyzerTest >> program_05 [
 
 ]
 
+{ #category : #'tests - source' }
+SWStackAnalyzerTest >> _06_method_call [
+	^ SWStd print: 'hoge!'
+]
+
 { #category : #'private - utility' }
-SWStackAnalyzerTest >> returnTypeOf: arg1 withArgumentTypes: arg2 equals: arg3 [
+SWStackAnalyzerTest >> returnValueOf: arg1 withArguments: arg2 equals: arg3 [
 
 	self
 		assert:
-		(SWStackAnalyzer new: self class>>arg1 with: { self class } , arg2) return type
+		(SWStackAnalyzer new: arg1 with: arg2) return value
 		equals: arg3
 ]
 
+{ #category : #'private - utility' }
+SWStackAnalyzerTest >> returnValueOfMy: arg1 withArguments: arg2 equals: arg3 [
+
+	self returnValueOf: self class>>arg1 withArguments: ({ self class }, arg2) equals: arg3
+
+]
+
 { #category : #tests }
-SWStackAnalyzerTest >> testDecode_01 [
+SWStackAnalyzerTest >> test_01 [
 
 	self
-		returnTypeOf: #program_01
-		withArgumentTypes: {  }
+		returnValueOfMy: #_01_return_constant
+		withArguments: {  }
 		equals: SmallInteger
 ]
 
 { #category : #tests }
-SWStackAnalyzerTest >> testDecode_02 [
+SWStackAnalyzerTest >> test_02 [
 
 	self
-		returnTypeOf: #program_02:
-		withArgumentTypes: { Integer }
+		returnValueOfMy: #_02_call_wellknown_message:
+		withArguments: { Integer }
 		equals: Integer;
-		returnTypeOf: #program_02:
-		withArgumentTypes: { Float }
+		returnValueOfMy: #_02_call_wellknown_message:
+		withArguments: { Float }
 		equals: Float
 ]
 
 { #category : #tests }
-SWStackAnalyzerTest >> testDecode_03 [
+SWStackAnalyzerTest >> test_03 [
 
 	self
-		returnTypeOf: #program_03:
-		withArgumentTypes: { Integer }
+		returnValueOfMy: #_03_ifTrue_ifFalse:
+		withArguments: { Integer }
 		equals: SmallInteger
 ]
 
 { #category : #tests }
-SWStackAnalyzerTest >> testDecode_04 [
+SWStackAnalyzerTest >> test_04 [
 
 	self
-		returnTypeOf: #program_04:
-		withArgumentTypes: { SmallInteger }
+		returnValueOfMy: #_04_recursive_message_call:
+		withArguments: { SmallInteger }
 		equals: SmallInteger
 ]
 
 { #category : #tests }
-SWStackAnalyzerTest >> testDecode_05 [
+SWStackAnalyzerTest >> test_05 [
 
 	self
-		returnTypeOf: #program_05
-		withArgumentTypes: {  }
+		returnValueOfMy: #_05_local_variables
+		withArguments: {  }
 		equals: SWVariableTypeInfo
 ]
 
 { #category : #tests }
-SWStackAnalyzerTest >> testSearchIn [
+SWStackAnalyzerTest >> test_06 [
 
 	self
-		assert: (SWStackAnalyzer search: #= in: Integer)
-		equals: Integer >> #=
+		returnValueOfMy: #_06_method_call
+		withArguments: {  }
+		equals: SWStd class
+]
+
+{ #category : #tests }
+SWStackAnalyzerTest >> test_07_decode_closure [
+	self returnValueOf: [ 123 ] withArguments: { } equals: SmallInteger
+
 ]

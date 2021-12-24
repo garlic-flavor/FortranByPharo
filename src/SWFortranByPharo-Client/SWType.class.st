@@ -1,5 +1,10 @@
 "
 I am in a SWVariableInfo.
+I can be used to declare the type of a variable.
+---
+    SWType declare: #nameOfVariable as: Integer.
+---
+
 "
 Class {
 	#name : #SWType,
@@ -11,12 +16,12 @@ Class {
 	#category : #'SWFortranByPharo-Client-Analyzer'
 }
 
-{ #category : #'as yet unclassified' }
+{ #category : #constants }
 SWType class >> argumentTypePriority [
 	^ 80
 ]
 
-{ #category : #utils }
+{ #category : #'private - utilities' }
 SWType class >> calcPriorityOf: aClass [
 	aClass ifNil: [ ^ self defaultPriority ].
 	aClass = UndefinedObject ifTrue: [ ^ self defaultPriority ].
@@ -24,7 +29,7 @@ SWType class >> calcPriorityOf: aClass [
 	^ self exactTypePriority 
 ]
 
-{ #category : #'as yet unclassified' }
+{ #category : #api }
 SWType class >> declare: aName as: aType [
 	^ aName -> (self new
 		type: aType;
@@ -42,14 +47,14 @@ SWType class >> exactTypePriority [
 	^ 90
 ]
 
-{ #category : #utils }
+{ #category : #utilities }
 SWType class >> mangledNameOf: aType [
 	^ aType ifNil: [ '_' ] ifNotNil: [ aType name select: [ :c | c isUppercase ] thenCollect: [ :c | c asLowercase ] ].
 ]
 
-{ #category : #utils }
+{ #category : #'private - utilities' }
 SWType class >> nameOfPriority: aPriority [
-	^ ((self class methodDict values select: [ :m |
+	^ ((SWType class methodDict values select: [ :m |
 		m protocol = #constants
 	] thenCollect: [ :m |
 		(m valueWithReceiver: self arguments: #()) -> m
@@ -95,7 +100,7 @@ SWType class >> userSpecifyingPriority [
 { #category : #streaming }
 SWType >> << rightType [
 	(rightType class includesBehavior: SWType) ifTrue: [
-		rightType priority < self priority ifTrue: [ ^ self ].
+		rightType priority <= self priority ifTrue: [ ^ self ].
 
 		self payload: rightType payload.
 		self priority: rightType priority.
@@ -150,8 +155,7 @@ SWType >> putOn: aStream [
 
 { #category : #accessing }
 SWType >> value [
-	^ payload class = FullBlockClosure ifTrue: [
-		self priority: nil.
-		payload := payload value
-	] ifFalse: [ payload ]
+	priority = self class unknownMethodPriority ifTrue: [ priority := nil ].
+	^ payload := payload value
+
 ]

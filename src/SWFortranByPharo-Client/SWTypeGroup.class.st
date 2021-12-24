@@ -1,4 +1,5 @@
 "
+I am in a SWVariableTypeInfo.
 I am a same type group chained by assignment.
 "
 Class {
@@ -57,5 +58,5 @@ SWTypeGroup >> putOn: aStream [
 	super putOn: aStream.
 	aStream
 		<< $#;
-		<< self hash asString
+		<< (self hash % 16rFFFF)  printStringHex
 ]

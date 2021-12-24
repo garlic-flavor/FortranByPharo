@@ -13,7 +13,7 @@ Class {
 { #category : #'instance creation' }
 SWSlot >> allocate: size [
 	[ self payload size < size ] whileTrue: [
-		self payload add: SWVariableTypeInfo new
+		self payload add:  SWVariableTypeInfo
 	]
 ]
 
@@ -32,6 +32,12 @@ SWSlot >> atOffset: offset [
 	"offset is  0 based.".
 	"offset 0 responds to the first argument."
 	^ self payload at: (offset + 1) ifAbsentPut: [ SWVariableTypeInfo new ].
+]
+
+{ #category : #copying }
+SWSlot >> copyFrom: start to: end [
+	self allocate: end.
+	^ self payload copyFrom: start to: end
 ]
 
 { #category : #enumerating }

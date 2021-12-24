@@ -282,7 +282,7 @@ SWStackAnalyzer >> return [
 	^ return ifNil: [
 		return := SWVariableTypeInfo new: [
 			self decode.
-			return type
+			return value
 		] with: SWType defaultPriority
 	]
 ]
@@ -305,7 +305,7 @@ SWStackAnalyzer >> send: selector super: supered numArgs: numberArguments [
 	]).
 
 	"A special case for user specifying."
-	(selector = #declare:as: and: [ args first easyType = SWType class ]) ifTrue: [|assoc|
+	(selector = #declare:as: and: [ args first easyValue = SWType class ]) ifTrue: [|assoc|
 		assoc := (self method sourceNodeForPC: oldPC) evaluate.
 		(self variableInfoOf: assoc key) << assoc value
 	].
