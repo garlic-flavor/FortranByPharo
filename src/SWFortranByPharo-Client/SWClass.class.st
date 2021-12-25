@@ -8,7 +8,6 @@ Class {
 	#instVars : [
 		'targetClass',
 		'methods',
-		'referenced',
 		'sourceHash',
 		'slot',
 		'instanceSide',
@@ -80,6 +79,14 @@ SWClass >> instanceSide: anObject [
 	^ instanceSide := anObject
 ]
 
+{ #category : #'as yet unclassified' }
+SWClass >> instantiateMethod: selector with: args [
+	^ (self method: selector) copy
+		types: args;
+		yourself.
+
+]
+
 { #category : #testing }
 SWClass >> isToTranspile [
 	^ self targetClass classSide methodDict includesKey: #toTranspile
@@ -112,6 +119,7 @@ SWClass >> methods [
 			method category ~= #'code generation'
 		] thenCollect: [ :method |
 			method selector -> ((self transpilerClass new: method with: { self targetClass })
+				classInfo: self;
 				decode;
 				yourself)
 		])
@@ -132,18 +140,6 @@ SWClass >> printInitializerOn: aStream [
 		tab; << '^ '; << self class name; space; << 'new'; cr;
 		tab; tab; << 'targetClass: '; << self targetClass name; << ';'; cr;
 		tab; tab; << 'yourself'
-]
-
-{ #category : #accessing }
-SWClass >> referenced [
-
-	^ referenced ifNil: [ referenced := Dictionary new ]
-]
-
-{ #category : #accessing }
-SWClass >> referenced: anObject [
-
-	referenced := anObject
 ]
 
 { #category : #accessing }

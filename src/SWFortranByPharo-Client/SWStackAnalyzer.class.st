@@ -99,7 +99,7 @@ SWStackAnalyzer >> mergeStackTopAndSecond [
 
 { #category : #'instruction decoding' }
 SWStackAnalyzer >> methodReturnConstant: value [
-	self return << SWVariableTypeInfo new: value class.
+	self return << (SWVariableTypeInfo new: value class).
 	super methodReturnConstant: value
 ]
 
@@ -196,6 +196,7 @@ SWStackAnalyzer >> pushConsArrayWithElements: numElements [
 	|args|
 	args := self stack pop: numElements.
 	self flag: #toImplement.
+	"There are no type information for each elements in an Array."
 	self stack push: (SWVariableTypeInfo new: Array).
 	
 	super pushConsArrayWithElements: numElements
@@ -298,11 +299,17 @@ SWStackAnalyzer >> send: selector super: supered numArgs: numberArguments [
 		selector: selector;
 		args: args;
 		yourself.
-	self messages at: (self method sourceNodeForPC: oldPC) put: methodFinder.
-	self stack push: (SWVariableTypeInfo new: [|mi|
-		mi := self pool new: methodFinder.
-		mi return value.
-	]).
+	self isToTranspile ifTrue: [|methodInfo|
+		methodInfo := self pool new: methodFinder.
+		methodInfo decode.
+		self messages at: (self method sourceNodeForPC: oldPC) put: methodInfo.
+		self stack push: methodInfo return
+	] ifFalse: [
+		self stack push: (SWVariableTypeInfo new: [|mi|
+			mi := self pool new: methodFinder.
+			mi return value.
+		])
+	].
 
 	"A special case for user specifying."
 	(selector = #declare:as: and: [ args first easyValue = SWType class ]) ifTrue: [|assoc|

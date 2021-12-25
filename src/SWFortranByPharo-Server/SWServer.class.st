@@ -34,7 +34,7 @@ SWServer class >> isRunning [
 	^ ZnServer default isRunning
 ]
 
-{ #category : #'code generation - deprecated' }
+{ #category : #api }
 SWServer class >> main [
 	SWStd
 		import: #(PharoObject Transcript FileLocator) from: 'Pharo';

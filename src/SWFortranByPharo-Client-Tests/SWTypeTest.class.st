@@ -57,7 +57,7 @@ SWTypeTest >> testNameOfPriority [
 	(SWType class methodDict valuesDo: [ :m |
 		m protocol = #constants ifTrue: [|val|
 			val := m valueWithReceiver: SWType arguments: #().
-			self assert: (SWType nameOfPriority: val) equals: m selector
+			self assert: (SWType nameOfPriority: val) equals: (m selector copyUpToSubstring: 'Priority')
 		]
 	])
 ]

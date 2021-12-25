@@ -8,8 +8,12 @@ Class {
 }
 
 { #category : #tests }
-SWMTofJSTest >> test_program_01 [
-	|mod|
+SWMTofJSTest >> test_01 [
+	|mod output|
 	mod := SWMTofJS newMainProgramFrom: SWTestProgram_01.
-	mod inspect
+	mod stream newline: String cr.
+	mod transpile.
+	output := mod stream contents.
+	self assert: output equals: 'console.log("Hello, good-bye!");
+'.
 ]

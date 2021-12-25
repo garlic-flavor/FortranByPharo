@@ -67,6 +67,12 @@ SWSlot >> payload: anObject [
 	payload := anObject
 ]
 
+{ #category : #copying }
+SWSlot >> postCopy [
+	super postCopy.
+	payload := payload collect: [ :e | e copy ]
+]
+
 { #category : #accessing }
 SWSlot >> size [
 	^ self payload size.

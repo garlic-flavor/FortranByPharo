@@ -44,6 +44,18 @@ SWVariableTypeInfoTest >> testLessThanLessThan [
 	self assert: v2 priority equals: SWType userSpecifyingPriority.
 ]
 
+{ #category : #tests }
+SWVariableTypeInfoTest >> testNextTemporalVariableNameOf [
+
+	| tmp1 tmp3 |
+	tmp1 := Set new.
+	tmp3 := nil.
+	256 timesRepeat: [ 
+		tmp3 := SWVariableTypeInfo nextTemporalVariableNameOf: tmp3.
+		self deny: (tmp1 includes: tmp3).
+		tmp1 add: tmp3 ]
+]
+
 { #category : #test }
 SWVariableTypeInfoTest >> testPutOn [
 

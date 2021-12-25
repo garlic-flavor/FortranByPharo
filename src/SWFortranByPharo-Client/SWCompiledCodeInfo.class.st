@@ -19,6 +19,16 @@ Class {
 	#category : #'SWFortranByPharo-Client-Analyzer'
 }
 
+{ #category : #accessing }
+SWCompiledCodeInfo class >> classTranspilerClass [
+	^ SWClass
+]
+
+{ #category : #'as yet unclassified' }
+SWCompiledCodeInfo class >> mangleClass [
+	^ SWMangle
+]
+
 { #category : #'instance creation' }
 SWCompiledCodeInfo class >> new: aMethod with: anArrayOfVariableTypeInfoOrTypes [
 	^ self new
@@ -32,25 +42,8 @@ SWCompiledCodeInfo class >> new: aMethod with: anArrayOfVariableTypeInfoOrTypes 
 SWCompiledCodeInfo class >> newDefaultPool [
 	^ SWPool new
 		transpilerClass: self;
-		classTranspilerClass: SWClass;
+		classTranspilerClass: self classTranspilerClass;
 		yourself
-]
-
-{ #category : #utils }
-SWCompiledCodeInfo class >> safeSelectorNameOf: selector [
-	selector = '=' ifTrue: [ ^ 'opEqual_' ].
-	selector = '==' ifTrue: [ ^ 'opEqual_' ].
-	selector = '~=' ifTrue: [ ^ 'opNotEqual_' ].
-	selector = ',' ifTrue: [ ^ 'opCamma_' ].
-	selector = '->' ifTrue: [ ^ 'opArrow_' ].
-	selector = '/' ifTrue: [ ^ 'opDiv_' ].
-	selector = '<<' ifTrue: [ ^ 'opWrite_' ].
-	selector = '+' ifTrue: [ ^ 'opPlus_' ].
-	selector = '<' ifTrue: [ ^ 'opLT_' ].
-	selector = '*' ifTrue: [ ^ 'opMul_' ].
-	selector = '-' ifTrue: [ ^ 'opSub_' ].
-	^ selector collect: [:c | (#' >#:/' anySatisfy: [ :each | each = c]) ifTrue: [ $_ ] ifFalse: [ c ] ]
-
 ]
 
 { #category : #adding }
@@ -127,6 +120,11 @@ SWCompiledCodeInfo >> decodeAllOf: aNeedle [
 	]
 ]
 
+{ #category : #testing }
+SWCompiledCodeInfo >> isToTranspile [
+	^ self classInfo isNil or: [ self classInfo isToTranspile ]
+]
+
 { #category : #accessing }
 SWCompiledCodeInfo >> locals [
 	^ self stack copyFrom: self method numArgs + 1 to: self numTemps
@@ -134,22 +132,9 @@ SWCompiledCodeInfo >> locals [
 
 { #category : #accessing }
 SWCompiledCodeInfo >> mangledName [
-	^ mangledName ifNil: [ mangledName := String streamContents: [ :s ||owner|
-		owner := (self method methodClass).
-		owner isClassSide ifTrue: [ 
-			s << owner soleInstance name; << 'C'
-		] ifFalse: [
-			s << owner name; << '_'
-		].
-"
-		(self const ifTrue: ['C'] ifFalse: ['_']).
-"
-		s
-			<< (self class safeSelectorNameOf: method selector);
-			<< (self arguments collect: [ :v |
-				v mangledName
-			])
-	] ]
+	^ mangledName ifNil: [
+		mangledName := self class mangleClass methodNameOf: self method with: self arguments
+	]
 ]
 
 { #category : #accessing }
@@ -203,6 +188,12 @@ SWCompiledCodeInfo >> pool [
 SWCompiledCodeInfo >> pool: anObject [
 
 	pool := anObject
+]
+
+{ #category : #copying }
+SWCompiledCodeInfo >> postCopy [
+	super postCopy.
+	self stack: self stack copy
 ]
 
 { #category : #NOCompletion }

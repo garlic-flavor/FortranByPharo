@@ -67,6 +67,8 @@ SWModuleTranspiler >> payload: anObject [
 
 { #category : #'as yet unclassified' }
 SWModuleTranspiler >> solveDependencies [
+
+	self payload decode.
 	self payload decodeAllOf: [ :mi |
 		mi classInfo isToTranspile
 	].

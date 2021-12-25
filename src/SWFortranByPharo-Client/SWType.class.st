@@ -32,7 +32,7 @@ SWType class >> calcPriorityOf: aClass [
 { #category : #api }
 SWType class >> declare: aName as: aType [
 	^ aName -> (self new
-		type: aType;
+		payload: aType;
 		priority: self userSpecifyingPriority;
 		yourself)
 ]
@@ -47,11 +47,6 @@ SWType class >> exactTypePriority [
 	^ 90
 ]
 
-{ #category : #utilities }
-SWType class >> mangledNameOf: aType [
-	^ aType ifNil: [ '_' ] ifNotNil: [ aType name select: [ :c | c isUppercase ] thenCollect: [ :c | c asLowercase ] ].
-]
-
 { #category : #'private - utilities' }
 SWType class >> nameOfPriority: aPriority [
 	^ ((SWType class methodDict values select: [ :m |
@@ -59,7 +54,7 @@ SWType class >> nameOfPriority: aPriority [
 	] thenCollect: [ :m |
 		(m valueWithReceiver: self arguments: #()) -> m
 	]) sort: [ :a :b | b key < a key ]) detect: [ :m | m key <= aPriority ] ifFound: [ :m |
-		m value selector
+		m value selector copyUpToSubstring: 'Priority'
 	] ifNone: [
 		#unknown
 	]
@@ -114,11 +109,6 @@ SWType >> << rightType [
 { #category : #accessing }
 SWType >> easyValue [
 	^ self class exactTypePriority <= self priority ifTrue: [ self value ] ifFalse: [ nil ]
-]
-
-{ #category : #accessing }
-SWType >> mangledName [
-	^ self class mangledNameOf: self payload
 ]
 
 { #category : #accessing }

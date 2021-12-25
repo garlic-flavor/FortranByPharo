@@ -91,11 +91,6 @@ SWVariableTypeInfo >> hasProperty: aProperty [
 ]
 
 { #category : #accessing }
-SWVariableTypeInfo >> mangledName [
-	^ self type mangledName
-]
-
-{ #category : #accessing }
 SWVariableTypeInfo >> name [
 	^ name
 ]
@@ -103,6 +98,12 @@ SWVariableTypeInfo >> name [
 { #category : #accessing }
 SWVariableTypeInfo >> name: aName [
 	name := aName
+]
+
+{ #category : #copying }
+SWVariableTypeInfo >> postCopy [
+	super postCopy.
+	self type addContainer: self
 ]
 
 { #category : #printing }

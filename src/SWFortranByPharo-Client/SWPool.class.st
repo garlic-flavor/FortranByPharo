@@ -19,11 +19,9 @@ SWPool class >> defined_copy [
 
 { #category : #'instance creation' }
 SWPool class >> defined_new [
-	^ [ :method :args |
-		SWCompiledCodeInfo new
-			method: method;
-			return: (SWVariableTypeInfo new: args first value soleInstance with: args first priority);
-			types: args;
+	^ [ :args |
+		SWWellknownMethodInfo new
+			return: (SWVariableTypeInfo new: [ args first value soleInstance ] with: args first priority);
 			yourself
 	]
 ]
@@ -60,11 +58,9 @@ SWPool class >> defined_yourself [
 
 { #category : #'instance creation' }
 SWPool class >> returnReceiverOp [
-	^ [ :method :args |
-		SWCompiledCodeInfo new
-			method: method;
+	^ [ :args |
+		SWWellknownMethodInfo new
 			return: args first;
-			types: args;
 			yourself
 	]
 ]
@@ -107,7 +103,7 @@ SWPool >> classTranspilerClass: anObject [
 SWPool >> definedMethod: selector ifPresent: presentBlock ifAbsent: absentBlock [
 	|generatorSelector|
 
-	generatorSelector := #defined_, (self transpilerClass safeSelectorNameOf: selector).
+	generatorSelector := #defined_, (self transpilerClass mangleClass safeSelectorNameOf: selector).
 	^ (self class respondsTo: generatorSelector) ifTrue: [
 		presentBlock value: (self class perform: generatorSelector)
 	] ifFalse: [
@@ -119,9 +115,10 @@ SWPool >> definedMethod: selector ifPresent: presentBlock ifAbsent: absentBlock 
 { #category : #'instance creation' }
 SWPool >> new: aMethodFinder [
 	^ (self definedMethod: aMethodFinder selector ifPresent: [ :mi |
-		mi value: aMethodFinder method value: aMethodFinder args
+		mi value: aMethodFinder args
 	] ifAbsent: [
-		(self classInfo: aMethodFinder method methodClass) method: aMethodFinder selector
+		(self classInfo: aMethodFinder method methodClass)
+			instantiateMethod: aMethodFinder selector with: aMethodFinder args
 	])
 		pool: self;
 		yourself

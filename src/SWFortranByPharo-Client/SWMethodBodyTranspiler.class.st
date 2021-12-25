@@ -18,6 +18,16 @@ SWMethodBodyTranspiler class >> messageTranspilerMethodNameFor: aSelector [
 ]
 
 { #category : #utils }
+SWMethodBodyTranspiler class >> search: selector in: aClass [
+	aClass ifNil: [ ^ nil ].
+
+	^ aClass methodDict at: selector ifAbsent: [
+			self search: selector in: aClass superclass
+	]
+
+]
+
+{ #category : #utils }
 SWMethodBodyTranspiler class >> uniqueMessageTranspilerNameFor: aSelector for: type [
 	^ (String streamContents: [ :s |
 		s << type; <<  '_'; << (self safeSelectorNameOf: aSelector); << 'With:Using:'
@@ -55,6 +65,15 @@ SWMethodBodyTranspiler >> classOf: aNode [
 	self flag: #toImplement.
 ]
 
+{ #category : #'as yet unclassified' }
+SWMethodBodyTranspiler >> classSideClassOf: aNode [
+	^ aNode class = RBVariableNode ifTrue: [
+		aNode variable value class classSide
+	] ifFalse: [
+		nil
+	]
+]
+
 { #category : #'code generation' }
 SWMethodBodyTranspiler >> cr [
 	self stream putLine
@@ -81,13 +100,13 @@ SWMethodBodyTranspiler >> hasOwnMessageTranspilerMethodOf: aSelector ifTrue: aBl
 
 { #category : #'private - testing' }
 SWMethodBodyTranspiler >> ifUniqueMessageTranspilerExistsOn: receiver of: selector thenDo: aBlock [
-	| receiverClassClass selectorName transpiler |
+	| receiverClassSideClass selectorName transpiler |
 
-	receiverClassClass := self metaclassOf: receiver.
+	receiverClassSideClass := self classSideClassOf: receiver.
 	selectorName := self class uniqueMessageTranspilerNameFor: selector for: self type.
-	(transpiler := self class search: selectorName in: receiverClassClass) ifNotNil: [
+	(transpiler := self class search: selectorName in: receiverClassSideClass) ifNotNil: [
 		aBlock value: [ :arguments |
-			transpiler valueWithReceiver: receiverClassClass arguments: { arguments. self }
+			transpiler valueWithReceiver: receiverClassSideClass arguments: { arguments. self }
 		]
 	].
 
@@ -108,16 +127,6 @@ SWMethodBodyTranspiler >> initialize [
 { #category : #'public API' }
 SWMethodBodyTranspiler >> logging: trueOrFalse [
 	self stream logging: trueOrFalse
-]
-
-{ #category : #'private - utilities' }
-SWMethodBodyTranspiler >> metaclassOf: receiver [
-	|rType|
-	^ (rType := (self classOf: receiver))  class = Metaclass ifTrue: [
-		rType
-	] ifFalse: [
-		rType class
-	]
 ]
 
 { #category : #'code generation' }
@@ -262,7 +271,7 @@ SWMethodBodyTranspiler >> putOrdinaryMessage: aNode withReceiver: aRNode [
 	aNode selector first isLetter ifTrue: [
 		self
 			putClassAccessor;
-			put: (self messages at: aNode) mangledName;
+			put: (self pool new: (self messages at: aNode)) mangledName;
 			putArguments: aNode arguments.
 	] ifFalse: [
 		self
@@ -371,7 +380,7 @@ SWMethodBodyTranspiler >> stream: anObject [
 { #category : #'public API' }
 SWMethodBodyTranspiler >> transpile [
 	self stream log.
-	self ready ifFalse: [ ^ Exception signal: 'something go wrong.' ].
+	self decode.
 	self locals do: [ :each | self putVariableDeclarationOf: each ].
 	self putSequence: self method sourceNode body.
 	^ self stream contents

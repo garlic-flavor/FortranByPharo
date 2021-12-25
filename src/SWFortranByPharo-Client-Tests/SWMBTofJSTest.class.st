@@ -11,7 +11,7 @@ SWMBTofJSTest class >> toTranspile [
 ]
 
 { #category : #'tests - source' }
-SWMBTofJSTest >> program_01 [
+SWMBTofJSTest >> _01_call_Transcript [
 
 	Transcript
 		show: 'Hello, good-bye!';
@@ -20,56 +20,71 @@ SWMBTofJSTest >> program_01 [
 ]
 
 { #category : #'tests - source' }
-SWMBTofJSTest >> program_02 [
+SWMBTofJSTest >> _02_call_SWStd_print [
 
 	SWStd print: 'Hello, World!'
 ]
 
 { #category : #'tests - source' }
-SWMBTofJSTest >> program_03 [
+SWMBTofJSTest >> _03_user_specified_variable_type [
 
 	| tmp1 |
-	tmp1 := SWVariableTypeInfo new
-		type: Integer;
-		addProperty: #const;
-		yourself.
-	tmp1 := 3.1415926535.
+	SWType declare: #tmp1 as: Integer.
+	tmp1 := 3.14159265358979.
 
 	^ tmp1 * 2.23620679
 ]
 
 { #category : #tests }
-SWMBTofJSTest >> testAnalyze_program_01 [
-	(SWStackAnalyzer new: #program_01 with: { self class }) ready; inspect
-]
-
-{ #category : #tests }
 SWMBTofJSTest >> testSourceHash [
 	self
-		deny: (SWMBTofJS new: #program_01 with: {self class}) sourceHash
-		equals: (SWMBTofJS new: #program_02 with: {self class}) sourceHash
+		deny: (SWMBTofJS new: self class>>#_01_call_Transcript with: {self class}) sourceHash
+		equals: (SWMBTofJS new: self class>>#_02_call_SWStd_print with: {self class}) sourceHash
 ]
 
 { #category : #tests }
-SWMBTofJSTest >> testTranspile_program_01 [
-
-	(self transpile_program: #program_01) stream contents inspect
-
+SWMBTofJSTest >> test_01 [
+	|transpiler result|
+	transpiler := (self transpile_program: #_01_call_Transcript).
+	result := transpiler stream contents.
+	self assert: result equals: 'Transcript.show_("Hello, good-bye!");
+Transcript.cr();
+Transcript.cr();
+'
 ]
 
 { #category : #tests }
-SWMBTofJSTest >> testTranspile_program_02 [
-
-	(self transpile_program: #program_02)
-		inspect
+SWMBTofJSTest >> test_01_analyze [
+	self
+		assert: (SWStackAnalyzer new: self class>>#_01_call_Transcript with: { self class }) return value
+		equals: self class
 ]
 
 { #category : #tests }
+SWMBTofJSTest >> test_02 [
+
+	|transpiler result|
+	transpiler := (self transpile_program: #_02_call_SWStd_print).
+	result := transpiler stream contents.
+	self assert: result equals: 'console.log("Hello, World!");
+'
+]
+
+{ #category : #tests }
+SWMBTofJSTest >> test_03_analyze [
+	self
+		assert: (SWStackAnalyzer new: self class>>#_03_user_specified_variable_type with: { self class }) return value
+		equals: Integer
+]
+
+{ #category : #utilities }
 SWMBTofJSTest >> transpile_program: selector [
-
-	^ (SWMBTofJS new: selector with: { self class })
+	|transpiler|
+	transpiler := (SWMBTofJS new: self class>>selector with: { self class })
 		logging: true;
-		transpile;
 		yourself.
+	transpiler stream newline: String cr.
+	transpiler transpile.
+	^ transpiler
 
 ]
