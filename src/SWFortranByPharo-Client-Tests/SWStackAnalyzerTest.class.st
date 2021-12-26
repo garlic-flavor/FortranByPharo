@@ -42,15 +42,19 @@ SWStackAnalyzerTest >> _05_local_variables [
 
 	| tmp1 tmp2 tmp3 tmp4 tmp5 tmp6 tmp7 tmp8 tmp9 |
 
-	^ tmp9 := SWVariableTypeInfo new
-		addProperty: #mutable;
-		yourself
-
+	^ tmp9 := 123
 ]
 
 { #category : #'tests - source' }
 SWStackAnalyzerTest >> _06_method_call [
 	^ SWStd print: 'hoge!'
+]
+
+{ #category : #'as yet unclassified' }
+SWStackAnalyzerTest >> _08_ZnServer [
+
+	ZnServer startDefaultOn: 50000.
+	^ ZnServer default
 ]
 
 { #category : #'private - utility' }
@@ -114,7 +118,7 @@ SWStackAnalyzerTest >> test_05 [
 	self
 		returnValueOfMy: #_05_local_variables
 		withArguments: {  }
-		equals: SWVariableTypeInfo
+		equals: SmallInteger
 ]
 
 { #category : #tests }
@@ -130,4 +134,12 @@ SWStackAnalyzerTest >> test_06 [
 SWStackAnalyzerTest >> test_07_decode_closure [
 	self returnValueOf: [ 123 ] withArguments: { } equals: SmallInteger
 
+]
+
+{ #category : #tests }
+SWStackAnalyzerTest >> test_08 [
+	|sa|
+	sa := SWStackAnalyzer new: self class>>#_08_ZnServer with: { self class }.
+	sa decode.
+	sa inspect.
 ]

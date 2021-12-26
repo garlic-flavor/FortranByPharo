@@ -17,6 +17,11 @@ SWPool class >> defined_copy [
 	^ self returnReceiverOp
 ]
 
+{ #category : #'as yet unclassified' }
+SWPool class >> defined_default [
+	^ self defined_new
+]
+
 { #category : #'instance creation' }
 SWPool class >> defined_new [
 	^ [ :args |
@@ -65,13 +70,24 @@ SWPool class >> returnReceiverOp [
 	]
 ]
 
+{ #category : #utils }
+SWPool class >> search: selector in: aClass [
+	aClass ifNil: [ self error ].
+
+	^ aClass methodDict at: selector ifAbsent: [
+			self search: selector in: aClass superclass
+	]
+
+]
+
 { #category : #accessing }
 SWPool >> classInfo: aClass [
 	^ self payload at: aClass name ifAbsentPut: [
 		self classTranspilerClass new
 			transpilerClass: self transpilerClass;
+			pool: self;
 			targetClass: aClass;
-			yourself
+			yourself.
 	]
 ]
 
@@ -113,15 +129,14 @@ SWPool >> definedMethod: selector ifPresent: presentBlock ifAbsent: absentBlock 
 ]
 
 { #category : #'instance creation' }
-SWPool >> new: aMethodFinder [
-	^ (self definedMethod: aMethodFinder selector ifPresent: [ :mi |
-		mi value: aMethodFinder args
-	] ifAbsent: [
-		(self classInfo: aMethodFinder method methodClass)
-			instantiateMethod: aMethodFinder selector with: aMethodFinder args
-	])
-		pool: self;
-		yourself
+SWPool >> new: aSelector with: args [
+	^ self definedMethod: aSelector ifPresent: [ :mi |
+		mi value: args
+	] ifAbsent: [|method|
+		method := self class search: aSelector in: args first value.
+		(self classInfo: method methodClass)
+			method: method with: args
+	]
 
 ]
 

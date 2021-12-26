@@ -259,7 +259,12 @@ SWStackAnalyzer >> pushReceiver [
 
 { #category : #'instruction decoding' }
 SWStackAnalyzer >> pushReceiverVariable: offset [
-	self stack push: (self classInfo getVariableInfoAtOffset: offset).
+	|v|
+	v := self classInfo getVariableInfoAtOffset: offset.
+	self stack push: v.
+	v priority < SWType exactTypePriority  ifTrue: [
+		self error: self classInfo targetClass name, '>>#', v name, ' needs exactType.'
+	].
 	super pushReceiverVariable: offset
 ]
 
@@ -290,24 +295,19 @@ SWStackAnalyzer >> return [
 
 { #category : #'instruction decoding' }
 SWStackAnalyzer >> send: selector super: supered numArgs: numberArguments [
-	|args methodFinder|
+	|args|
 
 	args := self stack pop: numberArguments + 1.
 	args at: 1 put: (supered ifTrue: [ args first copyAsSuper ] ifFalse: [ args first copy ]).
 
-	methodFinder := SWMethodFinder new
-		selector: selector;
-		args: args;
-		yourself.
 	self isToTranspile ifTrue: [|methodInfo|
-		methodInfo := self pool new: methodFinder.
-		methodInfo decode.
+		methodInfo := self pool new: selector with: args.
 		self messages at: (self method sourceNodeForPC: oldPC) put: methodInfo.
 		self stack push: methodInfo return
 	] ifFalse: [
-		self stack push: (SWVariableTypeInfo new: [|mi|
-			mi := self pool new: methodFinder.
-			mi return value.
+		self stack push: (SWVariableTypeInfo new: [|methodInfo|
+			methodInfo := self pool new: selector with: args.
+			methodInfo return value
 		])
 	].
 

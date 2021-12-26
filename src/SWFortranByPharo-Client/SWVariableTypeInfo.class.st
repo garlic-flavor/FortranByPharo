@@ -75,7 +75,7 @@ SWVariableTypeInfo >> assignCounter: anObject [
 { #category : #copying }
 SWVariableTypeInfo >> copyAsSuper [
 	^ self copy
-		type: [ self type superclass ];
+		type: [ self value superclass ];
 		yourself.
 ]
 

@@ -8,6 +8,7 @@ Class {
 	#instVars : [
 		'targetClass',
 		'methods',
+		'pool',
 		'sourceHash',
 		'slot',
 		'instanceSide',
@@ -79,22 +80,9 @@ SWClass >> instanceSide: anObject [
 	^ instanceSide := anObject
 ]
 
-{ #category : #'as yet unclassified' }
-SWClass >> instantiateMethod: selector with: args [
-	^ (self method: selector) copy
-		types: args;
-		yourself.
-
-]
-
 { #category : #testing }
 SWClass >> isToTranspile [
 	^ self targetClass classSide methodDict includesKey: #toTranspile
-]
-
-{ #category : #accessing }
-SWClass >> method: aSelector [
-	^ self methods at: aSelector
 ]
 
 { #category : #'as yet unclassified' }
@@ -112,24 +100,43 @@ SWClass >> method: aName arguments: args is: rType [
 ]
 
 { #category : #accessing }
+SWClass >> method: aMethod with: args [
+	^ self methods at: aMethod ifPresent: [ :m |
+		m types: args; yourself
+	] ifAbsent: [|methodInfo|
+		methodInfo := (self transpilerClass new: aMethod with: args)
+			classInfo: self;
+			pool: self pool;
+			yourself.
+		self methods at: aMethod put: methodInfo.
+		methodInfo
+			decode;
+			yourself
+	]
+]
+
+{ #category : #accessing }
 SWClass >> methods [
 
-	^ methods ifNil: [methods := Dictionary newFrom: (
-		self targetClass methodDict values select: [ :method |
-			method category ~= #'code generation'
-		] thenCollect: [ :method |
-			method selector -> ((self transpilerClass new: method with: { self targetClass })
-				classInfo: self;
-				decode;
-				yourself)
-		])
-	]
+	^ methods ifNil: [methods := Dictionary new ]
 ]
 
 { #category : #accessing }
 SWClass >> methods: anObject [
 
 	methods := anObject
+]
+
+{ #category : #accessing }
+SWClass >> pool [
+
+	^ pool
+]
+
+{ #category : #accessing }
+SWClass >> pool: anObject [
+
+	pool := anObject
 ]
 
 { #category : #printing }
