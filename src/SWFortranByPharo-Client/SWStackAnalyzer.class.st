@@ -164,7 +164,7 @@ SWStackAnalyzer >> popIntoTemporaryVariable: offset [
 
 { #category : #'instruction decoding' }
 SWStackAnalyzer >> pushActiveContext [ 
-	self halt.
+	self stack push: (SWVariableTypeInfo new: Context owner: self pc: oldPC).
 	super pushActiveContext
 ]
 

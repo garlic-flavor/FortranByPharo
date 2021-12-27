@@ -138,14 +138,18 @@ SWType >> priority: anObject [
 { #category : #printing }
 SWType >> putOn: aStream [
 	aStream
-		<< (payload class = FullBlockClosure ifTrue: ['lazy'] ifFalse: [ payload asString ]);
+		<< (payload isBlock ifTrue: ['lazy'] ifFalse: [ payload asString ]);
 		<< $:;
 		<< (self class nameOfPriority: self priority)
 ]
 
 { #category : #accessing }
 SWType >> value [
-	priority = self class unknownMethodPriority ifTrue: [ priority := nil ].
-	^ payload := payload value
+	^ payload isBlock ifTrue: [
+		priority := nil.
+		payload := payload value
+	] ifFalse: [
+		self payload
+	].
 
 ]

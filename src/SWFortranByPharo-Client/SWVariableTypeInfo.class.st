@@ -196,8 +196,9 @@ SWVariableTypeInfo >> putOn: aStream [
 		space;
 		<< '<< ';
 		<< self assignCounter size asString;
-		<< '<< ';
+		<< ' @';
 		<< (self owner ifNil: [ 'none' ])
+
 ]
 
 { #category : #removing }

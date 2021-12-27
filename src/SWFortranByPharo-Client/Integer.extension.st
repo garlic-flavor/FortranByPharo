@@ -2,7 +2,11 @@ Extension { #name : #Integer }
 
 { #category : #'*SWFortranByPharo-Client' }
 Integer class >> initializeClassTranspiler: aCT [
-	self halt.
+	aCT targetClass isInstanceSide ifTrue: [
+		aCT
+			defineMethodReturnsReceiver: #+
+	] ifFalse: [
+	]
 ]
 
 { #category : #'*SWFortranByPharo-Client' }

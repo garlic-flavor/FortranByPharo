@@ -36,6 +36,48 @@ SWClass class >> installClassInfoBuilderFor: aClass [
 	^ pool payload at: aClass instanceSide
 ]
 
+{ #category : #'as yet unclassified' }
+SWClass >> defineMethod: aName as: rType [
+	|info|
+	info := SWCompiledCodeInfo new
+		method: self targetClass>>aName;
+		markAsDecoded;
+		yourself.
+	rType isBlock ifTrue: [
+		info return: [
+			rType value: info
+		]
+	] ifFalse: [
+		info return << rType
+	].
+	self methods at: self targetClass>>aName put: info
+
+]
+
+{ #category : #'as yet unclassified' }
+SWClass >> defineMethodReturnsReceiver: aName [
+	|info|
+	info := SWCompiledCodeInfo new
+		method: self targetClass>>aName;
+		markAsDecoded;
+		yourself.
+	info return << info stack first.
+	self methods at: self targetClass>>aName put: info
+
+]
+
+{ #category : #'as yet unclassified' }
+SWClass >> defineMethodReturnsReceiversInstance: aName [
+	|info|
+	info := SWCompiledCodeInfo new
+		method: self targetClass>>aName;
+		markAsDecoded;
+		yourself.
+	info return << info stack first instanceSide.
+	self methods at: self targetClass>>aName put: info
+
+]
+
 { #category : #accessing }
 SWClass >> getVariableInfoAtOffset: offset [
 	"Return SWVariableInfo in slots at offset."
@@ -56,12 +98,15 @@ SWClass >> isToTranspile [
 
 { #category : #'as yet unclassified' }
 SWClass >> method: aName arguments: args is: rType [
-	self methods at: self targetClass>>aName put: (
-		SWCompiledCodeInfo new
-			method: self targetClass>>aName;
-			return: rType;
-			markAsDecoded;
-			yourself)
+	|info|
+	info := SWCompiledCodeInfo new
+		method: self targetClass>>aName;
+		markAsDecoded;
+		yourself.
+	rType class = FullBlockClosure ifTrue: [
+	] ifFalse: [
+	].
+	self methods at: self targetClass>>aName put: info
 
 ]
 
@@ -113,6 +158,16 @@ SWClass >> printInitializerOn: aStream [
 		tab; << '^ '; << self class name; space; << 'new'; cr;
 		tab; tab; << 'targetClass: '; << self targetClass name; << ';'; cr;
 		tab; tab; << 'yourself'
+]
+
+{ #category : #printing }
+SWClass >> printOn: aStream [
+	self putOn: aStream
+]
+
+{ #category : #streaming }
+SWClass >> putOn: aStream [
+	aStream << self targetClass name
 ]
 
 { #category : #accessing }

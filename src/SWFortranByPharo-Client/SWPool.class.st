@@ -100,14 +100,16 @@ SWPool >> definedMethod: selector ifPresent: presentBlock ifAbsent: absentBlock 
 
 { #category : #'instance creation' }
 SWPool >> newClassTranspiler: aClass [
-	^ self payload at: aClass ifAbsent: [|ct|
+	|initializer|
+	initializer := #initializeClassTranspiler:.
+	^ self payload at: aClass ifAbsentPut: [|ct|
 		ct := self classTranspilerClass new
 			targetClass: aClass;
 			pool: self;
 			yourself.
-		self payload at: aClass put: ct.
-		(aClass respondsTo: #initializeClassTranspiler:) ifTrue: [
-			aClass perform: #initializeClassTranspiler: with: ct.
+		aClass = Behavior ifTrue: [ self halt ].
+		(aClass classSide methodDict includesKey: initializer) ifTrue: [
+			(aClass classSide >> initializer) valueWithReceiver: aClass arguments: { ct }
 		].
 		ct
 	]
