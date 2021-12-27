@@ -10,10 +10,7 @@ Class {
 		'methods',
 		'pool',
 		'sourceHash',
-		'slot',
-		'instanceSide',
-		'classSide',
-		'transpilerClass'
+		'slot'
 	],
 	#category : #'SWFortranByPharo-Client-Analyzer'
 }
@@ -40,20 +37,6 @@ SWClass class >> installClassInfoBuilderFor: aClass [
 ]
 
 { #category : #accessing }
-SWClass >> classSide [
-
-	^ classSide ifNil: [
-		classSide := self targetClass isClassSide ifTrue: [ self ] ifFalse: [ nil ]
-	]
-]
-
-{ #category : #accessing }
-SWClass >> classSide: anObject [
-
-	^ classSide := anObject
-]
-
-{ #category : #accessing }
 SWClass >> getVariableInfoAtOffset: offset [
 	"Return SWVariableInfo in slots at offset."
 	^ self slot atOffset: offset.
@@ -66,20 +49,6 @@ SWClass >> getVariableInfoOf: aName [
 
 ]
 
-{ #category : #accessing }
-SWClass >> instanceSide [
-
-	^ instanceSide ifNil: [
-		instanceSide := self targetClass isInstanceSide ifTrue: [ self ] ifFalse: [ nil ]
-	]
-]
-
-{ #category : #accessing }
-SWClass >> instanceSide: anObject [
-
-	^ instanceSide := anObject
-]
-
 { #category : #testing }
 SWClass >> isToTranspile [
 	^ self targetClass classSide methodDict includesKey: #toTranspile
@@ -87,29 +56,26 @@ SWClass >> isToTranspile [
 
 { #category : #'as yet unclassified' }
 SWClass >> method: aName arguments: args is: rType [
-	self halt.
-	self addMember: (SWCompiledCodeInfo new
-		method: aName;
-		types: args;
-		return: (SWVariableTypeInfo new
-			type: rType;
-			yourself
-		);
-		yourself)
-	
+	self methods at: self targetClass>>aName put: (
+		SWCompiledCodeInfo new
+			method: self targetClass>>aName;
+			return: rType;
+			markAsDecoded;
+			yourself)
+
 ]
 
 { #category : #accessing }
 SWClass >> method: aMethod with: args [
 	^ self methods at: aMethod ifPresent: [ :m |
-		m types: args; yourself
+		(m copy) types: args; yourself
 	] ifAbsent: [|methodInfo|
 		methodInfo := (self transpilerClass new: aMethod with: args)
 			classInfo: self;
 			pool: self pool;
 			yourself.
 		self methods at: aMethod put: methodInfo.
-		methodInfo
+		(methodInfo copy)
 			decode;
 			yourself
 	]
@@ -156,6 +122,7 @@ SWClass >> slot [
 		self targetClass slots do: [ :ids |
 			(slot at: ids index)
 				name: ids name;
+				owner: self;
 				stackPos: ids index
 		].
 		slot
@@ -194,13 +161,7 @@ SWClass >> targetClass: anObject [
 { #category : #accessing }
 SWClass >> transpilerClass [
 
-	^ transpilerClass
-]
-
-{ #category : #accessing }
-SWClass >> transpilerClass: anObject [
-
-	transpilerClass := anObject
+	^ self pool transpilerClass
 ]
 
 { #category : #'as yet unclassified' }

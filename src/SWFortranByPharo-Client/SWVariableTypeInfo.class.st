@@ -10,7 +10,9 @@ Class {
 		'name',
 		'type',
 		'properties',
-		'assignCounter'
+		'assignCounter',
+		'owner',
+		'pc'
 	],
 	#category : #'SWFortranByPharo-Client-Analyzer'
 }
@@ -21,10 +23,29 @@ SWVariableTypeInfo class >> new: aType [
 ]
 
 { #category : #'instance creation' }
+SWVariableTypeInfo class >> new: aType owner: anOwner pc: oldPC [
+	^ self new
+		<< aType;
+		owner: anOwner;
+		pc: oldPC;
+		yourself.
+]
+
+{ #category : #'instance creation' }
 SWVariableTypeInfo class >> new: aType with: aPriority [
 	^ self new
 		<< aType;
 		priority: aPriority;
+		yourself.
+]
+
+{ #category : #'instance creation' }
+SWVariableTypeInfo class >> new: aType with: aPriority owner: anOwner pc: oldPC [
+	^ self new
+		<< aType;
+		priority: aPriority;
+		owner: anOwner;
+		pc: oldPC;
 		yourself.
 ]
 
@@ -48,7 +69,7 @@ SWVariableTypeInfo >> << rightObject [
 	(rightObject class includesBehavior: SWVariableTypeInfo) ifTrue: [
 		self type << rightObject type.
 		self properties addAll: rightObject properties.
-		self assignCounter: self assignCounter + 1.
+		self assignCounter add: rightObject
 	] ifFalse: [
 		self type << rightObject
 	]
@@ -63,13 +84,7 @@ SWVariableTypeInfo >> addProperty: aProp [
 { #category : #accessing }
 SWVariableTypeInfo >> assignCounter [
 
-	^ assignCounter ifNil: [ assignCounter := 0 ]
-]
-
-{ #category : #accessing }
-SWVariableTypeInfo >> assignCounter: anObject [
-
-	assignCounter := anObject
+	^ assignCounter ifNil: [ assignCounter := OrderedCollection new ]
 ]
 
 { #category : #copying }
@@ -98,6 +113,30 @@ SWVariableTypeInfo >> name [
 { #category : #accessing }
 SWVariableTypeInfo >> name: aName [
 	name := aName
+]
+
+{ #category : #accessing }
+SWVariableTypeInfo >> owner [
+
+	^ owner
+]
+
+{ #category : #accessing }
+SWVariableTypeInfo >> owner: anObject [
+
+	owner := anObject
+]
+
+{ #category : #accessing }
+SWVariableTypeInfo >> pc [
+
+	^ pc
+]
+
+{ #category : #accessing }
+SWVariableTypeInfo >> pc: anObject [
+
+	pc := anObject
 ]
 
 { #category : #copying }
@@ -156,7 +195,9 @@ SWVariableTypeInfo >> putOn: aStream [
 		<< $>;
 		space;
 		<< '<< ';
-		<< self assignCounter asString
+		<< self assignCounter size asString;
+		<< '<< ';
+		<< (self owner ifNil: [ 'none' ])
 ]
 
 { #category : #removing }

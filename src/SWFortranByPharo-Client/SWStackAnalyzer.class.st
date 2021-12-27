@@ -99,7 +99,7 @@ SWStackAnalyzer >> mergeStackTopAndSecond [
 
 { #category : #'instruction decoding' }
 SWStackAnalyzer >> methodReturnConstant: value [
-	self return << (SWVariableTypeInfo new: value class).
+	self return << (SWVariableTypeInfo new: value class owner: self pc: oldPC).
 	super methodReturnConstant: value
 ]
 
@@ -112,7 +112,7 @@ SWStackAnalyzer >> methodReturnReceiver [
 
 { #category : #'instruction decoding' }
 SWStackAnalyzer >> methodReturnTop [
-	self return << self stack top.
+	self return << self stack pop.
 	super methodReturnTop.
 
 ]
@@ -204,7 +204,7 @@ SWStackAnalyzer >> pushConsArrayWithElements: numElements [
 
 { #category : #'instruction decoding' }
 SWStackAnalyzer >> pushConstant: obj [
-	self stack push: (SWVariableTypeInfo new: obj class).
+	self stack push: (SWVariableTypeInfo new: obj class owner: self pc: oldPC).
 
 	super pushConstant: obj.
 
@@ -235,7 +235,7 @@ SWStackAnalyzer >> pushFullClosure: lit numCopied: numCopied receiverOnStack: rc
 
 { #category : #'instruction decoding' }
 SWStackAnalyzer >> pushLiteralVariable: anAssociation [
-	self stack push: (SWVariableTypeInfo new: anAssociation value class).
+	self stack push: (SWVariableTypeInfo new: anAssociation value class owner: self pc: oldPC).
 
 	super pushLiteralVariable: anAssociation.
 
@@ -259,12 +259,7 @@ SWStackAnalyzer >> pushReceiver [
 
 { #category : #'instruction decoding' }
 SWStackAnalyzer >> pushReceiverVariable: offset [
-	|v|
-	v := self classInfo getVariableInfoAtOffset: offset.
-	self stack push: v.
-	v priority < SWType exactTypePriority  ifTrue: [
-		self error: self classInfo targetClass name, '>>#', v name, ' needs exactType.'
-	].
+	self stack push: (self classInfo getVariableInfoAtOffset: offset).
 	super pushReceiverVariable: offset
 ]
 
@@ -289,31 +284,34 @@ SWStackAnalyzer >> return [
 		return := SWVariableTypeInfo new: [
 			self decode.
 			return value
-		] with: SWType defaultPriority
+		] with: SWType defaultPriority owner: self pc: oldPC
 	]
 ]
 
 { #category : #'instruction decoding' }
 SWStackAnalyzer >> send: selector super: supered numArgs: numberArguments [
-	|args|
+	|args methodInfo|
 
 	args := self stack pop: numberArguments + 1.
 	args at: 1 put: (supered ifTrue: [ args first copyAsSuper ] ifFalse: [ args first copy ]).
 
-	self isToTranspile ifTrue: [|methodInfo|
-		methodInfo := self pool new: selector with: args.
-		self messages at: (self method sourceNodeForPC: oldPC) put: methodInfo.
-		self stack push: methodInfo return
-	] ifFalse: [
+	methodInfo := self pool newMethodTranspiler: selector with: args.
+	self messages at: (self method sourceNodeForPC: oldPC) put: methodInfo.
+	self stack push: methodInfo return.
+self flag: #toRemove.
+"
 		self stack push: (SWVariableTypeInfo new: [|methodInfo|
-			methodInfo := self pool new: selector with: args.
+			methodInfo := self pool newMethodTranspiler: selector with: args.
 			methodInfo return value
-		])
+		] owner: self pc: oldPC)
 	].
-
+"
 	"A special case for user specifying."
 	(selector = #declare:as: and: [ args first easyValue = SWType class ]) ifTrue: [|assoc|
-		assoc := (self method sourceNodeForPC: oldPC) evaluate.
+		assoc := (((self method sourceNodeForPC: oldPC) evaluate)
+			owner: self;
+			pc: oldPC;
+			yourself).
 		(self variableInfoOf: assoc key) << assoc value
 	].
 	super send: selector super: supered numArgs: numberArguments.

@@ -58,6 +58,13 @@ SWStackAnalyzerTest >> _08_ZnServer [
 ]
 
 { #category : #'private - utility' }
+SWStackAnalyzerTest >> inspectMy: arg1 withArguments: arg2 [
+
+	(SWStackAnalyzer new: self class>>arg1 with: ({self class}, arg2)) decode; inspect
+
+]
+
+{ #category : #'private - utility' }
 SWStackAnalyzerTest >> returnValueOf: arg1 withArguments: arg2 equals: arg3 [
 
 	self
@@ -92,6 +99,20 @@ SWStackAnalyzerTest >> test_02 [
 		returnValueOfMy: #_02_call_wellknown_message:
 		withArguments: { Float }
 		equals: Float
+]
+
+{ #category : #tests }
+SWStackAnalyzerTest >> test_02_decode [
+
+	self
+		inspectMy: #_02_call_wellknown_message:
+		withArguments: { Integer }.
+"
+		equals: Integer;
+		returnValueOfMy: #_02_call_wellknown_message:
+		withArguments: { Float }
+		equals: Float
+"
 ]
 
 { #category : #tests }

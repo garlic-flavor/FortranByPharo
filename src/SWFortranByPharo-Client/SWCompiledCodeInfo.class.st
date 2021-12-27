@@ -42,7 +42,6 @@ SWCompiledCodeInfo class >> new: aMethod with: anArrayOfVariableTypeInfoOrTypes 
 SWCompiledCodeInfo class >> newDefaultPool [
 	^ SWPool new
 		transpilerClass: self;
-		classTranspilerClass: self classTranspilerClass;
 		yourself
 ]
 
@@ -79,45 +78,8 @@ SWCompiledCodeInfo >> classInfo: anObject [
 SWCompiledCodeInfo >> decode [
 	oldPC ifNotNil: [ ^ self ].
 
-	(self stack at: 0)
-		name: 'self';
-		stackPos: 0.
-
-	self method class = CompiledMethod ifTrue: [
-		self method temporaryVariables doWithIndex: [ :var :idx |
-			(self stack at: idx)
-				name: var name;
-				stackPos: idx
-		].
-		self method argumentNames doWithIndex: [ :var :idx |
-			(self stack at: idx)
-				priority: SWType argumentTypePriority
-		]
-	].
-	self method class = FullBlockClosure ifTrue: [
-		self method argumentNames doWithIndex: [ :name :idx |
-			(self stack at: idx)
-				name: name;
-				stackPos: idx
-		].
-		self method tempNames doWithIndex: [ :name :idx |
-			(self stack at: idx)
-				name: name;
-				stackPos: idx + self method numArgs
-		].
-		self method: self method compiledBlock
-	].
-
 	super decode.
 
-]
-
-{ #category : #'as yet unclassified' }
-SWCompiledCodeInfo >> decodeAllOf: aNeedle [
-	self decode.
-	self messages do: [ :mi |
-		(aNeedle value: mi) ifTrue: [ mi decodeAllOf: aNeedle ]
-	]
 ]
 
 { #category : #testing }
@@ -141,6 +103,11 @@ SWCompiledCodeInfo >> mangledName [
 SWCompiledCodeInfo >> mangledName: anObject [
 
 	mangledName := anObject
+]
+
+{ #category : #'as yet unclassified' }
+SWCompiledCodeInfo >> markAsDecoded [
+	oldPC := 9999
 ]
 
 { #category : #accessing }
@@ -196,6 +163,16 @@ SWCompiledCodeInfo >> postCopy [
 	self stack: self stack copy
 ]
 
+{ #category : #printing }
+SWCompiledCodeInfo >> printOn: aStream [
+	self putOn: aStream
+]
+
+{ #category : #printing }
+SWCompiledCodeInfo >> putOn: aStream [
+	aStream << method name
+]
+
 { #category : #NOCompletion }
 SWCompiledCodeInfo >> receiverClass [
 	^ (self stack at: 0) value
@@ -205,7 +182,10 @@ SWCompiledCodeInfo >> receiverClass [
 SWCompiledCodeInfo >> return [
 
 	^ return ifNil: [
-		return := SWVariableTypeInfo new
+		return := (SWVariableTypeInfo new)
+			owner: self;
+			pc: 0;
+			yourself
 	]
 ]
 
@@ -231,7 +211,45 @@ SWCompiledCodeInfo >> sourceHash [
 { #category : #accessing }
 SWCompiledCodeInfo >> stack [
 
-	^ stack ifNil: [ stack := SWStack new ]
+	^ stack ifNil: [
+		stack := SWStack new.
+
+		(stack at: 0)
+			name: 'self';
+			stackPos: 0.
+
+		self method class = CompiledMethod ifTrue: [
+			self method temporaryVariables doWithIndex: [ :var :idx |
+				(stack at: idx)
+					name: var name;
+					owner: self;
+					pc: 0;
+					stackPos: idx
+			].
+			self method argumentNames doWithIndex: [ :var :idx |
+				(stack at: idx)
+					owner: self;
+					pc: 0;
+					priority: SWType argumentTypePriority
+			]
+		].
+		self method class = FullBlockClosure ifTrue: [
+			self method argumentNames doWithIndex: [ :name :idx |
+				(stack at: idx)
+					name: name;
+					stackPos: idx
+			].
+			self method tempNames doWithIndex: [ :name :idx |
+				(stack at: idx)
+					name: name;
+					owner: self;
+					pc: 0;
+					stackPos: idx + self method numArgs
+			].
+			self method: self method compiledBlock
+		].
+		stack
+	]
 ]
 
 { #category : #accessing }

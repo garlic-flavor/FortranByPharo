@@ -114,7 +114,7 @@ SWType >> easyValue [
 { #category : #accessing }
 SWType >> payload [
 
-	^ payload
+	^ payload ifNil: [ payload := nil class ]
 ]
 
 { #category : #accessing }

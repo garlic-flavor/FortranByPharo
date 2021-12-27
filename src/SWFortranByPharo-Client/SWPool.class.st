@@ -6,8 +6,7 @@ Class {
 	#superclass : #Object,
 	#instVars : [
 		'payload',
-		'transpilerClass',
-		'classTranspilerClass'
+		'transpilerClass'
 	],
 	#category : #'SWFortranByPharo-Client-Analyzer'
 }
@@ -81,38 +80,9 @@ SWPool class >> search: selector in: aClass [
 ]
 
 { #category : #accessing }
-SWPool >> classInfo: aClass [
-	^ self payload at: aClass name ifAbsentPut: [
-		self classTranspilerClass new
-			transpilerClass: self transpilerClass;
-			pool: self;
-			targetClass: aClass;
-			yourself.
-	]
-]
-
-{ #category : #accessing }
-SWPool >> classTranspiler: aClass [
-	^ aClass isClassSide ifTrue: [|ci|
-		ci := self classTranspiler: aClass instanceSide.
-		ci classSide ifNil: [ ci classSide: (self newClassTranspiler: aClass) ]
-	] ifFalse: [
-		self payload at: aClass name ifAbsentPut: [
-			self newClassTranspiler: aClass
-		]
-	]
-]
-
-{ #category : #accessing }
 SWPool >> classTranspilerClass [
 
-	^ classTranspilerClass
-]
-
-{ #category : #accessing }
-SWPool >> classTranspilerClass: anObject [
-
-	classTranspilerClass := anObject
+	^ self transpilerClass classTranspilerClass
 ]
 
 { #category : #'as yet unclassified' }
@@ -129,28 +99,35 @@ SWPool >> definedMethod: selector ifPresent: presentBlock ifAbsent: absentBlock 
 ]
 
 { #category : #'instance creation' }
-SWPool >> new: aSelector with: args [
+SWPool >> newClassTranspiler: aClass [
+	^ self payload at: aClass ifAbsent: [|ct|
+		ct := self classTranspilerClass new
+			targetClass: aClass;
+			pool: self;
+			yourself.
+		self payload at: aClass put: ct.
+		(aClass respondsTo: #initializeClassTranspiler:) ifTrue: [
+			aClass perform: #initializeClassTranspiler: with: ct.
+		].
+		ct
+	]
+]
+
+{ #category : #'instance creation' }
+SWPool >> newMethodTranspiler: aSelector with: args [
+	|method|
+	method := self class search: aSelector in: args first value.
+	^ (self newClassTranspiler: method methodClass)
+		method: method with: args.
+"
 	^ self definedMethod: aSelector ifPresent: [ :mi |
 		mi value: args
 	] ifAbsent: [|method|
 		method := self class search: aSelector in: args first value.
-		(self classInfo: method methodClass)
+		(self newClassTranspiler: method methodClass)
 			method: method with: args
 	]
-
-]
-
-{ #category : #'instance creation' }
-SWPool >> newClassTranspiler: aClass [
-	|ct|
-	ct := self classTranspilerClass new
-		targetClass: aClass;
-		transpilerClass: self transpilerClass;
-		yourself.
-	(aClass classSide respondsTo: #initializeClassInfo:) ifTrue: [
-		aClass classSide perform: #initializeClassInfo: with: ct.
-	].
-	^ ct
+"
 ]
 
 { #category : #accessing }
@@ -163,6 +140,16 @@ SWPool >> payload [
 SWPool >> payload: anObject [
 
 	payload := anObject
+]
+
+{ #category : #printing }
+SWPool >> printOn: aStream [
+	self putOn: aStream.
+]
+
+{ #category : #streaming }
+SWPool >> putOn: aStream [
+	aStream << (self hash % 16rFFFF) printStringHex
 ]
 
 { #category : #enumerating }
