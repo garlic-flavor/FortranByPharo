@@ -30,11 +30,23 @@ SWCompiledCodeInfo class >> mangleClass [
 ]
 
 { #category : #'instance creation' }
+SWCompiledCodeInfo class >> new: aMethod [
+	^ self new: aMethod with: #()
+]
+
+{ #category : #'instance creation' }
 SWCompiledCodeInfo class >> new: aMethod with: anArrayOfVariableTypeInfoOrTypes [
-	^ self new
-		method: aMethod;
+	^ (aMethod isBlock ifTrue: [
+		self new
+			block: aMethod;
+			yourself
+	] ifFalse: [
+		self new
+			method: aMethod;
+			yourself
+	])
 		types: anArrayOfVariableTypeInfoOrTypes;
-		yourself
+		yourself.		
 
 ]
 
@@ -63,6 +75,25 @@ SWCompiledCodeInfo >> arguments [
 ]
 
 { #category : #accessing }
+SWCompiledCodeInfo >> block: aBlock [
+	aBlock argumentNames doWithIndex: [ :name :idx |
+		(self stack at: idx)
+			name: name;
+			stackPos: idx
+	].
+	aBlock tempNames doWithIndex: [ :name :idx |
+		(self stack at: idx)
+			name: name;
+			owner: self;
+			pc: 0;
+			stackPos: idx + aBlock numArgs
+	].
+	super method: aBlock compiledBlock
+
+
+]
+
+{ #category : #accessing }
 SWCompiledCodeInfo >> classInfo [
 
 	^ classInfo
@@ -76,10 +107,14 @@ SWCompiledCodeInfo >> classInfo: anObject [
 
 { #category : #api }
 SWCompiledCodeInfo >> decode [
-	oldPC ifNotNil: [ ^ self ].
-
+	self isDecoded ifTrue: [ ^self ].
 	super decode.
 
+]
+
+{ #category : #testing }
+SWCompiledCodeInfo >> isDecoded [
+	^ oldPC isNotNil
 ]
 
 { #category : #testing }
@@ -123,8 +158,22 @@ SWCompiledCodeInfo >> messages: anObject [
 ]
 
 { #category : #accessing }
-SWCompiledCodeInfo >> method [
-	^ method
+SWCompiledCodeInfo >> method: aMethod [
+	aMethod temporaryVariables doWithIndex: [ :var :idx |
+		(self stack at: idx)
+			name: var name;
+			owner: self;
+			pc: 0;
+			stackPos: idx
+	].
+	aMethod argumentNames doWithIndex: [ :var :idx |
+		(self stack at: idx)
+			owner: self;
+			pc: 0;
+			priority: SWType argumentTypePriority
+	].
+
+	^ super method: aMethod
 ]
 
 { #category : #accessing }
@@ -170,7 +219,7 @@ SWCompiledCodeInfo >> printOn: aStream [
 
 { #category : #printing }
 SWCompiledCodeInfo >> putOn: aStream [
-	aStream << method name
+	aStream << (method class = CompiledMethod ifTrue: [ method name ] ifFalse: [ 'block' ])
 ]
 
 { #category : #NOCompletion }
@@ -213,41 +262,9 @@ SWCompiledCodeInfo >> stack [
 
 	^ stack ifNil: [
 		stack := SWStack new.
-
 		(stack at: 0)
 			name: 'self';
 			stackPos: 0.
-
-		self method class = CompiledMethod ifTrue: [
-			self method temporaryVariables doWithIndex: [ :var :idx |
-				(stack at: idx)
-					name: var name;
-					owner: self;
-					pc: 0;
-					stackPos: idx
-			].
-			self method argumentNames doWithIndex: [ :var :idx |
-				(stack at: idx)
-					owner: self;
-					pc: 0;
-					priority: SWType argumentTypePriority
-			]
-		].
-		self method class = FullBlockClosure ifTrue: [
-			self method argumentNames doWithIndex: [ :name :idx |
-				(stack at: idx)
-					name: name;
-					stackPos: idx
-			].
-			self method tempNames doWithIndex: [ :name :idx |
-				(stack at: idx)
-					name: name;
-					owner: self;
-					pc: 0;
-					stackPos: idx + self method numArgs
-			].
-			self method: self method compiledBlock
-		].
 		stack
 	]
 ]

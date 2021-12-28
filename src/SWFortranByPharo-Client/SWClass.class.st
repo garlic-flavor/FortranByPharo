@@ -38,9 +38,10 @@ SWClass class >> installClassInfoBuilderFor: aClass [
 
 { #category : #'as yet unclassified' }
 SWClass >> defineMethod: aName as: rType [
-	|info|
+	|method info|
+	method := aName class = CompiledMethod ifTrue: [ aName ] ifFalse: [ self targetClass>>aName ].
 	info := SWCompiledCodeInfo new
-		method: self targetClass>>aName;
+		method: method;
 		markAsDecoded;
 		yourself.
 	rType isBlock ifTrue: [
@@ -50,32 +51,122 @@ SWClass >> defineMethod: aName as: rType [
 	] ifFalse: [
 		info return << rType
 	].
-	self methods at: self targetClass>>aName put: info
+	^ self methods at: method put: info
+
+]
+
+{ #category : #'as yet unclassified' }
+SWClass >> defineMethodReturnsFirstArgument: aName [
+	|method info ret|
+
+	method := aName class = CompiledMethod ifTrue: [ aName ] ifFalse: [ self targetClass>>aName ].
+	info := SWCompiledCodeInfo new
+		method: method;
+		markAsDecoded;
+		yourself.
+	ret := SWVariableTypeInfo new
+		priority: SWType argumentTypePriority;
+		yourself.
+	(info stack at: 1) << ret.
+	info return << ret.
+	^ self methods at: method put: info
 
 ]
 
 { #category : #'as yet unclassified' }
 SWClass >> defineMethodReturnsReceiver: aName [
-	|info|
+	|method info ret|
+
+	method := aName class = CompiledMethod ifTrue: [ aName ] ifFalse: [ self targetClass>>aName ].
 	info := SWCompiledCodeInfo new
-		method: self targetClass>>aName;
+		method: method;
 		markAsDecoded;
 		yourself.
-	info return << info stack first.
-	self methods at: self targetClass>>aName put: info
+	ret := SWVariableTypeInfo new
+		priority: SWType argumentTypePriority;
+		yourself.
+	info stack first << ret.
+	info return << ret.
+	^ self methods at: method put: info
 
 ]
 
 { #category : #'as yet unclassified' }
 SWClass >> defineMethodReturnsReceiversInstance: aName [
-	|info|
+	|method info|
+	method := aName class = CompiledMethod ifTrue: [ aName ] ifFalse: [ self targetClass>>aName ].
 	info := SWCompiledCodeInfo new
-		method: self targetClass>>aName;
+		method: method;
 		markAsDecoded;
 		yourself.
-	info return << info stack first instanceSide.
-	self methods at: self targetClass>>aName put: info
 
+	(info stack at: 0) << UndefinedObject.
+	info return << (SWVariableTypeInfo new
+		<< [ info stack first value instanceSide ];
+		priority: SWType argumentTypePriority;
+		yourself).
+
+	^ self methods at: method put: info
+
+]
+
+{ #category : #'as yet unclassified' }
+SWClass >> definedMethod: aMethod ifPresent: presentBlock ifAbsent: absentBlock [
+	|generatorSelector|
+
+	generatorSelector := #defined_, (self transpilerClass mangleClass safeSelectorNameOf: aMethod selector), ':'.
+	^ (self respondsTo: generatorSelector) ifTrue: [
+		presentBlock value: (self perform: generatorSelector with: aMethod)
+	] ifFalse: [
+		absentBlock value
+	]
+
+]
+
+{ #category : #'as yet unclassified' }
+SWClass >> defined_copy: aMethod [
+	^ self defineMethodReturnsReceiver: aMethod
+]
+
+{ #category : #'instance creation' }
+SWClass >> defined_new: aMethod [
+	^ self defineMethodReturnsReceiversInstance: aMethod
+
+]
+
+{ #category : #initialization }
+SWClass >> defined_opEqual_: aMethod [
+	^ self defineMethod: aMethod as: Boolean
+]
+
+{ #category : #initialization }
+SWClass >> defined_opLT_: aMethod [
+	^ self defineMethod: aMethod as: Boolean
+]
+
+{ #category : #initialization }
+SWClass >> defined_opMul_: aMethod [
+	^ self defineMethodReturnsReceiver: aMethod
+]
+
+{ #category : #initialization }
+SWClass >> defined_opPlus_: aMethod [
+	^ self defineMethodReturnsReceiver: aMethod
+]
+
+{ #category : #initialization }
+SWClass >> defined_opSub_ [
+	^ self defineMethodReturnsReceiver: #-
+]
+
+{ #category : #initialization }
+SWClass >> defined_opSub_: aMethod [
+	^ self defineMethodReturnsReceiver: aMethod
+]
+
+{ #category : #'instance creation' }
+SWClass >> defined_yourself: aMethod [
+	^ self defineMethodReturnsReceiver: aMethod
 ]
 
 { #category : #accessing }
@@ -96,33 +187,25 @@ SWClass >> isToTranspile [
 	^ self targetClass classSide methodDict includesKey: #toTranspile
 ]
 
-{ #category : #'as yet unclassified' }
-SWClass >> method: aName arguments: args is: rType [
-	|info|
-	info := SWCompiledCodeInfo new
-		method: self targetClass>>aName;
-		markAsDecoded;
-		yourself.
-	rType class = FullBlockClosure ifTrue: [
-	] ifFalse: [
-	].
-	self methods at: self targetClass>>aName put: info
-
-]
-
 { #category : #accessing }
 SWClass >> method: aMethod with: args [
 	^ self methods at: aMethod ifPresent: [ :m |
 		(m copy) types: args; yourself
-	] ifAbsent: [|methodInfo|
-		methodInfo := (self transpilerClass new: aMethod with: args)
-			classInfo: self;
-			pool: self pool;
-			yourself.
-		self methods at: aMethod put: methodInfo.
-		(methodInfo copy)
-			decode;
-			yourself
+	] ifAbsent: [
+		self definedMethod: aMethod ifPresent: [ :info |
+			info copy
+				types: args;
+				yourself
+		] ifAbsent: [|methodInfo|
+			methodInfo := (self transpilerClass new: aMethod with: args)
+				classInfo: self;
+				pool: self pool;
+				yourself.
+			self methods at: aMethod put: methodInfo.
+			(methodInfo copy)
+				decode;
+				yourself
+		]
 	]
 ]
 

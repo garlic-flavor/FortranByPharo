@@ -164,3 +164,15 @@ SWStackAnalyzerTest >> test_08 [
 	sa decode.
 	sa inspect.
 ]
+
+{ #category : #tests }
+SWStackAnalyzerTest >> test_09_access_to_instance_variables [
+	|sa|
+	sa := SWStackAnalyzer new: [|satp|
+		satp := 'hello'.
+		satp
+	].
+	sa
+		decode;
+		inspect
+]

@@ -29,7 +29,7 @@ SWStackAnalyzer >> blockReturnConstant: cst [
 
 { #category : #'instruction decoding' }
 SWStackAnalyzer >> blockReturnTop [
-	self return << self stack top.
+	self return << self stack pop.
 	
 	super blockReturnTop
 ]
