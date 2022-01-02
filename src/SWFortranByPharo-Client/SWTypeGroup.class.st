@@ -8,7 +8,7 @@ Class {
 	#instVars : [
 		'group'
 	],
-	#category : #'SWFortranByPharo-Client-Analyzer'
+	#category : #'SWFortranByPharo-Client-Client-Deprecated'
 }
 
 { #category : #'instance creation' }

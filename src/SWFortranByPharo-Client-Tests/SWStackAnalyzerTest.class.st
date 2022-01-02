@@ -66,10 +66,10 @@ SWStackAnalyzerTest >> inspectMy: arg1 withArguments: arg2 [
 
 { #category : #'private - utility' }
 SWStackAnalyzerTest >> returnValueOf: arg1 withArguments: arg2 equals: arg3 [
-
+	|analyzer|
+	analyzer := SWStackAnalyzer new: arg1 with: arg2.
 	self
-		assert:
-		(SWStackAnalyzer new: arg1 with: arg2) return value
+		assert: analyzer return value
 		equals: arg3
 ]
 
@@ -169,10 +169,9 @@ SWStackAnalyzerTest >> test_08 [
 SWStackAnalyzerTest >> test_09_access_to_instance_variables [
 	|sa|
 	sa := SWStackAnalyzer new: [|satp|
-		satp := 'hello'.
-		satp
+		satp := SWStackAnalyzerTestProgram new.
+		satp var1
 	].
-	sa
-		decode;
-		inspect
+	sa decode.
+	sa inspect.
 ]

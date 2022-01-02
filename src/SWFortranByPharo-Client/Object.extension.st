@@ -1,11 +1,9 @@
 Extension { #name : #Object }
 
 { #category : #'*SWFortranByPharo-Client' }
-Object class >> initializeClassTranspiler: aCT [
-	aCT targetClass isInstanceSide ifTrue: [
-		aCT
-			defineMethod: #subclassResponsibility as: [ :info | self error ]
-	]
+Object class >> initializeInstanceSideTranspiler: aCT [
+	aCT defineMethod: #subclassResponsibility as: [ :info | self error ]
+
 ]
 
 { #category : #'*SWFortranByPharo-Client' }

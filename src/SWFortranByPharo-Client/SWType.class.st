@@ -16,11 +16,6 @@ Class {
 	#category : #'SWFortranByPharo-Client-Analyzer'
 }
 
-{ #category : #constants }
-SWType class >> argumentTypePriority [
-	^ 80
-]
-
 { #category : #'private - utilities' }
 SWType class >> calcPriorityOf: aClass [
 	aClass ifNil: [ ^ self defaultPriority ].
@@ -32,7 +27,7 @@ SWType class >> calcPriorityOf: aClass [
 { #category : #api }
 SWType class >> declare: aName as: aType [
 	^ aName -> (self new
-		payload: aType;
+		<< aType;
 		priority: self userSpecifyingPriority;
 		yourself)
 ]
@@ -65,14 +60,14 @@ SWType class >> nameOfPriority: aPriority [
 { #category : #'instance creation' }
 SWType class >> new: aClass [
 	^ self new
-		payload: aClass;
+		<< aClass;
 		yourself
 ]
 
 { #category : #'instance creation' }
 SWType class >> new: aClass with: aPriority [
 	^ self new
-		payload: aClass;
+		<< aClass;
 		priority: aPriority;
 		yourself
 ]
@@ -94,21 +89,34 @@ SWType class >> userSpecifyingPriority [
 
 { #category : #streaming }
 SWType >> << rightType [
+	rightType ifNil: [ ^ self ].
 	(rightType class includesBehavior: SWType) ifTrue: [
 		rightType priority <= self priority ifTrue: [ ^ self ].
 
 		self payload: rightType payload.
 		self priority: rightType priority.
 	] ifFalse: [
+		rightType = UndefinedObject ifTrue: [  ^ self ].
+
 		self payload: rightType.
 		self priority: nil.
 	]
 
 ]
 
+{ #category : #comparing }
+SWType >> = right [
+	^ self payload = right payload
+]
+
 { #category : #accessing }
 SWType >> easyValue [
 	^ self class exactTypePriority <= self priority ifTrue: [ self value ] ifFalse: [ nil ]
+]
+
+{ #category : #comparing }
+SWType >> hash [
+	^ self payload hash
 ]
 
 { #category : #accessing }
@@ -121,6 +129,11 @@ SWType >> payload [
 SWType >> payload: anObject [
 
 	payload := anObject
+]
+
+{ #category : #printing }
+SWType >> printOn: aStream [
+	self putOn: aStream
 ]
 
 { #category : #accessing }
@@ -149,7 +162,7 @@ SWType >> value [
 		priority := nil.
 		payload := payload value
 	] ifFalse: [
-		self payload
+		payload
 	].
 
 ]

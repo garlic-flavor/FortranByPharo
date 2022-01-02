@@ -6,7 +6,8 @@ Class {
 	#superclass : #SWCompiledCodeInfo,
 	#instVars : [
 		'jumperStack',
-		'tempStore'
+		'tempStore',
+		'pool'
 	],
 	#category : #'SWFortranByPharo-Client-Analyzer'
 }
@@ -32,6 +33,12 @@ SWStackAnalyzer >> blockReturnTop [
 	self return << self stack pop.
 	
 	super blockReturnTop
+]
+
+{ #category : #'instruction decoding' }
+SWStackAnalyzer >> callPrimitive: primNumber [
+
+	super callPrimitive: primNumber
 ]
 
 { #category : #'instruction decoding' }
@@ -125,6 +132,18 @@ SWStackAnalyzer >> newFullClosure: lit with: args [
 		yourself
 
 
+]
+
+{ #category : #accessing }
+SWStackAnalyzer >> pool [
+
+	^ pool ifNil: [ pool := self class newDefaultPool ]
+]
+
+{ #category : #accessing }
+SWStackAnalyzer >> pool: anObject [
+
+	pool := anObject
 ]
 
 { #category : #'instruction decoding' }
@@ -277,35 +296,17 @@ SWStackAnalyzer >> pushTemporaryVariable:  offset [
 
 ]
 
-{ #category : #accessing }
-SWStackAnalyzer >> return [
-
-	^ return ifNil: [
-		return := SWVariableTypeInfo new: [
-			self decode.
-			return value
-		] with: SWType defaultPriority owner: self pc: oldPC
-	]
-]
-
 { #category : #'instruction decoding' }
 SWStackAnalyzer >> send: selector super: supered numArgs: numberArguments [
 	|args methodInfo|
-
 	args := self stack pop: numberArguments + 1.
 	args at: 1 put: (supered ifTrue: [ args first copyAsSuper ] ifFalse: [ args first copy ]).
 
 	methodInfo := self pool newMethodTranspiler: selector with: args.
+
 	self messages at: (self method sourceNodeForPC: oldPC) put: methodInfo.
 	self stack push: methodInfo return.
-self flag: #toRemove.
-"
-		self stack push: (SWVariableTypeInfo new: [|methodInfo|
-			methodInfo := self pool newMethodTranspiler: selector with: args.
-			methodInfo return value
-		] owner: self pc: oldPC)
-	].
-"
+
 	"A special case for user specifying."
 	(selector = #declare:as: and: [ args first easyValue = SWType class ]) ifTrue: [|assoc|
 		assoc := (((self method sourceNodeForPC: oldPC) evaluate)

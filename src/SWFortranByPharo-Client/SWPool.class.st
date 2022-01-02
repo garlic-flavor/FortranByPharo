@@ -11,9 +11,24 @@ Class {
 	#category : #'SWFortranByPharo-Client-Analyzer'
 }
 
+{ #category : #'code generation' }
+SWPool class >> defaultTranspilerFor: aSelector [
+
+	aSelector = #at:ifAbsent: ifTrue: [
+		^ [:args ||cci|
+			cci := (SWCompiledCodeInfo new).
+			cci return << (args at: 2).
+			cci markAsDecoded.
+			cci
+		]
+	].
+
+	self error.
+]
+
 { #category : #utils }
 SWPool class >> search: selector in: aClass [
-	aClass ifNil: [ self error ].
+	aClass ifNil: [ ^ nil ].
 
 	^ aClass methodDict at: selector ifAbsent: [
 			self search: selector in: aClass superclass
@@ -29,27 +44,29 @@ SWPool >> classTranspilerClass [
 
 { #category : #'instance creation' }
 SWPool >> newClassTranspiler: aClass [
-	|initializer|
-	initializer := #initializeClassTranspiler:.
-	^ self payload at: aClass ifAbsentPut: [|ct|
-		ct := self classTranspilerClass new
-			targetClass: aClass;
+	^ self payload at: aClass ifAbsentPut: [
+		self classTranspilerClass new
 			pool: self;
+			targetClass: aClass;
+			ready;
 			yourself.
-
-		(aClass classSide methodDict includesKey: initializer) ifTrue: [
-			(aClass classSide >> initializer) valueWithReceiver: aClass arguments: { ct }
-		].
-		ct
 	]
 ]
 
 { #category : #'instance creation' }
 SWPool >> newMethodTranspiler: aSelector with: args [
 	|method|
+	aSelector = #== ifTrue: [ self halt. ].
 	method := self class search: aSelector in: args first value.
-	^ (self newClassTranspiler: method methodClass)
-		method: method with: args.
+	^ method ifNotNil: [
+		(self newClassTranspiler: method methodClass)
+			newMethodTranspiler: method with: args.
+	] ifNil: [
+		self halt.
+		(self class defaultTranspilerFor: aSelector)
+			value: args
+	]
+	
 
 ]
 

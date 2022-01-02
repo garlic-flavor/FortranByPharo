@@ -76,6 +76,11 @@ SWVariableTypeInfo >> << rightObject [
 
 ]
 
+{ #category : #comparing }
+SWVariableTypeInfo >> = right [
+	^ self type = right type
+]
+
 { #category : #adding }
 SWVariableTypeInfo >> addProperty: aProp [
 	self properties add: aProp
@@ -90,7 +95,7 @@ SWVariableTypeInfo >> assignCounter [
 { #category : #copying }
 SWVariableTypeInfo >> copyAsSuper [
 	^ self copy
-		type: [ self value superclass ];
+		<< [ self halt. self value superclass ];
 		yourself.
 ]
 
@@ -137,12 +142,6 @@ SWVariableTypeInfo >> pc [
 SWVariableTypeInfo >> pc: anObject [
 
 	pc := anObject
-]
-
-{ #category : #copying }
-SWVariableTypeInfo >> postCopy [
-	super postCopy.
-	self type addContainer: self
 ]
 
 { #category : #printing }
@@ -193,11 +192,11 @@ SWVariableTypeInfo >> putOn: aStream [
 		<< $<;
 		<< self type;
 		<< $>;
-		space;
+		space";
 		<< '<< ';
 		<< self assignCounter size asString;
 		<< ' @';
-		<< (self owner ifNil: [ 'none' ])
+		<< (self owner ifNil: [ 'none' ])"
 
 ]
 
@@ -221,7 +220,7 @@ SWVariableTypeInfo >> stackPos: anObject [
 { #category : #accessing }
 SWVariableTypeInfo >> type [
 
-	^ type ifNil: [ type := SWTypeGroup newFor: self ]
+	^ type ifNil: [ type := SWType new ]
 ]
 
 { #category : #accessing }
