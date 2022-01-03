@@ -52,7 +52,7 @@ SWSlot >> detect: needle ifNone: noneBlock [
 
 { #category : #accessing }
 SWSlot >> first [
-	^ payload first
+	^ self payload first
 ]
 
 { #category : #accessing }
@@ -71,6 +71,11 @@ SWSlot >> payload: anObject [
 SWSlot >> postCopy [
 	super postCopy.
 	payload := payload collect: [ :e | e copy ]
+]
+
+{ #category : #accessing }
+SWSlot >> second [
+	^ self payload second
 ]
 
 { #category : #accessing }

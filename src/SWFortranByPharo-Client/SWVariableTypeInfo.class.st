@@ -95,7 +95,7 @@ SWVariableTypeInfo >> assignCounter [
 { #category : #copying }
 SWVariableTypeInfo >> copyAsSuper [
 	^ self copy
-		<< [ self halt. self value superclass ];
+		<< self value superclass;
 		yourself.
 ]
 

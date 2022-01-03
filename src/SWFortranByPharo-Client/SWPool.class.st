@@ -15,11 +15,11 @@ Class {
 SWPool class >> defaultTranspilerFor: aSelector [
 
 	aSelector = #at:ifAbsent: ifTrue: [
-		^ [:args ||cci|
-			cci := (SWCompiledCodeInfo new).
-			cci return << (args at: 2).
-			cci markAsDecoded.
-			cci
+		^ [:args |
+			(SWCompiledCodeInfo new)
+				return: (SWVariableTypeInfo new: (args at: 2));
+				markAsDecoded;
+				yourself
 		]
 	].
 
@@ -58,7 +58,6 @@ SWPool >> newMethodTranspiler: aSelector with: args [
 	|method|
 
 	method := self class search: aSelector in: args first value.
-	aSelector = #== ifTrue: [ self halt. ].
 
 	^ method ifNotNil: [
 		(self newClassTranspiler: method methodClass)

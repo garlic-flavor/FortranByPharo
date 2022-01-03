@@ -162,7 +162,7 @@ SWType >> value [
 		priority := nil.
 		payload := payload value
 	] ifFalse: [
-		payload
+		self payload
 	].
 
 ]

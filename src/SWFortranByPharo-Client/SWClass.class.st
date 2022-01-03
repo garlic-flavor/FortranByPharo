@@ -89,6 +89,16 @@ SWClass >> defineMethodReturnsReceiversInstance: aName [
 ]
 
 { #category : #'as yet unclassified' }
+SWClass >> defineMethodReturnsSecondArgument: aName [
+	self generator at: aName put: [ :aCallee |
+		(SWCompiledCodeInfo newFrom: aCallee)
+			return: (aCallee stack at: 2);
+			markAsDecoded;
+			yourself
+	]
+]
+
+{ #category : #'as yet unclassified' }
 SWClass >> definedMethod: aCallee ifAbsent: absentBlock [
 
 	^ self generator at: aCallee method selector ifPresent: [ :gen |
