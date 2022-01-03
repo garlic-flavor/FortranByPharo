@@ -125,6 +125,13 @@ SWCompiledCodeInfo >> return: anObject [
 	return := anObject
 ]
 
+{ #category : #'as yet unclassified' }
+SWCompiledCodeInfo >> specifyReturnTypeAs: aType [
+	self return
+		<< aType;
+		priority: SWType userSpecifyingPriority
+]
+
 { #category : #accessing }
 SWCompiledCodeInfo >> variableInfoOf: aName [
 

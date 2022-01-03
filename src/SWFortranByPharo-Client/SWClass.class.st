@@ -41,7 +41,7 @@ SWClass class >> installClassInfoBuilderFor: aClass [
 SWClass >> defineMethod: aName as: rType [
 	self generator at: aName put: [ :aCallee |
 		(SWCompiledCodeInfo newFrom: aCallee)
-			return: (SWVariableTypeInfo new: rType with: SWType userSpecifyingPriority);
+			specifyReturnTypeAs: rType;
 			markAsDecoded;
 			yourself.
 	]
@@ -99,6 +99,13 @@ SWClass >> defineMethodReturnsSecondArgument: aName [
 ]
 
 { #category : #'as yet unclassified' }
+SWClass >> defineTypeOf: aName is: aType [
+
+	(self getVariableInfoOf: aName) << aType
+
+]
+
+{ #category : #'as yet unclassified' }
 SWClass >> definedMethod: aCallee ifAbsent: absentBlock [
 
 	^ self generator at: aCallee method selector ifPresent: [ :gen |
@@ -134,7 +141,7 @@ SWClass >> getVariableInfoAtOffset: offset [
 { #category : #accessing }
 SWClass >> getVariableInfoOf: aName [
 	"Return SWVariableInfo searched by its name."
-	^ self slot detect: [ :each | each name = aName ]
+	^ self slot detect: [ :each | each isNotNil and: [ each name = aName ] ]
 
 ]
 
@@ -281,12 +288,4 @@ SWClass >> targetClass: anObject [
 SWClass >> transpilerClass [
 
 	^ self pool transpilerClass
-]
-
-{ #category : #'as yet unclassified' }
-SWClass >> typeOf: aName is: aType [
-	self halt.
-	(self getVariableInfoOf: aName)
-		type: aType
-
 ]

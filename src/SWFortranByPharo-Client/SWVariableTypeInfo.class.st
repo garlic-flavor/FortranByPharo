@@ -92,13 +92,6 @@ SWVariableTypeInfo >> assignCounter [
 	^ assignCounter ifNil: [ assignCounter := OrderedCollection new ]
 ]
 
-{ #category : #copying }
-SWVariableTypeInfo >> copyAsSuper [
-	^ self copy
-		<< self value superclass;
-		yourself.
-]
-
 { #category : #accessing }
 SWVariableTypeInfo >> easyValue [
 	^ self type easyValue

@@ -300,10 +300,9 @@ SWStackAnalyzer >> pushTemporaryVariable:  offset [
 SWStackAnalyzer >> send: selector super: supered numArgs: numberArguments [
 	|args methodInfo|
 	args := self stack pop: numberArguments + 1.
-	args at: 1 put: (supered ifTrue: [ args first copyAsSuper ] ifFalse: [ args first copy ]).
 
-	methodInfo := self pool newMethodTranspiler: selector with: args.
-
+	methodInfo := self pool newMethodTranspiler: selector supered: supered with: args.
+(selector = #lock) ifTrue: [ self halt. ].
 	self messages at: (self method sourceNodeForPC: oldPC) put: methodInfo.
 	self stack push: methodInfo return.
 
