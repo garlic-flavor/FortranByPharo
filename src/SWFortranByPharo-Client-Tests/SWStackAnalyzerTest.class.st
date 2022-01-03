@@ -57,6 +57,14 @@ SWStackAnalyzerTest >> _08_ZnServer [
 	^ ZnServer default
 ]
 
+{ #category : #tests }
+SWStackAnalyzerTest >> _10_new: arg1 [
+	|loc1 loc2|
+	loc1 := Dictionary new.
+	loc2 := Set new.
+	^ loc2
+]
+
 { #category : #'private - utility' }
 SWStackAnalyzerTest >> inspectMy: arg1 withArguments: arg2 [
 
@@ -68,6 +76,7 @@ SWStackAnalyzerTest >> inspectMy: arg1 withArguments: arg2 [
 SWStackAnalyzerTest >> returnValueOf: arg1 withArguments: arg2 equals: arg3 [
 	|analyzer|
 	analyzer := SWStackAnalyzer new: arg1 with: arg2.
+	analyzer decode.
 	self
 		assert: analyzer return value
 		equals: arg3
@@ -174,4 +183,10 @@ SWStackAnalyzerTest >> test_09_access_to_instance_variables [
 	].
 	sa decode.
 	sa inspect.
+]
+
+{ #category : #tests }
+SWStackAnalyzerTest >> test_10_new [
+	self returnValueOfMy: #_10_new: withArguments: { Integer } equals: Set
+
 ]

@@ -74,7 +74,7 @@ SWCalleeInfo >> block: aBlock [
 			stackPos: idx
 	].
 	aBlock tempNames doWithIndex: [ :name :idx |
-		(self stack at: idx)
+		(self stack at: idx + aBlock numArgs)
 			name: name;
 			owner: self;
 			pc: 0;

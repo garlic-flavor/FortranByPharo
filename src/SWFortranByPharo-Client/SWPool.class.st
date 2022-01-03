@@ -56,8 +56,10 @@ SWPool >> newClassTranspiler: aClass [
 { #category : #'instance creation' }
 SWPool >> newMethodTranspiler: aSelector with: args [
 	|method|
-	aSelector = #== ifTrue: [ self halt. ].
+
 	method := self class search: aSelector in: args first value.
+	aSelector = #== ifTrue: [ self halt. ].
+
 	^ method ifNotNil: [
 		(self newClassTranspiler: method methodClass)
 			newMethodTranspiler: method with: args.

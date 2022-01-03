@@ -41,9 +41,7 @@ SWClass class >> installClassInfoBuilderFor: aClass [
 SWClass >> defineMethod: aName as: rType [
 	self generator at: aName put: [ :aCallee |
 		(SWCompiledCodeInfo newFrom: aCallee)
-			return: (SWVariableTypeInfo
-				new: rType
-				with: SWType userSpecifyingPriority);
+			return: (SWVariableTypeInfo new: rType with: SWType userSpecifyingPriority);
 			markAsDecoded;
 			yourself.
 	]
@@ -53,7 +51,7 @@ SWClass >> defineMethod: aName as: rType [
 { #category : #'as yet unclassified' }
 SWClass >> defineMethodReturnsFirstArgument: aName [
 	|method info ret|
-self halt.
+
 	method := aName class = CompiledMethod ifTrue: [ aName ] ifFalse: [ self targetClass>>aName ].
 	info := SWCompiledCodeInfo new
 		method: method;
@@ -72,7 +70,7 @@ self halt.
 SWClass >> defineMethodReturnsReceiver: aName [
 	self generator at: aName put: [ :aCallee |
 		(SWCompiledCodeInfo newFrom: aCallee)
-			return: (SWVariableTypeInfo new: aCallee receiverClass);
+			return: aCallee stack first;
 			markAsDecoded;
 			yourself
 	]
