@@ -59,11 +59,6 @@ SWCompiledCodeInfo >> decode [
 ]
 
 { #category : #testing }
-SWCompiledCodeInfo >> isDecoded [
-	^ oldPC isNotNil
-]
-
-{ #category : #testing }
 SWCompiledCodeInfo >> isToTranspile [
 	^ self classInfo isNil or: [ self classInfo isToTranspile ]
 ]
@@ -71,11 +66,6 @@ SWCompiledCodeInfo >> isToTranspile [
 { #category : #accessing }
 SWCompiledCodeInfo >> locals [
 	^ self stack copyFrom: self method numArgs + 1 to: self numTemps
-]
-
-{ #category : #'as yet unclassified' }
-SWCompiledCodeInfo >> markAsDecoded [
-	oldPC := 9999
 ]
 
 { #category : #accessing }
@@ -127,6 +117,7 @@ SWCompiledCodeInfo >> return: anObject [
 
 { #category : #'as yet unclassified' }
 SWCompiledCodeInfo >> specifyReturnTypeAs: aType [
+
 	self return
 		<< aType;
 		priority: SWType userSpecifyingPriority

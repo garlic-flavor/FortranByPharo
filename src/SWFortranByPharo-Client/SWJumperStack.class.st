@@ -7,15 +7,14 @@ Class {
 	#name : #SWJumperStack,
 	#superclass : #Object,
 	#instVars : [
-		'payload',
-		'period'
+		'payload'
 	],
 	#category : #'SWFortranByPharo-Client-Analyzer'
 }
 
 { #category : #testing }
 SWJumperStack >> nextPeriodIs: pc [
-	^ (0 < self payload size and: [ self payload top = pc ])
+	^ (0 < self payload size and: [ self payload top key = pc ])
 ]
 
 { #category : #accessing }
@@ -30,38 +29,19 @@ SWJumperStack >> payload: anObject [
 	payload := anObject
 ]
 
-{ #category : #accessing }
-SWJumperStack >> period [
-
-	^ period
-]
-
-{ #category : #accessing }
-SWJumperStack >> period: anObject [
-
-	period := anObject
-]
-
 { #category : #removing }
 SWJumperStack >> pop [
-	|val|
-	val := self payload pop value.
-	self payload ifNotEmpty: [
-		self period: self payload top
-	] ifEmpty: [
-		self period: nil
-	].
-	^ val
+	^ self payload pop value.
+
 ]
 
 { #category : #accessing }
-SWJumperStack >> pushAt: pc period: aPeriod [
-	self period: aPeriod.
-	(0 < self payload size and: [ self payload top = pc ]) ifTrue: [
+SWJumperStack >> pushAt: pc period: aPeriod size: size [
+	(0 < self payload size and: [ self payload top key = pc ]) ifTrue: [
 		(self payload)
 			pop;
-			push: aPeriod
+			push: (aPeriod -> size)
 	] ifFalse: [
-		self payload push: aPeriod 
+		self payload push: (aPeriod -> size)
 	]
 ]

@@ -19,11 +19,12 @@ BaselineOfSWFortranByPharo >> baseline: spec [
 
 		"Packages"
 		spec
-			package: 'SWFortranByPharo-Base' with: [ spec requires: #('OSSubprocess') ];
-			package: 'SWFortranByPharo-Client' with: [ spec requires: #('ZincHTTPComponents' 'Zinc-WebSocket-Core' 'SWFortranByPharo-Base') ];
-			package: 'SWFortranByPharo-Server' with: [ spec requires: #('ZincHTTPComponents' 'Zinc-WebSocket-Core' 'SWFortranByPharo-Base') ];
-			package: 'SWFortranByPharo-Server-Program' with: [ spec requires: #('SWFortranByPharo-Base' 'SWFortranByPharo-Client' 'SWFortranByPharo-Server') ];
-			package: 'SWFortranByPharo-Base-Tests' with: [ spec requires: #('SWFortranByPharo-Base') ];
+			package: 'SWFortranByPharo-Analyzer';
+			package: 'SWFortranByPharo-ClientServer-Common' with: [ spec requires: #('OSSubprocess') ];
+			package: 'SWFortranByPharo-Client' with: [ spec requires: #('ZincHTTPComponents' 'Zinc-WebSocket-Core' 'SWFortranByPharo-ClientServer-Common' 'SWFortranByPharo-Analyzer') ];
+			package: 'SWFortranByPharo-Server' with: [ spec requires: #('ZincHTTPComponents' 'Zinc-WebSocket-Core' 'SWFortranByPharo-ClientServer-Common') ];
+			package: 'SWFortranByPharo-Server-Program' with: [ spec requires: #('SWFortranByPharo-ClientServer-Common' 'SWFortranByPharo-Client' 'SWFortranByPharo-Server') ];
+			package: 'SWFortranByPharo-ClientServer-Common-Tests' with: [ spec requires: #('SWFortranByPharo-ClientServer-Common') ];
 			package: 'SWFortranByPharo-Server-Tests' with: [ spec requires: #('SWFortranByPharo-Server') ];
 			package: 'SWFortranByPharo-Client-Tests' with: [ spec requires: #('SWFortranByPharo-Client') ].
 		

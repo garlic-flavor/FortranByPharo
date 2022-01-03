@@ -19,27 +19,24 @@ SWCalleeInfo class >> mangleClass [
 
 { #category : #'instance creation' }
 SWCalleeInfo class >> new: aMethod [
-	^ self new: aMethod with: #()
-]
-
-{ #category : #'instance creation' }
-SWCalleeInfo class >> new: aMethod with: anArrayOfVariableTypeInfoOrTypes [
 	aMethod isBlock ifTrue: [
 		^ self new
 			block: aMethod;
-			types: anArrayOfVariableTypeInfoOrTypes;
 			yourself
 	].
 	aMethod class = CompiledBlock ifTrue: [
 		^ self new
 			cblock: aMethod;
-			types: anArrayOfVariableTypeInfoOrTypes;
 			yourself
 	].
 	aMethod class = CompiledMethod ifTrue: [
 		^ self new
 			method: aMethod;
-			types: anArrayOfVariableTypeInfoOrTypes;
+			yourself
+	].
+	aMethod class = ByteSymbol ifTrue: [
+		^ self new
+			selector: aMethod;
 			yourself
 	].
 	self error
@@ -47,10 +44,17 @@ SWCalleeInfo class >> new: aMethod with: anArrayOfVariableTypeInfoOrTypes [
 ]
 
 { #category : #'instance creation' }
+SWCalleeInfo class >> new: aMethod with: anArrayOfVariableTypeInfoOrTypes [
+	^ (self new: aMethod)
+		types: anArrayOfVariableTypeInfoOrTypes;
+		yourself
+
+]
+
+{ #category : #'instance creation' }
 SWCalleeInfo class >> newFrom: anOriginal [
 	^ self new
-		method: anOriginal method;
-		stack: anOriginal stack;
+		copyFrom: anOriginal;
 		yourself
 ]
 
@@ -98,6 +102,13 @@ SWCalleeInfo >> cblock: aBlock [
 
 ]
 
+{ #category : #copying }
+SWCalleeInfo >> copyFrom: right [
+	method := right method.
+	stack := right stack.
+	right isDecoded ifTrue: [ self markAsDecoded ]
+]
+
 { #category : #comparing }
 SWCalleeInfo >> hash [
 	|args buf|
@@ -108,6 +119,11 @@ SWCalleeInfo >> hash [
 		one type hash
 	]).
 	^ buf hash
+]
+
+{ #category : #testing }
+SWCalleeInfo >> isDecoded [
+	^ oldPC isNotNil
 ]
 
 { #category : #accessing }
@@ -121,6 +137,11 @@ SWCalleeInfo >> mangledName [
 SWCalleeInfo >> mangledName: anObject [
 
 	mangledName := anObject
+]
+
+{ #category : #'as yet unclassified' }
+SWCalleeInfo >> markAsDecoded [
+	oldPC := 9999
 ]
 
 { #category : #accessing }
@@ -165,6 +186,12 @@ SWCalleeInfo >> putOn: aStream [
 { #category : #NOCompletion }
 SWCalleeInfo >> receiverClass [
 	^ (self stack at: 0) value
+]
+
+{ #category : #accessing }
+SWCalleeInfo >> selector: aSelector [
+	method := aSelector.
+	self markAsDecoded
 ]
 
 { #category : #comparing }

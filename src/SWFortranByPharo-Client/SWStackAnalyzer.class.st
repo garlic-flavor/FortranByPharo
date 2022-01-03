@@ -14,10 +14,11 @@ Class {
 
 { #category : #private }
 SWStackAnalyzer >> addBytecode: description [
+	|beforeSize|
 	super addBytecode: description.
 	(self jumperStack nextPeriodIs: scanner pc) ifFalse: [ ^ self  ].
-	self jumperStack pop.
-	self mergeStackTopAndSecond .
+	beforeSize := self jumperStack pop.
+	[ self stack size < beforeSize ] whileTrue: [ self mergeStackTopAndSecond ]
 
 ]
 
@@ -71,14 +72,14 @@ SWStackAnalyzer >> doPop [
 
 { #category : #'instruction decoding' }
 SWStackAnalyzer >> jump: offset [
-	self jumperStack pushAt: scanner pc period: scanner pc + offset.
+	self jumperStack pushAt: scanner pc period: scanner pc + offset size: self stack size.
 	super jump: offset.
 	
 ]
 
 { #category : #'instruction decoding' }
 SWStackAnalyzer >> jump: offset if: condition [
-	self jumperStack pushAt: scanner pc period: scanner pc + offset.
+	self jumperStack pushAt: scanner pc period: scanner pc + offset size: self stack size.
 	super jump: offset if: condition.
 
 ]
@@ -302,7 +303,7 @@ SWStackAnalyzer >> send: selector super: supered numArgs: numberArguments [
 	args := self stack pop: numberArguments + 1.
 
 	methodInfo := self pool newMethodTranspiler: selector supered: supered with: args.
-(selector = #lock) ifTrue: [ self halt. ].
+
 	self messages at: (self method sourceNodeForPC: oldPC) put: methodInfo.
 	self stack push: methodInfo return.
 

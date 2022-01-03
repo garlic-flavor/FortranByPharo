@@ -79,9 +79,9 @@ SWClass >> defineMethodReturnsReceiver: aName [
 
 { #category : #'as yet unclassified' }
 SWClass >> defineMethodReturnsReceiversInstance: aName [
-	self generator at: aName put: [:aCallee |
-		(SWCompiledCodeInfo newFrom: aCallee)
-			return: (SWVariableTypeInfo new: aCallee receiverClass instanceSide);
+	self generator at: aName put: [:operands |
+		SWCompiledCodeInfo new
+			return: (SWVariableTypeInfo new: operands first value instanceSide);
 			markAsDecoded;
 			yourself.
 	]
@@ -90,9 +90,9 @@ SWClass >> defineMethodReturnsReceiversInstance: aName [
 
 { #category : #'as yet unclassified' }
 SWClass >> defineMethodReturnsSecondArgument: aName [
-	self generator at: aName put: [ :aCallee |
-		(SWCompiledCodeInfo newFrom: aCallee)
-			return: (aCallee stack at: 2);
+	self generator at: aName put: [ :operands |
+		SWCompiledCodeInfo new
+			return: (SWVariableTypeInfo new: (operands at: 2));
 			markAsDecoded;
 			yourself
 	]
@@ -106,10 +106,10 @@ SWClass >> defineTypeOf: aName is: aType [
 ]
 
 { #category : #'as yet unclassified' }
-SWClass >> definedMethod: aCallee ifAbsent: absentBlock [
+SWClass >> definedMethod: selector with: operands ifAbsent: absentBlock [
 
-	^ self generator at: aCallee method selector ifPresent: [ :gen |
-		gen value: aCallee
+	^ self generator at: selector ifPresent: [ :gen |
+		gen value: operands
 	] ifAbsent: [
 		absentBlock value
 	].
@@ -237,6 +237,14 @@ SWClass >> readyGenerator [
 		defineMethodReturnsReceiver: #error:;
 		defineMethodReturnsReceiversInstance: #basicNew;
 		defineMethodReturnsReceiversInstance: #basicNew:
+
+]
+
+{ #category : #'as yet unclassified' }
+SWClass >> setBreakpointOn: aName [
+	self generator at: aName put: [ :aCallee |
+		self error
+	]
 
 ]
 
