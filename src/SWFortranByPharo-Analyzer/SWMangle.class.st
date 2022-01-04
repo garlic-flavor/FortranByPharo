@@ -4,7 +4,7 @@ I generate mangled name from a class.
 Class {
 	#name : #SWMangle,
 	#superclass : #Object,
-	#category : #'SWFortranByPharo-Client-Analyzer'
+	#category : #'SWFortranByPharo-Analyzer-Method'
 }
 
 { #category : #api }

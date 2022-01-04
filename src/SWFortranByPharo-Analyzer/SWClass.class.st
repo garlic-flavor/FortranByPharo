@@ -13,7 +13,7 @@ Class {
 		'sourceHash',
 		'slot'
 	],
-	#category : #'SWFortranByPharo-Client-Analyzer'
+	#category : #'SWFortranByPharo-Analyzer-Class'
 }
 
 { #category : #'as yet unclassified' }
@@ -73,6 +73,17 @@ SWClass >> defineMethodReturnsReceiver: aName [
 			return: aCallee stack first;
 			markAsDecoded;
 			yourself
+	]
+
+]
+
+{ #category : #'as yet unclassified' }
+SWClass >> defineMethodReturnsReceiversClass: aName [
+	self generator at: aName put: [:aCallee |
+		(SWCompiledCodeInfo newFrom: aCallee)
+			return: (SWVariableTypeInfo new: aCallee receiverClass classSide);
+			markAsDecoded;
+			yourself.
 	]
 
 ]

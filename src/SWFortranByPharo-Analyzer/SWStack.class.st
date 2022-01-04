@@ -6,7 +6,7 @@ index 1 indicates the first argument of the method.
 Class {
 	#name : #SWStack,
 	#superclass : #SWSlot,
-	#category : #'SWFortranByPharo-Client-Analyzer'
+	#category : #'SWFortranByPharo-Analyzer-Slot'
 }
 
 { #category : #accessing }

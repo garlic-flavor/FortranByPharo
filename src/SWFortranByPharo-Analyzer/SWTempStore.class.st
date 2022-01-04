@@ -9,7 +9,7 @@ Class {
 		'names',
 		'currentName'
 	],
-	#category : #'SWFortranByPharo-Client-Analyzer'
+	#category : #'SWFortranByPharo-Analyzer-Slot'
 }
 
 { #category : #enumerating }

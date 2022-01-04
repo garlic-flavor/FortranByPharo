@@ -13,7 +13,7 @@ Class {
 		'payload',
 		'priority'
 	],
-	#category : #'SWFortranByPharo-Client-Analyzer'
+	#category : #'SWFortranByPharo-Analyzer-Type'
 }
 
 { #category : #'private - utilities' }

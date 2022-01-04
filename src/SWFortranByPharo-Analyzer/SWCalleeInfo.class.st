@@ -9,7 +9,7 @@ Class {
 		'stack',
 		'sourceHash'
 	],
-	#category : #'SWFortranByPharo-Client-Analyzer'
+	#category : #'SWFortranByPharo-Analyzer-Method'
 }
 
 { #category : #constants }

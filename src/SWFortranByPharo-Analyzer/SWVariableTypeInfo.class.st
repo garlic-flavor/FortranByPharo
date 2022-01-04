@@ -14,7 +14,7 @@ Class {
 		'owner',
 		'pc'
 	],
-	#category : #'SWFortranByPharo-Client-Analyzer'
+	#category : #'SWFortranByPharo-Analyzer-Type'
 }
 
 { #category : #'instance creation' }

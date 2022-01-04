@@ -12,7 +12,7 @@ Class {
 		'numTemps',
 		'messages'
 	],
-	#category : #'SWFortranByPharo-Client-Analyzer'
+	#category : #'SWFortranByPharo-Analyzer-Method'
 }
 
 { #category : #accessing }

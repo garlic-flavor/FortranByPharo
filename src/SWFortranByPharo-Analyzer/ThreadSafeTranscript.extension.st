@@ -1,6 +1,6 @@
 Extension { #name : #ThreadSafeTranscript }
 
-{ #category : #'*SWFortranByPharo-Client' }
+{ #category : #'*SWFortranByPharo-Analyzer' }
 ThreadSafeTranscript class >> initializeInstanceSideTranspiler: aCT [
 	aCT targetClass isInstanceSide ifTrue: [
  		aCT

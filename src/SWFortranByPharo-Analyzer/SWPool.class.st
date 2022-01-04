@@ -8,23 +8,8 @@ Class {
 		'payload',
 		'transpilerClass'
 	],
-	#category : #'SWFortranByPharo-Client-Analyzer'
+	#category : #'SWFortranByPharo-Analyzer-Global'
 }
-
-{ #category : #'code generation' }
-SWPool class >> defaultTranspilerFor: aSelector [
-
-	aSelector = #at:ifAbsent: ifTrue: [
-		^ [:args |
-			(SWCompiledCodeInfo new)
-				return: (SWVariableTypeInfo new: (args at: 2));
-				markAsDecoded;
-				yourself
-		]
-	].
-
-	self error.
-]
 
 { #category : #utils }
 SWPool class >> search: selector in: aClass [

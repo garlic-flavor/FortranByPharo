@@ -9,7 +9,7 @@ Class {
 		'tempStore',
 		'pool'
 	],
-	#category : #'SWFortranByPharo-Client-Analyzer'
+	#category : #'SWFortranByPharo-Analyzer-Method'
 }
 
 { #category : #private }

@@ -1,6 +1,6 @@
 Extension { #name : #ZnSingleThreadedServer }
 
-{ #category : #'*SWFortranByPharo-Client' }
+{ #category : #'*SWFortranByPharo-Analyzer' }
 ZnSingleThreadedServer class >> initializeInstanceSideTranspiler: aTranspiler [
 
 	aTranspiler
