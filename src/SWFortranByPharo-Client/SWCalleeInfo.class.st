@@ -164,7 +164,13 @@ SWCalleeInfo >> method: aMethod [
 
 { #category : #accessing }
 SWCalleeInfo >> operands [
-	^ self stack copyFrom: 0 to: self method numArgs
+	method class = CompiledMethod ifTrue: [
+		^ self stack copyFrom: 0 to: self method numArgs
+	].
+	method class = ByteSymbol ifTrue: [
+		^ #()
+	].
+	self error
 ]
 
 { #category : #copying }
@@ -186,6 +192,19 @@ SWCalleeInfo >> putOn: aStream [
 { #category : #NOCompletion }
 SWCalleeInfo >> receiverClass [
 	^ (self stack at: 0) value
+]
+
+{ #category : #accessing }
+SWCalleeInfo >> selector [
+	method class = CompiledMethod ifTrue: [
+		^ method selector
+	].
+
+	method class = ByteSymbol ifTrue: [
+		^ method
+	].
+
+	self error
 ]
 
 { #category : #accessing }

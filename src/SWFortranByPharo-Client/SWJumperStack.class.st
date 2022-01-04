@@ -37,11 +37,13 @@ SWJumperStack >> pop [
 
 { #category : #accessing }
 SWJumperStack >> pushAt: pc period: aPeriod size: size [
-	(0 < self payload size and: [ self payload top key = pc ]) ifTrue: [
-		(self payload)
-			pop;
-			push: (aPeriod -> size)
-	] ifFalse: [
-		self payload push: (aPeriod -> size)
-	]
+	self payload push: (aPeriod -> size)
+
+]
+
+{ #category : #accessing }
+SWJumperStack >> update: aPeriod [
+
+	self payload push: (aPeriod -> self pop).
+
 ]

@@ -51,7 +51,7 @@ SWClass >> defineMethod: aName as: rType [
 { #category : #'as yet unclassified' }
 SWClass >> defineMethodReturnsFirstArgument: aName [
 	|method info ret|
-
+self halt.
 	method := aName class = CompiledMethod ifTrue: [ aName ] ifFalse: [ self targetClass>>aName ].
 	info := SWCompiledCodeInfo new
 		method: method;
@@ -79,9 +79,9 @@ SWClass >> defineMethodReturnsReceiver: aName [
 
 { #category : #'as yet unclassified' }
 SWClass >> defineMethodReturnsReceiversInstance: aName [
-	self generator at: aName put: [:operands |
-		SWCompiledCodeInfo new
-			return: (SWVariableTypeInfo new: operands first value instanceSide);
+	self generator at: aName put: [:aCallee |
+		(SWCompiledCodeInfo newFrom: aCallee)
+			return: (SWVariableTypeInfo new: aCallee receiverClass instanceSide);
 			markAsDecoded;
 			yourself.
 	]
@@ -90,9 +90,9 @@ SWClass >> defineMethodReturnsReceiversInstance: aName [
 
 { #category : #'as yet unclassified' }
 SWClass >> defineMethodReturnsSecondArgument: aName [
-	self generator at: aName put: [ :operands |
-		SWCompiledCodeInfo new
-			return: (SWVariableTypeInfo new: (operands at: 2));
+	self generator at: aName put: [ :aCallee |
+		(SWCompiledCodeInfo newFrom: aCallee)
+			return: (aCallee stack at: 2);
 			markAsDecoded;
 			yourself
 	]
@@ -106,10 +106,10 @@ SWClass >> defineTypeOf: aName is: aType [
 ]
 
 { #category : #'as yet unclassified' }
-SWClass >> definedMethod: selector with: operands ifAbsent: absentBlock [
+SWClass >> definedMethod: aCallee ifAbsent: absentBlock [
 
-	^ self generator at: selector ifPresent: [ :gen |
-		gen value: operands
+	^ self generator at: aCallee selector ifPresent: [ :gen |
+		gen value: aCallee
 	] ifAbsent: [
 		absentBlock value
 	].
@@ -163,13 +163,11 @@ SWClass >> methods: anObject [
 ]
 
 { #category : #accessing }
-SWClass >> newMethodTranspiler: aMethod with: args [
-	|callee|
-	callee := SWCalleeInfo new: aMethod with: args.
+SWClass >> newMethodTranspiler: aCallee [
 
-	^ self methods detect: [ :one | one = callee ] ifNone: [|transpiler|
-		transpiler := self definedMethod: callee ifAbsent: [
-			(self transpilerClass newFrom: callee)
+	^ self methods detect: [ :one | one = aCallee ] ifNone: [|transpiler|
+		transpiler := self definedMethod: aCallee ifAbsent: [
+			(self transpilerClass newFrom: aCallee)
 				classInfo: self;
 				pool: self pool;
 				yourself.

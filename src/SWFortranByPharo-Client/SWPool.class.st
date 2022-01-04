@@ -55,37 +55,14 @@ SWPool >> newClassTranspiler: aClass [
 
 { #category : #'instance creation' }
 SWPool >> newMethodTranspiler: aSelector supered: supered with: args [
-	|method|
+	|method callee methodClass|
 
 	method := self class search: aSelector
 		in: (supered ifTrue: [ args first value superclass ] ifFalse: [ args first value ]).
-	^ method ifNotNil: [
-		(self newClassTranspiler: method methodClass)
-			newMethodTranspiler: method with: args.
-	] ifNil: [
-		self halt.
-		(self class defaultTranspilerFor: aSelector)
-			value: args
-	]
-	
-
-]
-
-{ #category : #'instance creation' }
-SWPool >> newMethodTranspiler: aSelector with: args [
-	|method|
-
-	method := self class search: aSelector in: args first value.
-
-	^ method ifNotNil: [
-		(self newClassTranspiler: method methodClass)
-			newMethodTranspiler: method with: args.
-	] ifNil: [
-		self halt.
-		(self class defaultTranspilerFor: aSelector)
-			value: args
-	]
-	
+	callee := SWCalleeInfo new: (method ifNotNil: [ method ] ifNil: [ aSelector ]) with: args.
+	methodClass := (method ifNotNil: [ method methodClass ] ifNil: [ UndefinedObject ] ).
+	^ (self newClassTranspiler: methodClass)
+		newMethodTranspiler: callee
 
 ]
 

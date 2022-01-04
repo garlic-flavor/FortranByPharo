@@ -18,7 +18,10 @@ SWStackAnalyzer >> addBytecode: description [
 	super addBytecode: description.
 	(self jumperStack nextPeriodIs: scanner pc) ifFalse: [ ^ self  ].
 	beforeSize := self jumperStack pop.
-	[ self stack size < beforeSize ] whileTrue: [ self mergeStackTopAndSecond ]
+	(beforeSize = self stack size) ifTrue: [ ^ self ].
+	(beforeSize + 1 = self stack size) ifTrue: [ self stack pop. ^ self ].
+	(beforeSize + 2 = self stack size) ifTrue: [ self mergeStackTopAndSecond. ^ self ].
+	self error.
 
 ]
 
@@ -72,7 +75,7 @@ SWStackAnalyzer >> doPop [
 
 { #category : #'instruction decoding' }
 SWStackAnalyzer >> jump: offset [
-	self jumperStack pushAt: scanner pc period: scanner pc + offset size: self stack size.
+	self jumperStack update: scanner pc + offset.
 	super jump: offset.
 	
 ]
