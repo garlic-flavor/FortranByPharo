@@ -43,7 +43,6 @@ SWJumperStack >> pushAt: pc period: aPeriod size: size [
 
 { #category : #accessing }
 SWJumperStack >> update: aPeriod [
-
 	self payload push: (aPeriod -> self pop).
 
 ]

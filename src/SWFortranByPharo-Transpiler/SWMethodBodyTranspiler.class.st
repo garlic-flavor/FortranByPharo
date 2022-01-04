@@ -9,12 +9,17 @@ Class {
 		'type',
 		'messageNest'
 	],
-	#category : #'SWFortranByPharo-Client-Transpiler'
+	#category : #'SWFortranByPharo-Transpiler-Common'
 }
+
+{ #category : #constants }
+SWMethodBodyTranspiler class >> mangleClass [
+	^ self subclassResponsibility 
+]
 
 { #category : #utils }
 SWMethodBodyTranspiler class >> messageTranspilerMethodNameFor: aSelector [
-	^ ((self safeSelectorNameOf: aSelector), 'For:With:') asSymbol
+	^ ((self mangleClass safeSelectorNameOf: aSelector), 'For:With:') asSymbol
 ]
 
 { #category : #utils }
@@ -30,7 +35,7 @@ SWMethodBodyTranspiler class >> search: selector in: aClass [
 { #category : #utils }
 SWMethodBodyTranspiler class >> uniqueMessageTranspilerNameFor: aSelector for: type [
 	^ (String streamContents: [ :s |
-		s << type; <<  '_'; << (self safeSelectorNameOf: aSelector); << 'With:Using:'
+		s << type; <<  '_'; << (self mangleClass safeSelectorNameOf: aSelector); << 'With:Using:'
 	]) asSymbol
 	
 
@@ -271,7 +276,7 @@ SWMethodBodyTranspiler >> putOrdinaryMessage: aNode withReceiver: aRNode [
 	aNode selector first isLetter ifTrue: [
 		self
 			putClassAccessor;
-			put: (self pool new: (self messages at: aNode)) mangledName;
+			put: (self class mangleClass mangle: (self messages at: aNode));
 			putArguments: aNode arguments.
 	] ifFalse: [
 		self

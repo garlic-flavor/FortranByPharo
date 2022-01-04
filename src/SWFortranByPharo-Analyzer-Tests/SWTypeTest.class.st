@@ -4,7 +4,7 @@ A SWTypeTest is a test class for testing the behavior of SWType
 Class {
 	#name : #SWTypeTest,
 	#superclass : #TestCase,
-	#category : #'SWFortranByPharo-Client-Tests-Analyzer'
+	#category : #'SWFortranByPharo-Analyzer-Tests-Type'
 }
 
 { #category : #tests }
@@ -15,7 +15,7 @@ SWTypeTest >> testBasics [
 	self assert: type1 priority equals: SWType exactTypePriority.
 
 	type1 := SWType new: nil.
-	self assert: type1 value equals: nil.
+	self assert: type1 value equals: nil class.
 	self assert: type1 priority equals: SWType defaultPriority.
 
 	type1 := SWType new: nil class.
@@ -68,6 +68,6 @@ SWTypeTest >> testPutOn [
 	t := SWType new: SmallInteger with: SWType exactTypePriority.
 	self assert: (String streamContents: [ :s |
 		s << t
-	]) equals: 'SmallInteger:exactTypePriority'
+	]) equals: 'SmallInteger:exactType'
 
 ]

@@ -4,8 +4,19 @@ I generate mangled name from a class.
 Class {
 	#name : #SWMangle,
 	#superclass : #Object,
-	#category : #'SWFortranByPharo-Analyzer-Method'
+	#category : #'SWFortranByPharo-Transpiler-Common'
 }
+
+{ #category : #'as yet unclassified' }
+SWMangle class >> mangle: aCallee [
+	aCallee method class = CompiledMethod ifTrue: [
+		^ self methodNameOf: aCallee method with: aCallee operands
+	].
+
+	aCallee method class = ByteSymbol ifTrue: [
+		^ self safeSelectorNameOf: aCallee method
+	].
+]
 
 { #category : #api }
 SWMangle class >> methodNameOf: method with: args [

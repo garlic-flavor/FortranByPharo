@@ -7,7 +7,7 @@ Class {
 	#instVars : [
 		'slot'
 	],
-	#category : #'SWFortranByPharo-Client-Tests-Analyzer'
+	#category : #'SWFortranByPharo-Analyzer-Tests-Slot'
 }
 
 { #category : #running }
@@ -28,6 +28,17 @@ SWSlotTest >> testAllocate [
 
 	slot allocate: 5.
 	self assert: slot size equals: 5.
+]
+
+{ #category : #tests }
+SWSlotTest >> testAt [
+	(slot at: 1) << Integer.
+	self assert: slot size equals: 1.
+	self assert: (slot at: 1) value equals: Integer.
+	
+	(slot at: 3) << Number.
+	self assert: slot size equals: 3.
+	self assert: (slot at: 2) value equals: UndefinedObject.
 ]
 
 { #category : #test }

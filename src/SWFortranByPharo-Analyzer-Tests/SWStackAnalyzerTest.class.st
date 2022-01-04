@@ -1,7 +1,7 @@
 Class {
 	#name : #SWStackAnalyzerTest,
 	#superclass : #TestCase,
-	#category : #'SWFortranByPharo-Client-Tests-Analyzer'
+	#category : #'SWFortranByPharo-Analyzer-Tests-Method'
 }
 
 { #category : #'tests - source' }
@@ -50,7 +50,7 @@ SWStackAnalyzerTest >> _06_method_call [
 	^ SWStd print: 'hoge!'
 ]
 
-{ #category : #'as yet unclassified' }
+{ #category : #'tests - source' }
 SWStackAnalyzerTest >> _08_ZnServer [
 
 	ZnServer startDefaultOn: 50000.

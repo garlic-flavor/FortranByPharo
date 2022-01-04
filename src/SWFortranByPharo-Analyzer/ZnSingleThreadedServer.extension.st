@@ -4,5 +4,6 @@ Extension { #name : #ZnSingleThreadedServer }
 ZnSingleThreadedServer class >> initializeInstanceSideTranspiler: aTranspiler [
 
 	aTranspiler
-		defineMethodReturnsReceiver: #stop:
+		defineMethodReturnsReceiver: #stop:;
+		defineMethodReturnsReceiver: #start
 ]

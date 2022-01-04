@@ -12,8 +12,24 @@ Class {
 	#category : #'SWFortranByPharo-Analyzer-Slot'
 }
 
+{ #category : #utils }
+SWTempStore class >> nextTemporalVariableNameOf: prevName [
+	^ prevName isEmptyOrNil ifTrue: [
+		'a'
+	] ifFalse: [|counter|
+		counter := prevName last.
+		counter := Character value: counter charCode + 1.
+		(counter between: $a and: $z) ifTrue: [
+			(prevName copyFrom: 1 to: prevName size - 1), counter asString
+		] ifFalse: [
+			(self nextTemporalVariableNameOf: (prevName copyFrom: 1 to: prevName size - 1)), 'a'
+		]
+	].
+]
+
 { #category : #enumerating }
 SWTempStore >> detect: detectBlock ifNone: noneBlock [
+	self halt.
 	^ payload detect: detectBlock ifNone: noneBlock
 ]
 
@@ -30,7 +46,7 @@ SWTempStore >> method: aMethod [
 
 { #category : #private }
 SWTempStore >> nextName [
-	currentName := SWVariableTypeInfo nextTemporalVariableNameOf: currentName.
+	currentName := self class nextTemporalVariableNameOf: currentName.
 	^ (names anySatisfy: [ :each | each = currentName ]) ifTrue: [
 		self nextName
 	] ifFalse: [

@@ -10,10 +10,15 @@ Class {
 	#category : #'SWFortranByPharo-Analyzer-Slot'
 }
 
+{ #category : #'as yet unclassified' }
+SWSlot class >> elementClass [
+	^ SWVariableTypeInfo
+]
+
 { #category : #'instance creation' }
 SWSlot >> allocate: size [
 	[ self payload size < size ] whileTrue: [
-		self payload add:  SWVariableTypeInfo
+		self payload add:  self class elementClass new
 	]
 ]
 
@@ -24,7 +29,7 @@ SWSlot >> asArray [
 
 { #category : #accessing }
 SWSlot >> at: index [
-	^ self payload at: index ifAbsentPut: [ SWVariableTypeInfo new ].
+	^ self payload at: index ifAbsentPut: [ self class elementClass new ].
 ]
 
 { #category : #accessing }
@@ -38,16 +43,6 @@ SWSlot >> atOffset: offset [
 SWSlot >> copyFrom: start to: end [
 	self allocate: end.
 	^ self payload copyFrom: start to: end
-]
-
-{ #category : #enumerating }
-SWSlot >> detect: aNeedle [
-	^ self payload detect: aNeedle
-]
-
-{ #category : #enumerating }
-SWSlot >> detect: needle ifNone: noneBlock [
-	^ self payload detect: needle ifNone: noneBlock
 ]
 
 { #category : #accessing }
@@ -65,17 +60,6 @@ SWSlot >> payload [
 SWSlot >> payload: anObject [
 
 	payload := anObject
-]
-
-{ #category : #copying }
-SWSlot >> postCopy [
-	super postCopy.
-	payload := payload collect: [ :e | e copy ]
-]
-
-{ #category : #accessing }
-SWSlot >> second [
-	^ self payload second
 ]
 
 { #category : #accessing }

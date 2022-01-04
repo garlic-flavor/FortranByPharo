@@ -70,7 +70,7 @@ SWPool >> printOn: aStream [
 
 { #category : #streaming }
 SWPool >> putOn: aStream [
-	aStream << (self hash % 16rFFFF) printStringHex
+	aStream << $#; << (self hash % 16rFFFF) printStringHex
 ]
 
 { #category : #enumerating }

@@ -4,7 +4,7 @@ Class {
 	#instVars : [
 		'stack'
 	],
-	#category : #'SWFortranByPharo-Client-Tests-Analyzer'
+	#category : #'SWFortranByPharo-Analyzer-Tests-Slot'
 }
 
 { #category : #initialization }
@@ -28,7 +28,7 @@ SWStackTest >> testAt [
 		assert: (stack at: 0) equals: 1;
 		assert: (stack at: 1) equals: 2;
 		assert: (stack at: 3) equals: 4;
-		assert: (stack at: 4) value equals: nil;
+		assert: (stack at: 4) value equals: UndefinedObject;
 		should: [stack at:  -1] raise: SubscriptOutOfBounds
 ]
 

@@ -7,7 +7,7 @@ Class {
 	#instVars : [
 		'pool'
 	],
-	#category : #'SWFortranByPharo-Client-Tests-Analyzer'
+	#category : #'SWFortranByPharo-Analyzer-Tests-Global'
 }
 
 { #category : #running }
@@ -15,15 +15,4 @@ SWPoolTest >> setUp [
 	super setUp.
 	
 	pool := SWStackAnalyzer newDefaultPool
-]
-
-{ #category : #tests }
-SWPoolTest >> testBasics [
-	|mf|
-	mf := SWMethodFinder new
-		selector: #main;
-		args: { SWServer class };
-		yourself.
-	pool new: mf.
-	self error.
 ]

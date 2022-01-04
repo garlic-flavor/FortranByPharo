@@ -1,7 +1,7 @@
 Class {
 	#name : #SWMBTofJSTest,
 	#superclass : #TestCase,
-	#category : #'SWFortranByPharo-Client-Tests-Transpiler'
+	#category : #'SWFortranByPharo-Transpiler-Tests'
 }
 
 { #category : #'as yet unclassified' }

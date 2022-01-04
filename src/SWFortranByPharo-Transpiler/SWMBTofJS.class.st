@@ -4,12 +4,17 @@ I transpile Pharo to ECMAScript.
 Class {
 	#name : #SWMBTofJS,
 	#superclass : #SWMethodBodyTranspiler,
-	#category : #'SWFortranByPharo-Client-Transpiler'
+	#category : #'SWFortranByPharo-Transpiler-JS'
 }
+
+{ #category : #constants }
+SWMBTofJS class >> mangleClass [
+	^ SWMangleOfJS 
+]
 
 { #category : #accessing }
 SWMBTofJS >> mangledName [
-	^ self class safeSelectorNameOf: (method class = ByteSymbol ifTrue: [ method ] ifFalse: [ self method selector ])
+	^ self class mangleClass safeSelectorNameOf: (method class = ByteSymbol ifTrue: [ method ] ifFalse: [ self method selector ])
 ]
 
 { #category : #'code generation' }

@@ -4,7 +4,7 @@ Class {
 	#instVars : [
 		'var1'
 	],
-	#category : #'SWFortranByPharo-Client-Tests-Analyzer'
+	#category : #'SWFortranByPharo-Analyzer-Tests-Method'
 }
 
 { #category : #accessing }

@@ -12,11 +12,6 @@ Class {
 	#category : #'SWFortranByPharo-Analyzer-Method'
 }
 
-{ #category : #constants }
-SWCalleeInfo class >> mangleClass [
-	^ SWMangle
-]
-
 { #category : #'instance creation' }
 SWCalleeInfo class >> new: aMethod [
 	aMethod isBlock ifTrue: [
@@ -186,7 +181,7 @@ SWCalleeInfo >> printOn: aStream [
 
 { #category : #printing }
 SWCalleeInfo >> putOn: aStream [
-	aStream << (method class = CompiledMethod ifTrue: [ method name ] ifFalse: [ 'block' ])
+	aStream << self selector
 ]
 
 { #category : #NOCompletion }
@@ -204,7 +199,7 @@ SWCalleeInfo >> selector [
 		^ method
 	].
 
-	self error
+	^ #closure
 ]
 
 { #category : #accessing }
@@ -217,7 +212,7 @@ SWCalleeInfo >> selector: aSelector [
 SWCalleeInfo >> sourceHash [
 	^ SHA256 hashStream: (
 		(ReadWriteStream with: '')
-			<< self mangledName;
+			<< (self operands collect: [ :each | each value asString ]);
 			cr;
 			<< self method sourceCode;
 			reset;

@@ -4,7 +4,7 @@ A SWTypeGroupTest is a test class for testing the behavior of SWTypeGroup
 Class {
 	#name : #SWTypeGroupTest,
 	#superclass : #TestCase,
-	#category : #'SWFortranByPharo-Client-Tests-Analyzer'
+	#category : #'SWFortranByPharo-Client-Tests-Deprecated'
 }
 
 { #category : #test }

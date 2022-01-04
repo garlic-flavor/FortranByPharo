@@ -4,7 +4,7 @@ A SWVariableTypeInfoTest is a test class for testing the behavior of SWVariableT
 Class {
 	#name : #SWVariableTypeInfoTest,
 	#superclass : #TestCase,
-	#category : #'SWFortranByPharo-Client-Tests-Analyzer'
+	#category : #'SWFortranByPharo-Analyzer-Tests-Type'
 }
 
 { #category : #utilities }
@@ -36,24 +36,11 @@ SWVariableTypeInfoTest >> testLessThanLessThan [
 	v2 := SWVariableTypeInfo new: String.
 	v2 << v1.
 	self assert: v2 value equals: String.
-	self assert: v1 value equals: String.
-	self assert: v1 priority equals: SWType exactTypePriority.
+	self assert: v1 priority equals: SWType unknownMethodPriority.
+
 	v1 << (SWVariableTypeInfo new: Number with: SWType userSpecifyingPriority).
 	self assert: v1 value equals: Number.
-	self assert: v2 value equals: Number.
-	self assert: v2 priority equals: SWType userSpecifyingPriority.
-]
-
-{ #category : #tests }
-SWVariableTypeInfoTest >> testNextTemporalVariableNameOf [
-
-	| tmp1 tmp3 |
-	tmp1 := Set new.
-	tmp3 := nil.
-	256 timesRepeat: [ 
-		tmp3 := SWVariableTypeInfo nextTemporalVariableNameOf: tmp3.
-		self deny: (tmp1 includes: tmp3).
-		tmp1 add: tmp3 ]
+	self assert: v1 priority equals: SWType userSpecifyingPriority.
 ]
 
 { #category : #test }
@@ -64,13 +51,13 @@ SWVariableTypeInfoTest >> testPutOn [
 		name: 'hogehoge';
 		stackPos: 3
 		yourself.
-	self putOnOf: vi mustMatchesWith: '\[3\] hogehoge <SmallInteger\:exactTypePriority#.{4}> << 0'.
+	self putOnOf: vi mustMatchesWith: '\[3\] hogehoge <SmallInteger\:exactType>'.
 	
 	vi := (SWVariableTypeInfo new: [SmallInteger])
 		yourself.
-	self putOnOf: vi mustMatchesWith: '\[-\] nil <lazy\:unknownMethodPriority#.{4}> << 0'.
+	self putOnOf: vi mustMatchesWith: '\[-\] nil <lazy\:unknownMethod>'.
 	
 	vi := SWVariableTypeInfo new.
-	self putOnOf: vi mustMatchesWith: '\[-\] nil <nil\:defaultPriority#.{4}> << 0'.
+	self putOnOf: vi mustMatchesWith: '\[-\] nil <nil\:default>'.
 
 ]
