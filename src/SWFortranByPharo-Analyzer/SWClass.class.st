@@ -16,28 +16,7 @@ Class {
 	#category : #'SWFortranByPharo-Analyzer-Class'
 }
 
-{ #category : #'as yet unclassified' }
-SWClass class >> installClassInfoBuilderFor: aClass [
-	|pool|
-	self halt.
-	pool := SWPool new
-		transpilerClass: SWStackAnalyzer;
-		onClassAdded: [ :c |
-			Transcript show: 'class: '; show: c targetClass name; cr
-		];
-		onMethodAdded: [ :mi |
-			Transcript show: 'method: '; show: mi method selector; cr.
-			mi classInfo isToTranspile ifTrue: [ mi decode ]
-		];
-		yourself.
-	aClass methodDict valuesDo: [ :method |
-		(pool new: method with: {aClass}) decode
-	].
-	self flag: #toImplement.
-	^ pool payload at: aClass instanceSide
-]
-
-{ #category : #'as yet unclassified' }
+{ #category : #api }
 SWClass >> defineMethod: aName as: rType [
 	self generator at: aName put: [ :aCallee |
 		(SWCompiledCodeInfo newFrom: aCallee)
@@ -48,7 +27,7 @@ SWClass >> defineMethod: aName as: rType [
 
 ]
 
-{ #category : #'as yet unclassified' }
+{ #category : #api }
 SWClass >> defineMethodReturnsFirstArgument: aName [
 	|method info ret|
 self halt.
@@ -66,7 +45,7 @@ self halt.
 
 ]
 
-{ #category : #'as yet unclassified' }
+{ #category : #api }
 SWClass >> defineMethodReturnsReceiver: aName [
 	self generator at: aName put: [ :aCallee |
 		(SWCompiledCodeInfo newFrom: aCallee)
@@ -77,7 +56,7 @@ SWClass >> defineMethodReturnsReceiver: aName [
 
 ]
 
-{ #category : #'as yet unclassified' }
+{ #category : #api }
 SWClass >> defineMethodReturnsReceiversClass: aName [
 	self generator at: aName put: [:aCallee |
 		(SWCompiledCodeInfo newFrom: aCallee)
@@ -88,7 +67,7 @@ SWClass >> defineMethodReturnsReceiversClass: aName [
 
 ]
 
-{ #category : #'as yet unclassified' }
+{ #category : #api }
 SWClass >> defineMethodReturnsReceiversInstance: aName [
 	self generator at: aName put: [:aCallee |
 		(SWCompiledCodeInfo newFrom: aCallee)
@@ -99,7 +78,7 @@ SWClass >> defineMethodReturnsReceiversInstance: aName [
 
 ]
 
-{ #category : #'as yet unclassified' }
+{ #category : #api }
 SWClass >> defineMethodReturnsSecondArgument: aName [
 	self generator at: aName put: [ :aCallee |
 		(SWCompiledCodeInfo newFrom: aCallee)
@@ -109,14 +88,14 @@ SWClass >> defineMethodReturnsSecondArgument: aName [
 	]
 ]
 
-{ #category : #'as yet unclassified' }
+{ #category : #api }
 SWClass >> defineTypeOf: aName is: aType [
 
 	(self getVariableInfoOf: aName) << aType
 
 ]
 
-{ #category : #'as yet unclassified' }
+{ #category : #private }
 SWClass >> definedMethod: aCallee ifAbsent: absentBlock [
 
 	^ self generator at: aCallee selector ifPresent: [ :gen |
@@ -173,7 +152,7 @@ SWClass >> methods: anObject [
 	methods := anObject
 ]
 
-{ #category : #accessing }
+{ #category : #'instance creation' }
 SWClass >> newMethodTranspiler: aCallee [
 
 	^ self methods detect: [ :one | one = aCallee ] ifNone: [|transpiler|
@@ -203,27 +182,12 @@ SWClass >> pool: anObject [
 	pool := anObject
 ]
 
-{ #category : #printing }
-SWClass >> printInitializerOn: aStream [
-	self halt.
-	aStream
-		<< 'predefinedClassInfo'; cr;
-		tab; << '^ '; << self class name; space; << 'new'; cr;
-		tab; tab; << 'targetClass: '; << self targetClass name; << ';'; cr;
-		tab; tab; << 'yourself'
-]
-
-{ #category : #printing }
-SWClass >> printOn: aStream [
-	self putOn: aStream
-]
-
 { #category : #streaming }
 SWClass >> putOn: aStream [
 	aStream << self targetClass name
 ]
 
-{ #category : #'code generation - accessing' }
+{ #category : #initialization }
 SWClass >> ready [
 	|initializer|
 	initializer := targetClass isInstanceSide
@@ -234,7 +198,7 @@ SWClass >> ready [
 
 ]
 
-{ #category : #'as yet unclassified' }
+{ #category : #initialization }
 SWClass >> readyGenerator [
 	self
 		defineMethod: #= as: Boolean;
@@ -249,7 +213,7 @@ SWClass >> readyGenerator [
 
 ]
 
-{ #category : #'as yet unclassified' }
+{ #category : #api }
 SWClass >> setBreakpointOn: aName [
 	self generator at: aName put: [ :aCallee |
 		self error

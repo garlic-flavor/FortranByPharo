@@ -158,7 +158,7 @@ SWVariableTypeInfo >> property: propName [
 	^ self properties at: propName ifAbsent: nil
 ]
 
-{ #category : #printing }
+{ #category : #streaming }
 SWVariableTypeInfo >> putOn: aStream [
 	aStream
 		<< $[;

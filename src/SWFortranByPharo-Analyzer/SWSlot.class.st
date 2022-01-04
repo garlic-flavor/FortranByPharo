@@ -10,7 +10,7 @@ Class {
 	#category : #'SWFortranByPharo-Analyzer-Slot'
 }
 
-{ #category : #'as yet unclassified' }
+{ #category : #accessing }
 SWSlot class >> elementClass [
 	^ SWVariableTypeInfo
 ]

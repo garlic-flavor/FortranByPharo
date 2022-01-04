@@ -115,7 +115,7 @@ SWCompiledCodeInfo >> return: anObject [
 	return := anObject
 ]
 
-{ #category : #'as yet unclassified' }
+{ #category : #accessing }
 SWCompiledCodeInfo >> specifyReturnTypeAs: aType [
 
 	self return

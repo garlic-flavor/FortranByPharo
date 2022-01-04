@@ -36,7 +36,7 @@ SWStack >> pop [
 	^ self payload removeLast.
 ]
 
-{ #category : #affecting }
+{ #category : #removing }
 SWStack >> pop: itemsCount [
 	|arr|
 	arr := self payload copyFrom: self payload size - itemsCount + 1 to: self payload size.

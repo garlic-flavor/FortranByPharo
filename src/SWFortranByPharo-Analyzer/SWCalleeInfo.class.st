@@ -5,9 +5,7 @@ Class {
 	#name : #SWCalleeInfo,
 	#superclass : #SymbolicBytecodeBuilder,
 	#instVars : [
-		'mangledName',
-		'stack',
-		'sourceHash'
+		'stack'
 	],
 	#category : #'SWFortranByPharo-Analyzer-Method'
 }
@@ -84,7 +82,7 @@ SWCalleeInfo >> block: aBlock [
 
 ]
 
-{ #category : #'as yet unclassified' }
+{ #category : #accessing }
 SWCalleeInfo >> cblock: aBlock [
 	aBlock argumentNames doWithIndex: [ :name :idx |
 		(self stack at: idx)
@@ -121,20 +119,7 @@ SWCalleeInfo >> isDecoded [
 	^ oldPC isNotNil
 ]
 
-{ #category : #accessing }
-SWCalleeInfo >> mangledName [
-	^ mangledName ifNil: [
-		mangledName := self class mangleClass methodNameOf: self method with: self arguments
-	]
-]
-
-{ #category : #accessing }
-SWCalleeInfo >> mangledName: anObject [
-
-	mangledName := anObject
-]
-
-{ #category : #'as yet unclassified' }
+{ #category : #modifying }
 SWCalleeInfo >> markAsDecoded [
 	oldPC := 9999
 ]
@@ -168,12 +153,6 @@ SWCalleeInfo >> operands [
 	self error
 ]
 
-{ #category : #copying }
-SWCalleeInfo >> postCopy [
-	super postCopy.
-	self stack: self stack copy
-]
-
 { #category : #printing }
 SWCalleeInfo >> printOn: aStream [
 	self putOn: aStream
@@ -184,7 +163,7 @@ SWCalleeInfo >> putOn: aStream [
 	aStream << self selector
 ]
 
-{ #category : #NOCompletion }
+{ #category : #accessing }
 SWCalleeInfo >> receiverClass [
 	^ (self stack at: 0) value
 ]

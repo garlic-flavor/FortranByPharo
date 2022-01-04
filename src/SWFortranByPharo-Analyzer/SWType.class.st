@@ -26,7 +26,7 @@ SWType class >> calcPriorityOf: aClass [
 
 { #category : #api }
 SWType class >> declare: aName as: aType [
-	(aType = Boolean) ifTrue: [ self halt. ].
+
 	^ aName -> (self new
 		<< aType;
 		priority: self userSpecifyingPriority;
@@ -88,7 +88,7 @@ SWType class >> userSpecifyingPriority [
 	^ 100
 ]
 
-{ #category : #streaming }
+{ #category : #'accumulator ops' }
 SWType >> << rightType [
 	rightType ifNil: [ ^ self ].
 	(rightType class includesBehavior: SWType) ifTrue: [
@@ -149,7 +149,7 @@ SWType >> priority: anObject [
 	priority := anObject
 ]
 
-{ #category : #printing }
+{ #category : #streaming }
 SWType >> putOn: aStream [
 	aStream
 		<< (payload isBlock ifTrue: ['lazy'] ifFalse: [ payload asString ]);
