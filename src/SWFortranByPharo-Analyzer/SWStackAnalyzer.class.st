@@ -20,8 +20,7 @@ SWStackAnalyzer >> addBytecode: description [
 	beforeSize := self jumperStack pop.
 	(beforeSize = self stack size) ifTrue: [ ^ self ].
 	(beforeSize + 1 = self stack size) ifTrue: [ self stack pop. ^ self ].
-	(beforeSize + 2 = self stack size) ifTrue: [ self mergeStackTopAndSecond. ^ self ].
-	self error.
+	[ beforeSize + 1 < self stack size ] whileTrue: [ self mergeStackTopAndSecond ].
 
 ]
 
@@ -312,10 +311,10 @@ SWStackAnalyzer >> send: selector super: supered numArgs: numberArguments [
 
 	"A special case for user specifying."
 	(selector = #declare:as: and: [ args first easyValue = SWType class ]) ifTrue: [|assoc|
-		assoc := (((self method sourceNodeForPC: oldPC) evaluate)
+		assoc := (self method sourceNodeForPC: oldPC) evaluate.
+		(assoc value)
 			owner: self;
-			pc: oldPC;
-			yourself).
+			pc: oldPC.
 		(self variableInfoOf: assoc key) << assoc value
 	].
 	super send: selector super: supered numArgs: numberArguments.

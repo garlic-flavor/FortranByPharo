@@ -27,7 +27,7 @@ SWType class >> calcPriorityOf: aClass [
 { #category : #api }
 SWType class >> declare: aName as: aType [
 
-	^ aName -> (self new
+	^ aName -> (SWVariableTypeInfo new
 		<< aType;
 		priority: self userSpecifyingPriority;
 		yourself)
@@ -41,6 +41,12 @@ SWType class >> defaultPriority [
 { #category : #constants }
 SWType class >> exactTypePriority [
 	^ 90
+]
+
+{ #category : #initialization }
+SWType class >> initializeClassSideTranspiler: transpiler [
+	transpiler
+		defineMethod: #declare:as: as: SWVariableTypeInfo
 ]
 
 { #category : #'private - utilities' }

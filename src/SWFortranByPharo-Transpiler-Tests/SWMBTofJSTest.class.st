@@ -56,7 +56,7 @@ Transcript.cr();
 { #category : #tests }
 SWMBTofJSTest >> test_01_analyze [
 	self
-		assert: (SWStackAnalyzer new: self class>>#_01_call_Transcript with: { self class }) return value
+		assert: (SWStackAnalyzer new: self class>>#_01_call_Transcript with: { self class }) decode return value
 		equals: self class
 ]
 
@@ -73,7 +73,7 @@ SWMBTofJSTest >> test_02 [
 { #category : #tests }
 SWMBTofJSTest >> test_03_analyze [
 	self
-		assert: (SWStackAnalyzer new: self class>>#_03_user_specified_variable_type with: { self class }) return value
+		assert: (SWStackAnalyzer new: self class>>#_03_user_specified_variable_type with: { self class }) decode return value
 		equals: Integer
 ]
 

@@ -206,6 +206,7 @@ SWClass >> readyGenerator [
 		defineMethod: #~= as: Boolean;
 		defineMethod: #< as: Boolean;
 		defineMethodReturnsReceiver: #+;
+		defineMethodReturnsReceiver: #*;
 		defineMethodReturnsReceiver: #-;
 		defineMethodReturnsReceiver: #error:;
 		defineMethodReturnsReceiversInstance: #basicNew;
