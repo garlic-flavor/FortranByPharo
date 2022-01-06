@@ -1,8 +1,0 @@
-"
-I correspond to structure in C like functionality.
-"
-Class {
-	#name : #SWTypeOld,
-	#superclass : #Object,
-	#category : #'SWFortranByPharo-Client-Client-Deprecated'
-}
