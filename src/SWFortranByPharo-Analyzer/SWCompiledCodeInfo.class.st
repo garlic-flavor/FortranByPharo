@@ -129,6 +129,6 @@ SWCompiledCodeInfo >> variableInfoOf: aName [
 	^ self stack detect: [ :vi |
 		vi name = aName
 	] ifNone: [
-		self classInfo variableInfoOf: aName
+		self classInfo getVariableInfoOf: aName
 	]
 ]

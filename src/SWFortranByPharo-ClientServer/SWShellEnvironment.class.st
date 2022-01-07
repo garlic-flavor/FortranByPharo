@@ -10,7 +10,7 @@ Class {
 		'fortranCompilerAdapterClass',
 		'localDirectory'
 	],
-	#classVars : [
+	#classInstVars : [
 		'default'
 	],
 	#category : #'SWFortranByPharo-ClientServer-Shell'
@@ -20,6 +20,13 @@ Class {
 SWShellEnvironment class >> default [
 	^ default ifNil: [ default := self newDefault ]
 
+]
+
+{ #category : #initialization }
+SWShellEnvironment class >> initializeInstanceSideTranspiler: transpiler [
+
+	transpiler
+		defineMethod: #localDirectory as: FileLocator
 ]
 
 { #category : #'code generation' }

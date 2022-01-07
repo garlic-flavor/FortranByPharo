@@ -46,6 +46,11 @@ SWSlot >> copyFrom: start to: end [
 ]
 
 { #category : #enumerating }
+SWSlot >> detect: aNeedle [
+	^ self payload detect: aNeedle
+]
+
+{ #category : #enumerating }
 SWSlot >> detect: aNeedle ifNone: noneBlock [
 	^ self payload detect: aNeedle ifNone: noneBlock
 ]

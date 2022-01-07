@@ -6,7 +6,8 @@ Class {
 	#superclass : #Object,
 	#instVars : [
 		'main',
-		'modules'
+		'modules',
+		'newline'
 	],
 	#category : #'SWFortranByPharo-Transpiler-Common'
 }
@@ -21,6 +22,11 @@ SWProjectTranspiler class >> newFrom: aClass [
 	^ self new
 		main: (self mainModuleFrom: aClass);
 		yourself
+]
+
+{ #category : #api }
+SWProjectTranspiler >> decode [
+	self modules do: [ :each | each decode ]
 ]
 
 { #category : #accessing }
@@ -48,12 +54,25 @@ SWProjectTranspiler >> modules: anObject [
 	modules := anObject
 ]
 
+{ #category : #accessing }
+SWProjectTranspiler >> newline [
+
+	^ newline ifNil: [ newline := String crlf ]
+]
+
+{ #category : #accessing }
+SWProjectTranspiler >> newline: anObject [
+
+	newline := anObject.
+	self modules do: [ :each | each stream newline: anObject ]
+]
+
 { #category : #'as yet unclassified' }
 SWProjectTranspiler >> solveDependencies [
 	^ self main solveDependencies 
 ]
 
-{ #category : #'public API' }
+{ #category : #api }
 SWProjectTranspiler >> transpile [
 	self modules do: [ :each | each transpile ]
 ]

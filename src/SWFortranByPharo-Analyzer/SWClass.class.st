@@ -20,9 +20,9 @@ Class {
 SWClass >> defineMethod: aName as: rType [
 	self generator at: aName put: [ :aCallee |
 		(SWCompiledCodeInfo newFrom: aCallee)
-			specifyReturnTypeAs: rType;
+			specifyReturnTypeAs: (rType isBlock ifTrue: [ rType value: aCallee ] ifFalse: [ rType ]);
 			markAsDecoded;
-			yourself.
+			yourself
 	]
 
 ]
@@ -205,6 +205,9 @@ SWClass >> readyGenerator [
 		defineMethod: #== as: Boolean;
 		defineMethod: #~= as: Boolean;
 		defineMethod: #< as: Boolean;
+		defineMethod: #> as: Boolean;
+		defineMethod: #>= as: Boolean;
+		defineMethod: #<= as: Boolean;
 		defineMethodReturnsReceiver: #+;
 		defineMethodReturnsReceiver: #*;
 		defineMethodReturnsReceiver: #-;

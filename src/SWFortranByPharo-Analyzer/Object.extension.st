@@ -1,7 +1,13 @@
 Extension { #name : #Object }
 
 { #category : #'*SWFortranByPharo-Analyzer' }
-Object class >> initializeInstanceSideTranspiler: aCT [
-	aCT defineMethod: #subclassResponsibility as: [ :info | self error ]
-
+Object class >> initializeInstanceSideTranspiler: transpiler [
+	transpiler
+		setBreakpointOn: #subclassResponsibility;
+		defineMethod: #asString as: String;
+		defineMethod: #at: as: [ :aCallee |
+			aCallee receiverClass = String ifTrue: [ Character ] ifFalse: [
+				self halt
+			]
+		]
 ]

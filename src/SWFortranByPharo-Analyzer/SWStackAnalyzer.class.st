@@ -323,9 +323,8 @@ SWStackAnalyzer >> send: selector super: supered numArgs: numberArguments [
 
 { #category : #'instruction decoding' }
 SWStackAnalyzer >> storeIntoLiteralVariable: anAssociation [
-
-	self halt.
-	
+self halt.
+	(self variableInfoOf: anAssociation key) << self stack top.
 	super storeIntoLiteralVariable: anAssociation
 ]
 

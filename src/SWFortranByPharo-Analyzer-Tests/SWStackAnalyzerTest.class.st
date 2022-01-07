@@ -190,3 +190,11 @@ SWStackAnalyzerTest >> test_10_new [
 	self returnValueOfMy: #_10_new: withArguments: { Integer } equals: Set
 
 ]
+
+{ #category : #tests }
+SWStackAnalyzerTest >> test_11_ZnServer [
+	|sa|
+	sa := SWStackAnalyzer new: SWServer>>#startOn: with: { SWServer. SmallInteger }.
+	sa decode.
+	sa inspect.
+]

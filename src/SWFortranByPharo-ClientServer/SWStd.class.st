@@ -5,7 +5,7 @@ My main functionalities are in class side of me.
 Class {
 	#name : #SWStd,
 	#superclass : #Object,
-	#category : #'SWFortranByPharo-ClientServer-Program'
+	#category : #'SWFortranByPharo-ClientServer-Common'
 }
 
 { #category : #'code generation' }
