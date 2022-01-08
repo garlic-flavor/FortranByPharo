@@ -9,6 +9,11 @@ SWTestProgram_01 class >> main [
 	SWStd print: 'Hello, good-bye!'
 ]
 
+{ #category : #accessing }
+SWTestProgram_01 >> default [
+	^ 'hoge'
+]
+
 { #category : #'as yet unclassified' }
 SWTestProgram_01 >> hoge [
 	|dict|

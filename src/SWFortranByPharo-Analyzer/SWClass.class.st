@@ -29,19 +29,12 @@ SWClass >> defineMethod: aName as: rType [
 
 { #category : #api }
 SWClass >> defineMethodReturnsFirstArgument: aName [
-	|method info ret|
-self halt.
-	method := aName class = CompiledMethod ifTrue: [ aName ] ifFalse: [ self targetClass>>aName ].
-	info := SWCompiledCodeInfo new
-		method: method;
-		markAsDecoded;
-		yourself.
-	ret := SWVariableTypeInfo new
-		priority: SWType argumentTypePriority;
-		yourself.
-	(info stack at: 1) << ret.
-	info return << ret.
-	^ self methods at: method put: info
+	self generator at: aName put: [ :aCallee |
+		(SWCompiledCodeInfo newFrom: aCallee)
+			return: (aCallee stack at: 1);
+			markAsDecoded;
+			yourself
+	]
 
 ]
 
@@ -213,7 +206,11 @@ SWClass >> readyGenerator [
 		defineMethodReturnsReceiver: #-;
 		defineMethodReturnsReceiver: #error:;
 		defineMethodReturnsReceiversInstance: #basicNew;
-		defineMethodReturnsReceiversInstance: #basicNew:
+		defineMethodReturnsReceiversInstance: #basicNew:;
+		defineMethodReturnsSecondArgument: #at:put:;
+		defineMethodReturnsSecondArgument: #at:ifAbsent:;
+		defineMethod: #asInteger as: Integer;
+		defineMethod: #asString as: String
 
 ]
 

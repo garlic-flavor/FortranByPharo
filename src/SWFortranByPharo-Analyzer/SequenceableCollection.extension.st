@@ -4,5 +4,8 @@ Extension { #name : #SequenceableCollection }
 SequenceableCollection class >> initializeInstanceSideTranspiler: transpiler [
 	transpiler
 		defineMethodReturnsReceiver: #copyFrom:to:;
-		defineMethodReturnsReceiver: #do:
+		defineMethodReturnsReceiver: #do:;
+		defineMethodReturnsReceiver: #,;
+		defineMethod: #includes: as: Boolean;
+		defineMethod: #collect: as: Array
 ]
