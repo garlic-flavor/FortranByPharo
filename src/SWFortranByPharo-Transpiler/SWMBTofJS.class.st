@@ -22,6 +22,50 @@ SWMBTofJS >> mangledName [
 	^ self class mangleClass safeSelectorNameOf: (method class = ByteSymbol ifTrue: [ method ] ifFalse: [ self method selector ])
 ]
 
+{ #category : #'as yet unclassified' }
+SWMBTofJS >> putIfTrue: aNode [
+	self stream log.
+	
+	aNode lastIsReturn ifTrue: [
+		self
+			put: 'if(';
+			<< aNode receiver;
+			put: ')';
+			<< (aNode arguments at: 1)
+	] ifFalse: [
+		self
+			put: '(';
+			<< aNode receiver;
+			put: ') ? (function()';
+			<< (aNode arguments at: 1);
+			put: ')() : null'
+	]
+]
+
+{ #category : #'as yet unclassified' }
+SWMBTofJS >> putIfTrueIfFalse: aNode [
+	self stream log.
+	
+	aNode lastIsReturn ifTrue: [
+		self
+			put: 'if(';
+			<< aNode receiver;
+			put: ')';
+			<< (aNode arguments at: 1);
+			put: 'else ';
+			<< (aNode arguments at: 2)
+	] ifFalse: [
+		self
+			put: '(';
+			<< aNode receiver;
+			put: ') ? (function()';
+			<< (aNode arguments at: 1);
+			put: ')() : (function() { ';
+			<< (aNode arguments at: 2);
+			put: ')()'
+	]
+]
+
 { #category : #'code generation' }
 SWMBTofJS >> putSelf [
 	self put: (self method methodClass class = Metaclass ifTrue: [ self method methodClass soleInstance name ] ifFalse: [ 'this' ])

@@ -28,6 +28,16 @@ SWClassDefinitionTranspiler >> defineMethod: aName as: rType with: calleeGenerat
 ]
 
 { #category : #'as yet unclassified' }
+SWClassDefinitionTranspiler >> defineMethod: aName with: calleeGenerator [
+	self generator at: aName put: [ :aCallee |
+		(self transpilerClass newFrom: aCallee)
+			calleeGenerator: calleeGenerator;
+			yourself
+	]
+
+]
+
+{ #category : #'as yet unclassified' }
 SWClassDefinitionTranspiler >> putClassFooter [
 	^ self subclassResponsibility 
 ]

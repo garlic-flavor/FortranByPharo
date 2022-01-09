@@ -14,13 +14,18 @@ Class {
 
 { #category : #private }
 SWStackAnalyzer >> addBytecode: description [
-	|beforeSize|
+	|item node args methodInfo beforeSize|
 	super addBytecode: description.
-	(self jumperStack nextPeriodIs: scanner pc) ifFalse: [ ^ self  ].
-	beforeSize := self jumperStack pop.
-	(beforeSize = self stack size) ifTrue: [ ^ self ].
-	(beforeSize + 1 = self stack size) ifTrue: [ self stack pop. ^ self ].
-	[ beforeSize + 1 < self stack size ] whileTrue: [ self mergeStackTopAndSecond ].
+
+	(self jumperStack nextPeriodIs: scanner pc) ifFalse: [ ^ self  ]. 
+
+	"Below evaluates when ifTrue:ifFalse:."
+	item := self jumperStack pop.
+	node := self method sourceNodeForPC: item startPC.
+	args := self stack pop: self stack size - item stackSize + 1.
+	methodInfo := self pool newMethodTranspiler: node selector supered: false with: args.
+	self messages at: node put: methodInfo.
+	self stack push: methodInfo return.
 
 ]
 
@@ -81,7 +86,9 @@ SWStackAnalyzer >> jump: offset [
 
 { #category : #'instruction decoding' }
 SWStackAnalyzer >> jump: offset if: condition [
-	self jumperStack pushAt: scanner pc period: scanner pc + offset size: self stack size.
+
+	self jumperStack pushAt: oldPC period: scanner pc + offset size: self stack size.
+
 	super jump: offset if: condition.
 
 ]

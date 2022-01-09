@@ -14,7 +14,7 @@ Class {
 
 { #category : #testing }
 SWJumperStack >> nextPeriodIs: pc [
-	^ (0 < self payload size and: [ self payload top key = pc ])
+	^ (self payload isNotEmpty and: [ self payload top endPC = pc ])
 ]
 
 { #category : #accessing }
@@ -31,18 +31,24 @@ SWJumperStack >> payload: anObject [
 
 { #category : #removing }
 SWJumperStack >> pop [
-	^ self payload pop value.
+	^ self payload pop.
 
 ]
 
 { #category : #adding }
 SWJumperStack >> pushAt: pc period: aPeriod size: size [
-	self payload push: (aPeriod -> size)
+	self payload push: (SWJumperItem new
+		startPC: pc;
+		endPC: aPeriod;
+		stackSize: size;
+		yourself)
 
 ]
 
 { #category : #modifying }
 SWJumperStack >> update: aPeriod [
-	self payload push: (aPeriod -> self pop).
+	self payload push: ((self pop)
+			endPC: aPeriod;
+			yourself)
 
 ]

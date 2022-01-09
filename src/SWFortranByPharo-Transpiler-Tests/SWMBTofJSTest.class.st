@@ -35,6 +35,18 @@ SWMBTofJSTest >> _03_user_specified_variable_type [
 	^ tmp1 * 2.23620679
 ]
 
+{ #category : #'as yet unclassified' }
+SWMBTofJSTest >> _04_ifTrueifFalse [
+	^ true ifTrue: [ 123 ] ifFalse: [ 'hoge' ]
+	
+]
+
+{ #category : #'as yet unclassified' }
+SWMBTofJSTest >> _05_ifTrue [
+	^ true ifTrue: [ 123 ]
+	
+]
+
 { #category : #tests }
 SWMBTofJSTest >> testSourceHash [
 	self
@@ -75,6 +87,25 @@ SWMBTofJSTest >> test_03_analyze [
 	self
 		assert: (SWStackAnalyzer new: self class>>#_03_user_specified_variable_type with: { self class }) decode return value
 		equals: Integer
+]
+
+{ #category : #tests }
+SWMBTofJSTest >> test_04 [
+	|transpiler result|
+	transpiler := (self transpile_program: #_04_ifTrueifFalse).
+	result := transpiler stream contents.
+	self assert: result equals: 'return (true) ? (function(){123;
+})() : (function() { {"hoge";
+})();
+'
+]
+
+{ #category : #tests }
+SWMBTofJSTest >> test_05 [
+	|transpiler result|
+	transpiler := (self transpile_program: #_05_ifTrue).
+	result := transpiler stream contents.
+	result inspect
 ]
 
 { #category : #utilities }

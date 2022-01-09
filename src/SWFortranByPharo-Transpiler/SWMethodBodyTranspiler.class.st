@@ -77,6 +77,7 @@ SWMethodBodyTranspiler >> calleeGenerator: anObject [
 
 { #category : #'private - utilities' }
 SWMethodBodyTranspiler >> classOf: aNode [
+	self error; flag: #toRemove.
 	aNode class = RBVariableNode ifTrue: [
 		^ aNode name first isUppercase ifTrue: [
 			(Smalltalk globals at: aNode name asSymbol) class
@@ -99,6 +100,7 @@ SWMethodBodyTranspiler >> classOf: aNode [
 
 { #category : #'as yet unclassified' }
 SWMethodBodyTranspiler >> classSideClassOf: aNode [
+self error; flag: #toRemove.
 	^ aNode class = RBVariableNode ifTrue: [
 		aNode variable value class classSide
 	] ifFalse: [
@@ -121,6 +123,7 @@ SWMethodBodyTranspiler >> decMessageNest [
 { #category : #'private - testing' }
 SWMethodBodyTranspiler >> hasOwnMessageTranspilerMethodOf: aSelector ifTrue: aBlock [
 	|otms aMethod|
+	self error; flag: #toRemove.
 	otms := self class messageTranspilerMethodNameFor: aSelector.
 	(aMethod := self class search: otms in: self class) ifNotNil: [
 		aBlock value: [ :receiver :arguments |
@@ -133,7 +136,7 @@ SWMethodBodyTranspiler >> hasOwnMessageTranspilerMethodOf: aSelector ifTrue: aBl
 { #category : #'private - testing' }
 SWMethodBodyTranspiler >> ifUniqueMessageTranspilerExistsOn: receiver of: selector thenDo: aBlock [
 	| receiverClassSideClass selectorName transpiler |
-
+self error; flag: #toRemove.
 	receiverClassSideClass := self classSideClassOf: receiver.
 	selectorName := self class uniqueMessageTranspilerNameFor: selector for: self type.
 	(transpiler := self class search: selectorName in: receiverClassSideClass) ifNotNil: [
@@ -212,6 +215,15 @@ SWMethodBodyTranspiler >> putAssignTo: key with: value [
 
 ]
 
+{ #category : #'code generation' }
+SWMethodBodyTranspiler >> putBlock: aBlockNode [
+	self stream log.
+	self
+		put: '{';
+		putSequence: aBlockNode body;
+		put: '}'
+]
+
 { #category : #'as yet unclassified' }
 SWMethodBodyTranspiler >> putCallee: aNode [
 	self stream log.
@@ -282,6 +294,16 @@ SWMethodBodyTranspiler >> putCode: code with: anAssociationArray [
 	self put: escaped.
 
 
+]
+
+{ #category : #'as yet unclassified' }
+SWMethodBodyTranspiler >> putIfTrue: aNode [
+	^ self subclassResponsibility
+]
+
+{ #category : #'as yet unclassified' }
+SWMethodBodyTranspiler >> putIfTrueIfFalse: aNode [
+	^ self subclassResponsibility
 ]
 
 { #category : #'code generation' }
