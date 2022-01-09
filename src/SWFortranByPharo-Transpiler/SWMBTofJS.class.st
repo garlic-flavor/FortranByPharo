@@ -7,6 +7,11 @@ Class {
 	#category : #'SWFortranByPharo-Transpiler-JS'
 }
 
+{ #category : #accessing }
+SWMBTofJS class >> classTranspilerClass [
+	^ SWCDTofJS
+]
+
 { #category : #constants }
 SWMBTofJS class >> mangleClass [
 	^ SWMangleOfJS 
@@ -25,6 +30,14 @@ SWMBTofJS >> putSelf [
 { #category : #'code generation' }
 SWMBTofJS >> putStatementDelimiter [
 	self put: ';'
+]
+
+{ #category : #'as yet unclassified' }
+SWMBTofJS >> putStdOut: arguments [
+	self stream log.
+	self
+		put: 'console.log';
+		putArguments: arguments
 ]
 
 { #category : #'code generation' }

@@ -19,7 +19,7 @@ Class {
 { #category : #api }
 SWClass >> defineMethod: aName as: rType [
 	self generator at: aName put: [ :aCallee |
-		(SWCompiledCodeInfo newFrom: aCallee)
+		(self transpilerClass newFrom: aCallee)
 			specifyReturnTypeAs: (rType isBlock ifTrue: [ rType value: aCallee ] ifFalse: [ rType ]);
 			markAsDecoded;
 			yourself
@@ -30,7 +30,7 @@ SWClass >> defineMethod: aName as: rType [
 { #category : #api }
 SWClass >> defineMethodReturnsFirstArgument: aName [
 	self generator at: aName put: [ :aCallee |
-		(SWCompiledCodeInfo newFrom: aCallee)
+		(self transpilerClass newFrom: aCallee)
 			return: (aCallee stack at: 1);
 			markAsDecoded;
 			yourself
@@ -41,7 +41,7 @@ SWClass >> defineMethodReturnsFirstArgument: aName [
 { #category : #api }
 SWClass >> defineMethodReturnsReceiver: aName [
 	self generator at: aName put: [ :aCallee |
-		(SWCompiledCodeInfo newFrom: aCallee)
+		(self transpilerClass newFrom: aCallee)
 			return: aCallee stack first;
 			markAsDecoded;
 			yourself
@@ -52,7 +52,7 @@ SWClass >> defineMethodReturnsReceiver: aName [
 { #category : #api }
 SWClass >> defineMethodReturnsReceiversClass: aName [
 	self generator at: aName put: [:aCallee |
-		(SWCompiledCodeInfo newFrom: aCallee)
+		(self transpilerClass newFrom: aCallee)
 			return: (SWVariableTypeInfo new: aCallee receiverClass classSide);
 			markAsDecoded;
 			yourself.
@@ -63,7 +63,7 @@ SWClass >> defineMethodReturnsReceiversClass: aName [
 { #category : #api }
 SWClass >> defineMethodReturnsReceiversInstance: aName [
 	self generator at: aName put: [:aCallee |
-		(SWCompiledCodeInfo newFrom: aCallee)
+		(self transpilerClass newFrom: aCallee)
 			return: (SWVariableTypeInfo new: aCallee receiverClass instanceSide);
 			markAsDecoded;
 			yourself.
@@ -74,7 +74,7 @@ SWClass >> defineMethodReturnsReceiversInstance: aName [
 { #category : #api }
 SWClass >> defineMethodReturnsSecondArgument: aName [
 	self generator at: aName put: [ :aCallee |
-		(SWCompiledCodeInfo newFrom: aCallee)
+		(self transpilerClass newFrom: aCallee)
 			return: (aCallee stack at: 2);
 			markAsDecoded;
 			yourself

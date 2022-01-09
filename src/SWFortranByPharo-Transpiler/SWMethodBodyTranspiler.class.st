@@ -7,7 +7,8 @@ Class {
 	#instVars : [
 		'stream',
 		'type',
-		'messageNest'
+		'messageNest',
+		'calleeGenerator'
 	],
 	#category : #'SWFortranByPharo-Transpiler-Common'
 }
@@ -46,6 +47,32 @@ SWMethodBodyTranspiler >> << anObject [
 	self stream log.
 	anObject transpileUsing: self
 
+]
+
+{ #category : #accessing }
+SWMethodBodyTranspiler >> calleeGenerator [
+
+	^ calleeGenerator ifNil: [
+		calleeGenerator := [ :transpiler :aNode |
+			transpiler << aNode receiver.
+			aNode selector first isLetter ifTrue: [
+				transpiler
+					putClassAccessor;
+					put: (transpiler class mangleClass mangle: transpiler);
+					putArguments: aNode arguments.
+			] ifFalse: [
+				transpiler
+					put: aNode selector;
+					<< (aNode arguments at: 1)
+			]
+		]
+	]
+]
+
+{ #category : #accessing }
+SWMethodBodyTranspiler >> calleeGenerator: anObject [
+
+	calleeGenerator := anObject
 ]
 
 { #category : #'private - utilities' }
@@ -185,6 +212,13 @@ SWMethodBodyTranspiler >> putAssignTo: key with: value [
 
 ]
 
+{ #category : #'as yet unclassified' }
+SWMethodBodyTranspiler >> putCallee: aNode [
+	self stream log.
+	self calleeGenerator cull: self cull: aNode
+
+]
+
 { #category : #'code generation' }
 SWMethodBodyTranspiler >> putCascade: aRBCascadeNode [
 	({ RBVariableNode. RBLiteralValueNode } anySatisfy: [ :each | each = aRBCascadeNode leftmostChainReceiver class ]) ifTrue: [
@@ -262,7 +296,18 @@ SWMethodBodyTranspiler >> putLine: anObject [
 ]
 
 { #category : #'code generation' }
+SWMethodBodyTranspiler >> putMessage: aNode [
+	self stream log: [ aNode receiver asString, ' >> ', aNode selector asString ].
+	self incMessageNest.
+	(self messages at: aNode)
+		stream: self stream;
+		putCallee: aNode.
+	self decMessageNest
+]
+
+{ #category : #'code generation' }
 SWMethodBodyTranspiler >> putMessage: aNode withReceiver: aRNode [
+	self error; flag: #toRemove.
 	self stream log: [ aNode receiver asString, ' >> ', aNode selector asString ].
 	self incMessageNest.
 	self selectTranspiler: aNode withReceiver: aRNode.
@@ -271,6 +316,8 @@ SWMethodBodyTranspiler >> putMessage: aNode withReceiver: aRNode [
 
 { #category : #'code generation' }
 SWMethodBodyTranspiler >> putOrdinaryMessage: aNode withReceiver: aRNode [
+	self error; flag: #toRemove.
+
 	self stream log.
 	self << aRNode.
 	aNode selector first isLetter ifTrue: [
@@ -359,6 +406,7 @@ SWMethodBodyTranspiler >> putVariableDeclarationOf: aVariableInfo [
 
 { #category : #'private - code generation' }
 SWMethodBodyTranspiler >> selectTranspiler: aNode withReceiver: aRNode [
+	self error; flag: #toRemove.
 	self stream log: [ aNode receiver asString, ' >> ', aNode selector asString ].
 	self ifUniqueMessageTranspilerExistsOn: aRNode of: aNode selector thenDo: [ :proc |
 		^ proc value: aNode arguments

@@ -19,6 +19,14 @@ SWStd class >> f90_print_With: arguments Using: transpiler [
 SWStd class >> import: identifiers from: aFile [
 ]
 
+{ #category : #initialization }
+SWStd class >> initializeClassSideTranspiler: transpiler [
+	transpiler
+		defineMethod: #print: as: self with: [ :t :aNode |
+			t putStdOut: aNode arguments
+		]
+]
+
 { #category : #'code generation' }
 SWStd class >> js_import_from_With: arguments Using: transpiler [
 	transpiler put: 'import {'.
@@ -31,14 +39,6 @@ SWStd class >> js_import_from_With: arguments Using: transpiler [
 		put: '} from ''../../script/';
 		put: (arguments at: 2) value;
 		put: ''''
-]
-
-{ #category : #'code generation' }
-SWStd class >> js_print_With: arguments Using: transpiler [
-	transpiler
-		put: 'console.log';
-		putArguments: arguments
-		
 ]
 
 { #category : #printing }

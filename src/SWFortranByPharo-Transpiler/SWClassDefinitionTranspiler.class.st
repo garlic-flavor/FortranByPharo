@@ -16,6 +16,18 @@ SWClassDefinitionTranspiler class >> methodDefinitionTranspilerClass [
 ]
 
 { #category : #'as yet unclassified' }
+SWClassDefinitionTranspiler >> defineMethod: aName as: rType with: calleeGenerator [
+	self generator at: aName put: [ :aCallee |
+		(self transpilerClass newFrom: aCallee)
+			specifyReturnTypeAs: (rType isBlock ifTrue: [ rType value: aCallee ] ifFalse: [ rType ]);
+			calleeGenerator: calleeGenerator;
+			markAsDecoded;
+			yourself
+	]
+
+]
+
+{ #category : #'as yet unclassified' }
 SWClassDefinitionTranspiler >> putClassFooter [
 	^ self subclassResponsibility 
 ]
