@@ -9,6 +9,7 @@ Class {
 
 { #category : #'as yet unclassified' }
 SWMDTofJS class >> methodBodyTranspilerClass [
+	self error; flag: #toRemove.
 	^ SWMBTofJS
 ]
 
@@ -20,38 +21,19 @@ SWMDTofJS >> putFunctionFooter [
 
 { #category : #'code generation' }
 SWMDTofJS >> putFunctionHeader [
+	self bodyTranspiler method methodClass isClassSide ifTrue: [
+		self stream put: 'static '
+	].
 	self stream
 		put: 'function ';
 		put: self bodyTranspiler method selector;
 		put: '('.
 
-	self bodyTranspiler method tempNames do: [ :vi |
-		self stream put: vi
+	self bodyTranspiler arguments do: [ :vi |
+		self stream put: vi name
 	] separatedBy: [
 		self stream put: ', '
 	].
 	self stream putLine: '){'.
 
-]
-
-{ #category : #'public API' }
-SWMDTofJS >> transpile [
-	self stream
-		put: 'function ';
-		put: self bodyTranspiler method selector;
-		put: '('.
-
-	self bodyTranspiler method tempNames do: [ :vi |
-		self stream put: vi
-	] separatedBy: [
-		self stream put: ', '
-	].
-	self stream
-		putLine: '){';
-		incIndent.
-	self bodyTranspiler transpile.
-	self stream
-		decIndent;
-		putLine: '}'.
-	^ self stream contents
 ]

@@ -96,6 +96,14 @@ SWModuleTranspiler >> stream: anObject [
 
 { #category : #'public API' }
 SWModuleTranspiler >> transpile [
+	self payload decode.
+
+	self payload pool select: [ :each | each isToTranspile ] thenDo: [ :each |
+		each
+			stream: self stream;
+			transpile
+	].
+
 	self payload
 		stream: self stream;
 		transpile

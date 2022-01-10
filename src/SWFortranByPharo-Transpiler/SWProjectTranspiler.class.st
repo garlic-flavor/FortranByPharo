@@ -24,11 +24,6 @@ SWProjectTranspiler class >> newFrom: aClass [
 		yourself
 ]
 
-{ #category : #api }
-SWProjectTranspiler >> decode [
-	self modules do: [ :each | each decode ]
-]
-
 { #category : #accessing }
 SWProjectTranspiler >> main [
 

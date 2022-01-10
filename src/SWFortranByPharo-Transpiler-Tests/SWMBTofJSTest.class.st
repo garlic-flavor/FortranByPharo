@@ -94,9 +94,7 @@ SWMBTofJSTest >> test_04 [
 	|transpiler result|
 	transpiler := (self transpile_program: #_04_ifTrueifFalse).
 	result := transpiler stream contents.
-	self assert: result equals: 'return (true) ? (function(){123;
-})() : (function() { {"hoge";
-})();
+	self assert: result equals: 'return (true) ? (function(){return 123;})() : (function(){return "hoge";})();
 '
 ]
 
@@ -105,7 +103,8 @@ SWMBTofJSTest >> test_05 [
 	|transpiler result|
 	transpiler := (self transpile_program: #_05_ifTrue).
 	result := transpiler stream contents.
-	result inspect
+	self assert: result equals: 'return (true) ? (function(){return 123;})() : null;
+'
 ]
 
 { #category : #utilities }
@@ -115,7 +114,7 @@ SWMBTofJSTest >> transpile_program: selector [
 		logging: true;
 		yourself.
 	transpiler stream newline: String cr.
-	transpiler transpile.
+	transpiler decode; transpile.
 	^ transpiler
 
 ]

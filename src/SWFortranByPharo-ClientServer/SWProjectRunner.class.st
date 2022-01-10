@@ -56,6 +56,7 @@ SWProjectRunner >> project: anObject [
 
 { #category : #'code generation' }
 SWProjectRunner >> put: aModule [
+	self halt.
 	(self client head: aModule filename) ifNil: [
 		aModule transpile.
 		self client put: aModule filename contents: aModule contents

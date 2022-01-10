@@ -28,25 +28,28 @@ SWPool >> classTranspilerClass [
 ]
 
 { #category : #'instance creation' }
-SWPool >> newClassTranspiler: aClass [
-	^ self payload at: aClass ifAbsentPut: [
-		self classTranspilerClass new
-			pool: self;
-			targetClass: aClass;
-			ready;
-			yourself.
-	]
+SWPool >> getClassTranspiler: aClass [
+	^ (aClass isClassSide ifTrue: [
+		(self getClassTranspiler: aClass instanceSide) classSide
+	] ifFalse: [
+		self payload at: aClass ifAbsentPut: [ self classTranspilerClass new ]
+	])
+		pool: self;
+		targetClass: aClass;
+		ready;
+		yourself.
+
 ]
 
 { #category : #'instance creation' }
-SWPool >> newMethodTranspiler: aSelector supered: supered with: args [
+SWPool >> getMethodTranspiler: aSelector supered: supered with: args [
 	|method callee methodClass|
 
 	method := self class search: aSelector
 		in: (supered ifTrue: [ args first value superclass ] ifFalse: [ args first value ]).
 	callee := SWCalleeInfo new: (method ifNotNil: [ method ] ifNil: [ aSelector ]) with: args.
 	methodClass := (method ifNotNil: [ method methodClass ] ifNil: [ UndefinedObject ] ).
-	^ (self newClassTranspiler: methodClass)
+	^ (self getClassTranspiler: methodClass)
 		newMethodTranspiler: callee
 
 ]

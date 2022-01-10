@@ -23,7 +23,7 @@ SWStackAnalyzer >> addBytecode: description [
 	item := self jumperStack pop.
 	node := self method sourceNodeForPC: item startPC.
 	args := self stack pop: self stack size - item stackSize + 1.
-	methodInfo := self pool newMethodTranspiler: node selector supered: false with: args.
+	methodInfo := self pool getMethodTranspiler: node selector supered: false with: args.
 	self messages at: node put: methodInfo.
 	self stack push: methodInfo return.
 
@@ -311,7 +311,7 @@ SWStackAnalyzer >> send: selector super: supered numArgs: numberArguments [
 	|args methodInfo|
 	args := self stack pop: numberArguments + 1.
 
-	methodInfo := self pool newMethodTranspiler: selector supered: supered with: args.
+	methodInfo := self pool getMethodTranspiler: selector supered: supered with: args.
 
 	self messages at: (self method sourceNodeForPC: oldPC) put: methodInfo.
 	self stack push: methodInfo return.

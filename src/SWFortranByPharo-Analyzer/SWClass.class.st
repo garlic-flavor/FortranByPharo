@@ -11,10 +11,23 @@ Class {
 		'generator',
 		'pool',
 		'sourceHash',
-		'slot'
+		'slot',
+		'classSide'
 	],
 	#category : #'SWFortranByPharo-Analyzer-Class'
 }
+
+{ #category : #accessing }
+SWClass >> classSide [
+
+	^ classSide ifNil: [ classSide := self class new ]
+]
+
+{ #category : #accessing }
+SWClass >> classSide: anObject [
+
+	classSide := anObject
+]
 
 { #category : #api }
 SWClass >> defineMethod: aName as: rType [
@@ -27,6 +40,17 @@ SWClass >> defineMethod: aName as: rType [
 
 ]
 
+{ #category : #'as yet unclassified' }
+SWClass >> defineMethod: aName as: rType with: calleeGenerator [
+	self defineMethod: aName as: rType
+
+]
+
+{ #category : #'as yet unclassified' }
+SWClass >> defineMethod: aName with: calleeGenerator [
+
+]
+
 { #category : #api }
 SWClass >> defineMethodReturnsFirstArgument: aName [
 	self generator at: aName put: [ :aCallee |
@@ -35,6 +59,37 @@ SWClass >> defineMethodReturnsFirstArgument: aName [
 			markAsDecoded;
 			yourself
 	]
+
+]
+
+{ #category : #api }
+SWClass >> defineMethodReturnsFirstArgument: aName with: aCalleeGenerator [
+	self generator at: aName put: [ :aCallee |
+		(self transpilerClass newFrom: aCallee)
+			return: (aCallee stack at: 1);
+			markAsDecoded;
+			yourself
+	]
+
+]
+
+{ #category : #api }
+SWClass >> defineMethodReturnsFirstOrSecondArgument: aName [
+	self generator at: aName put: [ :aCallee |
+		(self transpilerClass newFrom: aCallee)
+			return: ((SWVariableTypeInfo new)
+				<< (aCallee stack at: 1);
+				<< (aCallee stack at: 2);
+				yourself);
+			markAsDecoded;
+			yourself
+	]
+
+]
+
+{ #category : #api }
+SWClass >> defineMethodReturnsFirstOrSecondArgument: aName with: aCalleeGenerator [
+	self defineMethodReturnsFirstOrSecondArgument: aName.
 
 ]
 

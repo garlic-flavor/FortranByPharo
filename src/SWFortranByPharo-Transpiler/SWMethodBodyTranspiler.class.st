@@ -98,7 +98,7 @@ SWMethodBodyTranspiler >> classOf: aNode [
 	self flag: #toImplement.
 ]
 
-{ #category : #'as yet unclassified' }
+{ #category : #'private - utilities' }
 SWMethodBodyTranspiler >> classSideClassOf: aNode [
 self error; flag: #toRemove.
 	^ aNode class = RBVariableNode ifTrue: [
@@ -224,7 +224,12 @@ SWMethodBodyTranspiler >> putBlock: aBlockNode [
 		put: '}'
 ]
 
-{ #category : #'as yet unclassified' }
+{ #category : #accessing }
+SWMethodBodyTranspiler >> putBlockAsExpression: aBlock [
+	^ self subclassResponsibility 
+]
+
+{ #category : #accessing }
 SWMethodBodyTranspiler >> putCallee: aNode [
 	self stream log.
 	self calleeGenerator cull: self cull: aNode
@@ -296,12 +301,12 @@ SWMethodBodyTranspiler >> putCode: code with: anAssociationArray [
 
 ]
 
-{ #category : #'as yet unclassified' }
+{ #category : #accessing }
 SWMethodBodyTranspiler >> putIfTrue: aNode [
 	^ self subclassResponsibility
 ]
 
-{ #category : #'as yet unclassified' }
+{ #category : #accessing }
 SWMethodBodyTranspiler >> putIfTrueIfFalse: aNode [
 	^ self subclassResponsibility
 ]
@@ -323,6 +328,7 @@ SWMethodBodyTranspiler >> putMessage: aNode [
 	self incMessageNest.
 	(self messages at: aNode)
 		stream: self stream;
+		messages: self messages;
 		putCallee: aNode.
 	self decMessageNest
 ]
@@ -384,6 +390,19 @@ SWMethodBodyTranspiler >> putSelf [
 SWMethodBodyTranspiler >> putSequence: aSequence [
 	aSequence statements do: [ :each |
 		self putStatement: each
+	]
+]
+
+{ #category : #'code generation' }
+SWMethodBodyTranspiler >> putSequenceWithReturn: aSequence [
+	aSequence statements doWithIndex: [ :each :index |
+		index < aSequence statements size ifTrue: [
+			self putStatement: each
+		] ifFalse: [
+			self
+				putReturn: each;
+				putStatementDelimiter
+		]
 	]
 ]
 
@@ -455,7 +474,6 @@ SWMethodBodyTranspiler >> stream: anObject [
 { #category : #'public API' }
 SWMethodBodyTranspiler >> transpile [
 	self stream log.
-	self decode.
 	self locals do: [ :each | self putVariableDeclarationOf: each ].
 	self putSequence: self method sourceNode body.
 	^ self stream contents

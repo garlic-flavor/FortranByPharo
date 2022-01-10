@@ -17,9 +17,24 @@ SWMBTofJS class >> mangleClass [
 	^ SWMangleOfJS 
 ]
 
+{ #category : #'as yet unclassified' }
+SWMBTofJS class >> methodDefinitionTranspilerClass [
+	^ SWMDTofJS
+]
+
 { #category : #accessing }
 SWMBTofJS >> mangledName [
 	^ self class mangleClass safeSelectorNameOf: (method class = ByteSymbol ifTrue: [ method ] ifFalse: [ self method selector ])
+]
+
+{ #category : #'as yet unclassified' }
+SWMBTofJS >> putBlockAsExpression: aBlock [
+	self stream log.
+	
+	self
+		put: '(function(){';
+		putSequenceWithReturn: aBlock body;
+		put: '})()'
 ]
 
 { #category : #'as yet unclassified' }
@@ -36,9 +51,9 @@ SWMBTofJS >> putIfTrue: aNode [
 		self
 			put: '(';
 			<< aNode receiver;
-			put: ') ? (function()';
-			<< (aNode arguments at: 1);
-			put: ')() : null'
+			put: ') ? ';
+			putBlockAsExpression: (aNode arguments at: 1);
+			put: ' : null'
 	]
 ]
 
@@ -58,11 +73,10 @@ SWMBTofJS >> putIfTrueIfFalse: aNode [
 		self
 			put: '(';
 			<< aNode receiver;
-			put: ') ? (function()';
-			<< (aNode arguments at: 1);
-			put: ')() : (function() { ';
-			<< (aNode arguments at: 2);
-			put: ')()'
+			put: ') ? ';
+ 			putBlockAsExpression: (aNode arguments at: 1);
+			put: ' : ';
+			putBlockAsExpression: (aNode arguments at: 2)
 	]
 ]
 

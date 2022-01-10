@@ -39,11 +39,6 @@ SWMethodDefinitionTranspiler >> bodyTranspiler: anObject [
 	bodyTranspiler := anObject
 ]
 
-{ #category : #'public API' }
-SWMethodDefinitionTranspiler >> logging: trueOrFalse [
-	self stream logging: trueOrFalse
-]
-
 { #category : #'code generation' }
 SWMethodDefinitionTranspiler >> putFunctionFooter [
 	^ self subclassResponsibility 
@@ -70,8 +65,10 @@ SWMethodDefinitionTranspiler >> stream: anObject [
 SWMethodDefinitionTranspiler >> transpile [
 	self putFunctionHeader.
 	self stream incIndent.
-	self bodyTranspiler transpile.
+	self bodyTranspiler
+		stream: self stream;
+		transpile.
 	self stream decIndent.
 	self putFunctionFooter.
-	^ self stream contents
+
 ]

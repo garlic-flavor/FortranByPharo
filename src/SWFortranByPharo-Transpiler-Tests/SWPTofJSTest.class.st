@@ -17,3 +17,14 @@ SWPTofJSTest >> test_program_01 [
 '.
 
 ]
+
+{ #category : #tests }
+SWPTofJSTest >> test_program_02 [
+	|project result|
+	project := SWPTofJS newFrom: SWTestProgram_02.
+	project newline: String cr.
+	project transpile.
+	result := project main contents.
+	self halt.
+
+]
