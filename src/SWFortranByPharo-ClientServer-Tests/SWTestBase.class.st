@@ -23,6 +23,7 @@ SWTestBase class >> mjs_requirements: transpiler [
 { #category : #running }
 SWTestBase class >> program [
 	|runner|
+	self error; flag: #toRewrite.
 	runner := self new.
 	(self methods select: [ :aMethod | aMethod protocol  beginsWith: 'test']) do: [ :each |
 		each valueWithReceiver: runner arguments: #()

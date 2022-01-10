@@ -58,11 +58,6 @@ SWCompiledCodeInfo >> decode [
 
 ]
 
-{ #category : #testing }
-SWCompiledCodeInfo >> isToTranspile [
-	^ self classInfo isNil or: [ self classInfo isToTranspile ]
-]
-
 { #category : #accessing }
 SWCompiledCodeInfo >> locals [
 	^ self stack copyFrom: self method numArgs + 1 to: self numTemps

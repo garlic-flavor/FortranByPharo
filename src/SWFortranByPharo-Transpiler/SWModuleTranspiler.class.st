@@ -42,6 +42,19 @@ SWModuleTranspiler >> filename [
 	^ self payload filename
 ]
 
+{ #category : #testing }
+SWModuleTranspiler >> isToTranspile: aClass [
+	|tClass|
+	tClass := self payload targetClass.
+	tClass ifNil: [ ^ false ].
+	tClass instanceSide = aClass ifTrue: [ ^ true ].
+
+	^ tClass classSide methodDict at: #dependings ifPresent: [ :deps |
+		deps anySatisfy: [ :each | each = aClass instanceSide ]
+	] ifAbsent: [ false ]
+
+]
+
 { #category : #accessing }
 SWModuleTranspiler >> payload [
 
@@ -65,12 +78,6 @@ SWModuleTranspiler >> solveDependencies [
 
 ]
 
-{ #category : #comparing }
-SWModuleTranspiler >> sourceHash [
-
-	^ self payload sourceHash
-]
-
 { #category : #accessing }
 SWModuleTranspiler >> stream [
 
@@ -87,7 +94,7 @@ SWModuleTranspiler >> stream: anObject [
 SWModuleTranspiler >> transpile [
 	self payload decode.
 
-	self payload pool select: [ :each | each isToTranspile ] thenDo: [ :each |
+	self payload pool select: [ :each | self isToTranspile: each targetClass ] thenDo: [ :each |
 		each
 			stream: self stream;
 			transpile

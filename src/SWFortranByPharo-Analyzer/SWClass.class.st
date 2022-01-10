@@ -183,11 +183,6 @@ SWClass >> getVariableInfoOf: aName [
 
 ]
 
-{ #category : #testing }
-SWClass >> isToTranspile [
-	^ self targetClass classSide methodDict includesKey: #toTranspile
-]
-
 { #category : #accessing }
 SWClass >> methods [
 
@@ -240,8 +235,8 @@ SWClass >> ready [
 	|initializer|
 	initializer := targetClass isInstanceSide
 		ifTrue: [ #initializeInstanceSideTranspiler: ] ifFalse: [ #initializeClassSideTranspiler: ].
-	(targetClass classSide methodDict includesKey: initializer) ifTrue: [
-		(targetClass classSide >> initializer) valueWithReceiver: targetClass arguments: { self }
+	targetClass classSide methodDict at: initializer ifPresent: [ :init |
+		init valueWithReceiver: targetClass arguments: { self }
 	].
 
 ]
@@ -295,17 +290,6 @@ SWClass >> slot [
 SWClass >> slot: anObject [
 
 	slot := anObject
-]
-
-{ #category : #accessing }
-SWClass >> sourceHash [
-	"Return an accumulated hash consists of whole source code of targetClass."
-
-	^ sourceHash ifNil: [
-		sourceHash := SHA256 hashMessage: ((self methods collect: [:each |
-			SHA256 hashMessage: each method sourceCode
-		]) flattened)
-	]
 ]
 
 { #category : #accessing }

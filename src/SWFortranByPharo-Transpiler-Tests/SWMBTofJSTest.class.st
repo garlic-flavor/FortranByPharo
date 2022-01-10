@@ -4,12 +4,6 @@ Class {
 	#category : #'SWFortranByPharo-Transpiler-Tests'
 }
 
-{ #category : #'as yet unclassified' }
-SWMBTofJSTest class >> toTranspile [
-
-	^ #program
-]
-
 { #category : #'tests - source' }
 SWMBTofJSTest >> _01_call_Transcript [
 
@@ -45,13 +39,6 @@ SWMBTofJSTest >> _04_ifTrueifFalse [
 SWMBTofJSTest >> _05_ifTrue [
 	^ true ifTrue: [ 123 ]
 	
-]
-
-{ #category : #tests }
-SWMBTofJSTest >> testSourceHash [
-	self
-		deny: (SWMBTofJS new: self class>>#_01_call_Transcript with: {self class}) sourceHash
-		equals: (SWMBTofJS new: self class>>#_02_call_SWStd_print with: {self class}) sourceHash
 ]
 
 { #category : #tests }

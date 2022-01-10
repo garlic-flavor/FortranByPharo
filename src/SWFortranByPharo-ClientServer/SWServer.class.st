@@ -66,11 +66,6 @@ SWServer class >> testRunning [
 	^ ZnServer default isRunning ifTrue: [ 'The server is running' ] ifFalse: [ 'The server is not running' ]
 ]
 
-{ #category : #'as yet unclassified' }
-SWServer class >> toTranspile [
-	^ #main
-]
-
 { #category : #accessing }
 SWServer >> env [
 

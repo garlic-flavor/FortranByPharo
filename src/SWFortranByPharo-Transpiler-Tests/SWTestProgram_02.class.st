@@ -10,11 +10,6 @@ SWTestProgram_02 class >> main [
 ]
 
 { #category : #'as yet unclassified' }
-SWTestProgram_02 class >> toTranspile [
-	^ true
-]
-
-{ #category : #'as yet unclassified' }
 SWTestProgram_02 class >> util1 [
 	^ 'Hello, world!'
 ]

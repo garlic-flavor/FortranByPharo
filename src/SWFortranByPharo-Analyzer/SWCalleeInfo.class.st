@@ -207,6 +207,11 @@ SWCalleeInfo >> stack: anObject [
 ]
 
 { #category : #accessing }
+SWCalleeInfo >> targetClass [
+	^ method class = CompiledMethod ifTrue: [ method methodClass ] ifFalse: [ nil ]
+]
+
+{ #category : #accessing }
 SWCalleeInfo >> types: anObject [
 	anObject doWithIndex: [ :type :idx |
 		(self stack at: idx - 1) << type
