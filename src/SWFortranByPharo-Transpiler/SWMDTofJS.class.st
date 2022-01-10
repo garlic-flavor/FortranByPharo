@@ -25,7 +25,6 @@ SWMDTofJS >> putFunctionHeader [
 		self stream put: 'static '
 	].
 	self stream
-		put: 'function ';
 		put: self bodyTranspiler method selector;
 		put: '('.
 

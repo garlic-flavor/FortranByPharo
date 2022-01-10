@@ -23,6 +23,11 @@ SWMBTofJS class >> methodDefinitionTranspilerClass [
 ]
 
 { #category : #accessing }
+SWMBTofJS >> filename [
+	^ 'cache/', super filename, '.mjs'
+]
+
+{ #category : #accessing }
 SWMBTofJS >> mangledName [
 	^ self class mangleClass safeSelectorNameOf: (method class = ByteSymbol ifTrue: [ method ] ifFalse: [ self method selector ])
 ]

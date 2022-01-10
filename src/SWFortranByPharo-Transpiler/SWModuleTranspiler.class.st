@@ -7,8 +7,7 @@ Class {
 	#instVars : [
 		'stream',
 		'payload',
-		'name',
-		'filename'
+		'contents'
 	],
 	#category : #'SWFortranByPharo-Transpiler-Common'
 }
@@ -27,30 +26,20 @@ SWModuleTranspiler class >> mainProgramTranspilerFrom: aClass [
 SWModuleTranspiler class >> newMainProgramFrom: aClass [
 	^ (self new)
 		payload: (self mainProgramTranspilerFrom: aClass);
-		name: aClass instanceSide name, 'Program';
 		yourself
 ]
 
 { #category : #accessing }
 SWModuleTranspiler >> contents [
-	^ self stream contents
+	^ contents ifNil: [
+		self transpile.
+		contents := self stream contents
+	]
 ]
 
 { #category : #accessing }
 SWModuleTranspiler >> filename [
-	^ filename ifNil: [ filename := 'cache/', self name, '/', self sourceHash hex, '.', self class extension ]
-]
-
-{ #category : #accessing }
-SWModuleTranspiler >> name [
-
-	^ name
-]
-
-{ #category : #accessing }
-SWModuleTranspiler >> name: anObject [
-
-	name := anObject
+	^ self payload filename
 ]
 
 { #category : #accessing }
@@ -67,7 +56,7 @@ SWModuleTranspiler >> payload: anObject [
 
 { #category : #'as yet unclassified' }
 SWModuleTranspiler >> solveDependencies [
-
+	self error; flag: #toRemove.
 	self payload decode.
 	self payload decodeAllOf: [ :mi |
 		mi classInfo isToTranspile

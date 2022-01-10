@@ -5,8 +5,7 @@ Class {
 	#name : #SWProjectRunner,
 	#superclass : #Object,
 	#instVars : [
-		'client',
-		'project'
+		'client'
 	],
 	#category : #'SWFortranByPharo-ClientServer-Client'
 }
@@ -31,41 +30,20 @@ SWProjectRunner >> client: anObject [
 ]
 
 { #category : #execution }
-SWProjectRunner >> execute [
+SWProjectRunner >> execute: aModule [
 	^ self subclassResponsibility 
 ]
 
 { #category : #api }
-SWProjectRunner >> go [
+SWProjectRunner >> go: aModule [
 	^ self
-		putAll;
-		execute
-]
+		put: aModule;
+		execute: aModule
 
-{ #category : #accessing }
-SWProjectRunner >> project [
-
-	^ project
-]
-
-{ #category : #accessing }
-SWProjectRunner >> project: anObject [
-
-	project := anObject
 ]
 
 { #category : #'code generation' }
 SWProjectRunner >> put: aModule [
-	self halt.
-	(self client head: aModule filename) ifNil: [
-		aModule transpile.
-		self client put: aModule filename contents: aModule contents
-	]
-]
+	self client put: aModule filename contents: aModule contents
 
-{ #category : #execution }
-SWProjectRunner >> putAll [
-	self project modules do: [ :aModule |
-		self put: aModule
-	]
 ]

@@ -120,6 +120,11 @@ SWMethodBodyTranspiler >> decMessageNest [
 
 ]
 
+{ #category : #accessing }
+SWMethodBodyTranspiler >> filename [
+	^ self method methodClass instanceSide name, self selector
+]
+
 { #category : #'private - testing' }
 SWMethodBodyTranspiler >> hasOwnMessageTranspilerMethodOf: aSelector ifTrue: aBlock [
 	|otms aMethod|

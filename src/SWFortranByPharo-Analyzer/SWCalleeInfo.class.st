@@ -187,19 +187,6 @@ SWCalleeInfo >> selector: aSelector [
 	self markAsDecoded
 ]
 
-{ #category : #comparing }
-SWCalleeInfo >> sourceHash [
-	^ SHA256 hashStream: (
-		(ReadWriteStream with: '')
-			<< (self operands collect: [ :each | each value asString ]);
-			cr;
-			<< self method sourceCode;
-			reset;
-			yourself
-	)
-
-]
-
 { #category : #accessing }
 SWCalleeInfo >> stack [
 

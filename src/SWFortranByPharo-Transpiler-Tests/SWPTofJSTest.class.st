@@ -10,21 +10,21 @@ Class {
 { #category : #tests }
 SWPTofJSTest >> test_program_01 [
 	|project|
-	project := SWPTofJS newFrom: SWTestProgram_01.
-	project newline: String cr.
-	project transpile.
-	self assert: project main contents equals: 'console.log("Hello, good-bye!");
+	project := SWMTofJS newMainProgramFrom: SWTestProgram_01.
+	project stream newline: String cr.
+	self assert: project contents equals: 'console.log("Hello, good-bye!");
 '.
 
 ]
 
 { #category : #tests }
 SWPTofJSTest >> test_program_02 [
-	|project result|
-	project := SWPTofJS newFrom: SWTestProgram_02.
-	project newline: String cr.
-	project transpile.
-	result := project main contents.
-	self halt.
+	|module result runner|
+	module := SWMTofJS newMainProgramFrom: SWTestProgram_02.
+	module stream newline: String cr.
+	result := module contents.
+	runner := SWPRofJS new.
+	(runner go: module) inspect
+
 
 ]

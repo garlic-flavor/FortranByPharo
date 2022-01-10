@@ -8,6 +8,6 @@ Class {
 }
 
 { #category : #execution }
-SWPRofJS >> execute [
-	^ self client exec: 'node' with: { self project main filename }
+SWPRofJS >> execute: aModule [
+	^ self client exec: 'node' with: { aModule filename }
 ]

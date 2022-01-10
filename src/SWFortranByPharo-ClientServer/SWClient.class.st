@@ -82,6 +82,7 @@ SWClient >> host: anObject [
 
 { #category : #accessing }
 SWClient >> nextPut: aSource [
+	self error; flag: #toRemove.
 	(self head: aSource filename) ifNil: [ 
 		self put: aSource filename contents: aSource contents
 	]
