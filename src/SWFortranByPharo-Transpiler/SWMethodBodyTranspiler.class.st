@@ -243,7 +243,7 @@ SWMethodBodyTranspiler >> putCallee: aNode [
 
 { #category : #'code generation' }
 SWMethodBodyTranspiler >> putCascade: aRBCascadeNode [
-	({ RBVariableNode. RBLiteralValueNode } anySatisfy: [ :each | each = aRBCascadeNode leftmostChainReceiver class ]) ifTrue: [
+	(RBVariableNode = aRBCascadeNode leftmostChainReceiver class) ifTrue: [
 		aRBCascadeNode messages do: [ :msgNode |
 			self putStatement: msgNode
 		]
@@ -316,6 +316,20 @@ SWMethodBodyTranspiler >> putIfTrueIfFalse: aNode [
 	^ self subclassResponsibility
 ]
 
+{ #category : #'as yet unclassified' }
+SWMethodBodyTranspiler >> putImport: anArray from: aSource [
+	self stream
+		put: 'import {'.
+	anArray do: [ :each |
+		self stream put: each asString
+	] separatedBy: [
+		self stream put: ', '
+	].
+	self stream
+		put: '} from ';
+		put: aSource asString
+]
+
 { #category : #'code generation' }
 SWMethodBodyTranspiler >> putInteger: anInteger [
 	self stream log.
@@ -329,22 +343,29 @@ SWMethodBodyTranspiler >> putLine: anObject [
 
 { #category : #'code generation' }
 SWMethodBodyTranspiler >> putMessage: aNode [
+	|t2|
 	self stream log: [ aNode receiver asString, ' >> ', aNode selector asString ].
 	self incMessageNest.
-	(self messages at: aNode)
+	t2 := (self messages at: aNode)
 		stream: self stream;
-		messages: self messages;
-		putCallee: aNode.
+		yourself.
+	t2 messages addAll: self messages.
+	t2 putCallee: aNode.
 	self decMessageNest
 ]
 
 { #category : #'code generation' }
 SWMethodBodyTranspiler >> putMessage: aNode withReceiver: aRNode [
-	self error; flag: #toRemove.
-	self stream log: [ aNode receiver asString, ' >> ', aNode selector asString ].
+	self stream log: [ aRNode asString, ' >> ', aNode selector asString ].
 	self incMessageNest.
-	self selectTranspiler: aNode withReceiver: aRNode.
+	(self messages at: aNode)
+		stream: self stream;
+		messages: self messages;
+		putCallee: (aNode copy
+			receiver: aRNode
+			yourself).
 	self decMessageNest
+
 ]
 
 { #category : #'code generation' }
@@ -433,6 +454,14 @@ SWMethodBodyTranspiler >> putString: aString [
 		put: '"';
 		put: aString;
 		put: '"'.
+]
+
+{ #category : #'code generation' }
+SWMethodBodyTranspiler >> putSymbol: aByteSymbol [
+	self stream
+		put: '"';
+		put: aByteSymbol asString;
+		put: '"'
 ]
 
 { #category : #'code generation' }

@@ -12,7 +12,7 @@ SWMTofJS class >> extension [
 	^ #mjs
 ]
 
-{ #category : #generators }
-SWMTofJS class >> mainProgramTranspilerFrom: aClass [
-	^ SWMBTofJS new: aClass classSide>>#main with: { aClass classSide }
+{ #category : #'as yet unclassified' }
+SWMTofJS class >> methodBodyTranspilerClass [ 
+	^ SWMBTofJS
 ]

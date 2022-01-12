@@ -24,6 +24,9 @@ SWStd class >> initializeClassSideTranspiler: transpiler [
 	transpiler
 		defineMethod: #print: as: self with: [ :t :aNode |
 			t putStdOut: aNode arguments
+		];
+		defineMethod: #import:from: as: self with: [ :t :aNode |
+			t putImport: (aNode arguments at: 1) value from: (aNode arguments at: 2) value
 		]
 ]
 

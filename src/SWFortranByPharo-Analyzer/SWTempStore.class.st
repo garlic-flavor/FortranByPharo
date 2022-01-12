@@ -64,7 +64,6 @@ SWTempStore >> push: aVariableInfo [
 
 	(payload isNotEmpty and: [ payload last = aVariableInfo ]) ifTrue: [ ^ false ].
 	aVariableInfo stackPos ifNotNil: [ ^ false ].
-	SWType exactTypePriority <= aVariableInfo priority ifTrue: [ ^ false ].
 	aVariableInfo name isEmptyOrNil ifFalse: [ ^ false ].
 
 	payload add: aVariableInfo.

@@ -11,8 +11,7 @@ Class {
 SWServerProgram class >> build [
 	<script>
 	|project|
-	project := SWPTofJS newFrom: SWServer.
-
-	project inspect.
+	project := SWMTofJS newMainProgramFrom: SWServer.
+	project contents inspect.
 
 ]

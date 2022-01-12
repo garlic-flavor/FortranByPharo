@@ -25,7 +25,7 @@ SWMDTofJS >> putFunctionHeader [
 		self stream put: 'static '
 	].
 	self stream
-		put: self bodyTranspiler method selector;
+		put: self bodyTranspiler mangledName;
 		put: '('.
 
 	self bodyTranspiler arguments do: [ :vi |

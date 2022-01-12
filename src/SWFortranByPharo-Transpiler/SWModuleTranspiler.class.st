@@ -17,15 +17,15 @@ SWModuleTranspiler class >> extension [
 	^ self subclassResponsibility 
 ]
 
-{ #category : #generators }
-SWModuleTranspiler class >> mainProgramTranspilerFrom: aClass [
+{ #category : #'as yet unclassified' }
+SWModuleTranspiler class >> methodBodyTranspilerClass [
 	^ self subclassResponsibility 
 ]
 
 { #category : #'instance creation' }
 SWModuleTranspiler class >> newMainProgramFrom: aClass [
 	^ (self new)
-		payload: (self mainProgramTranspilerFrom: aClass);
+		payload: (self methodBodyTranspilerClass new: aClass classSide>>#main with: { aClass classSide });
 		yourself
 ]
 

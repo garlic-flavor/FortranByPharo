@@ -131,6 +131,9 @@ SWClassDefinitionTranspiler >> transpileAsInstanceSide [
 			stream: self stream;
 			transpileAsClassSide
 	].
+	
+	self methods do: [ :each | self putMethodDefinition: each ].
+
 	self stream decIndent.
 	self putClassFooter.
 ]

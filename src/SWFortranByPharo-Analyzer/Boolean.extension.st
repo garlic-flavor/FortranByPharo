@@ -5,7 +5,7 @@ Boolean class >> initializeInstanceSideTranspiler: transpiler [
 	transpiler
 		defineMethodReturnsFirstOrSecondArgument: #ifTrue:ifFalse: with: [ :t :node | t putIfTrueIfFalse: node ];
 		defineMethodReturnsFirstArgument: #ifTrue: with: [ :t :node | t putIfTrue: node ];
+		defineMethodReturnsFirstArgument: #ifFalse:;
 		defineMethod: #and: as: self;
-		defineMethodReturnsFirstArgument: #ifFalse:
-
+		defineMethod: #or: as: self
 ]
