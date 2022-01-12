@@ -51,5 +51,6 @@ SWStack >> push: anObject [
 
 { #category : #adding }
 SWStack >> push: anObject afterIndex: idx [
+	self error; flag: #toRemove.
 	^ self payload add: anObject afterIndex: (idx + 1)
 ]

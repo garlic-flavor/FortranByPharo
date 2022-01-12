@@ -41,6 +41,26 @@ SWMBTofJSTest >> _05_ifTrue [
 	
 ]
 
+{ #category : #'as yet unclassified' }
+SWMBTofJSTest >> _06_cascading [
+	^ (SWServerStatus new
+		failed;
+		message: 'hogehoge';
+		uri: 'testuri';
+		yourself) toString
+
+]
+
+{ #category : #'as yet unclassified' }
+SWMBTofJSTest >> _06_cascading: uri [
+	^ (SWServerStatus new
+		failed;
+		message: 'hogehoge';
+		uri: uri;
+		yourself) toString
+
+]
+
 { #category : #tests }
 SWMBTofJSTest >> test_01 [
 	|transpiler result|
@@ -94,10 +114,30 @@ SWMBTofJSTest >> test_05 [
 '
 ]
 
+{ #category : #tests }
+SWMBTofJSTest >> test_06 [
+	|transpiler result|
+	transpiler := (self transpile_program: #_06_cascading: with: String).
+	result := transpiler stream contents.
+	result inspect
+]
+
 { #category : #utilities }
 SWMBTofJSTest >> transpile_program: selector [
 	|transpiler|
 	transpiler := (SWMBTofJS new: self class>>selector with: { self class })
+		logging: true;
+		yourself.
+	transpiler stream newline: String cr.
+	transpiler decode; transpile.
+	^ transpiler
+
+]
+
+{ #category : #utilities }
+SWMBTofJSTest >> transpile_program: selector with: arg1 [
+	|transpiler|
+	transpiler := (SWMBTofJS new: self class>>selector with: { self class. arg1 })
 		logging: true;
 		yourself.
 	transpiler stream newline: String cr.

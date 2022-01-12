@@ -243,26 +243,7 @@ SWMethodBodyTranspiler >> putCallee: aNode [
 
 { #category : #'code generation' }
 SWMethodBodyTranspiler >> putCascade: aRBCascadeNode [
-	(RBVariableNode = aRBCascadeNode leftmostChainReceiver class) ifTrue: [
-		aRBCascadeNode messages do: [ :msgNode |
-			self putStatement: msgNode
-		]
-	] ifFalse: [|tmp|
-		tmp := RBVariableNode new
-			name: self tempStore pop name;
-			yourself.
-		self
-			putAssignTo: tmp with: aRBCascadeNode leftmostChainReceiver;
-			putStatementDelimiter;
-			cr.
-		aRBCascadeNode messages do: [ :msgNode | 
-			self
-				putMessage: msgNode withReceiver: tmp;
-				putStatementDelimiter;
-				cr
-		]
-	]
-
+	^ self subclassResponsibility 
 ]
 
 { #category : #'code generation' }
@@ -304,6 +285,11 @@ SWMethodBodyTranspiler >> putCode: code with: anAssociationArray [
 	self put: escaped.
 
 
+]
+
+{ #category : #'as yet unclassified' }
+SWMethodBodyTranspiler >> putIfFalse: aNode [
+	^ self subclassResponsibility 
 ]
 
 { #category : #accessing }
@@ -476,6 +462,11 @@ SWMethodBodyTranspiler >> putVariable: aVariableNode [
 
 { #category : #'code generation' }
 SWMethodBodyTranspiler >> putVariableDeclarationOf: aVariableInfo [
+	^ self subclassResponsibility 
+]
+
+{ #category : #'as yet unclassified' }
+SWMethodBodyTranspiler >> putYourself: aNode [
 	^ self subclassResponsibility 
 ]
 

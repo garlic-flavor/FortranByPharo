@@ -12,6 +12,7 @@ SWServerProgram class >> build [
 	<script>
 	|project|
 	project := SWMTofJS newMainProgramFrom: SWServer.
-	project contents inspect.
+	project transpile.
+	project inspect.
 
 ]

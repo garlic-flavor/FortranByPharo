@@ -63,9 +63,12 @@ SWStackAnalyzer >> doDup [
 	top := self stack top.
 	self stack push: top.
 	"For a cascade node, create new variable."
+	self flag: #toRemove.
+"
 	(self tempStore push: top) ifTrue: [
 		self addLocalVariable: top
 	].
+"
 	super doDup.
 
 ]
@@ -359,6 +362,7 @@ SWStackAnalyzer >> storeIntoTemporaryVariable: offset [
 
 { #category : #accessing }
 SWStackAnalyzer >> tempStore [
+	self error; flag: #toRemove.
 
 	^ tempStore ifNil: [
 		tempStore := SWTempStore new
@@ -369,7 +373,7 @@ SWStackAnalyzer >> tempStore [
 
 { #category : #accessing }
 SWStackAnalyzer >> tempStore: anObject [
-
+	self error; flag: #toRemove.
 	tempStore := anObject
 ]
 

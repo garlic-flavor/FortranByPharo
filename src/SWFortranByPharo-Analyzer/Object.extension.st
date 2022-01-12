@@ -10,5 +10,6 @@ Object class >> initializeInstanceSideTranspiler: transpiler [
 			(aCallee receiverClass = String or: [ aCallee receiverClass = ByteString ]) ifTrue: [ Character ] ifFalse: [
 				self halt
 			]
-		]
+		];
+		defineMethod: #yourself as: self with: [ :t :node | t putYourself: node ]
 ]
