@@ -7,6 +7,7 @@ Object class >> initializeInstanceSideTranspiler: transpiler [
 		defineMethod: #asString as: String;
 		defineMethodReturnsReceiver: #copy;
 		defineMethod: #at: as: [ :aCallee |
+			self error; flag: #toRemove.
 			(aCallee receiverClass = String or: [ aCallee receiverClass = ByteString ]) ifTrue: [ Character ] ifFalse: [
 				self halt
 			]
