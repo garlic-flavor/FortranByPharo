@@ -105,6 +105,17 @@ SWClass >> defineMethodReturnsReceiver: aName [
 ]
 
 { #category : #api }
+SWClass >> defineMethodReturnsReceiver: aName with: calleeGenerator [
+	self generator at: aName put: [ :aCallee |
+		(self transpilerClass newFrom: aCallee)
+			return: aCallee stack first;
+			markAsDecoded;
+			yourself
+	]
+
+]
+
+{ #category : #api }
 SWClass >> defineMethodReturnsReceiversClass: aName [
 	self generator at: aName put: [:aCallee |
 		(self transpilerClass newFrom: aCallee)
@@ -170,6 +181,24 @@ SWClass >> generator: anObject [
 	generator := anObject
 ]
 
+{ #category : #'instance creation' }
+SWClass >> getMethodTranspiler: aCallee [
+
+	^ self methods detect: [ :one | one = aCallee ] ifNone: [|transpiler|
+		transpiler := self definedMethod: aCallee ifAbsent: [
+			(self transpilerClass newFrom: aCallee)
+				classInfo: self;
+				pool: self pool;
+				yourself.
+		].
+		self methods add: transpiler.
+		transpiler
+			decode;
+			yourself
+	].
+
+]
+
 { #category : #accessing }
 SWClass >> getVariableInfoAtOffset: offset [
 	"Return SWVariableInfo in slots at offset."
@@ -193,24 +222,6 @@ SWClass >> methods [
 SWClass >> methods: anObject [
 
 	methods := anObject
-]
-
-{ #category : #'instance creation' }
-SWClass >> newMethodTranspiler: aCallee [
-
-	^ self methods detect: [ :one | one = aCallee ] ifNone: [|transpiler|
-		transpiler := self definedMethod: aCallee ifAbsent: [
-			(self transpilerClass newFrom: aCallee)
-				classInfo: self;
-				pool: self pool;
-				yourself.
-		].
-		self methods add: transpiler.
-		transpiler
-			decode;
-			yourself
-	].
-
 ]
 
 { #category : #accessing }

@@ -64,6 +64,18 @@ SWClassDefinitionTranspiler >> defineMethodReturnsFirstOrSecondArgument: aName w
 
 ]
 
+{ #category : #api }
+SWClassDefinitionTranspiler >> defineMethodReturnsReceiver: aName with: calleeGenerator [
+	self generator at: aName put: [ :aCallee |
+		(self transpilerClass newFrom: aCallee)
+			return: aCallee stack first;
+			calleeGenerator: calleeGenerator;
+			markAsDecoded;
+			yourself
+	]
+
+]
+
 { #category : #'as yet unclassified' }
 SWClassDefinitionTranspiler >> putClassFooter [
 	self stream

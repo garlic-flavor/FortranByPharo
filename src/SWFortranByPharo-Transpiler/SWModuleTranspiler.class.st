@@ -37,6 +37,12 @@ SWModuleTranspiler >> contents [
 	]
 ]
 
+{ #category : #'as yet unclassified' }
+SWModuleTranspiler >> enableDebugMode [
+	self payload debugMode: true.
+	self stream logging: true.
+]
+
 { #category : #accessing }
 SWModuleTranspiler >> filename [
 	^ self payload filename

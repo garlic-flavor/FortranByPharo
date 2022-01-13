@@ -42,16 +42,6 @@ SWMBTofJSTest >> _05_ifTrue [
 ]
 
 { #category : #'as yet unclassified' }
-SWMBTofJSTest >> _06_cascading [
-	^ (SWServerStatus new
-		failed;
-		message: 'hogehoge';
-		uri: 'testuri';
-		yourself) toString
-
-]
-
-{ #category : #'as yet unclassified' }
 SWMBTofJSTest >> _06_cascading: uri [
 	^ (SWServerStatus new
 		failed;
@@ -66,10 +56,11 @@ SWMBTofJSTest >> test_01 [
 	|transpiler result|
 	transpiler := (self transpile_program: #_01_call_Transcript).
 	result := transpiler stream contents.
-	self assert: result equals: 'Transcript.show_("Hello, good-bye!");
-Transcript.cr();
-Transcript.cr();
-'
+	self assert: result equals: '(function(Transcript, _receiver_) {
+    _receiver_.show:("Hello, good-bye!");
+    _receiver_.cr();
+    return _receiver_.cr();
+})(Transcript, (Transcript))'
 ]
 
 { #category : #tests }
@@ -119,7 +110,13 @@ SWMBTofJSTest >> test_06 [
 	|transpiler result|
 	transpiler := (self transpile_program: #_06_cascading: with: String).
 	result := transpiler stream contents.
-	result inspect
+	self assert: result equals: 'return (function(uri, SWServerStatus, _receiver_) {
+    _receiver_.failed();
+    _receiver_.message:("hogehoge");
+    _receiver_.uri:(uri);
+    return _receiver_;
+})(uri, SWServerStatus, (SWServerStatus.new())).toString();
+'
 ]
 
 { #category : #utilities }

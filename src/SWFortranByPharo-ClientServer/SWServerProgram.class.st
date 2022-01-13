@@ -10,9 +10,10 @@ Class {
 { #category : #accessing }
 SWServerProgram class >> build [
 	<script>
-	|project|
-	project := SWMTofJS newMainProgramFrom: SWServer.
-	project transpile.
-	project inspect.
+	|module|
+	module := SWMTofJS newMainProgramFrom: SWServer.
+	module enableDebugMode.
+	module transpile.
+	module inspect.
 
 ]

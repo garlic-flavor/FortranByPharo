@@ -52,6 +52,16 @@ SWMangle class >> safeSelectorNameOf: selector [
 
 ]
 
+{ #category : #'as yet unclassified' }
+SWMangle class >> selectorForTranspilerOf: aSelector [
+	^ (String streamContents: [ :s |
+		s
+			<< 'put_';
+			<< (self safeSelectorNameOf: aSelector);
+			<< ':'
+	]) asSymbol
+]
+
 { #category : #api }
 SWMangle class >> typeNameOf: aType [
 	^ aType ifNil: [ '_' ] ifNotNil: [ aType name select: [ :c | c isUppercase ] thenCollect: [ :c | c asLowercase ] ].

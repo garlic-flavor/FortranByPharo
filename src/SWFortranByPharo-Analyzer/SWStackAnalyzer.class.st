@@ -7,7 +7,8 @@ Class {
 	#instVars : [
 		'jumperStack',
 		'tempStore',
-		'pool'
+		'pool',
+		'debugMode'
 	],
 	#category : #'SWFortranByPharo-Analyzer-Method'
 }
@@ -47,6 +48,18 @@ SWStackAnalyzer >> blockReturnTop [
 SWStackAnalyzer >> callPrimitive: primNumber [
 
 	super callPrimitive: primNumber
+]
+
+{ #category : #accessing }
+SWStackAnalyzer >> debugMode [
+
+	^ debugMode
+]
+
+{ #category : #accessing }
+SWStackAnalyzer >> debugMode: anObject [
+
+	debugMode := anObject
 ]
 
 { #category : #'instruction decoding' }
@@ -150,7 +163,11 @@ SWStackAnalyzer >> newFullClosure: lit with: args [
 { #category : #accessing }
 SWStackAnalyzer >> pool [
 
-	^ pool ifNil: [ pool := self class newDefaultPool ]
+	^ pool ifNil: [
+		pool := self class newDefaultPool
+			debugMode: self debugMode;
+			yourself
+	]
 ]
 
 { #category : #accessing }

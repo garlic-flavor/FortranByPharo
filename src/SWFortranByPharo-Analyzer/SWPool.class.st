@@ -6,25 +6,28 @@ Class {
 	#superclass : #Object,
 	#instVars : [
 		'payload',
-		'transpilerClass'
+		'transpilerClass',
+		'debugMode'
 	],
 	#category : #'SWFortranByPharo-Analyzer-Global'
 }
-
-{ #category : #utils }
-SWPool class >> search: selector in: aClass [
-	aClass ifNil: [ ^ nil ].
-
-	^ aClass methodDict at: selector ifAbsent: [
-			self search: selector in: aClass superclass
-	]
-
-]
 
 { #category : #accessing }
 SWPool >> classTranspilerClass [
 
 	^ self transpilerClass classTranspilerClass
+]
+
+{ #category : #accessing }
+SWPool >> debugMode [
+
+	^ debugMode
+]
+
+{ #category : #accessing }
+SWPool >> debugMode: anObject [
+
+	debugMode := anObject
 ]
 
 { #category : #'instance creation' }
@@ -37,7 +40,7 @@ SWPool >> getClassTranspiler: aClass [
 		pool: self;
 		targetClass: aClass;
 		ready;
-		yourself.
+		yourself
 
 ]
 
@@ -45,12 +48,12 @@ SWPool >> getClassTranspiler: aClass [
 SWPool >> getMethodTranspiler: aSelector supered: supered with: args [
 	|method callee methodClass|
 
-	method := self class search: aSelector
+	method := self search: aSelector
 		in: (supered ifTrue: [ args first value superclass ] ifFalse: [ args first value ]).
 	callee := SWCalleeInfo new: (method ifNotNil: [ method ] ifNil: [ aSelector ]) with: args.
 	methodClass := (method ifNotNil: [ method methodClass ] ifNil: [ UndefinedObject ] ).
 	^ (self getClassTranspiler: methodClass)
-		newMethodTranspiler: callee
+		getMethodTranspiler: callee
 
 ]
 
@@ -74,6 +77,16 @@ SWPool >> printOn: aStream [
 { #category : #streaming }
 SWPool >> putOn: aStream [
 	aStream << $#; << (self hash % 16rFFFF) printStringHex
+]
+
+{ #category : #utils }
+SWPool >> search: selector in: aClass [
+	aClass ifNil: [ ^ nil ].
+
+	^ aClass methodDict at: selector ifAbsent: [
+			self search: selector in: aClass superclass
+	]
+
 ]
 
 { #category : #enumerating }

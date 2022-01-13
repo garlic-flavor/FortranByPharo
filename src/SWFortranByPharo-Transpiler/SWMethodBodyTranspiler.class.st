@@ -53,17 +53,12 @@ SWMethodBodyTranspiler >> << anObject [
 SWMethodBodyTranspiler >> calleeGenerator [
 
 	^ calleeGenerator ifNil: [
-		calleeGenerator := [ :transpiler :aNode |
-			transpiler << aNode receiver.
-			aNode selector first isLetter ifTrue: [
-				transpiler
-					putClassAccessor;
-					put: (transpiler class mangleClass mangle: transpiler);
-					putArguments: aNode arguments.
+		calleeGenerator := [ :transpiler :aNode ||transpilerSelector|
+			transpilerSelector := transpiler class mangleClass selectorForTranspilerOf: aNode selector.
+			(transpiler respondsTo: transpilerSelector) ifTrue: [
+				transpiler perform: transpilerSelector with: aNode
 			] ifFalse: [
-				transpiler
-					put: aNode selector;
-					<< (aNode arguments at: 1)
+				transpiler putOrdinaryMessage: aNode
 			]
 		]
 	]
@@ -351,6 +346,18 @@ SWMethodBodyTranspiler >> putMessage: aNode withReceiver: aRNode [
 			receiver: aRNode
 			yourself).
 	self decMessageNest
+
+]
+
+{ #category : #'code generation' }
+SWMethodBodyTranspiler >> putOrdinaryMessage: aNode [
+	self stream log.
+
+	self
+		<< aNode receiver;
+		putClassAccessor;
+		put: aNode selector;
+		putArguments: aNode arguments
 
 ]
 

@@ -11,5 +11,5 @@ Object class >> initializeInstanceSideTranspiler: transpiler [
 				self halt
 			]
 		];
-		defineMethod: #yourself as: self with: [ :t :node | t putYourself: node ]
+		defineMethodReturnsReceiver: #yourself with: [ :t :node | t putYourself: node ]
 ]
