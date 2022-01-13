@@ -129,7 +129,9 @@ SWMBTofJSTest >> test_07 [
 	|transpiler result|
 	transpiler := (self transpile_program: #_07_opBinaries: with: Integer).
 	result := transpiler stream contents.
-	result inspect
+	self assert: result equals: 'return (((a + 100) * 200) - 300) / 400;
+'
+
 ]
 
 { #category : #utilities }

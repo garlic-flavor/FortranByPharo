@@ -4,6 +4,7 @@ Extension { #name : #Object }
 Object class >> initializeInstanceSideTranspiler: transpiler [
 	transpiler
 		setBreakpointOn: #subclassResponsibility;
+		defineMethodAsCompareOperator: #=;
 		defineMethod: #asString as: String;
 		defineMethodReturnsReceiver: #copy;
 		defineMethod: #at: as: [ :aCallee |

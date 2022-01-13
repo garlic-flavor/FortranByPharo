@@ -58,7 +58,7 @@ SWMethodBodyTranspiler >> calleeGenerator [
 			(transpiler respondsTo: transpilerSelector) ifTrue: [
 				transpiler perform: transpilerSelector with: aNode
 			] ifFalse: [
-				transpiler putOrdinaryMessage: aNode
+				transpiler putOrdinaryCallee: aNode
 			]
 		]
 	]
@@ -370,13 +370,13 @@ SWMethodBodyTranspiler >> putOpBinary: aNode [
 ]
 
 { #category : #'code generation' }
-SWMethodBodyTranspiler >> putOrdinaryMessage: aNode [
+SWMethodBodyTranspiler >> putOrdinaryCallee: aNode [
 	self stream log.
 
 	self
 		<< aNode receiver;
 		putClassAccessor;
-		put: aNode selector;
+		put: (self class mangleClass mangle: self);
 		putArguments: aNode arguments
 
 ]
@@ -447,9 +447,8 @@ SWMethodBodyTranspiler >> putSequenceWithReturn: aSequence [
 
 { #category : #'code generation' }
 SWMethodBodyTranspiler >> putStatement: aStatement [
-	self << aStatement.
-	aStatement class = RBCascadeNode ifTrue: [ ^ self ].
 	self
+		<< aStatement;
 		putStatementDelimiter;
 		cr
 

@@ -17,6 +17,12 @@ Class {
 	#category : #'SWFortranByPharo-Analyzer-Type'
 }
 
+{ #category : #initialization }
+SWVariableTypeInfo class >> initializeInstanceSideTranspiler: transpiler [
+	transpiler
+		defineMethodReturnsReceiver: #<<
+]
+
 { #category : #'instance creation' }
 SWVariableTypeInfo class >> new: aType [
 	^ self new: aType with: nil

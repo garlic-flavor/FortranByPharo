@@ -377,9 +377,9 @@ SWClass >> targetClass: anObject [
 	targetClass := anObject.
 	initializer := targetClass isInstanceSide
 		ifTrue: [ #initializeInstanceSideTranspiler: ] ifFalse: [ #initializeClassSideTranspiler: ].
-	targetClass classSide methodDict at: initializer ifPresent: [ :init |
-		init valueWithReceiver: targetClass arguments: { self }
-	].
+	(targetClass instanceSide respondsTo: initializer) ifTrue: [
+		targetClass instanceSide perform: initializer with: self
+	]
 
 ]
 
