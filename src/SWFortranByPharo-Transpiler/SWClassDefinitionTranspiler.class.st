@@ -38,6 +38,30 @@ SWClassDefinitionTranspiler >> defineMethod: aName with: calleeGenerator [
 ]
 
 { #category : #api }
+SWClassDefinitionTranspiler >> defineMethodAsBinaryOperator: aName [
+	self generator at: aName put: [ :aCallee |
+		(self transpilerClass newFrom: aCallee)
+			return: aCallee stack first;
+			calleeGenerator: [ :t :node | t putOpBinary: node ];
+			markAsDecoded;
+			yourself
+	]
+
+]
+
+{ #category : #api }
+SWClassDefinitionTranspiler >> defineMethodAsCompareOperator: aName [
+	self generator at: aName put: [ :aCallee |
+		(self transpilerClass newFrom: aCallee)
+			return: Boolean;
+			calleeGenerator: [ :t :node | t putOpBinary: node ];
+			markAsDecoded;
+			yourself
+	]
+
+]
+
+{ #category : #api }
 SWClassDefinitionTranspiler >> defineMethodReturnsFirstArgument: aName with: aCalleeGenerator [
 	self generator at: aName put: [ :aCallee |
 		(self transpilerClass newFrom: aCallee)

@@ -12,6 +12,16 @@ Class {
 	#category : #'SWFortranByPharo-Analyzer-Global'
 }
 
+{ #category : #utils }
+SWPool class >> search: selector in: aClass [
+	aClass ifNil: [ ^ nil ].
+
+	^ aClass methodDict at: selector ifAbsent: [
+			self search: selector in: aClass superclass
+	]
+
+]
+
 { #category : #accessing }
 SWPool >> classTranspilerClass [
 
@@ -39,7 +49,6 @@ SWPool >> getClassTranspiler: aClass [
 	])
 		pool: self;
 		targetClass: aClass;
-		ready;
 		yourself
 
 ]
@@ -48,8 +57,9 @@ SWPool >> getClassTranspiler: aClass [
 SWPool >> getMethodTranspiler: aSelector supered: supered with: args [
 	|method callee methodClass|
 
-	method := self search: aSelector
+	method := self class search: aSelector
 		in: (supered ifTrue: [ args first value superclass ] ifFalse: [ args first value ]).
+
 	callee := SWCalleeInfo new: (method ifNotNil: [ method ] ifNil: [ aSelector ]) with: args.
 	methodClass := (method ifNotNil: [ method methodClass ] ifNil: [ UndefinedObject ] ).
 	^ (self getClassTranspiler: methodClass)
@@ -77,16 +87,6 @@ SWPool >> printOn: aStream [
 { #category : #streaming }
 SWPool >> putOn: aStream [
 	aStream << $#; << (self hash % 16rFFFF) printStringHex
-]
-
-{ #category : #utils }
-SWPool >> search: selector in: aClass [
-	aClass ifNil: [ ^ nil ].
-
-	^ aClass methodDict at: selector ifAbsent: [
-			self search: selector in: aClass superclass
-	]
-
 ]
 
 { #category : #enumerating }

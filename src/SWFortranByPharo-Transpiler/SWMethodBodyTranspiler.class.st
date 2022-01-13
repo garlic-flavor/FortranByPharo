@@ -110,6 +110,7 @@ SWMethodBodyTranspiler >> cr [
 
 { #category : #'private - code generation' }
 SWMethodBodyTranspiler >> decMessageNest [
+	self error; flag: #toRemove.
 	messageNest push: { 0. messageNest pop - 1 } max.
 	0 < messageNest top ifTrue: [ self put: ')' ].
 
@@ -149,19 +150,26 @@ self error; flag: #toRemove.
 
 { #category : #'private - code generation' }
 SWMethodBodyTranspiler >> incMessageNest [
+	self error; flag: #toRemove.
 	messageNest push: (messageNest pop + 1).
 	1 < messageNest top ifTrue: [ self put: '(' ].
-]
-
-{ #category : #initialization }
-SWMethodBodyTranspiler >> initialize [
-	super initialize.
-	messageNest := Stack newFrom: { 0 }.
 ]
 
 { #category : #'public API' }
 SWMethodBodyTranspiler >> logging: trueOrFalse [
 	self stream logging: trueOrFalse
+]
+
+{ #category : #accessing }
+SWMethodBodyTranspiler >> messageNest [
+
+	^ messageNest ifNil: [ messageNest := 0 ]
+]
+
+{ #category : #accessing }
+SWMethodBodyTranspiler >> messageNest: anObject [
+
+	messageNest := anObject
 ]
 
 { #category : #'code generation' }
@@ -326,27 +334,39 @@ SWMethodBodyTranspiler >> putLine: anObject [
 SWMethodBodyTranspiler >> putMessage: aNode [
 	|t2|
 	self stream log: [ aNode receiver asString, ' >> ', aNode selector asString ].
-	self incMessageNest.
-	t2 := (self messages at: aNode)
+	0 < self messageNest ifTrue: [ self put: '(' ].
+	t2 := (self messages at: aNode) asCallee
+		messageNest: self messageNest + 1;
+		messages: self messages;
 		stream: self stream;
 		yourself.
-	t2 messages addAll: self messages.
+
 	t2 putCallee: aNode.
-	self decMessageNest
+	0 < self messageNest ifTrue: [ self put: ')' ]
 ]
 
 { #category : #'code generation' }
 SWMethodBodyTranspiler >> putMessage: aNode withReceiver: aRNode [
 	self stream log: [ aRNode asString, ' >> ', aNode selector asString ].
-	self incMessageNest.
 	(self messages at: aNode)
 		stream: self stream;
 		messages: self messages;
 		putCallee: (aNode copy
 			receiver: aRNode
 			yourself).
-	self decMessageNest
 
+]
+
+{ #category : #'as yet unclassified' }
+SWMethodBodyTranspiler >> putOpBinary: aNode [
+	self stream log.
+	
+	self
+		<< aNode receiver;
+		put: ' ';
+		put: aNode selector;
+		put: ' ';
+		<< (aNode arguments at: 1)
 ]
 
 { #category : #'code generation' }

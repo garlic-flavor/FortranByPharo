@@ -75,7 +75,7 @@ SWMBTofJS >> putCascade: aRBCascadeNode [
 	self stream decIndent.
 	self put: '})('.
 	variables do: [ :each | self put: each name; put: ', ' ].
-	self put: '('; << aRBCascadeNode receiver; put: '))'.
+	self << aRBCascadeNode receiver; put: ')'.
 	
 ]
 

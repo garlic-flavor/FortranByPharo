@@ -63,6 +63,11 @@ SWCalleeInfo >> arguments [
 	^ self stack copyFrom: 1 to: self method numArgs
 ]
 
+{ #category : #converting }
+SWCalleeInfo >> asCallee [
+	^ self copy
+]
+
 { #category : #accessing }
 SWCalleeInfo >> block: aBlock [
 	aBlock argumentNames doWithIndex: [ :name :idx |
@@ -97,6 +102,7 @@ SWCalleeInfo >> cblock: aBlock [
 
 { #category : #copying }
 SWCalleeInfo >> copyFrom: right [
+
 	method := right method.
 	stack := right stack.
 	right isDecoded ifTrue: [ self markAsDecoded ]

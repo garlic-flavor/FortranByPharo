@@ -33,7 +33,7 @@ SWClass >> classSide: anObject [
 SWClass >> defineMethod: aName as: rType [
 	self generator at: aName put: [ :aCallee |
 		(self transpilerClass newFrom: aCallee)
-			specifyReturnTypeAs: (rType isBlock ifTrue: [ rType value: aCallee ] ifFalse: [ rType ]);
+			specifyReturnTypeAs: (rType isBlock ifTrue: [ self error; flag: #toRemove. rType value: aCallee ] ifFalse: [ rType ]);
 			markAsDecoded;
 			yourself
 	]
@@ -48,6 +48,28 @@ SWClass >> defineMethod: aName as: rType with: calleeGenerator [
 
 { #category : #'as yet unclassified' }
 SWClass >> defineMethod: aName with: calleeGenerator [
+
+]
+
+{ #category : #api }
+SWClass >> defineMethodAsBinaryOperator: aName [
+	self generator at: aName put: [ :aCallee |
+		(self transpilerClass newFrom: aCallee)
+			return: aCallee stack first;
+			markAsDecoded;
+			yourself
+	]
+
+]
+
+{ #category : #api }
+SWClass >> defineMethodAsCompareOperator: aName [
+	self generator at: aName put: [ :aCallee |
+		(self transpilerClass newFrom: aCallee)
+			return: Boolean;
+			markAsDecoded;
+			yourself
+	]
 
 ]
 
@@ -168,11 +190,7 @@ SWClass >> definedMethod: aCallee ifAbsent: absentBlock [
 { #category : #accessing }
 SWClass >> generator [
 
-	^ generator ifNil: [
-		generator := Dictionary new.
-		self readyGenerator.
-		generator
-	]
+	^ generator ifNil: [ generator := Dictionary new ]
 ]
 
 { #category : #accessing }
@@ -241,40 +259,6 @@ SWClass >> putOn: aStream [
 	aStream << self targetClass name
 ]
 
-{ #category : #initialization }
-SWClass >> ready [
-	|initializer|
-	initializer := targetClass isInstanceSide
-		ifTrue: [ #initializeInstanceSideTranspiler: ] ifFalse: [ #initializeClassSideTranspiler: ].
-	targetClass classSide methodDict at: initializer ifPresent: [ :init |
-		init valueWithReceiver: targetClass arguments: { self }
-	].
-
-]
-
-{ #category : #initialization }
-SWClass >> readyGenerator [
-	self
-		defineMethod: #= as: Boolean;
-		defineMethod: #== as: Boolean;
-		defineMethod: #~= as: Boolean;
-		defineMethod: #< as: Boolean;
-		defineMethod: #> as: Boolean;
-		defineMethod: #>= as: Boolean;
-		defineMethod: #<= as: Boolean;
-		defineMethodReturnsReceiver: #+;
-		defineMethodReturnsReceiver: #*;
-		defineMethodReturnsReceiver: #-;
-		defineMethodReturnsReceiver: #error:;
-		defineMethodReturnsReceiversInstance: #basicNew;
-		defineMethodReturnsReceiversInstance: #basicNew:;
-		defineMethodReturnsSecondArgument: #at:put:;
-		defineMethodReturnsSecondArgument: #at:ifAbsent:;
-		defineMethod: #asInteger as: Integer;
-		defineMethod: #asString as: String
-
-]
-
 { #category : #api }
 SWClass >> setBreakpointOn: aName [
 	self generator at: aName put: [ :aCallee |
@@ -312,8 +296,14 @@ SWClass >> targetClass [
 { #category : #accessing }
 SWClass >> targetClass: anObject [
 
+	|initializer|
 	targetClass := anObject.
-	
+	initializer := targetClass isInstanceSide
+		ifTrue: [ #initializeInstanceSideTranspiler: ] ifFalse: [ #initializeClassSideTranspiler: ].
+	targetClass classSide methodDict at: initializer ifPresent: [ :init |
+		init valueWithReceiver: targetClass arguments: { self }
+	].
+
 ]
 
 { #category : #accessing }

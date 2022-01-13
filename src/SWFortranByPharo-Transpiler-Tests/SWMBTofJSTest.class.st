@@ -51,6 +51,11 @@ SWMBTofJSTest >> _06_cascading: uri [
 
 ]
 
+{ #category : #'as yet unclassified' }
+SWMBTofJSTest >> _07_opBinaries: a [
+	^ a + 100 * 200 - 300 / 400
+]
+
 { #category : #tests }
 SWMBTofJSTest >> test_01 [
 	|transpiler result|
@@ -60,7 +65,7 @@ SWMBTofJSTest >> test_01 [
     _receiver_.show:("Hello, good-bye!");
     _receiver_.cr();
     return _receiver_.cr();
-})(Transcript, (Transcript))'
+})(Transcript, Transcript)'
 ]
 
 { #category : #tests }
@@ -117,6 +122,14 @@ SWMBTofJSTest >> test_06 [
     return _receiver_;
 })(uri, SWServerStatus, (SWServerStatus.new())).toString();
 '
+]
+
+{ #category : #tests }
+SWMBTofJSTest >> test_07 [
+	|transpiler result|
+	transpiler := (self transpile_program: #_07_opBinaries: with: Integer).
+	result := transpiler stream contents.
+	result inspect
 ]
 
 { #category : #utilities }

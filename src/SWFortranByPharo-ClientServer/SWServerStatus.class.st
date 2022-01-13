@@ -42,6 +42,12 @@ SWServerStatus class >> fromSton: stonReader [
 	
 ]
 
+{ #category : #initialization }
+SWServerStatus class >> initializeInstanceSideTranspiler: transpiler [
+	transpiler
+		defineMethod: #stonOn: as: STON
+]
+
 { #category : #'code generation' }
 SWServerStatus class >> mjs_requirements: transpiler [
 	transpiler

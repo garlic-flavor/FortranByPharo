@@ -13,6 +13,31 @@ Class {
 	#category : #'SWFortranByPharo-Analyzer-Method'
 }
 
+{ #category : #initialization }
+SWStackAnalyzer class >> initializeDefaultClassTranspiler: transpiler [
+	self error; flag: #toRemove.
+"
+	transpiler
+		defineMethod: #= as: Boolean;
+		defineMethod: #== as: Boolean;
+		defineMethod: #~= as: Boolean;
+		defineMethod: #< as: Boolean;
+		defineMethod: #> as: Boolean;
+		defineMethod: #>= as: Boolean;
+		defineMethod: #<= as: Boolean;
+		defineMethodAsBinaryOperator: #+;
+		defineMethodReturnsReceiver: #* with: [:t :node | t putOpBinary: node ];
+		defineMethodReturnsReceiver: #-;
+		defineMethodReturnsReceiver: #error:;
+		defineMethodReturnsReceiversInstance: #basicNew;
+		defineMethodReturnsReceiversInstance: #basicNew:;
+		defineMethodReturnsSecondArgument: #at:put:;
+		defineMethodReturnsSecondArgument: #at:ifAbsent:;
+		defineMethod: #asInteger as: Integer;
+		defineMethod: #asString as: String
+"
+]
+
 { #category : #private }
 SWStackAnalyzer >> addBytecode: description [
 	|item node args methodInfo beforeSize|
