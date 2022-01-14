@@ -63,6 +63,7 @@ SWMethodDefinitionTranspiler >> stream: anObject [
 
 { #category : #'public API' }
 SWMethodDefinitionTranspiler >> transpile [
+	self stream putComment: self bodyTranspiler method comment.
 	self putFunctionHeader.
 	self stream incIndent.
 	self bodyTranspiler

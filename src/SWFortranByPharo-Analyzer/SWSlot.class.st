@@ -55,6 +55,11 @@ SWSlot >> detect: aNeedle ifNone: noneBlock [
 	^ self payload detect: aNeedle ifNone: noneBlock
 ]
 
+{ #category : #enumerating }
+SWSlot >> do: aBlock [
+	^ self payload do: aBlock
+]
+
 { #category : #accessing }
 SWSlot >> first [
 	^ self payload first

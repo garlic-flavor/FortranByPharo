@@ -80,8 +80,20 @@ SWClassDefinitionTranspiler >> putClassHeader [
 ]
 
 { #category : #'as yet unclassified' }
-SWClassDefinitionTranspiler >> putMemberVariable: aVariableInfo [
-	^ self subclassResponsibility 
+SWClassDefinitionTranspiler >> putMember [
+	self slot do: [ :each |
+		(each isNotNil and: [ each name isEmptyOrNil not ]) ifTrue: [
+			self putMemberDeclarationOf: each
+		]
+	].
+	self methods do: [ :each | self putMethodDefinition: each ].
+
+]
+
+{ #category : #'as yet unclassified' }
+SWClassDefinitionTranspiler >> putMemberDeclarationOf: aVariableTypeInfo [
+	^ self subclassResponsibility
+
 ]
 
 { #category : #'as yet unclassified' }
@@ -118,11 +130,15 @@ SWClassDefinitionTranspiler >> transpile [
 
 { #category : #'as yet unclassified' }
 SWClassDefinitionTranspiler >> transpileAsClassSide [
-	self methods do: [ :each | self putMethodDefinition: each ]
+
+	self putMember
+
 ]
 
 { #category : #'as yet unclassified' }
 SWClassDefinitionTranspiler >> transpileAsInstanceSide [
+
+	self stream putComment: self targetClass comment.
 	self putClassHeader.
 	self stream incIndent.
 	classSide ifNotNil: [
@@ -131,7 +147,7 @@ SWClassDefinitionTranspiler >> transpileAsInstanceSide [
 			transpileAsClassSide
 	].
 	
-	self methods do: [ :each | self putMethodDefinition: each ].
+	self putMember.
 
 	self stream decIndent.
 	self putClassFooter.

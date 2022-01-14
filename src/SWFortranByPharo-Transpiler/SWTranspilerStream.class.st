@@ -13,7 +13,11 @@ Class {
 		'newline',
 		'delimiter',
 		'preventNewline',
-		'preventDelimiter'
+		'preventDelimiter',
+		'firstLineHeaderOfComment',
+		'middleLineHeaderOfComment',
+		'lastLineOfComment',
+		'singleLineHeaderOfComment'
 	],
 	#category : #'SWFortranByPharo-Transpiler-Common'
 }
@@ -41,6 +45,18 @@ SWTranspilerStream >> delimiter: anObject [
 	delimiter := anObject
 ]
 
+{ #category : #accessing }
+SWTranspilerStream >> firstLineHeaderOfComment [
+
+	^ firstLineHeaderOfComment ifNil: [ firstLineHeaderOfComment := '/** ' ]
+]
+
+{ #category : #accessing }
+SWTranspilerStream >> firstLineHeaderOfComment: anObject [
+
+	firstLineHeaderOfComment := anObject
+]
+
 { #category : #api }
 SWTranspilerStream >> incIndent [
 	indent := indent + 1.
@@ -53,6 +69,18 @@ SWTranspilerStream >> initialize [
 	indent := 0.
 	isNewline := false.
 	preventNewline := false.
+]
+
+{ #category : #accessing }
+SWTranspilerStream >> lastLineOfComment [
+
+	^ lastLineOfComment ifNil: [ lastLineOfComment := ' */' ]
+]
+
+{ #category : #accessing }
+SWTranspilerStream >> lastLineOfComment: anObject [
+
+	lastLineOfComment := anObject
 ]
 
 { #category : #api }
@@ -83,6 +111,18 @@ SWTranspilerStream >> logging: trueOrFalse [
 ]
 
 { #category : #accessing }
+SWTranspilerStream >> middleLineHeaderOfComment [
+
+	^ middleLineHeaderOfComment ifNil: [ middleLineHeaderOfComment := ' * ' ]
+]
+
+{ #category : #accessing }
+SWTranspilerStream >> middleLineHeaderOfComment: anObject [
+
+	middleLineHeaderOfComment := anObject
+]
+
+{ #category : #accessing }
 SWTranspilerStream >> newline [
 
 	^ newline ifNil: [ newline := String crlf ]
@@ -109,6 +149,29 @@ SWTranspilerStream >> put: code [
 	self logger log: code.
 	self putIndent.
 	payload nextPutAll: code.
+]
+
+{ #category : #'code generation' }
+SWTranspilerStream >> putComment: aComment [
+
+	aComment ifNil: [ ^ self ].
+	aComment lineIndicesDo: [ :start :end :endWithDelimiter |
+		start = 1 ifTrue: [
+			aComment size = endWithDelimiter ifTrue: [
+				self put: self singleLineHeaderOfComment; putLine: aComment.
+				^ self
+			].
+			self put: self firstLineHeaderOfComment
+		] ifFalse: [
+			self put: self middleLineHeaderOfComment
+		].
+		self putLine: (aComment copyFrom: start to: end).
+		aComment size = endWithDelimiter ifTrue: [
+			self lastLineOfComment isEmptyOrNil ifFalse: [
+				self putLine: self lastLineOfComment
+			]
+		]
+	]
 ]
 
 { #category : #'as yet unclassified' }
@@ -144,6 +207,18 @@ SWTranspilerStream >> putLine: code [
 	self put: code.
 	self putLine.
 
+]
+
+{ #category : #accessing }
+SWTranspilerStream >> singleLineHeaderOfComment [
+
+	^ singleLineHeaderOfComment ifNil: [ singleLineHeaderOfComment := '/// ' ]
+]
+
+{ #category : #accessing }
+SWTranspilerStream >> singleLineHeaderOfComment: anObject [
+
+	singleLineHeaderOfComment := anObject
 ]
 
 { #category : #accessing }
