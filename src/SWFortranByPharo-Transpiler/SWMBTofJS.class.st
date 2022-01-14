@@ -37,11 +37,17 @@ SWMBTofJS >> putBlock: aBlock [
 	self stream log.
 
 	self
-		put: 'function';
-		putArguments: aBlock arguments;
 		put: '{';
-		putSequenceWithReturn: aBlock body;
-		put: '}'
+		cr;
+		incIndent;
+		withoutMessageNestDo: [
+			self putSequence: aBlock body
+		];
+		cr;
+		decIndent;
+		put: '}';
+		preventStatementDelimiter
+
 ]
 
 { #category : #'as yet unclassified' }
@@ -50,7 +56,7 @@ SWMBTofJS >> putBlockAsExpression: aBlock [
 	
 	self
 		put: '(';
-		putBlock: aBlock;
+		putClosure: aBlock;
 		put: ')()'
 ]
 
@@ -80,15 +86,32 @@ SWMBTofJS >> putCascade: aRBCascadeNode [
 ]
 
 { #category : #'as yet unclassified' }
+SWMBTofJS >> putClosure: aBlock [
+	self stream log.
+
+	self
+		put: 'function';
+		putArguments: aBlock arguments;
+		put: '{';
+		cr;
+		incIndent;
+		putSequenceWithReturn: aBlock body;
+		cr;
+		decIndent;
+		put: '}'
+
+]
+
+{ #category : #'as yet unclassified' }
 SWMBTofJS >> putIfFalse: aNode [
 	self stream log.
 
-	aNode lastIsReturn ifTrue: [
+	(aNode lastIsReturn or: [ aNode parent class = RBSequenceNode ]) ifTrue: [
 		self
-			put: 'if(!(';
+			put: 'if(!';
 			<< aNode receiver;
-			put: '))';
-			<< (aNode arguments at: 1)
+			put: ')';
+			putBlock: (aNode arguments at: 1)
 	] ifFalse: [
 		self
 			put: '(!(';
@@ -142,14 +165,18 @@ SWMBTofJS >> putIfTrueIfFalse: aNode [
 	]
 ]
 
-{ #category : #'code generation' }
-SWMBTofJS >> putSelf [
-	self put: (self method methodClass class = Metaclass ifTrue: [ self method methodClass soleInstance name ] ifFalse: [ 'this' ])
+{ #category : #'as yet unclassified' }
+SWMBTofJS >> putOpBinary: aNode [
+	super putOpBinary: (aNode selector = #= ifTrue: [
+		aNode copy
+			selector: #==;
+			yourself
+	] ifFalse: [ aNode ])
 ]
 
 { #category : #'code generation' }
-SWMBTofJS >> putStatementDelimiter [
-	self put: ';'
+SWMBTofJS >> putSelf [
+	self put: (self method methodClass class = Metaclass ifTrue: [ self method methodClass soleInstance name ] ifFalse: [ 'this' ])
 ]
 
 { #category : #'as yet unclassified' }

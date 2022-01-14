@@ -108,6 +108,11 @@ SWMethodBodyTranspiler >> cr [
 	self stream putLine
 ]
 
+{ #category : #'code generation - protected' }
+SWMethodBodyTranspiler >> decIndent [
+	self stream decIndent
+]
+
 { #category : #'private - code generation' }
 SWMethodBodyTranspiler >> decMessageNest [
 	self error; flag: #toRemove.
@@ -148,6 +153,11 @@ self error; flag: #toRemove.
 
 ]
 
+{ #category : #'code generation - protected' }
+SWMethodBodyTranspiler >> incIndent [
+	self stream incIndent
+]
+
 { #category : #'private - code generation' }
 SWMethodBodyTranspiler >> incMessageNest [
 	self error; flag: #toRemove.
@@ -182,6 +192,11 @@ SWMethodBodyTranspiler >> opEqual_For: receiver With: arguments [
 
 ]
 
+{ #category : #'as yet unclassified' }
+SWMethodBodyTranspiler >> preventStatementDelimiter [
+	self stream preventDelimiter
+]
+
 { #category : #'code generation' }
 SWMethodBodyTranspiler >> put: anObject [
 	self stream put: anObject asString
@@ -190,13 +205,16 @@ SWMethodBodyTranspiler >> put: anObject [
 { #category : #'code generation' }
 SWMethodBodyTranspiler >> putArguments: arguments [
 	self stream log.
-	self put: '('.
-	arguments do: [ :each |
-		self << each
-	] separatedBy: [
-		self put: ', '
-	].
-	self put: ')'
+	self
+		put: '(';
+		withoutMessageNestDo: [
+			arguments do: [ :each |
+				self << each
+			] separatedBy: [
+				self put: ', '
+			]
+		];
+		put: ')'
 
 ]
 
@@ -372,9 +390,10 @@ SWMethodBodyTranspiler >> putOpBinary: aNode [
 { #category : #'code generation' }
 SWMethodBodyTranspiler >> putOrdinaryCallee: aNode [
 	self stream log.
-
-	self
-		<< aNode receiver;
+	self 
+		withoutMessageNestDo: [
+			self << aNode receiver
+		];
 		putClassAccessor;
 		put: (self class mangleClass mangle: self);
 		putArguments: aNode arguments
@@ -417,7 +436,9 @@ SWMethodBodyTranspiler >> putReturn: value [
 	self stream log.
 	^ self
 		put: 'return ';
-		<< value.
+		withoutMessageNestDo: [
+			self << value
+		]
 ]
 
 { #category : #'code generation' }
@@ -456,7 +477,7 @@ SWMethodBodyTranspiler >> putStatement: aStatement [
 
 { #category : #'code generation' }
 SWMethodBodyTranspiler >> putStatementDelimiter [
-	^ self subclassResponsibility 
+	self stream putDelimiter
 ]
 
 { #category : #'code generation' }
@@ -532,7 +553,7 @@ SWMethodBodyTranspiler >> transpile [
 
 { #category : #accessing }
 SWMethodBodyTranspiler >> type [
-
+self error; flag: #toRemove.
 	^ type
 ]
 
@@ -540,4 +561,25 @@ SWMethodBodyTranspiler >> type [
 SWMethodBodyTranspiler >> type: anObject [
 
 	type := anObject
+]
+
+{ #category : #enumerating }
+SWMethodBodyTranspiler >> withoutMessageNestDo: aBlock [
+	|nest|
+	nest := messageNest.
+	messageNest := 0.
+	aBlock value.
+	messageNest := nest
+]
+
+{ #category : #accessing }
+SWMethodBodyTranspiler >> withoutStatementDelimiter [
+
+	^ withoutStatementDelimiter ifNil: [ withoutStatementDelimiter := false ]
+]
+
+{ #category : #accessing }
+SWMethodBodyTranspiler >> withoutStatementDelimiter: anObject [
+
+	withoutStatementDelimiter := anObject
 ]

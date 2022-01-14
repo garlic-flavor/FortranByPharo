@@ -11,7 +11,9 @@ Class {
 		'indent',
 		'isNewline',
 		'newline',
-		'preventNewline'
+		'delimiter',
+		'preventNewline',
+		'preventDelimiter'
 	],
 	#category : #'SWFortranByPharo-Transpiler-Common'
 }
@@ -25,6 +27,18 @@ SWTranspilerStream >> contents [
 SWTranspilerStream >> decIndent [
 	indent := indent - 1.
 	indent < 0 ifTrue: [ self error: 'Indentation clauses mismatch.' ]
+]
+
+{ #category : #accessing }
+SWTranspilerStream >> delimiter [
+
+	^ delimiter ifNil: [ delimiter := ';' ]
+]
+
+{ #category : #accessing }
+SWTranspilerStream >> delimiter: anObject [
+
+	delimiter := anObject
 ]
 
 { #category : #api }
@@ -80,6 +94,11 @@ SWTranspilerStream >> newline: anObject [
 	newline := anObject
 ]
 
+{ #category : #accessing }
+SWTranspilerStream >> preventDelimiter [
+	preventDelimiter := true
+]
+
 { #category : #api }
 SWTranspilerStream >> preventNewline [
 	preventNewline := true
@@ -90,6 +109,15 @@ SWTranspilerStream >> put: code [
 	self logger log: code.
 	self putIndent.
 	payload nextPutAll: code.
+]
+
+{ #category : #'as yet unclassified' }
+SWTranspilerStream >> putDelimiter [
+	preventDelimiter ifNotNil: [
+		preventDelimiter := nil
+	] ifNil: [
+		payload << self delimiter
+	]
 ]
 
 { #category : #private }

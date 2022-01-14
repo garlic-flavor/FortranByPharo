@@ -108,6 +108,6 @@ SWModuleTranspiler >> transpile [
 
 	self payload
 		stream: self stream;
-		transpile
-
+		transpile.
+	contents := self stream contents
 ]
