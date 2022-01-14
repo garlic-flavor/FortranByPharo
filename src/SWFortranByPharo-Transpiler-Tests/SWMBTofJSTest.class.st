@@ -62,10 +62,11 @@ SWMBTofJSTest >> test_01 [
 	transpiler := (self transpile_program: #_01_call_Transcript).
 	result := transpiler stream contents.
 	self assert: result equals: '(function(Transcript, _receiver_) {
-    _receiver_.show:("Hello, good-bye!");
+    _receiver_.show_("Hello, good-bye!");
     _receiver_.cr();
     return _receiver_.cr();
-})(Transcript, Transcript)'
+})(Transcript, Transcript);
+'
 ]
 
 { #category : #tests }
@@ -97,7 +98,7 @@ SWMBTofJSTest >> test_04 [
 	|transpiler result|
 	transpiler := (self transpile_program: #_04_ifTrueifFalse).
 	result := transpiler stream contents.
-	self assert: result equals: 'return (true) ? (function(){return 123;})() : (function(){return "hoge";})();
+	self assert: result equals: 'return (true ? 123 : "hoge");
 '
 ]
 
@@ -106,7 +107,7 @@ SWMBTofJSTest >> test_05 [
 	|transpiler result|
 	transpiler := (self transpile_program: #_05_ifTrue).
 	result := transpiler stream contents.
-	self assert: result equals: 'return (true) ? (function(){return 123;})() : null;
+	self assert: result equals: 'return (true ? 123 : null);
 '
 ]
 
@@ -117,10 +118,10 @@ SWMBTofJSTest >> test_06 [
 	result := transpiler stream contents.
 	self assert: result equals: 'return (function(uri, SWServerStatus, _receiver_) {
     _receiver_.failed();
-    _receiver_.message:("hogehoge");
-    _receiver_.uri:(uri);
+    _receiver_.message_("hogehoge");
+    _receiver_.uri_(uri);
     return _receiver_;
-})(uri, SWServerStatus, (SWServerStatus.new())).toString();
+})(uri, SWServerStatus, SWServerStatus.new()).toString();
 '
 ]
 

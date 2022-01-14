@@ -12,6 +12,7 @@ SWPTofJSTest >> test_program_01 [
 	|project|
 	project := SWMTofJS newMainProgramFrom: SWTestProgram_01.
 	project stream newline: String cr.
+	project transpile.
 	self assert: project contents equals: 'console.log("Hello, good-bye!");
 '.
 
@@ -22,6 +23,7 @@ SWPTofJSTest >> test_program_02 [
 	|module result runner|
 	module := SWMTofJS newMainProgramFrom: SWTestProgram_02.
 	module stream newline: String cr.
+	module transpile.
 	result := module contents.
 	runner := SWPRofJS new.
 	(runner go: module) inspect

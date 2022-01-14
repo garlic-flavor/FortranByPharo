@@ -23,11 +23,6 @@ SWMBTofJS class >> methodDefinitionTranspilerClass [
 ]
 
 { #category : #accessing }
-SWMBTofJS >> filename [
-	^ 'cache/', super filename, '.mjs'
-]
-
-{ #category : #accessing }
 SWMBTofJS >> mangledName [
 	^ self class mangleClass safeSelectorNameOf: (method class = ByteSymbol ifTrue: [ method ] ifFalse: [ self method selector ])
 ]
@@ -54,10 +49,14 @@ SWMBTofJS >> putBlock: aBlock [
 SWMBTofJS >> putBlockAsExpression: aBlock [
 	self stream log.
 	
-	self
-		put: '(';
-		putClosure: aBlock;
-		put: ')()'
+	aBlock statements size = 1 ifTrue: [
+		self << (aBlock statements at: 1)
+	] ifFalse: [
+		self
+			put: '(';
+			putClosure: aBlock;
+			put: ')()'
+	]
 ]
 
 { #category : #'code generation' }
@@ -102,6 +101,13 @@ SWMBTofJS >> putClosure: aBlock [
 
 ]
 
+{ #category : #accessing }
+SWMBTofJS >> putFilenameOn: aStream [
+	aStream << 'cache/'.
+	super putFilenameOn: aStream.
+	aStream << '.mjs'
+]
+
 { #category : #'as yet unclassified' }
 SWMBTofJS >> putIfFalse: aNode [
 	self stream log.
@@ -136,9 +142,9 @@ SWMBTofJS >> putIfTrue: aNode [
 		self
 			put: '(';
 			<< aNode receiver;
-			put: ') ? ';
+			put: ' ? ';
 			putBlockAsExpression: (aNode arguments at: 1);
-			put: ' : null'
+			put: ' : null)'
 	]
 ]
 
@@ -158,10 +164,11 @@ SWMBTofJS >> putIfTrueIfFalse: aNode [
 		self
 			put: '(';
 			<< aNode receiver;
-			put: ') ? ';
+			put: ' ? ';
  			putBlockAsExpression: (aNode arguments at: 1);
 			put: ' : ';
-			putBlockAsExpression: (aNode arguments at: 2)
+			putBlockAsExpression: (aNode arguments at: 2);
+			put: ')'
 	]
 ]
 

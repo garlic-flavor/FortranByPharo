@@ -1,5 +1,5 @@
 "
-I am HTTP and WebSocket server.
+I am a HTTP / WebSocket server.
 "
 Class {
 	#name : #SWServer,

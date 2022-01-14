@@ -121,11 +121,6 @@ SWMethodBodyTranspiler >> decMessageNest [
 
 ]
 
-{ #category : #accessing }
-SWMethodBodyTranspiler >> filename [
-	^ self method methodClass instanceSide name, self selector
-]
-
 { #category : #'private - testing' }
 SWMethodBodyTranspiler >> hasOwnMessageTranspilerMethodOf: aSelector ifTrue: aBlock [
 	|otms aMethod|
@@ -306,6 +301,13 @@ SWMethodBodyTranspiler >> putCode: code with: anAssociationArray [
 	self put: escaped.
 
 
+]
+
+{ #category : #'as yet unclassified' }
+SWMethodBodyTranspiler >> putFilenameOn: aStream [
+	aStream
+		<< method methodClass instanceSide name;
+		<< self selector asCamelCase
 ]
 
 { #category : #'as yet unclassified' }
@@ -570,16 +572,4 @@ SWMethodBodyTranspiler >> withoutMessageNestDo: aBlock [
 	messageNest := 0.
 	aBlock value.
 	messageNest := nest
-]
-
-{ #category : #accessing }
-SWMethodBodyTranspiler >> withoutStatementDelimiter [
-
-	^ withoutStatementDelimiter ifNil: [ withoutStatementDelimiter := false ]
-]
-
-{ #category : #accessing }
-SWMethodBodyTranspiler >> withoutStatementDelimiter: anObject [
-
-	withoutStatementDelimiter := anObject
 ]

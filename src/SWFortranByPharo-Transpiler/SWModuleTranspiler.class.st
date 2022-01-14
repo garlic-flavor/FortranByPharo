@@ -6,8 +6,7 @@ Class {
 	#superclass : #Object,
 	#instVars : [
 		'stream',
-		'payload',
-		'contents'
+		'payload'
 	],
 	#category : #'SWFortranByPharo-Transpiler-Common'
 }
@@ -31,10 +30,8 @@ SWModuleTranspiler class >> newMainProgramFrom: aClass [
 
 { #category : #accessing }
 SWModuleTranspiler >> contents [
-	^ contents ifNil: [
-		self transpile.
-		contents := self stream contents
-	]
+	stream ifNil: [ self transpile ].
+	^ self stream contents
 ]
 
 { #category : #'as yet unclassified' }
@@ -45,7 +42,7 @@ SWModuleTranspiler >> enableDebugMode [
 
 { #category : #accessing }
 SWModuleTranspiler >> filename [
-	^ self payload filename
+	^ String streamContents: [ :s | self payload putFilenameOn: s ]
 ]
 
 { #category : #testing }
@@ -109,5 +106,5 @@ SWModuleTranspiler >> transpile [
 	self payload
 		stream: self stream;
 		transpile.
-	contents := self stream contents
+
 ]
