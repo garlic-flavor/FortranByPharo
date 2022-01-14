@@ -54,6 +54,18 @@ SWServer class >> main [
 	self new startOn: 50000
 ]
 
+{ #category : #accessing }
+SWServer class >> put [
+	<script>
+	|module runner|
+	module := SWMTofJS newMainProgramFrom: self.
+	module transpile.
+	module contents inspect.
+	runner := SWPRofJS new.
+	runner put: module.
+
+]
+
 { #category : #'as yet unclassified' }
 SWServer class >> relPathOf: path [
 	^ path relativeTo: SWShellEnvironment default localDirectory

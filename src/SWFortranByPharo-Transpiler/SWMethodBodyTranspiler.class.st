@@ -376,6 +376,11 @@ SWMethodBodyTranspiler >> putMessage: aNode withReceiver: aRNode [
 ]
 
 { #category : #'as yet unclassified' }
+SWMethodBodyTranspiler >> putNew: aNode [
+	^ self subclassResponsibility
+]
+
+{ #category : #'as yet unclassified' }
 SWMethodBodyTranspiler >> putOpBinary: aNode [
 	self stream log.
 	
@@ -456,7 +461,7 @@ SWMethodBodyTranspiler >> putSequence: aSequence [
 { #category : #'code generation' }
 SWMethodBodyTranspiler >> putSequenceWithReturn: aSequence [
 	aSequence statements doWithIndex: [ :each :index |
-		index < aSequence statements size ifTrue: [
+		(index < aSequence statements size or: [ each class = RBReturnNode ]) ifTrue: [
 			self putStatement: each
 		] ifFalse: [
 			self

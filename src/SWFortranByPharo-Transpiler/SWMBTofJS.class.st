@@ -98,7 +98,6 @@ SWMBTofJS >> putClosure: aBlock [
 		cr;
 		incIndent;
 		putSequenceWithReturn: aBlock body;
-		cr;
 		decIndent;
 		put: '}'
 
@@ -186,6 +185,15 @@ SWMBTofJS >> putImport: anArray from: aSource [
 	self
 		put: '} from ';
 		putString: ('../script/', aSource, '.mjs')
+]
+
+{ #category : #'as yet unclassified' }
+SWMBTofJS >> putNew: aNode [
+	self
+		put: '(new ';
+		<< aNode receiver;
+		putArguments: aNode arguments;
+		put: ')'
 ]
 
 { #category : #'as yet unclassified' }
