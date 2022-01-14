@@ -9,6 +9,7 @@ Class {
 
 { #category : #constants }
 SWMTofJS class >> extension [
+	self error; flag: #toRemove.
 	^ #mjs
 ]
 

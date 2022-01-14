@@ -62,6 +62,9 @@ SWMBTofJS >> putBlockAsExpression: aBlock [
 { #category : #'code generation' }
 SWMBTofJS >> putCascade: aRBCascadeNode [
 	|variables receiver|
+
+	(self trySimpleCascade: aRBCascadeNode) ifTrue: [ ^ self ].
+
 	variables := (Set newFrom: aRBCascadeNode allVariables) asArray.
 	self put: '(function('.
 	variables do: [ :each | self stream put: each name; put: ', ' ].
@@ -173,6 +176,19 @@ SWMBTofJS >> putIfTrueIfFalse: aNode [
 ]
 
 { #category : #'as yet unclassified' }
+SWMBTofJS >> putImport: anArray from: aSource [
+	self put: 'import {'.
+	anArray do: [ :each |
+		self put: each asString
+	] separatedBy: [
+		self put: ', '
+	].
+	self
+		put: '} from ';
+		putString: ('../script/', aSource, '.mjs')
+]
+
+{ #category : #'as yet unclassified' }
 SWMBTofJS >> putOpBinary: aNode [
 	super putOpBinary: (aNode selector = #= ifTrue: [
 		aNode copy
@@ -183,7 +199,8 @@ SWMBTofJS >> putOpBinary: aNode [
 
 { #category : #'code generation' }
 SWMBTofJS >> putSelf [
-	self put: (self method methodClass class = Metaclass ifTrue: [ self method methodClass soleInstance name ] ifFalse: [ 'this' ])
+
+	self put: (self receiverClass isClassSide ifTrue: [ self receiverClass soleInstance name ] ifFalse: [ 'this' ])
 ]
 
 { #category : #'as yet unclassified' }
@@ -209,6 +226,19 @@ SWMBTofJS >> putVariableDeclarationOf: aVariableInfo [
 SWMBTofJS >> putYourself: aNode [
 	self stream log.
 	self << aNode receiver
+]
+
+{ #category : #'as yet unclassified' }
+SWMBTofJS >> trySimpleCascade: aRBCascadeNode [
+
+	aRBCascadeNode parent class = RBSequenceNode ifFalse: [ ^ false ].
+	aRBCascadeNode receiver class = RBVariableNode ifFalse: [ ^ false ].
+
+	aRBCascadeNode messages do: [ :each |
+		self putStatement: each
+	].
+	self preventStatementDelimiter; preventNewline.
+	^ true
 ]
 
 { #category : #accessing }

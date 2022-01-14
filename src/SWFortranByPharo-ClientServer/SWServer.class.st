@@ -14,6 +14,17 @@ Class {
 }
 
 { #category : #accessing }
+SWServer class >> build [
+	<script>
+	|module|
+	module := SWMTofJS newMainProgramFrom: self.
+	module enableDebugMode.
+	module transpile.
+	module inspect.
+
+]
+
+{ #category : #accessing }
 SWServer class >> default [
 	^ default
 ]
@@ -39,6 +50,7 @@ SWServer class >> main [
 	SWStd
 		import: #(PharoObject Transcript FileLocator) from: 'Pharo';
 		import: #(ZnServer SWWebSocketDelegate ZnResponse ZnEntity ZnStatusLine ZnHeaders) from: 'ZnServer'.
+
 	self new startOn: 50000
 ]
 

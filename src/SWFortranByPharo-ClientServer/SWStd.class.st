@@ -15,6 +15,10 @@ SWStd class >> f90_print_With: arguments Using: transpiler [
 		transpile: (arguments at: 1)
 ]
 
+{ #category : #'as yet unclassified' }
+SWStd class >> haltOnTranspiling [
+]
+
 { #category : #'code generation' }
 SWStd class >> import: identifiers from: aFile [
 ]
@@ -27,7 +31,8 @@ SWStd class >> initializeClassSideTranspiler: transpiler [
 		];
 		defineMethod: #import:from: as: self with: [ :t :aNode |
 			t putImport: (aNode arguments at: 1) value from: (aNode arguments at: 2) value
-		]
+		];
+		setBreakpointOn: #haltOnTranspiling
 ]
 
 { #category : #'code generation' }

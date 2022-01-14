@@ -339,7 +339,7 @@ SWClass >> putOn: aStream [
 { #category : #api }
 SWClass >> setBreakpointOn: aName [
 	self generator at: aName put: [ :aCallee |
-		self error
+		self halt
 	]
 
 ]

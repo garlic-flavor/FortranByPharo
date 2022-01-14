@@ -20,6 +20,7 @@ SWMethodBodyTranspiler class >> mangleClass [
 
 { #category : #utils }
 SWMethodBodyTranspiler class >> messageTranspilerMethodNameFor: aSelector [
+	self error; flag: #toRemove.
 	^ ((self mangleClass safeSelectorNameOf: aSelector), 'For:With:') asSymbol
 ]
 
@@ -35,6 +36,7 @@ SWMethodBodyTranspiler class >> search: selector in: aClass [
 
 { #category : #utils }
 SWMethodBodyTranspiler class >> uniqueMessageTranspilerNameFor: aSelector for: type [
+	self error; flag: #toRemove.
 	^ (String streamContents: [ :s |
 		s << type; <<  '_'; << (self mangleClass safeSelectorNameOf: aSelector); << 'With:Using:'
 	]) asSymbol
@@ -187,6 +189,11 @@ SWMethodBodyTranspiler >> opEqual_For: receiver With: arguments [
 
 ]
 
+{ #category : #'code generation - protected' }
+SWMethodBodyTranspiler >> preventNewline [
+	self stream preventNewline
+]
+
 { #category : #'as yet unclassified' }
 SWMethodBodyTranspiler >> preventStatementDelimiter [
 	self stream preventDelimiter
@@ -327,16 +334,7 @@ SWMethodBodyTranspiler >> putIfTrueIfFalse: aNode [
 
 { #category : #'as yet unclassified' }
 SWMethodBodyTranspiler >> putImport: anArray from: aSource [
-	self stream
-		put: 'import {'.
-	anArray do: [ :each |
-		self stream put: each asString
-	] separatedBy: [
-		self stream put: ', '
-	].
-	self stream
-		put: '} from ';
-		put: aSource asString
+	^ self subclassResponsibility 
 ]
 
 { #category : #'code generation' }
