@@ -48,7 +48,7 @@ SWModuleTranspiler >> filename [
 { #category : #testing }
 SWModuleTranspiler >> isToTranspile: aClass [
 	|tClass|
-	tClass := self payload targetClass.
+	tClass := self payload methodClass.
 	tClass ifNil: [ ^ false ].
 	tClass instanceSide = aClass ifTrue: [ ^ true ].
 

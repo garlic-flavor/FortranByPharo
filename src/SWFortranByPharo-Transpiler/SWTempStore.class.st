@@ -9,7 +9,7 @@ Class {
 		'names',
 		'currentName'
 	],
-	#category : #'SWFortranByPharo-Analyzer-Slot'
+	#category : #'SWFortranByPharo-Transpiler-Common'
 }
 
 { #category : #utils }

@@ -12,5 +12,5 @@ SWJumperStackTest >> testBasics [
 	self assert: (js nextPeriodIs: 234).
 	js update: 345.
 	self assert: (js nextPeriodIs: 345).
-	self assert: js pop equals: 99
+	self assert: js pop stackSize equals: 99
 ]

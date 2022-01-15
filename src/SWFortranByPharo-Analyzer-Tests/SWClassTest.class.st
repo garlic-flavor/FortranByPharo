@@ -7,7 +7,7 @@ Class {
 	#instVars : [
 		'ci'
 	],
-	#category : #'SWFortranByPharo-Analyzer-Tests-Class'
+	#category : #'SWFortranByPharo-Analyzer-Tests-Analyzer'
 }
 
 { #category : #running }

@@ -4,7 +4,7 @@ A SWTempStoreTest is a test class for testing the behavior of SWTempStore
 Class {
 	#name : #SWTempStoreTest,
 	#superclass : #TestCase,
-	#category : #'SWFortranByPharo-Analyzer-Tests-Slot'
+	#category : #'SWFortranByPharo-Transpiler-Tests'
 }
 
 { #category : #tests }

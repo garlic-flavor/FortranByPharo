@@ -1,5 +1,5 @@
 "
-I fork decode process of SymbolicBytecodeBuilder to emulate stack status.
+SWStackAnalyzer forks decode process of SymbolicBytecodeBuilder to emulate stack status.
 "
 Class {
 	#name : #SWStackAnalyzer,
@@ -10,7 +10,7 @@ Class {
 		'pool',
 		'debugMode'
 	],
-	#category : #'SWFortranByPharo-Analyzer-Method'
+	#category : #'SWFortranByPharo-Analyzer-Analyzer'
 }
 
 { #category : #initialization }

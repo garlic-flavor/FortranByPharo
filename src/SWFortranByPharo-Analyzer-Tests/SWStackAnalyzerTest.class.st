@@ -1,7 +1,7 @@
 Class {
 	#name : #SWStackAnalyzerTest,
 	#superclass : #TestCase,
-	#category : #'SWFortranByPharo-Analyzer-Tests-Method'
+	#category : #'SWFortranByPharo-Analyzer-Tests-Analyzer'
 }
 
 { #category : #'tests - source' }

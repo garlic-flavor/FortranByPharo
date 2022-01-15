@@ -1,6 +1,10 @@
 "
-I hold type information about a class to transpile.
+SWClass represents a class in this analyzing system.
 
+SWClass is an argument of #initializeInstanceSideTranspiler: and #initializeClassSideTranspiler:.
+In these methods, some SWClass>>#define*** methods are called to supply informations to help analyzation and transpilation.
+
+A Writer of a transpiler, may make subclass of SWClass, and override #newTranspiler*** methods to suit.
 "
 Class {
 	#name : #SWClass,
@@ -14,7 +18,7 @@ Class {
 		'slot',
 		'classSide'
 	],
-	#category : #'SWFortranByPharo-Analyzer-Class'
+	#category : #'SWFortranByPharo-Analyzer-Analyzer'
 }
 
 { #category : #accessing }
@@ -37,7 +41,7 @@ SWClass >> defineMethod: aName as: rType [
 
 ]
 
-{ #category : #'as yet unclassified' }
+{ #category : #api }
 SWClass >> defineMethod: aName as: rType with: aCalleeGenerator [
 	self generator at: aName put: [ :aCallee |
 		self newTranspilerOf: aCallee as: rType with: aCalleeGenerator
@@ -45,7 +49,7 @@ SWClass >> defineMethod: aName as: rType with: aCalleeGenerator [
 
 ]
 
-{ #category : #'as yet unclassified' }
+{ #category : #api }
 SWClass >> defineMethod: aName with: aCalleeGenerator [
 	self generator at: aName put: [ :aCallee |
 		self newTranspilerOf: aCallee with: aCalleeGenerator
@@ -171,12 +175,15 @@ SWClass >> generator: anObject [
 	generator := anObject
 ]
 
-{ #category : #'instance creation' }
-SWClass >> getMethodTranspiler: aCallee [
+{ #category : #accessing }
+SWClass >> getMethodTranspiler: aCalleeInfo [
+	"This returns a decoded transpiler.
+	The returned object is derived from SWCalleeInfo. 
+	but the returned object never equal to the instance of aCalleeInfo."
 
-	^ self methods detect: [ :one | one = aCallee ] ifNone: [|transpiler|
-		transpiler := self definedMethod: aCallee ifAbsent: [
-			(self transpilerClass newFrom: aCallee)
+	^ self methods detect: [ :one | one = aCalleeInfo ] ifNone: [|transpiler|
+		transpiler := self definedMethod: aCalleeInfo ifAbsent: [
+			(self transpilerClass newFrom: aCalleeInfo)
 				classInfo: self;
 				pool: self pool;
 				yourself.
@@ -191,7 +198,7 @@ SWClass >> getMethodTranspiler: aCallee [
 
 { #category : #accessing }
 SWClass >> getVariableInfoAtOffset: offset [
-	"Return SWVariableInfo in slots at offset."
+	"Return SWVariableInfo in slots at 0 based offset."
 	^ self slot atOffset: offset.
 ]
 
@@ -204,7 +211,7 @@ SWClass >> getVariableInfoOf: aName [
 
 { #category : #accessing }
 SWClass >> methods [
-
+	"A Set object consists of referenced methods."
 	^ methods ifNil: [methods := Set new ]
 ]
 
@@ -214,7 +221,7 @@ SWClass >> methods: anObject [
 	methods := anObject
 ]
 
-{ #category : #'instance creation' }
+{ #category : #'to extends' }
 SWClass >> newTranspilerAsBinaryOperatorOf: aCallee [
 	^ (self transpilerClass newFrom: aCallee)
 		return: aCallee stack first;
@@ -223,28 +230,28 @@ SWClass >> newTranspilerAsBinaryOperatorOf: aCallee [
 
 ]
 
-{ #category : #'instance creation' }
+{ #category : #'to extends' }
 SWClass >> newTranspilerOf: aCallee as: rType [
 	^ (self transpilerClass newFrom: aCallee)
-		specifyReturnTypeAs: (rType isBlock ifTrue: [ self error; flag: #toRemove. rType value: aCallee ] ifFalse: [ rType ]);
+		specifyReturnTypeAs: rType;
 		markAsDecoded;
 		yourself
 
 ]
 
-{ #category : #'instance creation' }
+{ #category : #'to extends' }
 SWClass >> newTranspilerOf: aCallee as: rType with: aCalleeGenerator [
 	^ self newTranspilerOf: aCallee as: rType
 ]
 
-{ #category : #'instance creation' }
+{ #category : #'to extends' }
 SWClass >> newTranspilerOf: aCallee with: aCalleeGenerator [
 	^ (self transpilerClass newFrom: aCallee)
 		yourself
 	
 ]
 
-{ #category : #'instance creation' }
+{ #category : #'to extends' }
 SWClass >> newTranspilerReturnsFirstArgumentOf: aCallee [
 	^ (self transpilerClass newFrom: aCallee)
 		return: (aCallee stack at: 1);
@@ -253,13 +260,13 @@ SWClass >> newTranspilerReturnsFirstArgumentOf: aCallee [
 
 ]
 
-{ #category : #'instance creation' }
+{ #category : #'to extends' }
 SWClass >> newTranspilerReturnsFirstArgumentOf: aCallee with: aCalleeGenerator [
 	^ self newTranspilerReturnsFirstArgumentOf: aCallee
 
 ]
 
-{ #category : #'instance creation' }
+{ #category : #'to extends' }
 SWClass >> newTranspilerReturnsFirstOrSecondArgumentOf: aCallee [
 	^ (self transpilerClass newFrom: aCallee)
 		return: ((SWVariableTypeInfo new)
@@ -271,13 +278,13 @@ SWClass >> newTranspilerReturnsFirstOrSecondArgumentOf: aCallee [
 
 ]
 
-{ #category : #'instance creation' }
+{ #category : #'to extends' }
 SWClass >> newTranspilerReturnsFirstOrSecondArgumentOf: aCallee with: aCalleeGenerator [
 	^ self newTranspilerReturnsFirstOrSecondArgumentOf: aCallee
 
 ]
 
-{ #category : #'instance creation' }
+{ #category : #'to extends' }
 SWClass >> newTranspilerReturnsReceiverOf: aCallee [
 	^ (self transpilerClass newFrom: aCallee)
 		return: aCallee stack first;
@@ -286,13 +293,13 @@ SWClass >> newTranspilerReturnsReceiverOf: aCallee [
 
 ]
 
-{ #category : #'instance creation' }
+{ #category : #'to extends' }
 SWClass >> newTranspilerReturnsReceiverOf: aCallee with: aCalleeGenerator [
 	^ self newTranspilerReturnsReceiverOf: aCallee
 
 ]
 
-{ #category : #'instance creation' }
+{ #category : #'to extends' }
 SWClass >> newTranspilerReturnsReceiversClassOf: aCallee [
 	^ (self transpilerClass newFrom: aCallee)
 		return: (SWVariableTypeInfo new: aCallee receiverClass classSide);
@@ -301,7 +308,7 @@ SWClass >> newTranspilerReturnsReceiversClassOf: aCallee [
 
 ]
 
-{ #category : #'instance creation' }
+{ #category : #'to extends' }
 SWClass >> newTranspilerReturnsReceiversInstanceOf: aCallee [
 	^ (self transpilerClass newFrom: aCallee)
 		return: (SWVariableTypeInfo new: aCallee receiverClass instanceSide);
@@ -310,7 +317,7 @@ SWClass >> newTranspilerReturnsReceiversInstanceOf: aCallee [
 
 ]
 
-{ #category : #'instance creation' }
+{ #category : #'to extends' }
 SWClass >> newTranspilerReturnsSecondArgumentOf: aCallee [
 	^ (self transpilerClass newFrom: aCallee)
 		return: (aCallee stack at: 2);
@@ -321,7 +328,7 @@ SWClass >> newTranspilerReturnsSecondArgumentOf: aCallee [
 
 { #category : #accessing }
 SWClass >> pool [
-
+	"A SWPool object"
 	^ pool
 ]
 
@@ -346,6 +353,9 @@ SWClass >> setBreakpointOn: aName [
 
 { #category : #accessing }
 SWClass >> slot [
+	"A slot consists of member variables.
+	In Pharo object, a member variable has its own 'offset' represented by its #stackPos."
+
 	^ slot ifNil: [
 		slot := SWSlot new.
 		self targetClass slots do: [ :ids |

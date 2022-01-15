@@ -7,7 +7,7 @@ Class {
 	#instVars : [
 		'pool'
 	],
-	#category : #'SWFortranByPharo-Analyzer-Tests-Global'
+	#category : #'SWFortranByPharo-Analyzer-Tests-Analyzer'
 }
 
 { #category : #running }

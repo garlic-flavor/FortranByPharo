@@ -67,7 +67,7 @@ SWMBTofJS >> putCascade: aRBCascadeNode [
 
 	variables := (Set newFrom: aRBCascadeNode allVariables) asArray.
 	self put: '(function('.
-	variables do: [ :each | self stream put: each name; put: ', ' ].
+	variables select: [ :each | each name first isLowercase ] thenDo: [ :each | self << each; put: ', ' ].
 	self put: '_receiver_) {'; cr.
 	self stream incIndent.
 	receiver := RBVariableNode named: #_receiver_.
@@ -82,7 +82,7 @@ SWMBTofJS >> putCascade: aRBCascadeNode [
 	].
 	self stream decIndent.
 	self put: '})('.
-	variables do: [ :each | self put: each name; put: ', ' ].
+	variables select: [ :each | each name first isLowercase ] thenDo: [ :each | self << each; put: ', ' ].
 	self << aRBCascadeNode receiver; put: ')'.
 	
 ]

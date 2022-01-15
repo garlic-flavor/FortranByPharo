@@ -9,7 +9,7 @@ Class {
 		'transpilerClass',
 		'debugMode'
 	],
-	#category : #'SWFortranByPharo-Analyzer-Global'
+	#category : #'SWFortranByPharo-Analyzer-Analyzer'
 }
 
 { #category : #utils }

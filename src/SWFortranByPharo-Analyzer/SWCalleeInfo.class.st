@@ -1,5 +1,6 @@
 "
-I contains informations of callee to call.
+SWCalleeInfo contains informations of callee to call.
+#method member variable may contains FullClosure, CompiledMethod, CompiledBlock or ByteString as its selector name.
 "
 Class {
 	#name : #SWCalleeInfo,
@@ -7,7 +8,7 @@ Class {
 	#instVars : [
 		'stack'
 	],
-	#category : #'SWFortranByPharo-Analyzer-Method'
+	#category : #'SWFortranByPharo-Analyzer-Analyzer'
 }
 
 { #category : #'instance creation' }
@@ -65,38 +66,41 @@ SWCalleeInfo >> arguments [
 
 { #category : #converting }
 SWCalleeInfo >> asCallee [
+	"This will be called to preserve #message member variable."
 	^ self copy
 ]
 
 { #category : #accessing }
-SWCalleeInfo >> block: aBlock [
-	aBlock argumentNames doWithIndex: [ :name :idx |
+SWCalleeInfo >> block: aFullClosure [
+
+	aFullClosure argumentNames doWithIndex: [ :name :idx |
 		(self stack at: idx)
 			name: name;
 			stackPos: idx
 	].
-	aBlock tempNames doWithIndex: [ :name :idx |
-		(self stack at: idx + aBlock numArgs)
+	aFullClosure tempNames doWithIndex: [ :name :idx |
+		(self stack at: idx + aFullClosure numArgs)
 			name: name;
 			owner: self;
 			pc: 0;
-			stackPos: idx + aBlock numArgs
+			stackPos: idx + aFullClosure numArgs
 	].
-	super method: aBlock compiledBlock
+	method := aFullClosure compiledBlock
 
 
 ]
 
 { #category : #accessing }
-SWCalleeInfo >> cblock: aBlock [
-	aBlock argumentNames doWithIndex: [ :name :idx |
+SWCalleeInfo >> cblock: aCompiledBlock [
+	
+	aCompiledBlock argumentNames doWithIndex: [ :name :idx |
 		(self stack at: idx)
 			name: name;
 			owner: self;
 			pc: 0;
 			stackPos: idx
 	].
-	super method: aBlock
+	method := aCompiledBlock
 
 ]
 
@@ -110,6 +114,7 @@ SWCalleeInfo >> copyFrom: right [
 
 { #category : #comparing }
 SWCalleeInfo >> hash [
+	"The hash depends on this method and its operands."
 	|args buf|
 	args := self operands.
 	buf := OrderedCollection new: args size + 1.
@@ -131,25 +136,31 @@ SWCalleeInfo >> markAsDecoded [
 ]
 
 { #category : #accessing }
-SWCalleeInfo >> method: aMethod [
-	aMethod temporaryVariables doWithIndex: [ :var :idx |
+SWCalleeInfo >> method: aCompiledMethod [
+	aCompiledMethod temporaryVariables doWithIndex: [ :var :idx |
 		(self stack at: idx)
 			name: var name;
 			owner: self;
 			pc: 0;
 			stackPos: idx
 	].
-	aMethod argumentNames doWithIndex: [ :var :idx |
+	aCompiledMethod argumentNames doWithIndex: [ :var :idx |
 		(self stack at: idx)
 			owner: self;
 			pc: 0
 	].
 
-	^ super method: aMethod
+	^ super method: aCompiledMethod
+]
+
+{ #category : #accessing }
+SWCalleeInfo >> methodClass [
+	^ method class = CompiledMethod ifTrue: [ method methodClass ] ifFalse: [ nil ]
 ]
 
 { #category : #accessing }
 SWCalleeInfo >> operands [
+	"The operands consist of its receiver and its arguments."
 	method class = CompiledMethod ifTrue: [
 		^ self stack copyFrom: 0 to: self method numArgs
 	].
@@ -164,7 +175,7 @@ SWCalleeInfo >> printOn: aStream [
 	self putOn: aStream
 ]
 
-{ #category : #printing }
+{ #category : #streaming }
 SWCalleeInfo >> putOn: aStream [
 	aStream << self selector
 ]
@@ -195,7 +206,7 @@ SWCalleeInfo >> selector: aSelector [
 
 { #category : #accessing }
 SWCalleeInfo >> stack [
-
+	"The stack at 0 corresponds to a receiver."
 	^ stack ifNil: [
 		stack := SWStack new.
 		(stack at: 0)
@@ -213,13 +224,9 @@ SWCalleeInfo >> stack: anObject [
 ]
 
 { #category : #accessing }
-SWCalleeInfo >> targetClass [
-	^ method class = CompiledMethod ifTrue: [ method methodClass ] ifFalse: [ nil ]
-]
-
-{ #category : #accessing }
-SWCalleeInfo >> types: anObject [
-	anObject doWithIndex: [ :type :idx |
+SWCalleeInfo >> types: anArray [
+	"anArray is 'operands'. So, the first element of anArray is a type of receiver."
+	anArray doWithIndex: [ :type :idx |
 		(self stack at: idx - 1) << type
 	]
 ]

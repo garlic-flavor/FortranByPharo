@@ -4,7 +4,7 @@ A SWCalleeInfoTest is a test class for testing the behavior of SWCalleeInfo
 Class {
 	#name : #SWCalleeInfoTest,
 	#superclass : #TestCase,
-	#category : #'SWFortranByPharo-Analyzer-Tests-Method'
+	#category : #'SWFortranByPharo-Analyzer-Tests-Analyzer'
 }
 
 { #category : #tests }
