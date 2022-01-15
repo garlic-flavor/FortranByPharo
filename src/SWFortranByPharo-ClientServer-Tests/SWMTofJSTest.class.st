@@ -10,7 +10,7 @@ Class {
 { #category : #tests }
 SWMTofJSTest >> test_01 [
 	|mod output|
-	mod := SWMTofJS newMainProgramFrom: SWTestProgram_01.
+	mod := SWMTofJS newFrom: SWTestProgram_01.
 	mod stream newline: String cr.
 	mod transpile.
 	output := mod stream contents.

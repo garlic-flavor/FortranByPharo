@@ -17,7 +17,7 @@ Class {
 SWServer class >> build [
 	<script>
 	|module|
-	module := SWMTofJS newMainProgramFrom: self.
+	module := SWMTofJS newFrom: self.
 	module enableDebugMode.
 	module transpile.
 	module inspect.
@@ -58,7 +58,7 @@ SWServer class >> main [
 SWServer class >> put [
 	<script>
 	|module runner|
-	module := SWMTofJS newMainProgramFrom: self.
+	module := SWMTofJS newFrom: self.
 	module transpile.
 	module contents inspect.
 	runner := SWPRofJS new.

@@ -22,10 +22,15 @@ SWModuleTranspiler class >> methodBodyTranspilerClass [
 ]
 
 { #category : #'instance creation' }
-SWModuleTranspiler class >> newMainProgramFrom: aClass [
+SWModuleTranspiler class >> newFrom: aClass [
 	^ (self new)
-		payload: (self methodBodyTranspilerClass new: aClass classSide>>#main with: { aClass classSide });
+		payload: (self methodBodyTranspilerClass new: ((aClass instanceSide inheritsFrom: TestCase) ifTrue: [
+			TestCase class>>#runAllAndLogResult
+		] ifFalse: [
+			aClass classSide>>#main
+		]) with: { aClass classSide });
 		yourself
+
 ]
 
 { #category : #accessing }
