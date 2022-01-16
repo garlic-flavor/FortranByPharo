@@ -24,11 +24,9 @@ SWModuleTranspiler class >> methodBodyTranspilerClass [
 { #category : #'instance creation' }
 SWModuleTranspiler class >> newFrom: aClass [
 	^ (self new)
-		payload: (self methodBodyTranspilerClass new: ((aClass instanceSide inheritsFrom: TestCase) ifTrue: [
-			TestCase class>>#runAllAndLogResult
-		] ifFalse: [
-			aClass classSide>>#main
-		]) with: { aClass classSide });
+		payload: (self methodBodyTranspilerClass
+			new: (self methodBodyTranspilerClass poolClass search: #main in: aClass classSide)
+			with: { aClass classSide });
 		yourself
 
 ]

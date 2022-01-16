@@ -22,9 +22,14 @@ SWCompiledCodeInfo class >> classTranspilerClass [
 
 { #category : #'instance creation' }
 SWCompiledCodeInfo class >> newDefaultPool [
-	^ SWPool new
+	^ self poolClass new
 		transpilerClass: self;
 		yourself
+]
+
+{ #category : #'as yet unclassified' }
+SWCompiledCodeInfo class >> poolClass [
+	^ SWPool
 ]
 
 { #category : #adding }

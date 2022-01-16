@@ -61,11 +61,9 @@ SWMBTofJSTest >> test_01 [
 	|transpiler result|
 	transpiler := (self transpile_program: #_01_call_Transcript).
 	result := transpiler stream contents.
-	self assert: result equals: '(function(Transcript, _receiver_) {
-    _receiver_.show_("Hello, good-bye!");
-    _receiver_.cr();
-    return _receiver_.cr();
-})(Transcript, Transcript);
+	self assert: result equals: 'Transcript.show_("Hello, good-bye!");
+Transcript.cr();
+Transcript.cr();
 '
 ]
 
@@ -116,12 +114,12 @@ SWMBTofJSTest >> test_06 [
 	|transpiler result|
 	transpiler := (self transpile_program: #_06_cascading: with: String).
 	result := transpiler stream contents.
-	self assert: result equals: 'return (function(uri, SWServerStatus, _receiver_) {
+	self assert: result equals: 'return (function(uri, _receiver_) {
     _receiver_.failed();
     _receiver_.message_("hogehoge");
     _receiver_.uri_(uri);
     return _receiver_;
-})(uri, SWServerStatus, SWServerStatus.new()).toString();
+})(uri, (new SWServerStatus())).toString();
 '
 ]
 

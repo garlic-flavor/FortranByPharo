@@ -26,6 +26,7 @@ SWMethodBodyTranspiler class >> messageTranspilerMethodNameFor: aSelector [
 
 { #category : #utils }
 SWMethodBodyTranspiler class >> search: selector in: aClass [
+	self error; flag: #toRemove.
 	aClass ifNil: [ ^ nil ].
 
 	^ aClass methodDict at: selector ifAbsent: [
