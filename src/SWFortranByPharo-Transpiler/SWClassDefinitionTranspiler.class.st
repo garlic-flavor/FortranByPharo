@@ -16,51 +16,12 @@ SWClassDefinitionTranspiler class >> methodDefinitionTranspilerClass [
 ]
 
 { #category : #api }
-SWClassDefinitionTranspiler >> newTranspilerAsBinaryOperatorOf: aCallee [
-	^ (super newTranspilerAsBinaryOperatorOf: aCallee)
-		calleeGenerator: [ :t :node | t putOpBinary: node ];
-		yourself
-
-
-]
-
-{ #category : #'instance creation' }
-SWClassDefinitionTranspiler >> newTranspilerOf: aCallee as: rType with: aCalleeGenerator [
-	^ (self newTranspilerOf: aCallee as: rType)
-		calleeGenerator: aCalleeGenerator;
-		yourself
-]
-
-{ #category : #'instance creation' }
-SWClassDefinitionTranspiler >> newTranspilerOf: aCallee with: aCalleeGenerator [
-	^ (self transpilerClass newFrom: aCallee)
-		calleeGenerator: aCalleeGenerator;
-		yourself
-]
-
-{ #category : #api }
-SWClassDefinitionTranspiler >> newTranspilerReturnsFirstArgumentOf: aCallee with: aCalleeGenerator [
-	^ (self newTranspilerReturnsFirstArgumentOf: aCallee)
-		calleeGenerator: aCalleeGenerator;
-		yourself
-
-
-]
-
-{ #category : #api }
-SWClassDefinitionTranspiler >> newTranspilerReturnsFirstOrSecondArgumentOf: aCallee with: aCalleeGenerator [
-	^ (self newTranspilerReturnsFirstOrSecondArgumentOf: aCallee)
-		calleeGenerator: aCalleeGenerator;
-		yourself
-
-]
-
-{ #category : #api }
-SWClassDefinitionTranspiler >> newTranspilerReturnsReceiverOf: aCallee with: aCalleeGenerator [
-	^ (self newTranspilerReturnsReceiverOf: aCallee)
-		calleeGenerator: aCalleeGenerator;
-		yourself
-
+SWClassDefinitionTranspiler >> defineMethodAsBinaryOperator: aName [
+	^ self defineMethodAsBinaryOperator: aName as: [ :newT |
+		newT
+			senderGenerator: [ :t :node | t putOpBinary: node ];
+			yourself
+	]
 ]
 
 { #category : #'as yet unclassified' }

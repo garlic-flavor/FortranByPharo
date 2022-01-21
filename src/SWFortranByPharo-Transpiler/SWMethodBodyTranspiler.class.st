@@ -8,7 +8,8 @@ Class {
 		'stream',
 		'type',
 		'messageNest',
-		'calleeGenerator'
+		'senderGenerator',
+		'bodyGenerator'
 	],
 	#category : #'SWFortranByPharo-Transpiler-Common'
 }
@@ -53,24 +54,19 @@ SWMethodBodyTranspiler >> << anObject [
 ]
 
 { #category : #accessing }
-SWMethodBodyTranspiler >> calleeGenerator [
+SWMethodBodyTranspiler >> bodyGenerator [
 
-	^ calleeGenerator ifNil: [
-		calleeGenerator := [ :transpiler :aNode ||transpilerSelector|
-			transpilerSelector := transpiler class mangleClass selectorForTranspilerOf: aNode selector.
-			(transpiler respondsTo: transpilerSelector) ifTrue: [
-				transpiler perform: transpilerSelector with: aNode
-			] ifFalse: [
-				transpiler putOrdinaryCallee: aNode
-			]
-		]
-	]
+	^ bodyGenerator ifNil: [ bodyGenerator := [ :transpiler | 
+		transpiler stream log.
+		transpiler locals do: [ :each | self putVariableDeclarationOf: each ].
+		transpiler putSequence: transpiler method sourceNode body.
+	] ]
 ]
 
 { #category : #accessing }
-SWMethodBodyTranspiler >> calleeGenerator: anObject [
+SWMethodBodyTranspiler >> bodyGenerator: anObject [
 
-	calleeGenerator := anObject
+	bodyGenerator := anObject
 ]
 
 { #category : #'private - utilities' }
@@ -261,7 +257,7 @@ SWMethodBodyTranspiler >> putBlockAsExpression: aBlock [
 { #category : #accessing }
 SWMethodBodyTranspiler >> putCallee: aNode [
 	self stream log.
-	self calleeGenerator cull: self cull: aNode
+	self senderGenerator cull: self cull: aNode
 
 ]
 
@@ -538,6 +534,27 @@ SWMethodBodyTranspiler >> selectTranspiler: aNode withReceiver: aRNode [
 ]
 
 { #category : #accessing }
+SWMethodBodyTranspiler >> senderGenerator [
+
+	^ senderGenerator ifNil: [
+		senderGenerator := [ :transpiler :aNode ||transpilerSelector|
+			transpilerSelector := transpiler class mangleClass selectorForTranspilerOf: aNode selector.
+			(transpiler respondsTo: transpilerSelector) ifTrue: [
+				transpiler perform: transpilerSelector with: aNode
+			] ifFalse: [
+				transpiler putOrdinaryCallee: aNode
+			]
+		]
+	]
+]
+
+{ #category : #accessing }
+SWMethodBodyTranspiler >> senderGenerator: anObject [
+
+	senderGenerator := anObject
+]
+
+{ #category : #accessing }
 SWMethodBodyTranspiler >> stream [
 
 	^ stream ifNil: [ stream := SWTranspilerStream new ]
@@ -551,9 +568,7 @@ SWMethodBodyTranspiler >> stream: anObject [
 
 { #category : #'public API' }
 SWMethodBodyTranspiler >> transpile [
-	self stream log.
-	self locals do: [ :each | self putVariableDeclarationOf: each ].
-	self putSequence: self method sourceNode body.
+	self bodyGenerator value: self.
 	^ self stream contents
 ]
 

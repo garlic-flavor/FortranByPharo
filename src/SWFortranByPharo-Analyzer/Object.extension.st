@@ -5,13 +5,20 @@ Object class >> initializeInstanceSideTranspiler: transpiler [
 	transpiler
 		setBreakpointOn: #subclassResponsibility;
 		defineMethodAsCompareOperator: #=;
-		defineMethod: #asString as: String;
+		defineMethod: #asString asReturn: String;
 		defineMethodReturnsReceiver: #copy;
-		defineMethod: #at: as: [ :aCallee |
+		defineMethodReturnsReceiver: #changed:;
+		defineMethod: #at: as: [:newT |
 			self error; flag: #toRemove.
+"
 			(aCallee receiverClass = String or: [ aCallee receiverClass = ByteString ]) ifTrue: [ Character ] ifFalse: [
 				self halt
 			]
+"
 		];
-		defineMethodReturnsReceiver: #yourself with: [ :t :node | t putYourself: node ]
+		defineMethodReturnsReceiver: #yourself as: [ :newT |
+			newT
+				senderGenerator: [ :t :node | t putYourself: node ];
+				yourself
+		]
 ]

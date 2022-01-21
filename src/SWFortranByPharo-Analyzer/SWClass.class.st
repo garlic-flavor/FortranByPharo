@@ -34,89 +34,97 @@ SWClass >> classSide: anObject [
 ]
 
 { #category : #api }
-SWClass >> defineMethod: aName as: rType [
+SWClass >> defineMethod: aName as: initializer [
 	self generator at: aName put: [ :aCallee |
-		self newTranspilerOf: aCallee as: rType
+		initializer value: (self transpilerClass newFrom: aCallee)
 	]
 
 ]
 
 { #category : #api }
-SWClass >> defineMethod: aName as: rType with: aCalleeGenerator [
-	self generator at: aName put: [ :aCallee |
-		self newTranspilerOf: aCallee as: rType with: aCalleeGenerator
-	]
-
-]
-
-{ #category : #api }
-SWClass >> defineMethod: aName with: aCalleeGenerator [
-	self generator at: aName put: [ :aCallee |
-		self newTranspilerOf: aCallee with: aCalleeGenerator
+SWClass >> defineMethod: aName asReturn: rType [
+	^ self defineMethod: aName as: [ :newT |
+		newT
+			specifyReturnTypeAs: rType;
+			markAsDecoded;
+			yourself
 	]
 
 ]
 
 { #category : #api }
 SWClass >> defineMethodAsBinaryOperator: aName [
+	^ self defineMethodAsBinaryOperator: aName as: [ :newT | newT ]
+
+]
+
+{ #category : #api }
+SWClass >> defineMethodAsBinaryOperator: aName as: anInitializer [
 	self generator at: aName put: [ :aCallee |
-		self newTranspilerAsBinaryOperatorOf: aCallee
+		anInitializer value: ((self transpilerClass newFrom: aCallee)
+			return: aCallee stack first;
+			markAsDecoded;
+			yourself)
 	]
 
 ]
 
 { #category : #api }
 SWClass >> defineMethodAsCompareOperator: aName [
-	self generator at: aName put: [ :aCallee |
-		self newTranspilerAsBinaryOperatorOf: aCallee
-	]
+	^ self defineMethodAsBinaryOperator: aName
 
 ]
 
 { #category : #api }
 SWClass >> defineMethodReturnsFirstArgument: aName [
-	self generator at: aName put: [ :aCallee |
-		self newTranspilerReturnsFirstArgumentOf: aCallee
-	]
+	^ self defineMethodReturnsFirstArgument: aName as: [ :newT | newT ]
 
 ]
 
 { #category : #api }
-SWClass >> defineMethodReturnsFirstArgument: aName with: aCalleeGenerator [
+SWClass >> defineMethodReturnsFirstArgument: aName as: anInitializer [
 	self generator at: aName put: [ :aCallee |
-		self newTranspilerReturnsFirstArgumentOf: aCallee with: aCalleeGenerator
+		anInitializer value: ((self transpilerClass newFrom: aCallee)
+			return: (aCallee stack at: 1);
+			markAsDecoded;
+			yourself)
 	]
 
 ]
 
 { #category : #api }
 SWClass >> defineMethodReturnsFirstOrSecondArgument: aName [
-	self generator at: aName put: [ :aCallee |
-		self newTranspilerReturnsFirstOrSecondArgumentOf: aCallee
-	]
+	^ self defineMethodReturnsFirstOrSecondArgument: aName as: [ :newT | newT ]
 
 ]
 
 { #category : #api }
-SWClass >> defineMethodReturnsFirstOrSecondArgument: aName with: aCalleeGenerator [
+SWClass >> defineMethodReturnsFirstOrSecondArgument: aName as: anInitializer [
 	self generator at: aName put: [ :aCallee |
-		self newTranspilerReturnsFirstOrSecondArgumentOf: aCallee with: aCalleeGenerator
+		anInitializer value: ((self transpilerClass newFrom: aCallee)
+		return: ((SWVariableTypeInfo new)
+			<< (aCallee stack at: 1);
+			<< (aCallee stack at: 2);
+			yourself);
+		markAsDecoded;
+		yourself)
 	]
 
 ]
 
 { #category : #api }
 SWClass >> defineMethodReturnsReceiver: aName [
-	self generator at: aName put: [ :aCallee |
-		self newTranspilerReturnsReceiverOf: aCallee
-	]
+	^ self defineMethodReturnsReceiver: aName as: [ :newT | newT ]
 
 ]
 
 { #category : #api }
-SWClass >> defineMethodReturnsReceiver: aName with: aCalleeGenerator [
+SWClass >> defineMethodReturnsReceiver: aName as: anInitializer [
 	self generator at: aName put: [ :aCallee |
-		self newTranspilerReturnsReceiverOf: aCallee with: aCalleeGenerator
+		anInitializer value: ((self transpilerClass newFrom: aCallee)
+		return: aCallee stack first;
+		markAsDecoded;
+		yourself)
 	]
 
 ]
@@ -124,7 +132,10 @@ SWClass >> defineMethodReturnsReceiver: aName with: aCalleeGenerator [
 { #category : #api }
 SWClass >> defineMethodReturnsReceiversClass: aName [
 	self generator at: aName put: [:aCallee |
-		self newTranspilerReturnsReceiversClassOf: aCallee
+		(self transpilerClass newFrom: aCallee)
+			return: (SWVariableTypeInfo new: aCallee receiverClass classSide);
+			markAsDecoded;
+			yourself
 	]
 
 ]
@@ -132,7 +143,10 @@ SWClass >> defineMethodReturnsReceiversClass: aName [
 { #category : #api }
 SWClass >> defineMethodReturnsReceiversInstance: aName [
 	self generator at: aName put: [:aCallee |
-		self newTranspilerReturnsReceiversInstanceOf: aCallee
+		(self transpilerClass newFrom: aCallee)
+			return: (SWVariableTypeInfo new: aCallee receiverClass instanceSide);
+			markAsDecoded;
+			yourself
 	]
 
 ]
@@ -140,7 +154,10 @@ SWClass >> defineMethodReturnsReceiversInstance: aName [
 { #category : #api }
 SWClass >> defineMethodReturnsSecondArgument: aName [
 	self generator at: aName put: [ :aCallee |
-		self newTranspilerReturnsSecondArgumentOf: aCallee
+		(self transpilerClass newFrom: aCallee)
+			return: (aCallee stack at: 2);
+			markAsDecoded;
+			yourself
 	]
 
 ]
@@ -219,111 +236,6 @@ SWClass >> methods [
 SWClass >> methods: anObject [
 
 	methods := anObject
-]
-
-{ #category : #'to extends' }
-SWClass >> newTranspilerAsBinaryOperatorOf: aCallee [
-	^ (self transpilerClass newFrom: aCallee)
-		return: aCallee stack first;
-		markAsDecoded;
-		yourself
-
-]
-
-{ #category : #'to extends' }
-SWClass >> newTranspilerOf: aCallee as: rType [
-	^ (self transpilerClass newFrom: aCallee)
-		specifyReturnTypeAs: rType;
-		markAsDecoded;
-		yourself
-
-]
-
-{ #category : #'to extends' }
-SWClass >> newTranspilerOf: aCallee as: rType with: aCalleeGenerator [
-	^ self newTranspilerOf: aCallee as: rType
-]
-
-{ #category : #'to extends' }
-SWClass >> newTranspilerOf: aCallee with: aCalleeGenerator [
-	^ (self transpilerClass newFrom: aCallee)
-		yourself
-	
-]
-
-{ #category : #'to extends' }
-SWClass >> newTranspilerReturnsFirstArgumentOf: aCallee [
-	^ (self transpilerClass newFrom: aCallee)
-		return: (aCallee stack at: 1);
-		markAsDecoded;
-		yourself
-
-]
-
-{ #category : #'to extends' }
-SWClass >> newTranspilerReturnsFirstArgumentOf: aCallee with: aCalleeGenerator [
-	^ self newTranspilerReturnsFirstArgumentOf: aCallee
-
-]
-
-{ #category : #'to extends' }
-SWClass >> newTranspilerReturnsFirstOrSecondArgumentOf: aCallee [
-	^ (self transpilerClass newFrom: aCallee)
-		return: ((SWVariableTypeInfo new)
-			<< (aCallee stack at: 1);
-			<< (aCallee stack at: 2);
-			yourself);
-		markAsDecoded;
-		yourself
-
-]
-
-{ #category : #'to extends' }
-SWClass >> newTranspilerReturnsFirstOrSecondArgumentOf: aCallee with: aCalleeGenerator [
-	^ self newTranspilerReturnsFirstOrSecondArgumentOf: aCallee
-
-]
-
-{ #category : #'to extends' }
-SWClass >> newTranspilerReturnsReceiverOf: aCallee [
-	^ (self transpilerClass newFrom: aCallee)
-		return: aCallee stack first;
-		markAsDecoded;
-		yourself
-
-]
-
-{ #category : #'to extends' }
-SWClass >> newTranspilerReturnsReceiverOf: aCallee with: aCalleeGenerator [
-	^ self newTranspilerReturnsReceiverOf: aCallee
-
-]
-
-{ #category : #'to extends' }
-SWClass >> newTranspilerReturnsReceiversClassOf: aCallee [
-	^ (self transpilerClass newFrom: aCallee)
-		return: (SWVariableTypeInfo new: aCallee receiverClass classSide);
-		markAsDecoded;
-		yourself
-
-]
-
-{ #category : #'to extends' }
-SWClass >> newTranspilerReturnsReceiversInstanceOf: aCallee [
-	^ (self transpilerClass newFrom: aCallee)
-		return: (SWVariableTypeInfo new: aCallee receiverClass instanceSide);
-		markAsDecoded;
-		yourself.
-
-]
-
-{ #category : #'to extends' }
-SWClass >> newTranspilerReturnsSecondArgumentOf: aCallee [
-	^ (self transpilerClass newFrom: aCallee)
-		return: (aCallee stack at: 2);
-		markAsDecoded;
-		yourself
-
 ]
 
 { #category : #accessing }

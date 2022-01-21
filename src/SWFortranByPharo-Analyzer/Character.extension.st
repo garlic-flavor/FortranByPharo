@@ -9,5 +9,6 @@ Character class >> initializeClassSideTranspiler: transpiler [
 { #category : #'*SWFortranByPharo-Analyzer' }
 Character class >> initializeInstanceSideTranspiler: transpiler [
 	transpiler
-		defineMethod: #asciiValue as: SmallInteger
+		defineMethod: #asciiValue asReturn: SmallInteger
+
 ]

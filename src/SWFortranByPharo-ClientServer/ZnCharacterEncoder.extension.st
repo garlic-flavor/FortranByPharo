@@ -9,5 +9,5 @@ ZnCharacterEncoder class >> initializeClassSideTranspiler: transpiler [
 { #category : #'*SWFortranByPharo-ClientServer' }
 ZnCharacterEncoder class >> initializeInstanceSideTranspiler: transpiler [
 	transpiler
-		defineMethod: #encodeString: as: ByteArray
+		defineMethod: #encodeString: asReturn: ByteArray
 ]

@@ -15,7 +15,7 @@ SWTestRunner class >> build [
 
 { #category : #accessing }
 SWTestRunner class >> main [
-	^ self buildSuite run
+	^ self buildSuiteFromSelectors run
 ]
 
 { #category : #'as yet unclassified' }

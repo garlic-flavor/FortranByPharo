@@ -69,6 +69,10 @@ SWStackAnalyzer >> blockReturnTop [
 	super blockReturnTop
 ]
 
+{ #category : #accessing }
+SWStackAnalyzer >> bodyGenerator: aBodyGenerator [
+]
+
 { #category : #'instruction decoding' }
 SWStackAnalyzer >> callPrimitive: primNumber [
 
@@ -318,7 +322,7 @@ SWStackAnalyzer >> pushLiteralVariable: anAssociation [
 { #category : #'instruction decoding' }
 SWStackAnalyzer >> pushNewArrayOfSize: numElements [
 
-	self halt.
+	self stack push: (SWVariableTypeInfo new: Array owner: self pc: oldPC).
 	
 	super pushNewArrayOfSize: numElements 
 ]
@@ -371,6 +375,10 @@ SWStackAnalyzer >> send: selector super: supered numArgs: numberArguments [
 	].
 	super send: selector super: supered numArgs: numberArguments.
 
+]
+
+{ #category : #accessing }
+SWStackAnalyzer >> senderGenerator: aCalleeGenerator [
 ]
 
 { #category : #'instruction decoding' }

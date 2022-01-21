@@ -26,11 +26,21 @@ SWStd class >> import: identifiers from: aFile [
 { #category : #initialization }
 SWStd class >> initializeClassSideTranspiler: transpiler [
 	transpiler
-		defineMethod: #print: as: self with: [ :t :aNode |
-			t putStdOut: aNode arguments
+		defineMethod: #print: as: [ :newT |
+			newT
+				specifyReturnTypeAs: self;
+				senderGenerator: [ :t :aNode |
+					t putStdOut: aNode arguments
+				];
+				yourself
 		];
-		defineMethod: #import:from: as: self with: [ :t :aNode |
-			t putImport: (aNode arguments at: 1) value from: (aNode arguments at: 2) value
+		defineMethod: #import:from: as: [ :newT |
+			newT
+				specifyReturnTypeAs: self;
+				senderGenerator: [ :t :aNode |
+					t putImport: (aNode arguments at: 1) value from: (aNode arguments at: 2) value
+				];
+				yourself
 		];
 		setBreakpointOn: #haltOnTranspiling
 ]

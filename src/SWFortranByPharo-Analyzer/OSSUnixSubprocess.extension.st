@@ -3,7 +3,8 @@ Extension { #name : #OSSUnixSubprocess }
 { #category : #'*SWFortranByPharo-Analyzer' }
 OSSUnixSubprocess class >> initializeInstanceSideTranspiler: transpiler [
 	transpiler 
-		defineMethod: #defaultEncoding as: ZnCharacterEncoder;
+		defineMethod: #defaultEncoding asReturn: ZnCharacterEncoder;
 		defineMethodReturnsReceiver: #run;
-		defineMethod: #waitForExit as: SmallInteger
+		defineMethod: #waitForExit asReturn: SmallInteger
+
 ]

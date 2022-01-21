@@ -3,7 +3,7 @@ Extension { #name : #ZnMultiValueDictionary }
 { #category : #'*SWFortranByPharo-Analyzer' }
 ZnMultiValueDictionary class >> initializeClassSideTranspiler: transpiler [
 	transpiler
-		defineMethod: #defaultLimit as: SmallInteger
+		defineMethod: #defaultLimit asReturn: SmallInteger
 
 ]
 

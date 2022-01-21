@@ -12,6 +12,6 @@ SequenceableCollection class >> initializeInstanceSideTranspiler: transpiler [
 		defineMethodReturnsReceiver: #copyFrom:to:;
 		defineMethodReturnsReceiver: #do:;
 		defineMethodReturnsReceiver: #,;
-		defineMethod: #includes: as: Boolean;
-		defineMethod: #collect: as: Array
+		defineMethod: #includes: asReturn: Boolean;
+		defineMethod: #collect: asReturn: Array
 ]

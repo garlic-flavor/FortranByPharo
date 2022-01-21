@@ -26,7 +26,7 @@ SWShellEnvironment class >> default [
 SWShellEnvironment class >> initializeInstanceSideTranspiler: transpiler [
 
 	transpiler
-		defineMethod: #localDirectory as: FileLocator
+		defineMethod: #localDirectory asReturn: FileLocator
 ]
 
 { #category : #'code generation' }

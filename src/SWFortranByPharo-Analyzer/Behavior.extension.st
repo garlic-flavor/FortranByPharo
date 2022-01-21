@@ -5,5 +5,9 @@ Behavior class >> initializeInstanceSideTranspiler: transpiler [
 	transpiler
 		defineMethodReturnsReceiversInstance: #basicNew;
 		defineMethodReturnsReceiversInstance: #basicNew:;
-		defineMethod: #new with: [ :t :node | t putNew: node ]
+		defineMethod: #new as: [ :newT |
+			newT
+				senderGenerator: [ :t :node | t putNew: node ];
+				yourself
+		]
 ]
