@@ -40,6 +40,11 @@ SWPool >> debugMode: anObject [
 	debugMode := anObject
 ]
 
+{ #category : #'as yet unclassified' }
+SWPool >> detect: aNeedle ifFound: aBlock ifNone: aNoneBlock [
+	^ self payload detect: aNeedle ifFound: aBlock ifNone: aNoneBlock
+]
+
 { #category : #'instance creation' }
 SWPool >> getClassTranspiler: aClass [
 	^ (aClass isClassSide ifTrue: [
@@ -91,6 +96,7 @@ SWPool >> putOn: aStream [
 
 { #category : #enumerating }
 SWPool >> select: aNeedle thenDo: anIterator [
+self error; flag: #toRemove.
 	^ self payload values select: aNeedle thenDo: anIterator
 ]
 

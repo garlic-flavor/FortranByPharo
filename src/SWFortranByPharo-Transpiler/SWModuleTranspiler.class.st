@@ -38,6 +38,11 @@ SWModuleTranspiler >> contents [
 ]
 
 { #category : #'as yet unclassified' }
+SWModuleTranspiler >> decode: aSelector with: args [
+	^ self pool getMethodTranspiler: aSelector supered: false with: args
+]
+
+{ #category : #'as yet unclassified' }
 SWModuleTranspiler >> enableDebugMode [
 	self payload debugMode: true.
 	self stream logging: true.
@@ -51,13 +56,16 @@ SWModuleTranspiler >> filename [
 { #category : #testing }
 SWModuleTranspiler >> isToTranspile: aClass [
 	|tClass|
+self error; flag: #toRemove.
+
 	tClass := self payload methodClass.
 	tClass ifNil: [ ^ false ].
-	tClass instanceSide = aClass ifTrue: [ ^ true ].
+	tClass instanceSide = aClass instanceSide ifTrue: [ ^ true ].
 
-	^ tClass classSide methodDict at: #dependings ifPresent: [ :deps |
-		deps anySatisfy: [ :each | each = aClass instanceSide ]
-	] ifAbsent: [ false ]
+	^ (tClass instanceSide respondsTo: #dependings) ifTrue: [
+		(tClass instanceSide perform: #dependings)
+			anySatisfy: [ :each | each = aClass instanceSide ]
+	] ifFalse: [ false ]
 
 ]
 
@@ -73,15 +81,21 @@ SWModuleTranspiler >> payload: anObject [
 	payload := anObject
 ]
 
+{ #category : #accessing }
+SWModuleTranspiler >> pool [
+	^ self payload pool
+]
+
 { #category : #'as yet unclassified' }
 SWModuleTranspiler >> solveDependencies [
-	self error; flag: #toRemove.
-	self payload decode.
-	self payload decodeAllOf: [ :mi |
-		mi classInfo isToTranspile
-	].
-	^ self payload pool
-
+	|solver tClass|
+	solver := #solveDependenciesUsing:.
+	tClass := self payload receiverClass instanceSide.
+	(tClass respondsTo: solver) ifTrue: [
+		tClass perform: solver with: self
+	]
+	
+	
 ]
 
 { #category : #accessing }
@@ -99,15 +113,27 @@ SWModuleTranspiler >> stream: anObject [
 { #category : #'public API' }
 SWModuleTranspiler >> transpile [
 	self payload decode.
-
+	self solveDependencies.
+"
 	self payload pool select: [ :each | self isToTranspile: each targetClass ] thenDo: [ :each |
 		each
 			stream: self stream;
 			transpile
 	].
-
+"
 	self payload
 		stream: self stream;
 		transpile.
 
+]
+
+{ #category : #'code generation' }
+SWModuleTranspiler >> transpile: aClass [
+	self pool detect: [ :each |
+		each targetClass = aClass
+	] ifFound: [ :each |
+		each
+			stream: self stream;
+			transpile
+	] ifNone: [ self error ]
 ]

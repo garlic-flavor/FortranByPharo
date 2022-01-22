@@ -15,10 +15,24 @@ SWTestRunner class >> build [
 
 { #category : #accessing }
 SWTestRunner class >> main [
-	^ self buildSuiteFromSelectors run
+	self runAllTests
+
 ]
 
 { #category : #'as yet unclassified' }
 SWTestRunner class >> moduleTranspilerClass [
 	^ self subclassResponsibility
+]
+
+{ #category : #suites }
+SWTestRunner class >> runAllTests [
+	^ self buildSuiteFromSelectors run
+]
+
+{ #category : #'as yet unclassified' }
+SWTestRunner class >> solveDependenciesUsing: transpiler [
+ 	self methodDict select: [ :each | each selector beginsWith: 'test' ] thenDo: [ :each |
+		transpiler decode: each selector with: { self }
+	].
+	transpiler transpile: self
 ]
