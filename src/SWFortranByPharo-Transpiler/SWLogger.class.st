@@ -9,10 +9,15 @@ Class {
 	#superclass : #Object,
 	#instVars : [
 		'enabled',
-		'selector'
+		'payload'
 	],
 	#category : #'SWFortranByPharo-Transpiler-Common'
 }
+
+{ #category : #generation }
+SWLogger >> dump [
+	self payload inspect
+]
 
 { #category : #accessing }
 SWLogger >> enabled [
@@ -28,6 +33,7 @@ SWLogger >> enabled: anObject [
 
 { #category : #private }
 SWLogger >> getDepthOf: aContext [
+	self error; flag: #toRemove.
 	aContext ifNil: [ ^ 0	].
 	(self selector value: aContext) ifTrue: [ 
 		^ 1 + (self getDepthOf: aContext sender)
@@ -48,15 +54,33 @@ SWLogger >> log: msg [
 
 { #category : #private }
 SWLogger >> log: msg withContext: aContext [
-	|depth|
 	self enabled ifFalse: [ ^ self ].
+	self payload add: (SWLog new
+		message: msg value;
+		context: aContext copy;
+		yourself)
+"
+	|depth|
 	depth := self getDepthOf: aContext.
 	Transcript << ('  ' repeat: depth); << aContext asString; << '> '; << msg value; cr; flush
+"
+]
 
+{ #category : #accessing }
+SWLogger >> payload [
+
+	^ payload ifNil: [ payload := OrderedCollection new ]
+]
+
+{ #category : #accessing }
+SWLogger >> payload: anObject [
+
+	payload := anObject
 ]
 
 { #category : #accessing }
 SWLogger >> selector [
+	self error; flag: #toRemove.
 	^ selector ifNil: [
 		selector := [ :aContext |
 			aContext receiver className beginsWith: 'SW'
@@ -66,5 +90,6 @@ SWLogger >> selector [
 
 { #category : #accessing }
 SWLogger >> selector: aSelectorBlock [
+	self error; flag: #toRemove.
 	selector := aSelectorBlock 
 ]

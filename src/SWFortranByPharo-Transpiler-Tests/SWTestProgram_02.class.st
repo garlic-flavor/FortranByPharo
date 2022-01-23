@@ -20,6 +20,23 @@ SWTestProgram_02 class >> test2_cascading [
 ]
 
 { #category : #'as yet unclassified' }
+SWTestProgram_02 class >> tmp3 [
+	<script>
+	self new tmp2 inspect
+]
+
+{ #category : #'as yet unclassified' }
 SWTestProgram_02 class >> util1 [
 	^ 'Hello, world!'
+]
+
+{ #category : #'as yet unclassified' }
+SWTestProgram_02 >> tmp [
+
+	thisContext copy inspect
+]
+
+{ #category : #'as yet unclassified' }
+SWTestProgram_02 >> tmp2 [
+	^ self tmp
 ]

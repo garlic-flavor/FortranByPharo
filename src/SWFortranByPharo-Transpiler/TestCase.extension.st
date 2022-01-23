@@ -8,7 +8,12 @@ TestCase class >> initializeClassSideTranspiler: transpiler [
 			newT
 				specifyReturnTypeAs: OrderedCollection;
 				bodyGenerator: [ :t |
-					self halt; flag: #toImplement
+					t putStatement: (RBReturnNode value: (RBLiteralArrayNode value: (
+						t receiverClass instanceSide methodDict keys select: [ :each |
+							each beginsWith: 'test'
+						] thenCollect: [ :each |
+							RBLiteralValueNode value: each
+						])))
 				];
 				markAsDecoded;
 				yourself

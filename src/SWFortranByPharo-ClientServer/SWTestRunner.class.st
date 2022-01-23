@@ -34,5 +34,8 @@ SWTestRunner class >> solveDependenciesUsing: transpiler [
  	self methodDict select: [ :each | each selector beginsWith: 'test' ] thenDo: [ :each |
 		transpiler decode: each selector with: { self }
 	].
-	transpiler transpile: self
+	transpiler
+		transpile: TestCase;
+		transpile: SWTestRunner;
+		transpile: self
 ]
