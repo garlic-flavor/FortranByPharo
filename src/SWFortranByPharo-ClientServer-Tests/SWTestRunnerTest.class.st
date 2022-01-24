@@ -12,7 +12,7 @@ SWTestRunnerTest class >> build [
 { #category : #'as yet unclassified' }
 SWTestRunnerTest class >> buildThenInspect [
 	<script>
-	self build inspect.
+	self build contents inspect.
 ]
 
 { #category : #running }
@@ -30,5 +30,5 @@ SWTestRunnerTest class >> moduleTranspilerClass [
 
 { #category : #tests }
 SWTestRunnerTest >> test_01 [
-	Transcript show: 'hello'; cr
+	SWStd print: 'hello!'.
 ]

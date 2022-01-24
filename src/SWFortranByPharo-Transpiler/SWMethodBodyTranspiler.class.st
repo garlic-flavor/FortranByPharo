@@ -60,6 +60,9 @@ SWMethodBodyTranspiler >> bodyGenerator [
 		transpiler stream log.
 		transpiler locals do: [ :each | self putVariableDeclarationOf: each ].
 		transpiler putSequence: transpiler method sourceNode body.
+		(transpiler classInfo isNil or: [ transpiler method sourceNode lastIsReturn ]) ifFalse: [
+			transpiler putReturnSelf
+		]
 	] ]
 ]
 
@@ -441,6 +444,11 @@ SWMethodBodyTranspiler >> putReturn: value [
 		withoutMessageNestDo: [
 			self << value
 		]
+]
+
+{ #category : #'as yet unclassified' }
+SWMethodBodyTranspiler >> putReturnSelf [
+	self putStatement: (RBReturnNode value: (RBVariableNode named: 'self'))
 ]
 
 { #category : #'code generation' }
