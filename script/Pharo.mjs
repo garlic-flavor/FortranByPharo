@@ -77,15 +77,63 @@ export class TestAsserter extends PharoObject {
 }
 
 //-----------------------------------------------------------------------------
+class TestResult {
+  selectorName = null;
+  result = null;
+  message = null;
+
+  run(proc) {
+    var oldLog = console.log;
+    var outer = this;
+    this.message = "";
+    console.log = function(message){
+      outer.message = outer.message + message + "\r\n";
+    };
+    try {
+      proc();
+    } catch (e) {
+      this.result = false;
+      this.message = e.message;
+      return;
+    } finally {
+      console.log = oldLog;
+    }
+    this.result = true;
+  }
+}
+
+//-----------------------------------------------------------------------------
+class TestResultSummary {
+  className = null;
+  eachTest = null;
+  succeeded = 0;
+  failed = 0;
+  constructor() {
+    this.eachTest = [];
+  }
+  push(result) {
+    this.eachTest.push(result);
+    if(result.result) {
+      this.succeeded++;
+    } else {
+      this.failed++;
+    }
+  }
+}
+
+
+//-----------------------------------------------------------------------------
 export class TestSuite {
   static named_(name) {
-    return new TestSuite()
+    return new TestSuite(name)
   }
 
+  className = null;
   tests = null;
 
-  constructor(){
+  constructor(name){
     this.tests = [];
+    this.className = name;
   }
 
   addTest_(aTest) {
@@ -94,12 +142,18 @@ export class TestSuite {
   }
 
   run() {
-    console.log('run');
+    var results = new TestResultSummary();
     this.tests.forEach(function(element) {
-      console.log(element.constructor.name);
-      console.log(element.testSelector);
-      element[element.testSelector]();
+      var result = new TestResult();
+      result.selectorName = element.testSelector;
+      result.run(function() {
+        element.setUp();
+        element[element.testSelector]();
+        element.tearDown();
+      });
+      results.push(result);
     });
+    console.log(JSON.stringify(results));
   }
 }
 
