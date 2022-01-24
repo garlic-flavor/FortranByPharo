@@ -20,7 +20,7 @@ SWServer class >> build [
 	module := SWMTofJS newFrom: self.
 	module enableDebugMode.
 	module transpile.
-	module inspect.
+	module contents inspect.
 
 ]
 
@@ -49,7 +49,7 @@ SWServer class >> isRunning [
 SWServer class >> main [
 	SWStd
 		import: #(PharoObject Transcript FileLocator) from: 'Pharo';
-		import: #(ZnServer SWWebSocketDelegate ZnResponse ZnEntity ZnStatusLine ZnHeaders) from: 'ZnServer'.
+		import: #(ZnServer ZnWebSocketDelegate SWWebSocketDelegate ZnResponse ZnEntity ZnStatusLine ZnHeaders) from: 'ZnServer'.
 
 	self new startOn: 50000
 ]
@@ -58,11 +58,13 @@ SWServer class >> main [
 SWServer class >> put [
 	<script>
 	|module runner|
+	self start.
 	module := SWMTofJS newFrom: self.
 	module transpile.
 	module contents inspect.
 	runner := SWPRofJS new.
 	runner put: module.
+	self stop.
 
 ]
 

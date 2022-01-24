@@ -3,10 +3,7 @@ I use SWClient to upload SWProject and run it.
 "
 Class {
 	#name : #SWProjectRunner,
-	#superclass : #Object,
-	#instVars : [
-		'client'
-	],
+	#superclass : #SWClient,
 	#category : #'SWFortranByPharo-ClientServer-Client'
 }
 
@@ -21,18 +18,6 @@ SWProjectRunner class >> newFrom: aProject [
 	^ self new
 		project: aProject;
 		yourself
-]
-
-{ #category : #accessing }
-SWProjectRunner >> client [
-
-	^ client ifNil: [ client := SWClient new ]
-]
-
-{ #category : #accessing }
-SWProjectRunner >> client: anObject [
-
-	client := anObject
 ]
 
 { #category : #execution }
@@ -50,6 +35,6 @@ SWProjectRunner >> go: aModule [
 
 { #category : #'code generation' }
 SWProjectRunner >> put: aModule [
-	self client put: aModule filename contents: aModule contents
+	self put: aModule filename contents: aModule contents
 
 ]

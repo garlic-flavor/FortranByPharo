@@ -24,6 +24,11 @@ SWClassDefinitionTranspiler >> defineMethodAsBinaryOperator: aName [
 	]
 ]
 
+{ #category : #testing }
+SWClassDefinitionTranspiler >> isTranspiled [
+	^ stream isNotNil
+]
+
 { #category : #'as yet unclassified' }
 SWClassDefinitionTranspiler >> putClassFooter [
 	self stream

@@ -5,7 +5,7 @@ Class {
 	#name : #SWPRofJSTest,
 	#superclass : #TestCase,
 	#instVars : [
-		'project',
+		'module',
 		'runner'
 	],
 	#category : #'SWFortranByPharo-ClientServer-Tests'
@@ -14,8 +14,8 @@ Class {
 { #category : #tests }
 SWPRofJSTest >> setUp [
 	super setUp.
-	project := SWPTofJS newFrom: SWTestProgram_01.
-	runner := SWPRofJS newFrom: project.
+	module := SWMTofJS newFrom: SWTestProgram_01.
+	runner := SWPRofJS new.
 
 ]
 

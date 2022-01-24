@@ -41,6 +41,11 @@ SWPool >> debugMode: anObject [
 ]
 
 { #category : #'as yet unclassified' }
+SWPool >> detect: aNeedle ifFound: aBlock [
+	^ self payload detect: aNeedle ifFound: aBlock
+]
+
+{ #category : #'as yet unclassified' }
 SWPool >> detect: aNeedle ifFound: aBlock ifNone: aNoneBlock [
 	^ self payload detect: aNeedle ifFound: aBlock ifNone: aNoneBlock
 ]

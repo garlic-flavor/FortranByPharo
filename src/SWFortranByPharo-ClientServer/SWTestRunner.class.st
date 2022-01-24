@@ -13,6 +13,16 @@ SWTestRunner class >> build [
 	^ module
 ]
 
+{ #category : #running }
+SWTestRunner class >> go [
+	|module result|
+	module := self build.
+	result := (SWPRofJS go: module).
+	(STON reader
+		on: result message readStream;
+		next) inspect
+]
+
 { #category : #accessing }
 SWTestRunner class >> initializeClassSideTranspiler: transpiler [
 	transpiler

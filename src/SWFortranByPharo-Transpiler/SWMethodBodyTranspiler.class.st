@@ -59,6 +59,11 @@ SWMethodBodyTranspiler >> bodyGenerator [
 	^ bodyGenerator ifNil: [ bodyGenerator := [ :transpiler | 
 		transpiler stream log.
 		transpiler locals do: [ :each | self putVariableDeclarationOf: each ].
+		(transpiler method methodClass isInstanceSide and: [
+			transpiler method sourceNode allVariables anySatisfy: [ :each | each name = 'self' ]
+		]) ifTrue: [
+			self putSelfDefinition
+		].
 		transpiler putSequence: transpiler method sourceNode body.
 		(transpiler classInfo isNil or: [ transpiler method sourceNode lastIsReturn ]) ifFalse: [
 			transpiler putReturnSelf
@@ -453,6 +458,11 @@ SWMethodBodyTranspiler >> putReturnSelf [
 
 { #category : #'code generation' }
 SWMethodBodyTranspiler >> putSelf [
+	^ self subclassResponsibility 
+]
+
+{ #category : #'as yet unclassified' }
+SWMethodBodyTranspiler >> putSelfDefinition [
 	^ self subclassResponsibility 
 ]
 

@@ -93,9 +93,10 @@ SWModuleTranspiler >> solveDependencies [
 	tClass := self payload receiverClass instanceSide.
 	(tClass respondsTo: solver) ifTrue: [
 		tClass perform: solver with: self
+	].
+	self pool detect: [ :each | each targetClass = tClass ] ifFound: [ :t |
+		self transpile: tClass
 	]
-	
-	
 ]
 
 { #category : #accessing }
@@ -132,8 +133,10 @@ SWModuleTranspiler >> transpile: aClass [
 	self pool detect: [ :each |
 		each targetClass = aClass
 	] ifFound: [ :each |
-		each
-			stream: self stream;
-			transpile
+		each isTranspiled ifFalse: [
+			each
+				stream: self stream;
+				transpile
+		]
 	] ifNone: [ self error ]
 ]

@@ -9,5 +9,5 @@ Class {
 
 { #category : #execution }
 SWPRofJS >> execute: aModule [
-	^ self client exec: 'node' with: { aModule filename }
+	^ self exec: 'node' with: { aModule filename }
 ]

@@ -66,9 +66,7 @@ SWMBTofJS >> putCascade: aRBCascadeNode [
 	(self trySimpleCascade: aRBCascadeNode) ifTrue: [ ^ self ].
 
 	variables := (Set newFrom: aRBCascadeNode allVariables) asArray.
-	self put: '(function('.
-	variables select: [ :each | each name first isLowercase ] thenDo: [ :each | self << each; put: ', ' ].
-	self put: '_receiver_) {'; cr.
+	self put: '(function(_receiver_) {'; cr.
 	self stream incIndent.
 	receiver := RBVariableNode named: #_receiver_.
 	aRBCascadeNode messages doWithIndex: [ :msgNode :idx |
@@ -82,7 +80,6 @@ SWMBTofJS >> putCascade: aRBCascadeNode [
 	].
 	self stream decIndent.
 	self put: '})('.
-	variables select: [ :each | each name first isLowercase ] thenDo: [ :each | self << each; put: ', ' ].
 	self << aRBCascadeNode receiver; put: ')'.
 	
 ]
@@ -233,7 +230,12 @@ SWMBTofJS >> putReturnThisClassName [
 { #category : #'code generation' }
 SWMBTofJS >> putSelf [
 
-	self put: (self receiverClass isClassSide ifTrue: [ self receiverClass soleInstance name ] ifFalse: [ 'this' ])
+	self put: (self receiverClass isClassSide ifTrue: [ self receiverClass soleInstance name ] ifFalse: [ 'self' ])
+]
+
+{ #category : #'as yet unclassified' }
+SWMBTofJS >> putSelfDefinition [
+	self put: 'var self = this;'; cr
 ]
 
 { #category : #'as yet unclassified' }
@@ -277,13 +279,22 @@ SWMBTofJS >> put_inject_into_: aNode [
 SWMBTofJS >> trySimpleCascade: aRBCascadeNode [
 
 	aRBCascadeNode receiver class = RBVariableNode ifFalse: [ ^ false ].
-
-	self put: '('.
-	aRBCascadeNode messages do: [ :each |
-		self << each
-	] separatedBy: [ self put: ', ' ].
-	self put: ')'.
+	(aRBCascadeNode parent class ~= RBSequenceNode or: [ aRBCascadeNode parent isLast: aRBCascadeNode ]) ifTrue: [
+		self put: '('.
+		aRBCascadeNode messages do: [ :each |
+			self << each
+		] separatedBy: [ self put: ', ' ].
+		self put: ')'.
+	] ifFalse: [
+		aRBCascadeNode messages do: [ :each |
+			self putStatement: each
+		].
+		self
+			preventStatementDelimiter;
+			preventNewline
+	].
 	^ true
+
 ]
 
 { #category : #accessing }

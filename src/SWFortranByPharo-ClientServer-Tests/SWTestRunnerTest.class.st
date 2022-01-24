@@ -18,12 +18,7 @@ SWTestRunnerTest class >> buildThenInspect [
 { #category : #running }
 SWTestRunnerTest class >> go [
 	<script>
-	|module result|
-	module := self build.
-	result := (SWPRofJS go: module).
-	(STON reader
-		on: result message readStream;
-		next) inspect
+	super go
 ]
 
 { #category : #'as yet unclassified' }
