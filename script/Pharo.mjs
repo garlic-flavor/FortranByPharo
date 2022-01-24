@@ -17,6 +17,10 @@ export class PharoObject {
         throw `Assertion failed: ${aBlock} failed.`;
   }
 
+  static name() {
+    return this.constructor.name;
+  }
+
 }
 PharoObject.error_ = function(msg) {
   throw msg;
@@ -45,7 +49,7 @@ OSPlatform.isMacOS = function() {
 };
 
 //-----------------------------------------------------------------------------
-export class TestCase extends PharoObject {
+export class TestAsserter extends PharoObject {
   setUp() {
   }
   tearDown() {
@@ -67,6 +71,36 @@ export class TestCase extends PharoObject {
       throw `Assertion failed: ${left} != ${right}.`;
   }
 
+  static suiteClass() {
+    return TestSuite;
+  }
+}
+
+//-----------------------------------------------------------------------------
+export class TestSuite {
+  static named_(name) {
+    return new TestSuite()
+  }
+
+  tests = null;
+
+  constructor(){
+    this.tests = [];
+  }
+
+  addTest_(aTest) {
+    this.tests.push(aTest);
+    return this;
+  }
+
+  run() {
+    console.log('run');
+    this.tests.forEach(function(element) {
+      console.log(element.constructor.name);
+      console.log(element.testSelector);
+      element[element.testSelector]();
+    });
+  }
 }
 
 
@@ -90,6 +124,9 @@ String.prototype.trimLeft_ = function(aBlock) {
       return this.substring(i);
     }
   }
+  return this;
+};
+String.prototype.asString = function() {
   return this;
 };
 
