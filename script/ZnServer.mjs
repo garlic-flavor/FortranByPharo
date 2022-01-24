@@ -15,7 +15,7 @@ export class ZnServer {
   portNumber_(p) { this._portNumber = p; }
 
   delegate() {
-    if (!this._delegate) { this._delegate = new ZnDefaultDelegate(); }
+    if (!this._delegate) { this._delegate = new ZnWebSocketDelegate(); }
     return this._delegate;
   }
   delegate_(d) {
@@ -65,7 +65,7 @@ ZnServer.startDefaultOn_ = function(portNumber) {
 };
 
 //-----------------------------------------------------------------------------
-export class ZnDefaultDelegate {
+export class ZnWebSocketDelegate {
   _map = {};
   _handler = null;
 
@@ -96,15 +96,15 @@ export class ZnDefaultDelegate {
       handler.upgrade(req, sock, head);
     }
   }
-
+  
+  static handler_(h) {
+    const d = new this();
+    d.handler_(h);
+    return d;
+  }
 }
-ZnDefaultDelegate.handler_ = function(h) {
-  const d = new this();
-  d.handler_(h);
-  return d;
-};
 //-----------------------------------------------------------------------------
-export class SWWebSocketDelegate extends ZnDefaultDelegate {
+export class SWWebSocketDelegate extends ZnWebSocketDelegate {
   _wss = null;
 
   wss() {
