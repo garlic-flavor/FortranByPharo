@@ -10,6 +10,7 @@ Class {
 
 { #category : #'code generation' }
 SWStd class >> f90_print_With: arguments Using: transpiler [
+	self error; flag: #toRemove.
 	transpiler
 		put: 'print *, ';
 		transpile: (arguments at: 1)
@@ -47,6 +48,7 @@ SWStd class >> initializeClassSideTranspiler: transpiler [
 
 { #category : #'code generation' }
 SWStd class >> js_import_from_With: arguments Using: transpiler [
+	self error; flag: #toRemove.
 	transpiler put: 'import {'.
 	(arguments at: 1) value do: [ :each |
 		transpiler put: each asString

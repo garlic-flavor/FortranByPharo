@@ -76,7 +76,7 @@ SWMethodBodyTranspiler >> classOf: aNode [
 		^ aNode name first isUppercase ifTrue: [
 			(Smalltalk globals at: aNode name asSymbol) class
 		] ifFalse: [
-			(self variableInfoOf: aNode name) type
+			(self getVariableInfoOf: aNode name) type
 		]
 	].
 
@@ -503,10 +503,17 @@ SWMethodBodyTranspiler >> putSymbol: aByteSymbol [
 SWMethodBodyTranspiler >> putVariable: aVariableNode [
 	self stream log: aVariableNode name.
 	aVariableNode name = #self ifTrue: [
-		self putSelf
-	] ifFalse: [
-		self put: aVariableNode name
-	]
+		^ self putSelf
+	].
+	self getVariableInfoOf: aVariableNode name ifPresent: [ :vi |
+		(vi owner class inheritsFrom: SWClass) ifTrue: [
+			self
+				putSelf;
+				putClassAccessor
+		]
+	].
+	self put: aVariableNode name
+
 ]
 
 { #category : #'code generation' }

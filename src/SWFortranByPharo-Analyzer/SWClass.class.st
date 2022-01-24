@@ -227,6 +227,13 @@ SWClass >> getVariableInfoOf: aName [
 ]
 
 { #category : #accessing }
+SWClass >> getVariableInfoOf: aName ifPresent: aPresentBlock [
+	"Return SWVariableInfo searched by its name."
+	^ self slot detect: [ :each | each isNotNil and: [ each name = aName ] ] ifFound: aPresentBlock
+
+]
+
+{ #category : #accessing }
 SWClass >> methods [
 	"A Set object consists of referenced methods."
 	^ methods ifNil: [methods := Set new ]

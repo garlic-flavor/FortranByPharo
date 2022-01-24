@@ -206,6 +206,31 @@ SWMBTofJS >> putOpBinary: aNode [
 ]
 
 { #category : #'code generation' }
+SWMBTofJS >> putOrdinaryCallee: aNode [
+	self stream log.
+	self methodClass ifNil: [ ^ super putOrdinaryCallee: aNode ].
+	self methodClass isClassSide ifFalse: [ ^ super putOrdinaryCallee: aNode ].
+	self methodClass = self receiverClass ifTrue: [ ^ super putOrdinaryCallee: aNode ].
+
+	self
+		put: self methodClass instanceSide name;
+		putClassAccessor;
+		put: (self class mangleClass mangle: self);
+		putClassAccessor;
+		put: 'call';
+		putArguments: ({RBVariableNode named: self receiverClass instanceSide name}, aNode arguments)
+
+]
+
+{ #category : #'as yet unclassified' }
+SWMBTofJS >> putReturnThisClassName [
+	self
+		put: 'return this.name';
+		putStatementDelimiter;
+		cr
+]
+
+{ #category : #'code generation' }
 SWMBTofJS >> putSelf [
 
 	self put: (self receiverClass isClassSide ifTrue: [ self receiverClass soleInstance name ] ifFalse: [ 'this' ])
@@ -237,15 +262,27 @@ SWMBTofJS >> putYourself: aNode [
 ]
 
 { #category : #'as yet unclassified' }
+SWMBTofJS >> put_inject_into_: aNode [
+	self
+		<< aNode receiver;
+		putClassAccessor;
+		put: 'reduce(';
+		<< (aNode arguments at: 2);
+		put: ', ';
+		<< (aNode arguments at: 1);
+		put: ')'
+]
+
+{ #category : #'as yet unclassified' }
 SWMBTofJS >> trySimpleCascade: aRBCascadeNode [
 
-	aRBCascadeNode parent class = RBSequenceNode ifFalse: [ ^ false ].
 	aRBCascadeNode receiver class = RBVariableNode ifFalse: [ ^ false ].
 
+	self put: '('.
 	aRBCascadeNode messages do: [ :each |
-		self putStatement: each
-	].
-	self preventStatementDelimiter; preventNewline.
+		self << each
+	] separatedBy: [ self put: ', ' ].
+	self put: ')'.
 	^ true
 ]
 

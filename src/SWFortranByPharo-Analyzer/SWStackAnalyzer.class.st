@@ -371,7 +371,7 @@ SWStackAnalyzer >> send: selector super: supered numArgs: numberArguments [
 		(assoc value)
 			owner: self;
 			pc: oldPC.
-		(self variableInfoOf: assoc key) << assoc value
+		(self getVariableInfoOf: assoc key) << assoc value
 	].
 	super send: selector super: supered numArgs: numberArguments.
 
@@ -384,7 +384,7 @@ SWStackAnalyzer >> senderGenerator: aCalleeGenerator [
 { #category : #'instruction decoding' }
 SWStackAnalyzer >> storeIntoLiteralVariable: anAssociation [
 self halt.
-	(self variableInfoOf: anAssociation key) << self stack top.
+	(self getVariableInfoOf: anAssociation key) << self stack top.
 	super storeIntoLiteralVariable: anAssociation
 ]
 

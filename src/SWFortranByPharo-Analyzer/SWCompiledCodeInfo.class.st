@@ -66,6 +66,29 @@ SWCompiledCodeInfo >> decode [
 ]
 
 { #category : #accessing }
+SWCompiledCodeInfo >> getVariableInfoOf: aName [
+	"This searches a SWVariableTypeInfo by its name."
+	^ self stack detect: [ :vi |
+		vi name = aName
+	] ifNone: [
+		self classInfo getVariableInfoOf: aName
+	]
+]
+
+{ #category : #accessing }
+SWCompiledCodeInfo >> getVariableInfoOf: aName ifPresent: aPresentBlock [
+	"This searches a SWVariableTypeInfo by its name."
+	^ self stack detect: [ :vi |
+		vi name = aName
+	] ifFound: [ :vi |
+		aPresentBlock cull: vi
+	] ifNone: [
+		self classInfo ifNotNil: [ self classInfo getVariableInfoOf: aName ifPresent: aPresentBlock ].
+		nil
+	]
+]
+
+{ #category : #accessing }
 SWCompiledCodeInfo >> locals [
 	"This returns local variables excluding its arguments."
 	^ self stack copyFrom: self method numArgs + 1 to: self method numTemps
@@ -128,14 +151,4 @@ SWCompiledCodeInfo >> specifyReturnTypeAs: aType [
 	self return
 		<< aType;
 		priority: SWType userSpecifyingPriority
-]
-
-{ #category : #accessing }
-SWCompiledCodeInfo >> variableInfoOf: aName [
-	"This searches a SWVariableTypeInfo by its name."
-	^ self stack detect: [ :vi |
-		vi name = aName
-	] ifNone: [
-		self classInfo getVariableInfoOf: aName
-	]
 ]

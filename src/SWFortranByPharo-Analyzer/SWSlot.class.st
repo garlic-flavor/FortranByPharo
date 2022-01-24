@@ -51,7 +51,18 @@ SWSlot >> detect: aNeedle [
 ]
 
 { #category : #enumerating }
+SWSlot >> detect: aNeedle ifFound: foundBlock [
+	^ self payload detect: aNeedle ifFound: foundBlock ifNone: [ ]
+]
+
+{ #category : #enumerating }
+SWSlot >> detect: aNeedle ifFound: foundBlock ifNone: noneBlock [
+	^ self payload detect: aNeedle ifFound: foundBlock ifNone: noneBlock
+]
+
+{ #category : #enumerating }
 SWSlot >> detect: aNeedle ifNone: noneBlock [
+	self error; flag: #toRemove.
 	^ self payload detect: aNeedle ifNone: noneBlock
 ]
 

@@ -10,11 +10,25 @@ SWTestRunner class >> build [
 	module := self moduleTranspilerClass newFrom: self.
 	module enableDebugMode.
 	module transpile.
-	module inspect.
+	^ module
+]
+
+{ #category : #accessing }
+SWTestRunner class >> initializeClassSideTranspiler: transpiler [
+	transpiler
+		defineMethod: #name as: [ :newT |
+			newT
+				specifyReturnTypeAs: String;
+				markAsDecoded;
+				bodyGenerator: [ :t |
+					t putReturnThisClassName
+				]
+		]
 ]
 
 { #category : #accessing }
 SWTestRunner class >> main [
+	SWStd import: #(PharoObject TestAsserter) from: 'Pharo'.
 	self runAllTests
 
 ]
@@ -22,6 +36,11 @@ SWTestRunner class >> main [
 { #category : #'as yet unclassified' }
 SWTestRunner class >> moduleTranspilerClass [
 	^ self subclassResponsibility
+]
+
+{ #category : #accessing }
+SWTestRunner class >> name [
+	^ super name
 ]
 
 { #category : #suites }

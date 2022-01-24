@@ -6,8 +6,21 @@ Class {
 
 { #category : #building }
 SWTestRunnerTest class >> build [
+	^ super build
+]
+
+{ #category : #'as yet unclassified' }
+SWTestRunnerTest class >> buildThenInspect [
 	<script>
-	super build
+	self build inspect.
+]
+
+{ #category : #running }
+SWTestRunnerTest class >> go [
+	<script>
+	|module|
+	module := self build.
+	(SWPRofJS go: module) inspect
 ]
 
 { #category : #'as yet unclassified' }

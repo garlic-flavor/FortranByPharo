@@ -58,7 +58,8 @@ SWLogger >> log: msg withContext: aContext [
 	self payload add: (SWLog new
 		message: msg value;
 		context: aContext copy;
-		yourself)
+		yourself).
+	self flag: #toRemove.	
 "
 	|depth|
 	depth := self getDepthOf: aContext.

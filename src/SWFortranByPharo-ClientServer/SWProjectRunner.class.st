@@ -10,8 +10,14 @@ Class {
 	#category : #'SWFortranByPharo-ClientServer-Client'
 }
 
+{ #category : #api }
+SWProjectRunner class >> go: aModule [
+	^ self new go: aModule
+]
+
 { #category : #'instance creation' }
 SWProjectRunner class >> newFrom: aProject [
+	self error; flag: #toRemove.
 	^ self new
 		project: aProject;
 		yourself
