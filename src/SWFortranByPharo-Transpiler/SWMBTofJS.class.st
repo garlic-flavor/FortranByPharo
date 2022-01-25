@@ -276,6 +276,31 @@ SWMBTofJS >> put_inject_into_: aNode [
 ]
 
 { #category : #'as yet unclassified' }
+SWMBTofJS >> put_on_do_: aNode [
+
+	self
+		put: 'function(){ try {'; cr;
+		incIndent;
+		withoutMessageNestDo: [
+			self putSequenceWithReturn: aNode receiver
+		];
+		decIndent;
+		put: '} catch'.
+	(aNode arguments at: 2) arguments ifNotEmpty: [
+		self putArguments: (aNode arguments at: 2) arguments
+	].
+	self
+		put: ' {'; cr;
+		incIndent;
+		withoutMessageNestDo: [
+			self putSequenceWithReturn: (aNode arguments at: 2)
+		];
+		decIndent;
+		put: '}}()'
+
+]
+
+{ #category : #'as yet unclassified' }
 SWMBTofJS >> trySimpleCascade: aRBCascadeNode [
 
 	aRBCascadeNode receiver class = RBVariableNode ifFalse: [ ^ false ].

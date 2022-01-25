@@ -6,7 +6,7 @@ Class {
 	#superclass : #Object,
 	#instVars : [
 		'payload',
-		'transpilerClass',
+		'owner',
 		'debugMode'
 	],
 	#category : #'SWFortranByPharo-Analyzer-Analyzer'
@@ -25,7 +25,7 @@ SWPool class >> search: selector in: aClass [
 { #category : #accessing }
 SWPool >> classTranspilerClass [
 
-	^ self transpilerClass classTranspilerClass
+	^ self owner class classTranspilerClass
 ]
 
 { #category : #accessing }
@@ -78,6 +78,23 @@ SWPool >> getMethodTranspiler: aSelector supered: supered with: args [
 ]
 
 { #category : #accessing }
+SWPool >> logger [
+	^ self owner logger
+]
+
+{ #category : #accessing }
+SWPool >> owner [
+
+	^ owner
+]
+
+{ #category : #accessing }
+SWPool >> owner: anObject [
+
+	owner := anObject
+]
+
+{ #category : #accessing }
 SWPool >> payload [
 
 	^ payload ifNil: [ payload := Dictionary new ]
@@ -108,11 +125,13 @@ self error; flag: #toRemove.
 { #category : #accessing }
 SWPool >> transpilerClass [
 
-	^ transpilerClass
+	^ self owner class
 ]
 
 { #category : #accessing }
 SWPool >> transpilerClass: anObject [
-
+	self error; flag: #toRemove.
+	"
 	transpilerClass := anObject
+	"
 ]

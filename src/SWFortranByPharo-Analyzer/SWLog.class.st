@@ -7,9 +7,10 @@ Class {
 	#instVars : [
 		'message',
 		'context',
-		'sender'
+		'sender',
+		'stack'
 	],
-	#category : #'SWFortranByPharo-Transpiler-Common'
+	#category : #'SWFortranByPharo-Analyzer-Logger'
 }
 
 { #category : #accessing }
@@ -61,4 +62,16 @@ SWLog >> sender [
 SWLog >> sender: anObject [
 
 	sender := anObject
+]
+
+{ #category : #accessing }
+SWLog >> stack [
+
+	^ stack
+]
+
+{ #category : #accessing }
+SWLog >> stack: anObject [
+
+	stack := anObject
 ]

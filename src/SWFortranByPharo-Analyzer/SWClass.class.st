@@ -71,7 +71,18 @@ SWClass >> defineMethodAsBinaryOperator: aName as: anInitializer [
 
 { #category : #api }
 SWClass >> defineMethodAsCompareOperator: aName [
-	^ self defineMethodAsBinaryOperator: aName
+	^ self defineMethodAsCompareOperator: aName as: [ :newT | newT ]
+
+]
+
+{ #category : #api }
+SWClass >> defineMethodAsCompareOperator: aName as: anInitializer [
+	self generator at: aName put: [ :aCallee |
+		anInitializer value: ((self transpilerClass newFrom: aCallee)
+			specifyReturnTypeAs: Boolean;
+			markAsDecoded;
+			yourself)
+	]
 
 ]
 
@@ -207,6 +218,7 @@ SWClass >> getMethodTranspiler: aCalleeInfo [
 		].
 		self methods add: transpiler.
 		transpiler
+			logger: self pool logger;
 			decode;
 			yourself
 	].

@@ -8,6 +8,7 @@ Class {
 		'jumperStack',
 		'tempStore',
 		'pool',
+		'logger',
 		'debugMode'
 	],
 	#category : #'SWFortranByPharo-Analyzer-Analyzer'
@@ -86,9 +87,10 @@ SWStackAnalyzer >> debugMode [
 ]
 
 { #category : #accessing }
-SWStackAnalyzer >> debugMode: anObject [
+SWStackAnalyzer >> debugMode: trueOrFalse [
 
-	debugMode := anObject
+	debugMode := trueOrFalse.
+	self logger enabled: trueOrFalse
 ]
 
 { #category : #'instruction decoding' }
@@ -150,6 +152,18 @@ SWStackAnalyzer >> jumperStack: anObject [
 	jumperStack := anObject
 ]
 
+{ #category : #accessing }
+SWStackAnalyzer >> logger [
+
+	^ logger ifNil: [ logger := SWLogger new ]
+]
+
+{ #category : #accessing }
+SWStackAnalyzer >> logger: anObject [
+
+	logger := anObject
+]
+
 { #category : #private }
 SWStackAnalyzer >> mergeStackTopAndSecond [
 	|right|
@@ -193,7 +207,8 @@ SWStackAnalyzer >> newFullClosure: lit with: args [
 SWStackAnalyzer >> pool [
 
 	^ pool ifNil: [
-		pool := self class newDefaultPool
+		pool := self class poolClass new
+			owner: self;
 			debugMode: self debugMode;
 			yourself
 	]
@@ -358,6 +373,8 @@ SWStackAnalyzer >> pushTemporaryVariable:  offset [
 { #category : #'instruction decoding' }
 SWStackAnalyzer >> send: selector super: supered numArgs: numberArguments [
 	|args methodInfo|
+	self logger log: [ 'decode: ', selector ] withStack: self stack.
+
 	args := self stack pop: numberArguments + 1.
 
 	methodInfo := self pool getMethodTranspiler: selector supered: supered with: args.

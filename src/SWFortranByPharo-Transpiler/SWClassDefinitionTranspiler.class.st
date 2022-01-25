@@ -24,6 +24,15 @@ SWClassDefinitionTranspiler >> defineMethodAsBinaryOperator: aName [
 	]
 ]
 
+{ #category : #api }
+SWClassDefinitionTranspiler >> defineMethodAsCompareOperator: aName [
+	^ self defineMethodAsCompareOperator: aName as: [ :newT |
+		newT
+			senderGenerator: [ :t :node | t putOpBinary: node ];
+			yourself
+	]
+]
+
 { #category : #testing }
 SWClassDefinitionTranspiler >> isTranspiled [
 	^ stream isNotNil

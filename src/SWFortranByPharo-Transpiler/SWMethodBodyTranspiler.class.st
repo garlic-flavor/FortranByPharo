@@ -481,7 +481,8 @@ SWMethodBodyTranspiler >> putSequenceWithReturn: aSequence [
 		] ifFalse: [
 			self
 				putReturn: each;
-				putStatementDelimiter
+				putStatementDelimiter;
+				cr
 		]
 	]
 ]
@@ -582,13 +583,18 @@ SWMethodBodyTranspiler >> senderGenerator: anObject [
 { #category : #accessing }
 SWMethodBodyTranspiler >> stream [
 
-	^ stream ifNil: [ stream := SWTranspilerStream new ]
+	^ stream ifNil: [
+		stream := SWTranspilerStream new
+			logger: self logger;
+			yourself
+	]
 ]
 
 { #category : #accessing }
 SWMethodBodyTranspiler >> stream: anObject [
 
-	stream := anObject
+	stream := anObject.
+	self logger: anObject logger
 ]
 
 { #category : #'public API' }

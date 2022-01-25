@@ -48,7 +48,7 @@ SWServer class >> isRunning [
 { #category : #api }
 SWServer class >> main [
 	SWStd
-		import: #(PharoObject Transcript FileLocator) from: 'Pharo';
+		import: #(PharoObject Transcript FileLocator Exception) from: 'Pharo';
 		import: #(ZnServer ZnWebSocketDelegate SWWebSocketDelegate ZnResponse ZnEntity ZnStatusLine ZnHeaders) from: 'ZnServer'.
 
 	self new startOn: 50000

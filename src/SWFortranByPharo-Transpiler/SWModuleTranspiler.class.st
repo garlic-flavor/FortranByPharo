@@ -113,18 +113,19 @@ SWModuleTranspiler >> stream: anObject [
 
 { #category : #'public API' }
 SWModuleTranspiler >> transpile [
-	self payload decode.
+	self payload
+		stream: self stream;
+		decode.
 	self solveDependencies.
 "
+	self flag: #toRemove.
 	self payload pool select: [ :each | self isToTranspile: each targetClass ] thenDo: [ :each |
 		each
 			stream: self stream;
 			transpile
 	].
 "
-	self payload
-		stream: self stream;
-		transpile.
+	self payload transpile.
 
 ]
 

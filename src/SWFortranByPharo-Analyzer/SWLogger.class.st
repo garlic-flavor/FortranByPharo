@@ -11,7 +11,7 @@ Class {
 		'enabled',
 		'payload'
 	],
-	#category : #'SWFortranByPharo-Transpiler-Common'
+	#category : #'SWFortranByPharo-Analyzer-Logger'
 }
 
 { #category : #generation }
@@ -65,6 +65,17 @@ SWLogger >> log: msg withContext: aContext [
 	depth := self getDepthOf: aContext.
 	Transcript << ('  ' repeat: depth); << aContext asString; << '> '; << msg value; cr; flush
 "
+]
+
+{ #category : #'as yet unclassified' }
+SWLogger >> log: msg withStack: aStack [
+	self enabled ifFalse: [ ^ self ].
+	self payload add: (SWLog new
+		message: msg value;
+		stack: aStack copy;
+		context: thisContext sender copy;
+		yourself).
+
 ]
 
 { #category : #accessing }

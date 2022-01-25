@@ -1,5 +1,7 @@
 "
 I store temporal variables for cascading statement of Pharo.
+
+This is to remove.
 "
 Class {
 	#name : #SWTempStore,

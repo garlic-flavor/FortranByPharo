@@ -65,10 +65,22 @@ SWStackAnalyzerTest >> _10_new: arg1 [
 	^ loc2
 ]
 
+{ #category : #'as yet unclassified' }
+SWStackAnalyzerTest >> _12_try_catch [
+
+	[  
+		Transcript show: 'hello'; cr
+	] on: Exception do: [
+		Transcript show: 'error!'
+	]
+]
+
 { #category : #'private - utility' }
 SWStackAnalyzerTest >> inspectMy: arg1 withArguments: arg2 [
 
-	(SWStackAnalyzer new: self class>>arg1 with: ({self class}, arg2)) decode; inspect
+	(SWStackAnalyzer new: self class>>arg1 with: ({self class}, arg2))
+		debugMode: true;
+		decode; inspect
 
 ]
 
@@ -197,4 +209,9 @@ SWStackAnalyzerTest >> test_11_ZnServer [
 	sa := SWStackAnalyzer new: SWServer>>#startOn: with: { SWServer. SmallInteger }.
 	sa decode.
 	sa inspect.
+]
+
+{ #category : #tests }
+SWStackAnalyzerTest >> test_12_decode [
+	self inspectMy: #_12_try_catch withArguments: {  }
 ]

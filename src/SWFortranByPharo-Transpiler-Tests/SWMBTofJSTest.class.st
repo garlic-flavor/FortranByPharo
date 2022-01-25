@@ -56,6 +56,17 @@ SWMBTofJSTest >> _07_opBinaries: a [
 	^ a + 100 * 200 - 300 / 400
 ]
 
+{ #category : #'as yet unclassified' }
+SWMBTofJSTest >> _08_try_catch [
+	[  
+		Transcript show: 'hello'; cr
+	] on: Exception do: [ :e |
+		Transcript
+			show: 'error!';
+			show: e asString
+	]
+]
+
 { #category : #tests }
 SWMBTofJSTest >> test_01 [
 	|transpiler result|
@@ -130,6 +141,15 @@ SWMBTofJSTest >> test_07 [
 	result := transpiler stream contents.
 	self assert: result equals: 'return (((a + 100) * 200) - 300) / 400;
 '
+
+]
+
+{ #category : #tests }
+SWMBTofJSTest >> test_08 [
+	|transpiler result|
+	transpiler := (self transpile_program: #_08_try_catch with: #()).
+	result := transpiler stream contents.
+	result inspect.
 
 ]
 

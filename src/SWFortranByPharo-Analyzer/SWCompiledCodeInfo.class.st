@@ -22,6 +22,7 @@ SWCompiledCodeInfo class >> classTranspilerClass [
 
 { #category : #'instance creation' }
 SWCompiledCodeInfo class >> newDefaultPool [
+	self error; flag: #toRemove.
 	^ self poolClass new
 		transpilerClass: self;
 		yourself
