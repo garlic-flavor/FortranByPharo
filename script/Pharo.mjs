@@ -298,6 +298,9 @@ export class Dictionary {}
 // for Dummy
 export class SWGFortranCompilerAdapter {}
 
+//
+export class Exception extends Error {}
+
 
 //-----------------------------------------------------------------------------
 if (process.env.NODE_ENV == 'test') {
