@@ -55,17 +55,15 @@ SWMethodBodyTranspiler >> << anObject [
 
 { #category : #accessing }
 SWMethodBodyTranspiler >> bodyGenerator [
-
-	^ bodyGenerator ifNil: [ bodyGenerator := [ :transpiler | 
+	^ bodyGenerator ifNil: [ bodyGenerator := [ :transpiler | |m|
+		m := transpiler method.
 		transpiler stream log.
 		transpiler locals do: [ :each | self putVariableDeclarationOf: each ].
-		(transpiler method methodClass isInstanceSide and: [
-			transpiler method sourceNode allVariables anySatisfy: [ :each | each name = 'self' ]
-		]) ifTrue: [
+		(m methodClass isInstanceSide and: [ m readsSelf ]) ifTrue: [
 			self putSelfDefinition
 		].
-		transpiler putSequence: transpiler method sourceNode body.
-		(transpiler classInfo isNil or: [ transpiler method sourceNode lastIsReturn ]) ifFalse: [
+		transpiler putSequence: m sourceNode body.
+		(transpiler classInfo isNil or: [ m sourceNode lastIsReturn ]) ifFalse: [
 			transpiler putReturnSelf
 		]
 	] ]
@@ -361,6 +359,8 @@ SWMethodBodyTranspiler >> putMessage: aNode [
 	t2 := (self messages at: aNode) asCallee
 		messageNest: self messageNest + 1;
 		messages: self messages;
+		stack: self stack;
+		classInfo: self classInfo;
 		stream: self stream;
 		yourself.
 
@@ -529,10 +529,11 @@ SWMethodBodyTranspiler >> putVariable: aVariableNode [
 		^ self putSelf
 	].
 	self getVariableInfoOf: aVariableNode name ifPresent: [ :vi |
-		(vi owner class inheritsFrom: SWClass) ifTrue: [
+		(vi owner class includesBehavior: SWClass) ifTrue: [
 			self
 				putSelf;
-				putClassAccessor
+				putClassAccessor;
+				put: '_'
 		]
 	].
 	self put: aVariableNode name

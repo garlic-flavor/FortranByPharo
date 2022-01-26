@@ -25,6 +25,7 @@ SWCDTofJS >> putMemberDeclarationOf: aVariableTypeInfo [
 		self stream put: 'static '
 	].
 	self stream
+		put: '_';
 		put: aVariableTypeInfo name asString;
 		put: ' = null';
 		putDelimiter;

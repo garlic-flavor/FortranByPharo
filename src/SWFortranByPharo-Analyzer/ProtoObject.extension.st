@@ -4,7 +4,13 @@ Extension { #name : #ProtoObject }
 ProtoObject class >> initializeInstanceSideTranspiler: aCT [
 	aCT
 		defineMethodAsCompareOperator: #==;
-		defineMethodReturnsReceiversClass: #class;
+		defineMethodReturnsReceiversClass: #class as: [ :newT |
+			newT
+				senderGenerator: [ :t :node |
+					t << (RBVariableNode named: t receiverClass name)
+				];
+				yourself
+		];
 		setBreakpointOn: #primitiveFailed
 
 ]

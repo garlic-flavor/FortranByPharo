@@ -3,24 +3,37 @@ A SWShellEnvironmentTest is a test class for testing the behavior of SWShellEnvi
 "
 Class {
 	#name : #SWShellEnvironmentTest,
-	#superclass : #SWTestBase,
+	#superclass : #SWTestRunner,
 	#category : #'SWFortranByPharo-ClientServer-Tests'
 }
 
-{ #category : #'code generation' }
-SWShellEnvironmentTest class >> mjs_requirements: transpiler [
-	transpiler
-		putImportNative: 'OSPlatform' from: 'Pharo.mjs';
-		putImportClass: SWTestBase;
-		putImportClass: SWShellEnvironment
+{ #category : #running }
+SWShellEnvironmentTest class >> go [
+	<script>
+	super go
 ]
 
-{ #category : #accessing }
-SWShellEnvironmentTest class >> rb_requirements [
-	^ {
-		SWTestBase.
-		SWShellEnvironment
-	}
+{ #category : #'as yet unclassified' }
+SWShellEnvironmentTest class >> moduleTranspilerClass [
+	^ SWMTofJS
+]
+
+{ #category : #'as yet unclassified' }
+SWShellEnvironmentTest class >> solveDependenciesUsing: transpiler [
+	super solveDependenciesUsing: transpiler.
+	transpiler transpile: SWShellEnvironment.
+	transpiler payload
+		putImport: #(OSPlatform) from: 'Pharo';
+		putStatementDelimiter;
+		cr.
+	
+
+]
+
+{ #category : #building }
+SWShellEnvironmentTest class >> tryBuild [
+	<script>
+	super build contents inspect
 ]
 
 { #category : #test }
@@ -28,14 +41,4 @@ SWShellEnvironmentTest >> testExeFileExtension [
 	OSPlatform current isMacOS ifTrue: [
 		self assert: SWShellEnvironment default exeFileExtension equals: #out
 	].
-]
-
-{ #category : #'code generation - running' }
-SWShellEnvironmentTest >> testThis [
-	self
-		type: #mjs;
-		runAsClient: true;
-		usingPharoServer: true;
-		ready;
-		go.
 ]

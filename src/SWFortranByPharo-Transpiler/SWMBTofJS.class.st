@@ -263,6 +263,15 @@ SWMBTofJS >> putYourself: aNode [
 ]
 
 { #category : #'as yet unclassified' }
+SWMBTofJS >> put_asString: aNode [
+	self stream log.
+	self
+		<< aNode receiver;
+		putClassAccessor;
+		put: 'toString()'
+]
+
+{ #category : #'as yet unclassified' }
 SWMBTofJS >> put_inject_into_: aNode [
 	self
 		<< aNode receiver;

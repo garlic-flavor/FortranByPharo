@@ -142,11 +142,17 @@ SWClass >> defineMethodReturnsReceiver: aName as: anInitializer [
 
 { #category : #api }
 SWClass >> defineMethodReturnsReceiversClass: aName [
+	^ self defineMethodReturnsReceiversClass: aName as: [ :newT | newT ]
+
+]
+
+{ #category : #api }
+SWClass >> defineMethodReturnsReceiversClass: aName as: anInitializer [
 	self generator at: aName put: [:aCallee |
-		(self transpilerClass newFrom: aCallee)
+		anInitializer value: ((self transpilerClass newFrom: aCallee)
 			return: (SWVariableTypeInfo new: aCallee receiverClass classSide);
 			markAsDecoded;
-			yourself
+			yourself)
 	]
 
 ]

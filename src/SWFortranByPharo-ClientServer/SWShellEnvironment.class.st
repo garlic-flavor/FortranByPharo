@@ -26,7 +26,18 @@ SWShellEnvironment class >> default [
 SWShellEnvironment class >> initializeInstanceSideTranspiler: transpiler [
 
 	transpiler
-		defineMethod: #localDirectory asReturn: FileLocator
+		defineMethod: #localDirectory as: [ :newT |
+			newT
+				specifyReturnTypeAs: FileLocator;
+				markAsDecoded;
+				bodyGenerator: [ :t |
+					t
+						put: 'return FileLocator.localDirectory()';
+						putStatementDelimiter;
+						cr
+				];
+				yourself
+		]
 ]
 
 { #category : #'code generation' }

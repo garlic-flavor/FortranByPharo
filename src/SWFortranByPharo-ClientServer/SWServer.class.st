@@ -18,7 +18,9 @@ SWServer class >> build [
 	<script>
 	|module|
 	module := SWMTofJS newFrom: self.
+"
 	module enableDebugMode.
+"
 	module transpile.
 	module contents inspect.
 
@@ -71,6 +73,12 @@ SWServer class >> put [
 { #category : #'as yet unclassified' }
 SWServer class >> relPathOf: path [
 	^ path relativeTo: SWShellEnvironment default localDirectory
+]
+
+{ #category : #'as yet unclassified' }
+SWServer class >> solveDependenciesUsing: transpiler [
+	transpiler
+		transpile: SWShellEnvironment
 ]
 
 { #category : #accessing }
