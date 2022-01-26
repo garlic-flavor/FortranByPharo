@@ -263,7 +263,7 @@ export class FileLocator {
   }
 }
 
-FileLocator.imageDirectory = function() {
+FileLocator.localDirectory = function() {
   return new FileLocator(process.cwd());
 }
 
