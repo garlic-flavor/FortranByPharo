@@ -38,7 +38,6 @@ SWMBTofJS >> putBlock: aBlock [
 		withoutMessageNestDo: [
 			self putSequence: aBlock body
 		];
-		cr;
 		decIndent;
 		put: '}';
 		preventStatementDelimiter
@@ -131,19 +130,19 @@ SWMBTofJS >> putIfFalse: aNode [
 SWMBTofJS >> putIfTrue: aNode [
 	self stream log.
 	
-	aNode lastIsReturn ifTrue: [
-		self
-			put: 'if(';
-			<< aNode receiver;
-			put: ')';
-			<< (aNode arguments at: 1)
-	] ifFalse: [
+	aNode isExpression ifTrue: [
 		self
 			put: '(';
 			<< aNode receiver;
 			put: ' ? ';
 			putBlockAsExpression: (aNode arguments at: 1);
 			put: ' : null)'
+	] ifFalse: [
+		self
+			put: 'if(';
+			<< aNode receiver;
+			put: ')';
+			putBlock: (aNode arguments at: 1)
 	]
 ]
 
@@ -278,12 +277,18 @@ SWMBTofJS >> put_inject_into_: aNode [
 { #category : #'as yet unclassified' }
 SWMBTofJS >> put_on_do_: aNode [
 
+	aNode isExpression ifTrue: [
+		self put: '(function(){'
+	].
 	self
-		put: 'function(){ try {'; cr;
-		incIndent;
-		withoutMessageNestDo: [
-			self putSequenceWithReturn: aNode receiver
-		];
+		put: 'try {'; cr;
+		incIndent.
+	aNode isExpression ifTrue: [
+		self putSequenceWithReturn: aNode receiver
+	] ifFalse: [
+		self putSequence: aNode receiver
+	].
+	self
 		decIndent;
 		put: '} catch'.
 	(aNode arguments at: 2) arguments ifNotEmpty: [
@@ -291,12 +296,18 @@ SWMBTofJS >> put_on_do_: aNode [
 	].
 	self
 		put: ' {'; cr;
-		incIndent;
-		withoutMessageNestDo: [
-			self putSequenceWithReturn: (aNode arguments at: 2)
-		];
+		incIndent.
+	aNode isExpression ifTrue: [
+		self putSequenceWithReturn: (aNode arguments at: 2)
+	] ifFalse: [
+		self putSequence: (aNode arguments at: 2)
+	].
+	self
 		decIndent;
-		put: '}}()'
+		put: '}'.
+	aNode isExpression ifTrue: [
+		self put: '})()'
+	]
 
 ]
 
@@ -304,7 +315,7 @@ SWMBTofJS >> put_on_do_: aNode [
 SWMBTofJS >> trySimpleCascade: aRBCascadeNode [
 
 	aRBCascadeNode receiver class = RBVariableNode ifFalse: [ ^ false ].
-	(aRBCascadeNode parent class ~= RBSequenceNode or: [ aRBCascadeNode parent isLast: aRBCascadeNode ]) ifTrue: [
+	aRBCascadeNode isExpression ifTrue: [
 		self put: '('.
 		aRBCascadeNode messages do: [ :each |
 			self << each

@@ -58,7 +58,7 @@ SWMBTofJSTest >> _07_opBinaries: a [
 
 { #category : #'as yet unclassified' }
 SWMBTofJSTest >> _08_try_catch [
-	[  
+	^ [  
 		Transcript show: 'hello'; cr
 	] on: Exception do: [ :e |
 		Transcript

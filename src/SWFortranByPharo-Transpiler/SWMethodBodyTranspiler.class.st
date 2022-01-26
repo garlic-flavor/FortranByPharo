@@ -468,21 +468,25 @@ SWMethodBodyTranspiler >> putSelfDefinition [
 
 { #category : #'code generation' }
 SWMethodBodyTranspiler >> putSequence: aSequence [
-	aSequence statements do: [ :each |
-		self putStatement: each
+	self withoutMessageNestDo: [
+		aSequence statements do: [ :each |
+			self putStatement: each
+		]
 	]
 ]
 
 { #category : #'code generation' }
 SWMethodBodyTranspiler >> putSequenceWithReturn: aSequence [
-	aSequence statements doWithIndex: [ :each :index |
-		(index < aSequence statements size or: [ each class = RBReturnNode ]) ifTrue: [
-			self putStatement: each
-		] ifFalse: [
-			self
-				putReturn: each;
-				putStatementDelimiter;
-				cr
+	self withoutMessageNestDo: [
+		aSequence statements doWithIndex: [ :each :index |
+			(index < aSequence statements size or: [ each class = RBReturnNode ]) ifTrue: [
+				self putStatement: each
+			] ifFalse: [
+				self
+					putReturn: each;
+					putStatementDelimiter;
+					cr
+			]
 		]
 	]
 ]
