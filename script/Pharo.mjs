@@ -110,17 +110,19 @@ class TestResult {
 class TestResultSummary {
   className = null;
   eachTest = null;
-  succeeded = 0;
-  failed = 0;
+  succeeded = null;
+  failed = null;
   constructor() {
     this.eachTest = [];
+    this.succeeded = [];
+    this.failed = [];
   }
   push(result) {
     this.eachTest.push(result);
     if(result.result) {
-      this.succeeded++;
+      this.succeeded.push(result);
     } else {
-      this.failed++;
+      this.failed.push(result);
     }
   }
 }
@@ -147,9 +149,10 @@ export class TestSuite {
 
   run() {
     var results = new TestResultSummary();
+    results.className = this.className;
     this.tests.forEach(function(element) {
       var result = new TestResult();
-      result.selectorName = element.testSelector;
+      result.selectorName = element._testSelector;
       result.run(function() {
         element.setUp();
         element[element._testSelector]();
@@ -241,8 +244,8 @@ export class FileLocator {
     return new FileLocator(path.dirname(this._payload));
   }
   ensureCreateDirectory() {
-    var dir = this.isDirectory ?
-      dir = this._payload : path.dirname(this._payload);
+    var dir = path.dirname(this._payload);
+
     if (!fs.existsSync(dir)) {
       fs.mkdirSync(dir, {recursive: true});
     }
@@ -262,14 +265,14 @@ export class FileLocator {
   children() {
     var self = this;
     return fs.readdirSync(this._payload).flatMap(function(name) {
-      return self.join(name);
+      return self.joinPath_(name);
     });
+  }
+  static localDirectory() {
+    return new FileLocator(process.cwd());
   }
 }
 
-FileLocator.localDirectory = function() {
-  return new FileLocator(process.cwd());
-}
 
 //-----------------------------------------------------------------------------
 Date.prototype.prettyPrint = function() {
@@ -309,7 +312,7 @@ export class Exception extends Error {}
 //-----------------------------------------------------------------------------
 if (process.env.NODE_ENV == 'test') {
 
-  var fl = FileLocator.imageDirectory();
+  var fl = FileLocator.localDirectory();
   console.log(fl.fullName());
   console.log(fl.isDirectory());
   console.log(fl.exists());
@@ -318,7 +321,7 @@ if (process.env.NODE_ENV == 'test') {
   console.log(fl.accessTime());
   console.log(fl.changeTime());
   console.log(fl.relativeTo_(new FileLocator('/bin')).fullName());
-  var fl2 = fl.join('hoge/fuga.txt');
+  var fl2 = fl.joinPath_('hoge/fuga.txt');
   console.log(fl2.fullName());
   console.log(fl.contains_(fl2));
   fl2.ensureCreateDirectory();
