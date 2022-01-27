@@ -93,3 +93,10 @@ SWShell class >> rb_requirements [
 	self error; flag: #toRemove.
 	^ { 'OSSUnixSubprocess.rb' }
 ]
+
+{ #category : #'as yet unclassified' }
+SWShell class >> solveDependenciesUsing: transpiler [
+	transpiler
+		transpile: SWShellEnvironment;
+		import: #(OSSUnixSubprocess) from: 'OSSUnixSubprocess'
+]

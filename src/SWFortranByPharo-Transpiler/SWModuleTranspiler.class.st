@@ -53,6 +53,14 @@ SWModuleTranspiler >> filename [
 	^ String streamContents: [ :s | self payload putFilenameOn: s ]
 ]
 
+{ #category : #'code generation' }
+SWModuleTranspiler >> import: anArray from: basename [
+	self payload
+		putImport: anArray from: basename;
+		putStatementDelimiter;
+		cr
+]
+
 { #category : #testing }
 SWModuleTranspiler >> isToTranspile: aClass [
 	|tClass|
@@ -131,12 +139,15 @@ SWModuleTranspiler >> transpile [
 
 { #category : #'code generation' }
 SWModuleTranspiler >> transpile: aClass [
-	|ct|
+	|ct solver|
 	ct := (self pool getClassTranspiler: aClass).
-	ct isTranspiled ifFalse: [
-		ct
-			stream: self stream;
-			transpile
-	]
+	ct isTranspiled ifTrue: [ ^ self ].
+
+	solver := #solveDependenciesUsing:.
+	ct stream: self stream.
+	(aClass instanceSide respondsTo: solver) ifTrue: [
+		aClass instanceSide perform: solver with: self
+	].
+	ct transpile.
 
 ]

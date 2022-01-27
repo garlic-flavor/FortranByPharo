@@ -272,12 +272,58 @@ SWMBTofJS >> put_asString: aNode [
 ]
 
 { #category : #'as yet unclassified' }
+SWMBTofJS >> put_beginsWith_: aNode [
+	self
+		withoutMessageNestDo: [
+			self << aNode receiver
+		];
+		putClassAccessor;
+		put: 'startsWith';
+		putArguments: aNode arguments
+]
+
+{ #category : #'as yet unclassified' }
+SWMBTofJS >> put_endsWith_: aNode [
+	self
+		withoutMessageNestDo: [
+			self << aNode receiver
+		];
+		putClassAccessor;
+		put: 'endsWith';
+		putArguments: aNode arguments
+]
+
+{ #category : #'as yet unclassified' }
+SWMBTofJS >> put_ensure_:aNode [
+	self
+		put: '(function(){ try {';
+		cr;
+		incIndent;
+		putSequenceWithReturn: aNode receiver;
+		decIndent;
+		put: '} finally';
+		putBlock: aNode arguments first;
+		put: '})()'
+]
+
+{ #category : #'as yet unclassified' }
 SWMBTofJS >> put_ifNil_: aNode [
 	self
 		put: '(function(_receiver_){ return (_receiver_ === null ) ? ';
 		putBlockAsExpression: aNode arguments first;
 		put: ' : _receiver_; })(';
 		<< aNode receiver;
+		put: ')'
+
+]
+
+{ #category : #'as yet unclassified' }
+SWMBTofJS >> put_ifNotNil_: aNode [
+	self
+		put: '((';
+		<< aNode receiver;
+		put: ' === null) ? null : ';
+		putBlockAsExpression: aNode arguments first;
 		put: ')'
 
 ]
@@ -329,6 +375,16 @@ SWMBTofJS >> put_on_do_: aNode [
 		self put: '})()'
 	]
 
+]
+
+{ #category : #'as yet unclassified' }
+SWMBTofJS >> put_upToEnd: aNode [
+	self
+		withoutMessageNestDo: [
+			self << aNode receiver
+		];
+		putClassAccessor;
+		put: 'read()'
 ]
 
 { #category : #'as yet unclassified' }

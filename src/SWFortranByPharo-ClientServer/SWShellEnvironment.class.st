@@ -42,11 +42,13 @@ SWShellEnvironment class >> initializeInstanceSideTranspiler: transpiler [
 
 { #category : #'code generation' }
 SWShellEnvironment class >> mjs_localDirectoryUsing: transpiler [
+	self error; flag: #toRemove.
 	transpiler put: 'return new FileLocator(process.cwd());'
 ]
 
 { #category : #'code generation' }
 SWShellEnvironment class >> mjs_requirements: transpiler [
+	self error; flag: #toRemove.
 	transpiler
 		putImportNative: #(PharoObject OSPlatform SWGFortranCompilerAdapter FileLocator)  from: 'Pharo.mjs'
 ]
@@ -67,6 +69,13 @@ SWShellEnvironment class >> newMacDefault [
 		exeFileExtension: #out;
 		objFileExtension: #o;
 		yourself.
+]
+
+{ #category : #'as yet unclassified' }
+SWShellEnvironment class >> solveDependenciesUsing: transpiler [
+	transpiler
+		transpile: SWGFortranCompilerAdapter;
+		import: #(OSPlatform FileLocator) from: 'Pharo'
 ]
 
 { #category : #accessing }

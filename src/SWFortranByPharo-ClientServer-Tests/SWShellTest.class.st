@@ -3,24 +3,32 @@ A SWShellTest is a test class for testing the behavior of SWShell
 "
 Class {
 	#name : #SWShellTest,
-	#superclass : #SWTestBase,
+	#superclass : #SWTestRunner,
 	#category : #'SWFortranByPharo-ClientServer-Tests'
 }
 
-{ #category : #'code generation' }
-SWShellTest class >> mjs_requirements: transpiler [
-	transpiler
-		putImportNative: 'FileLocator' from: 'Pharo.mjs';
-		putImportClass: SWTestBase;
-		putImportClass: SWShell
+{ #category : #running }
+SWShellTest class >> go [
+	<script>
+	super go
 ]
 
-{ #category : #accessing }
-SWShellTest class >> rb_requirements [
-	^ {
-		SWTestBase.
-		SWShell
-	}
+{ #category : #'as yet unclassified' }
+SWShellTest class >> moduleTranspilerClass [
+	^ SWMTofJS
+]
+
+{ #category : #'as yet unclassified' }
+SWShellTest class >> solveDependenciesUsing: transpiler [
+	super solveDependenciesUsing: transpiler.
+	transpiler
+		transpile: SWShell
+]
+
+{ #category : #building }
+SWShellTest class >> tryBuild [
+	<script>
+	super build inspect
 ]
 
 { #category : #tests }
@@ -29,24 +37,4 @@ SWShellTest >> testExecution [
 	|res|
 	res := SWShell execute: 'gfortran' arguments: #('--version').
 	self assert: [res beginsWith: 'GNU Fortran'].
-]
-
-{ #category : #tests }
-SWShellTest >> testLs [
-	|dict|
-	dict := SWShell ls: FileLocator imageDirectory.
-	self assert: [(dict at: #children) anySatisfy: [ :each |
-		(each at: #basename) = 'pharo-local'
-	]]
-
-]
-
-{ #category : #'code generation - tests' }
-SWShellTest >> testThis [
-	self
-		type: #mjs;
-		runAsClient: true;
-		usingPharoServer: true;
-		ready;
-		go.
 ]
