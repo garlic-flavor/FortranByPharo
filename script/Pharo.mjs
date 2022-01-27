@@ -81,19 +81,23 @@ class TestResult {
   selectorName = null;
   result = null;
   message = null;
+  redirectStdout = true;
+  
 
   run(proc) {
     var oldLog = console.log;
     var outer = this;
     this.message = "";
-    console.log = function(message){
-      outer.message = outer.message + message + "\r\n";
-    };
+    if (this.redirectStdout){
+      console.log = function(message){
+        outer.message = outer.message + message + "\r\n";
+      };
+    }
     try {
       proc();
     } catch (e) {
       this.result = false;
-      this.message = e.message;
+      console.log(e);
       return;
     } finally {
       console.log = oldLog;
@@ -148,7 +152,7 @@ export class TestSuite {
       result.selectorName = element.testSelector;
       result.run(function() {
         element.setUp();
-        element[element.testSelector]();
+        element[element._testSelector]();
         element.tearDown();
       });
       results.push(result);
