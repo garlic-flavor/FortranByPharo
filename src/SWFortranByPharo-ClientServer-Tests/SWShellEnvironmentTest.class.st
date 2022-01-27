@@ -25,7 +25,7 @@ SWShellEnvironmentTest class >> solveDependenciesUsing: transpiler [
 		transpile: SWShellEnvironment;
 		transpile: SWGFortranCompilerAdapter.
 	transpiler payload
-		putImport: #(OSPlatform) from: 'Pharo';
+		putImport: #(OSPlatform FileLocator) from: 'Pharo';
 		putStatementDelimiter;
 		cr.
 	
@@ -43,4 +43,9 @@ SWShellEnvironmentTest >> testExeFileExtension [
 	OSPlatform current isMacOS ifTrue: [
 		self assert: SWShellEnvironment default exeFileExtension equals: #out
 	].
+]
+
+{ #category : #tests }
+SWShellEnvironmentTest >> testLocalDirectory [
+	self assert: (SWShellEnvironment default localDirectory fullName endsWith: 'FortranByPharo')
 ]
