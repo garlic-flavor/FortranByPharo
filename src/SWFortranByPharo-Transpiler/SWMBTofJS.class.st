@@ -272,6 +272,17 @@ SWMBTofJS >> put_asString: aNode [
 ]
 
 { #category : #'as yet unclassified' }
+SWMBTofJS >> put_ifNil_: aNode [
+	self
+		put: '(function(_receiver_){ return (_receiver_ === null ) ? ';
+		putBlockAsExpression: aNode arguments first;
+		put: ' : _receiver_; })(';
+		<< aNode receiver;
+		put: ')'
+
+]
+
+{ #category : #'as yet unclassified' }
 SWMBTofJS >> put_inject_into_: aNode [
 	self
 		<< aNode receiver;

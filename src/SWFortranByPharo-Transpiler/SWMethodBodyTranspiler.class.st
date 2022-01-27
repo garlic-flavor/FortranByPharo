@@ -59,7 +59,7 @@ SWMethodBodyTranspiler >> bodyGenerator [
 		m := transpiler method.
 		transpiler stream log.
 		transpiler locals do: [ :each | self putVariableDeclarationOf: each ].
-		(m methodClass isInstanceSide and: [ m readsSelf ]) ifTrue: [
+		m methodClass isInstanceSide ifTrue: [
 			self putSelfDefinition
 		].
 		transpiler putSequence: m sourceNode body.
@@ -316,7 +316,7 @@ SWMethodBodyTranspiler >> putCode: code with: anAssociationArray [
 { #category : #'as yet unclassified' }
 SWMethodBodyTranspiler >> putFilenameOn: aStream [
 	aStream
-		<< method methodClass instanceSide name;
+		<< self receiverClass instanceSide name;
 		<< self selector asCamelCase
 ]
 
@@ -529,7 +529,7 @@ SWMethodBodyTranspiler >> putVariable: aVariableNode [
 		^ self putSelf
 	].
 	self getVariableInfoOf: aVariableNode name ifPresent: [ :vi |
-		(vi owner class includesBehavior: SWClass) ifTrue: [
+		(vi owner class inheritsFrom: SWClass) ifTrue: [
 			self
 				putSelf;
 				putClassAccessor;

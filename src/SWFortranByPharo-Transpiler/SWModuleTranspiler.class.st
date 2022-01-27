@@ -131,13 +131,12 @@ SWModuleTranspiler >> transpile [
 
 { #category : #'code generation' }
 SWModuleTranspiler >> transpile: aClass [
-	self pool detect: [ :each |
-		each targetClass = aClass
-	] ifFound: [ :each |
-		each isTranspiled ifFalse: [
-			each
-				stream: self stream;
-				transpile
-		]
-	] ifNone: [ self error ]
+	|ct|
+	ct := (self pool getClassTranspiler: aClass).
+	ct isTranspiled ifFalse: [
+		ct
+			stream: self stream;
+			transpile
+	]
+
 ]

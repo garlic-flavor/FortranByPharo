@@ -81,6 +81,7 @@ SWShell class >> lsr: path [
 
 { #category : #'code generation' }
 SWShell class >> mjs_requirements: transpiler [
+	self error; flag: #toRemove.
 	transpiler
 		putImportNative: {'PharoObject'. 'Dictionary'. 'FileLocator' } from: 'Pharo.mjs';
 		putImportNative: 'OSSUnixSubprocess' from: 'OSSUnixSubprocess.mjs';
@@ -89,5 +90,6 @@ SWShell class >> mjs_requirements: transpiler [
 
 { #category : #'code generation' }
 SWShell class >> rb_requirements [
+	self error; flag: #toRemove.
 	^ { 'OSSUnixSubprocess.rb' }
 ]

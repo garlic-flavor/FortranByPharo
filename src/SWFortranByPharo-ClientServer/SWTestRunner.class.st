@@ -38,7 +38,7 @@ SWTestRunner class >> initializeClassSideTranspiler: transpiler [
 
 { #category : #accessing }
 SWTestRunner class >> main [
-	SWStd import: #(PharoObject TestAsserter) from: 'Pharo'.
+	SWStd import: #(PharoObject TestAsserter TestSuite) from: 'Pharo'.
 	self runAllTests
 
 ]

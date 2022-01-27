@@ -21,7 +21,9 @@ SWShellEnvironmentTest class >> moduleTranspilerClass [
 { #category : #'as yet unclassified' }
 SWShellEnvironmentTest class >> solveDependenciesUsing: transpiler [
 	super solveDependenciesUsing: transpiler.
-	transpiler transpile: SWShellEnvironment.
+	transpiler
+		transpile: SWShellEnvironment;
+		transpile: SWGFortranCompilerAdapter.
 	transpiler payload
 		putImport: #(OSPlatform) from: 'Pharo';
 		putStatementDelimiter;
@@ -33,7 +35,7 @@ SWShellEnvironmentTest class >> solveDependenciesUsing: transpiler [
 { #category : #building }
 SWShellEnvironmentTest class >> tryBuild [
 	<script>
-	super build contents inspect
+	super build inspect
 ]
 
 { #category : #test }
