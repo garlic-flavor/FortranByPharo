@@ -15,6 +15,11 @@ SWSlot class >> elementClass [
 	^ SWVariableTypeInfo
 ]
 
+{ #category : #comparing }
+SWSlot >> = right [
+	^ self payload = right payload
+]
+
 { #category : #'instance creation' }
 SWSlot >> allocate: size [
 	[ self payload size < size ] whileTrue: [

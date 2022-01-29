@@ -3,7 +3,7 @@ SWStackAnalyzer forks decode process of SymbolicBytecodeBuilder to emulate stack
 "
 Class {
 	#name : #SWStackAnalyzer,
-	#superclass : #SWCompiledCodeInfo,
+	#superclass : #SWCompiledCode,
 	#instVars : [
 		'jumperStack',
 		'tempStore',
@@ -39,9 +39,14 @@ SWStackAnalyzer class >> initializeDefaultClassTranspiler: transpiler [
 "
 ]
 
+{ #category : #'as yet unclassified' }
+SWStackAnalyzer class >> poolClass [
+	^ SWPool
+]
+
 { #category : #private }
 SWStackAnalyzer >> addBytecode: description [
-	|item node args methodInfo beforeSize|
+	|item node operands sender beforeSize|
 	super addBytecode: description.
 
 	(self jumperStack nextPeriodIs: scanner pc) ifFalse: [ ^ self  ]. 
@@ -49,10 +54,10 @@ SWStackAnalyzer >> addBytecode: description [
 	"Below evaluates when ifTrue:ifFalse:."
 	item := self jumperStack pop.
 	node := self method sourceNodeForPC: item startPC.
-	args := self stack pop: self stack size - item stackSize + 1.
-	methodInfo := self pool getMethodTranspiler: node selector supered: false with: args.
-	self messages at: node put: methodInfo.
-	self stack push: methodInfo return.
+	operands := self stack pop: self stack size - item stackSize + 1.
+	sender := self pool newSenderOf: node selector super: false with: operands.
+	self senders at: node put: sender.
+	self stack push: sender return.
 
 ]
 
@@ -209,7 +214,6 @@ SWStackAnalyzer >> pool [
 	^ pool ifNil: [
 		pool := self class poolClass new
 			owner: self;
-			debugMode: self debugMode;
 			yourself
 	]
 ]
@@ -218,6 +222,7 @@ SWStackAnalyzer >> pool [
 SWStackAnalyzer >> pool: anObject [
 
 	pool := anObject
+
 ]
 
 { #category : #'instruction decoding' }
@@ -372,18 +377,23 @@ SWStackAnalyzer >> pushTemporaryVariable:  offset [
 
 { #category : #'instruction decoding' }
 SWStackAnalyzer >> send: selector super: supered numArgs: numberArguments [
-	|args methodInfo|
+	|operands sender|
 	self logger log: [ 'decode: ', selector ] withStack: self stack.
 
-	args := self stack pop: numberArguments + 1.
+	operands := self stack pop: numberArguments + 1.
+	sender := self pool newSenderOf: selector super: supered with: operands.
 
+	self senders at: (self method sourceNodeForPC: oldPC) put: sender.
+	self stack push: sender return.
+"
+	self error; flag: #toRewrite.
 	methodInfo := self pool getMethodTranspiler: selector supered: supered with: args.
 
 	self messages at: (self method sourceNodeForPC: oldPC) put: methodInfo.
 	self stack push: methodInfo return.
-
+"
 	"A special case for user specifying."
-	(selector = #declare:as: and: [ args first easyValue = SWType class ]) ifTrue: [|assoc|
+	(selector = #declare:as: and: [ operands first value = SWType class ]) ifTrue: [|assoc|
 		assoc := (self method sourceNodeForPC: oldPC) evaluate.
 		(assoc value)
 			owner: self;
@@ -396,6 +406,7 @@ SWStackAnalyzer >> send: selector super: supered numArgs: numberArguments [
 
 { #category : #accessing }
 SWStackAnalyzer >> senderGenerator: aCalleeGenerator [
+	self error; flag: #toRemove.
 ]
 
 { #category : #'instruction decoding' }

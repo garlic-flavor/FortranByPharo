@@ -6,8 +6,7 @@ Class {
 	#superclass : #Object,
 	#instVars : [
 		'payload',
-		'owner',
-		'debugMode'
+		'owner'
 	],
 	#category : #'SWFortranByPharo-Analyzer-Analyzer'
 }
@@ -31,13 +30,7 @@ SWPool >> classTranspilerClass [
 { #category : #accessing }
 SWPool >> debugMode [
 
-	^ debugMode
-]
-
-{ #category : #accessing }
-SWPool >> debugMode: anObject [
-
-	debugMode := anObject
+	^ self owner debugMode
 ]
 
 { #category : #'as yet unclassified' }
@@ -55,31 +48,72 @@ SWPool >> getClassTranspiler: aClass [
 	^ (aClass isClassSide ifTrue: [
 		(self getClassTranspiler: aClass instanceSide) classSide
 	] ifFalse: [
-		self payload at: aClass ifAbsentPut: [ self classTranspilerClass new ]
+		self payload at: aClass ifAbsentPut: [
+			self classTranspilerClass new
+				pool: self;
+				targetClass: aClass;
+				yourself
+		]
 	])
-		pool: self;
-		targetClass: aClass;
-		yourself
 
 ]
 
 { #category : #'instance creation' }
 SWPool >> getMethodTranspiler: aSelector supered: supered with: args [
-	|method callee methodClass|
+	self error; flag: #toRemove.
+"
+	|method sender methodClass|
 
 	method := self class search: aSelector
 		in: (supered ifTrue: [ args first value superclass ] ifFalse: [ args first value ]).
-
+	sender := SWSender new
+		selector: aSelector;
+		operands: args;
+		yourself.
+		
 	callee := SWCalleeInfo new: (method ifNotNil: [ method ] ifNil: [ aSelector ]) with: args.
 	methodClass := (method ifNotNil: [ method methodClass ] ifNil: [ UndefinedObject ] ).
 	^ (self getClassTranspiler: methodClass)
 		getMethodTranspiler: callee
+"
 
 ]
 
 { #category : #accessing }
 SWPool >> logger [
 	^ self owner logger
+]
+
+{ #category : #'as yet unclassified' }
+SWPool >> newSenderOf: aSelector super: supered with: args [
+	|method|
+	method := self class search: aSelector
+		in: (supered ifTrue: [ args first value superclass ] ifFalse: [ args first value ]).
+	^ method ifNil: [ 
+		self newUndefinedSenderOf: aSelector with: args
+	] ifNotNil: [
+		(self getClassTranspiler: method methodClass)
+			newSenderOf: method with: args
+	]
+"		
+	callee := SWCalleeInfo new: (method ifNotNil: [ method ] ifNil: [ aSelector ]) with: args.
+	methodClass := (method ifNotNil: [ method methodClass ] ifNil: [ UndefinedObject ] ).
+	^ (self getClassTranspiler: methodClass)
+		getMethodTranspiler: callee
+"
+
+]
+
+{ #category : #'instance creation' }
+SWPool >> newUndefinedSenderOf: aSelector with: args [
+	self logger log: [ 'An unknown method detected: ', aSelector ].
+	self halt.
+	^ self senderTranspilerClass new
+		selector: aSelector;
+		args: args;
+		return: SWVariableTypeInfo new;
+		yourself
+
 ]
 
 { #category : #accessing }
@@ -120,6 +154,12 @@ SWPool >> putOn: aStream [
 SWPool >> select: aNeedle thenDo: anIterator [
 self error; flag: #toRemove.
 	^ self payload values select: aNeedle thenDo: anIterator
+]
+
+{ #category : #accessing }
+SWPool >> senderTranspilerClass [
+
+	^ self owner class senderTranspilerClass
 ]
 
 { #category : #accessing }

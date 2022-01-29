@@ -13,7 +13,7 @@ Class {
 
 { #category : #accessing }
 SWTranspilerBaseOld class >> analyzerClass [
-	^ SWCompiledCodeInfo
+	^ SWCompiledCode
 ]
 
 { #category : #utils }

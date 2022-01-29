@@ -125,6 +125,7 @@ SWType >> = right [
 
 { #category : #accessing }
 SWType >> easyValue [
+	self error; flag: #toRemove.
 	^ self class exactTypePriority <= self priority ifTrue: [ self value ] ifFalse: [ nil ]
 ]
 

@@ -35,6 +35,8 @@ SWClass >> classSide: anObject [
 
 { #category : #api }
 SWClass >> defineMethod: aName as: initializer [
+self error; flag: #toRemove.
+
 	self generator at: aName put: [ :aCallee |
 		initializer value: (self transpilerClass newFrom: aCallee)
 	]
@@ -43,6 +45,8 @@ SWClass >> defineMethod: aName as: initializer [
 
 { #category : #api }
 SWClass >> defineMethod: aName asReturn: rType [
+self error; flag: #toRemove.
+
 	^ self defineMethod: aName as: [ :newT |
 		newT
 			specifyReturnTypeAs: rType;
@@ -54,16 +58,22 @@ SWClass >> defineMethod: aName asReturn: rType [
 
 { #category : #api }
 SWClass >> defineMethodAsBinaryOperator: aName [
-	^ self defineMethodAsBinaryOperator: aName as: [ :newT | newT ]
+
+	self generator at: aName put: [ :aSender |
+		aSender
+			return: aSender operands first;
+			yourself
+	]
 
 ]
 
 { #category : #api }
 SWClass >> defineMethodAsBinaryOperator: aName as: anInitializer [
-	self generator at: aName put: [ :aCallee |
-		anInitializer value: ((self transpilerClass newFrom: aCallee)
-			return: aCallee stack first;
-			markAsDecoded;
+self error; flag: #toRemove.
+
+	self generator at: aName put: [ :aSender |
+		anInitializer value: (aSender
+			return: aSender operands first;
 			yourself)
 	]
 
@@ -71,12 +81,18 @@ SWClass >> defineMethodAsBinaryOperator: aName as: anInitializer [
 
 { #category : #api }
 SWClass >> defineMethodAsCompareOperator: aName [
-	^ self defineMethodAsCompareOperator: aName as: [ :newT | newT ]
+	self generator at: aName put: [ :aSender |
+		aSender
+			specifyReturnTypeAs: Boolean;
+			yourself
+	]
 
 ]
 
 { #category : #api }
 SWClass >> defineMethodAsCompareOperator: aName as: anInitializer [
+self error; flag: #toRemove.
+
 	self generator at: aName put: [ :aCallee |
 		anInitializer value: ((self transpilerClass newFrom: aCallee)
 			specifyReturnTypeAs: Boolean;
@@ -88,12 +104,17 @@ SWClass >> defineMethodAsCompareOperator: aName as: anInitializer [
 
 { #category : #api }
 SWClass >> defineMethodReturnsFirstArgument: aName [
-	^ self defineMethodReturnsFirstArgument: aName as: [ :newT | newT ]
+	self generator at: aName put: [ :aSender |
+		aSender
+			return: aSender operands second;
+			yourself
+	]
 
 ]
 
 { #category : #api }
 SWClass >> defineMethodReturnsFirstArgument: aName as: anInitializer [
+self error; flag: #toRemove.
 	self generator at: aName put: [ :aCallee |
 		anInitializer value: ((self transpilerClass newFrom: aCallee)
 			return: (aCallee stack at: 1);
@@ -105,12 +126,20 @@ SWClass >> defineMethodReturnsFirstArgument: aName as: anInitializer [
 
 { #category : #api }
 SWClass >> defineMethodReturnsFirstOrSecondArgument: aName [
-	^ self defineMethodReturnsFirstOrSecondArgument: aName as: [ :newT | newT ]
+	self generator at: aName put: [ :aSender |
+		aSender
+			return: ((SWVariableTypeInfo new)
+				<< aSender operands second;
+				<< aSender operands third;
+				yourself);
+			yourself
+	]
 
 ]
 
 { #category : #api }
 SWClass >> defineMethodReturnsFirstOrSecondArgument: aName as: anInitializer [
+self error; flag: #toRemove.
 	self generator at: aName put: [ :aCallee |
 		anInitializer value: ((self transpilerClass newFrom: aCallee)
 		return: ((SWVariableTypeInfo new)
@@ -125,12 +154,17 @@ SWClass >> defineMethodReturnsFirstOrSecondArgument: aName as: anInitializer [
 
 { #category : #api }
 SWClass >> defineMethodReturnsReceiver: aName [
-	^ self defineMethodReturnsReceiver: aName as: [ :newT | newT ]
+	self generator at: aName put: [ :aSender |
+		aSender
+			return: aSender operands first;
+			yourself
+	]
 
 ]
 
 { #category : #api }
 SWClass >> defineMethodReturnsReceiver: aName as: anInitializer [
+self error; flag: #toRemove.
 	self generator at: aName put: [ :aCallee |
 		anInitializer value: ((self transpilerClass newFrom: aCallee)
 		return: aCallee stack first;
@@ -142,12 +176,14 @@ SWClass >> defineMethodReturnsReceiver: aName as: anInitializer [
 
 { #category : #api }
 SWClass >> defineMethodReturnsReceiversClass: aName [
+self error; flag: #toRemove.
 	^ self defineMethodReturnsReceiversClass: aName as: [ :newT | newT ]
 
 ]
 
 { #category : #api }
 SWClass >> defineMethodReturnsReceiversClass: aName as: anInitializer [
+self error; flag: #toRemove.
 	self generator at: aName put: [:aCallee |
 		anInitializer value: ((self transpilerClass newFrom: aCallee)
 			return: (SWVariableTypeInfo new: aCallee receiverClass classSide);
@@ -159,6 +195,7 @@ SWClass >> defineMethodReturnsReceiversClass: aName as: anInitializer [
 
 { #category : #api }
 SWClass >> defineMethodReturnsReceiversInstance: aName [
+self error; flag: #toRemove.
 	self generator at: aName put: [:aCallee |
 		(self transpilerClass newFrom: aCallee)
 			return: (SWVariableTypeInfo new: aCallee receiverClass instanceSide);
@@ -170,6 +207,7 @@ SWClass >> defineMethodReturnsReceiversInstance: aName [
 
 { #category : #api }
 SWClass >> defineMethodReturnsSecondArgument: aName [
+self error; flag: #toRemove.
 	self generator at: aName put: [ :aCallee |
 		(self transpilerClass newFrom: aCallee)
 			return: (aCallee stack at: 2);
@@ -181,6 +219,7 @@ SWClass >> defineMethodReturnsSecondArgument: aName [
 
 { #category : #api }
 SWClass >> defineTypeOf: aName is: aType [
+self error; flag: #toRemove.
 
 	(self getVariableInfoOf: aName) << aType
 
@@ -188,12 +227,21 @@ SWClass >> defineTypeOf: aName is: aType [
 
 { #category : #private }
 SWClass >> definedMethod: aCallee ifAbsent: absentBlock [
-
+self error; flag: #toRemove.
 	^ self generator at: aCallee selector ifPresent: [ :gen |
 		gen value: aCallee
 	] ifAbsent: [
 		absentBlock value
 	].
+
+]
+
+{ #category : #private }
+SWClass >> definedMethod: aSender ifPresent: presentBlock [
+self error; flag: #toRemove.
+	self generator at: aSender selector ifPresent: [ :gen |
+		presentBlock value: (gen value: aSender)
+	]
 
 ]
 
@@ -210,10 +258,62 @@ SWClass >> generator: anObject [
 ]
 
 { #category : #accessing }
+SWClass >> getMethodDecoderOf: aSender [
+self error; flag: #toRewrite.
+
+	self methods at: aSender ifAbsent: [ |newT|
+		newT := self definedMethod: aSender ifAbsent: [
+			(self transpilerClass newFrom: aSender)
+				classInfo: self;
+				pool: self pool;
+				yourself
+		]
+	]
+"	
+	detect: [ :one | one = aCalleeInfo ] ifNone: [|transpiler|
+		transpiler := self definedMethod: aCalleeInfo ifAbsent: [
+			(self transpilerClass newFrom: aCalleeInfo)
+				classInfo: self;
+				pool: self pool;
+				yourself.
+		].
+		self methods add: transpiler.
+		transpiler
+			logger: self pool logger;
+			decode;
+			yourself
+	].
+"
+
+]
+
+{ #category : #accessing }
+SWClass >> getMethodDecoderOf: aSelector with: args [
+	self error; flag: #toImplement
+"
+	^ self methods detect: [ :one | one = aCalleeInfo ] ifNone: [|transpiler|
+		transpiler := self definedMethod: aCalleeInfo ifAbsent: [
+			(self transpilerClass newFrom: aCalleeInfo)
+				classInfo: self;
+				pool: self pool;
+				yourself.
+		].
+		self methods add: transpiler.
+		transpiler
+			logger: self pool logger;
+			decode;
+			yourself
+	].
+"
+
+]
+
+{ #category : #accessing }
 SWClass >> getMethodTranspiler: aCalleeInfo [
 	"This returns a decoded transpiler.
 	The returned object is derived from SWCalleeInfo. 
 	but the returned object never equal to the instance of aCalleeInfo."
+self error; flag: #toRemove.
 
 	^ self methods detect: [ :one | one = aCalleeInfo ] ifNone: [|transpiler|
 		transpiler := self definedMethod: aCalleeInfo ifAbsent: [
@@ -251,16 +351,113 @@ SWClass >> getVariableInfoOf: aName ifPresent: aPresentBlock [
 
 ]
 
+{ #category : #initialization }
+SWClass >> initializeAs: aClass [
+	|initializer|
+	aClass ifNil: [ ^ self ].
+	self initializeAs: aClass superclass.
+
+	initializer := (String streamContents: [ :s |
+		s
+			<< 'initializeAs_';
+			<< aClass instanceSide name;
+			<< (aClass isClassSide ifTrue: [ 'Class' ] ifFalse: [ '' ])
+	]) asSymbol.
+
+	(self respondsTo: initializer) ifTrue: [
+		self perform: initializer
+	]
+
+
+]
+
+{ #category : #initialization }
+SWClass >> initializeAs_Boolean [
+	self
+		defineMethodReturnsFirstOrSecondArgument: #ifTrue:ifFalse:" as: [ :newT |
+			newT
+				senderGenerator: [ :t :node | t putIfTrueIfFalse: node ];
+				yourself
+		]";
+		defineMethodReturnsFirstArgument: #ifTrue:" as: [ :newT |
+			newT
+				senderGenerator: [ :t :node | t putIfTrue: node ];
+				yourself 
+		]";
+		defineMethodReturnsFirstArgument: #ifFalse:" as: [ :newT |
+			newT
+				senderGenerator: [ :t :node | t putIfFalse: node ];
+				yourself
+		]";
+		defineMethodReturnsReceiver: #and:;
+		defineMethodReturnsReceiver: #or:
+
+]
+
+{ #category : #initialization }
+SWClass >> initializeAs_Magnitude [
+	self
+		defineMethodAsCompareOperator: #>=;
+		defineMethodAsCompareOperator: #<=;
+		defineMethodAsCompareOperator: #>;
+		defineMethodAsCompareOperator: #<";
+		defineMethodAsCompareOperator: #="
+
+]
+
+{ #category : #initialization }
+SWClass >> initializeAs_Number [
+	self
+		defineMethodAsBinaryOperator: #+;
+		defineMethodAsBinaryOperator: #-;
+		defineMethodAsBinaryOperator: #*;
+		defineMethodAsBinaryOperator: #/
+		
+]
+
+{ #category : #initialization }
+SWClass >> initializeAs_Object [
+	self
+		defineMethodAsCompareOperator: #=
+
+]
+
 { #category : #accessing }
 SWClass >> methods [
 	"A Set object consists of referenced methods."
-	^ methods ifNil: [methods := Set new ]
+	^ methods ifNil: [methods := Dictionary new ]
 ]
 
 { #category : #accessing }
 SWClass >> methods: anObject [
 
 	methods := anObject
+]
+
+{ #category : #'instance creation' }
+SWClass >> newSenderOf: aMethod with: args [
+	|sender decoder|
+
+	sender := self senderTranspilerClass new
+		selector: aMethod selector;
+		operands: args;
+		yourself.
+	self methods associationAt: sender ifPresent: [ :assoc | ^ assoc key copy ].
+	self generator at: sender selector ifPresent: [ :gen ||newS|
+		newS := gen value: sender.
+		self methods at: newS put: nil.
+		^ newS copy
+	].
+	decoder := (self transpilerClass new: aMethod with: args)
+		classInfo: self;
+		pool: self pool;
+		logger: self pool logger;
+		yourself.
+	self methods at: sender put: decoder.
+	decoder decode.
+	sender return: decoder return.
+	^ sender copy
+
 ]
 
 { #category : #accessing }
@@ -278,6 +475,11 @@ SWClass >> pool: anObject [
 { #category : #streaming }
 SWClass >> putOn: aStream [
 	aStream << self targetClass name
+]
+
+{ #category : #accessing }
+SWClass >> senderTranspilerClass [
+	^ self pool senderTranspilerClass 
 ]
 
 { #category : #api }
@@ -319,14 +521,16 @@ SWClass >> targetClass [
 
 { #category : #accessing }
 SWClass >> targetClass: anObject [
-
-	|initializer|
 	targetClass := anObject.
+	self initializeAs: anObject
+	"
+	self error; flag: #toRemove.
 	initializer := targetClass isInstanceSide
 		ifTrue: [ #initializeInstanceSideTranspiler: ] ifFalse: [ #initializeClassSideTranspiler: ].
 	(targetClass instanceSide respondsTo: initializer) ifTrue: [
 		targetClass instanceSide perform: initializer with: self
 	]
+	"
 
 ]
 

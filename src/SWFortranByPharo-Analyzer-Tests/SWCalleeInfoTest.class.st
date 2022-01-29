@@ -10,6 +10,7 @@ Class {
 { #category : #tests }
 SWCalleeInfoTest >> testEquality [
 	|ci1 ci2|
+	self error; flag: #toRewrite.
 	ci1 := SWCalleeInfo new: SmallInteger>>#+ with: { SmallInteger. SmallInteger }.
 	ci2 := SWCalleeInfo new: SmallInteger>>#+ with: { SmallInteger. SmallInteger }.
 	self assert: ci1 equals: ci2.

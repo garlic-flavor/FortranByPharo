@@ -50,3 +50,22 @@ SWSlotTest >> testCopyFromTo [
 	self assert: copied size equals: 3.
 
 ]
+
+{ #category : #test }
+SWSlotTest >> testEqualsSign [
+	|s1 s2|
+	s1 := SWSlot new.
+	(s1 at: 1)
+		<< Integer.
+	(s1 at: 2)
+		<< String;
+		priority: SWType userSpecifyingPriority.
+
+	s2 := SWSlot new.
+	(s2 at: 1)	
+		<< Integer.
+	(s2 at: 2)
+		<< String.
+	self assert: s1 equals:  s2
+
+]

@@ -94,6 +94,11 @@ SWVariableTypeInfo >> hasProperty: aProperty [
 	^ self properties includes: aProperty
 ]
 
+{ #category : #comparing }
+SWVariableTypeInfo >> hash [
+	^ self type hash
+]
+
 { #category : #accessing }
 SWVariableTypeInfo >> name [
 	^ name
