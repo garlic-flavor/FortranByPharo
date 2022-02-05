@@ -54,7 +54,7 @@ SWStackAnalyzer >> addBytecode: description [
 	"Below evaluates when ifTrue:ifFalse:."
 	item := self jumperStack pop.
 	node := self method sourceNodeForPC: item startPC.
-	operands := self stack pop: self stack size - item stackSize + 1.
+	operands := self stack splitTop: self stack size - item stackSize + 1.
 	sender := self pool newSenderOf: node selector super: false with: operands.
 	self senders at: node put: sender.
 	self stack push: sender return.
@@ -88,7 +88,7 @@ SWStackAnalyzer >> callPrimitive: primNumber [
 { #category : #accessing }
 SWStackAnalyzer >> debugMode [
 
-	^ debugMode
+	^ debugMode ifNil: [ debugMode := false ]
 ]
 
 { #category : #accessing }
@@ -325,7 +325,7 @@ SWStackAnalyzer >> pushFullClosure: lit numCopied: numCopied receiverOnStack: rc
 	lit hasMethodReturn ifTrue: [
 		self return << mi return
 	].
-	self messages addAll: mi messages.
+	self senders addAll: mi senders.
 	self stack push: mi return.
 
 	super pushFullClosure: lit numCopied: numCopied  receiverOnStack: rcvr ignoreOuterContext: ignore 
@@ -380,7 +380,7 @@ SWStackAnalyzer >> send: selector super: supered numArgs: numberArguments [
 	|operands sender|
 	self logger log: [ 'decode: ', selector ] withStack: self stack.
 
-	operands := self stack pop: numberArguments + 1.
+	operands := self stack splitTop: numberArguments + 1.
 	sender := self pool newSenderOf: selector super: supered with: operands.
 
 	self senders at: (self method sourceNodeForPC: oldPC) put: sender.

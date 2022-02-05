@@ -24,7 +24,12 @@ Class {
 { #category : #accessing }
 SWClass >> classSide [
 
-	^ classSide ifNil: [ classSide := self class new ]
+	^ classSide ifNil: [
+		classSide := self class new
+			pool: self pool;
+			targetClass: self targetClass classSide;
+			yourself
+	]
 ]
 
 { #category : #accessing }
@@ -195,11 +200,9 @@ self error; flag: #toRemove.
 
 { #category : #api }
 SWClass >> defineMethodReturnsReceiversInstance: aName [
-self error; flag: #toRemove.
-	self generator at: aName put: [:aCallee |
-		(self transpilerClass newFrom: aCallee)
-			return: (SWVariableTypeInfo new: aCallee receiverClass instanceSide);
-			markAsDecoded;
+	self generator at: aName put: [:aSender |
+		aSender
+			return: aSender operands first value instanceSide;
 			yourself
 	]
 
@@ -372,6 +375,13 @@ SWClass >> initializeAs: aClass [
 ]
 
 { #category : #initialization }
+SWClass >> initializeAs_Behavior [
+	self
+		defineMethodReturnsReceiversInstance: #basicNew:;
+		defineMethodReturnsReceiversInstance: #basicNew
+]
+
+{ #category : #initialization }
 SWClass >> initializeAs_Boolean [
 	self
 		defineMethodReturnsFirstOrSecondArgument: #ifTrue:ifFalse:" as: [ :newT |
@@ -392,6 +402,12 @@ SWClass >> initializeAs_Boolean [
 		defineMethodReturnsReceiver: #and:;
 		defineMethodReturnsReceiver: #or:
 
+]
+
+{ #category : #initialization }
+SWClass >> initializeAs_CharacterClass [
+	self
+		defineMethodReturnsReceiversInstance: #cr
 ]
 
 { #category : #initialization }
@@ -418,8 +434,15 @@ SWClass >> initializeAs_Number [
 { #category : #initialization }
 SWClass >> initializeAs_Object [
 	self
-		defineMethodAsCompareOperator: #=
+		defineMethodAsCompareOperator: #=;
+		defineMethodReturnsReceiver: #error:
+]
 
+{ #category : #initialization }
+SWClass >> initializeAs_ProtoObject [
+	self
+		setBreakpointOn: #primitiveFailed;
+		defineMethodAsCompareOperator: #==
 ]
 
 { #category : #accessing }

@@ -44,6 +44,11 @@ SWSlot >> atOffset: offset [
 	^ self payload at: (offset + 1) ifAbsentPut: [ SWVariableTypeInfo new ].
 ]
 
+{ #category : #enumerating }
+SWSlot >> collect: anIterator [
+	^ self payload collect: anIterator
+]
+
 { #category : #copying }
 SWSlot >> copyFrom: start to: end [
 	self allocate: end.
@@ -75,6 +80,11 @@ SWSlot >> do: aBlock [
 	^ self payload do: aBlock
 ]
 
+{ #category : #enumerating }
+SWSlot >> doWithIndex: anIterator [
+	^ self payload doWithIndex: anIterator
+]
+
 { #category : #accessing }
 SWSlot >> first [
 	^ self payload first
@@ -98,8 +108,18 @@ SWSlot >> postCopy [
 ]
 
 { #category : #accessing }
+SWSlot >> second [
+	^ self at: 2
+]
+
+{ #category : #accessing }
 SWSlot >> size [
 	^ self payload size.
+]
+
+{ #category : #accessing }
+SWSlot >> third [
+	^ self at: 3
 ]
 
 { #category : #accessing }

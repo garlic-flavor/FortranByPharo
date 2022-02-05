@@ -54,3 +54,10 @@ SWStack >> push: anObject afterIndex: idx [
 	self error; flag: #toRemove.
 	^ self payload add: anObject afterIndex: (idx + 1)
 ]
+
+{ #category : #'as yet unclassified' }
+SWStack >> splitTop: num [
+	^ self class new
+		payload: (self pop: num);
+		yourself
+]

@@ -107,10 +107,10 @@ SWPool >> newSenderOf: aSelector super: supered with: args [
 { #category : #'instance creation' }
 SWPool >> newUndefinedSenderOf: aSelector with: args [
 	self logger log: [ 'An unknown method detected: ', aSelector ].
-	self halt.
+	self debugMode ifTrue: [ self halt ].
 	^ self senderTranspilerClass new
 		selector: aSelector;
-		args: args;
+		operands: args;
 		return: SWVariableTypeInfo new;
 		yourself
 
