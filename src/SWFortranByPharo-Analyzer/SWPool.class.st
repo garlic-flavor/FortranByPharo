@@ -93,7 +93,7 @@ SWPool >> logger [
 SWPool >> newSenderOf: aSelector super: supered with: args [
 	|method|
 	method := self class search: aSelector
-		in: (supered ifTrue: [ args first value superclass ] ifFalse: [ args first value ]).
+		in: (supered ifTrue: [ args receiver value superclass ] ifFalse: [ args receiver value ]).
 	^ method ifNil: [ 
 		self newUndefinedSenderOf: aSelector with: args
 	] ifNotNil: [

@@ -16,6 +16,32 @@ Class {
 	#category : #'SWFortranByPharo-ClientServer-Shell'
 }
 
+{ #category : #adding }
+SWShellEnvironment class >> addTranspilerTo: pool [
+	pool
+		addTranspilerOf: SWShellEnvironment initialize: [ :ct |
+			ct
+				defineMethod: #localDirectory asReturn: FileLocator
+		];
+		addTranspilerOf: SWShellEnvironment class initialize: [ :ct |
+			ct
+				defineMethodReturnsReceiversInstance: #default
+		];
+		addTranspilerOf: OSEnvironment class initialize: [ :ct |
+			ct
+				defineMethodReturnsReceiversInstance: #environmentFor:
+		];
+		addTranspilerOf: OSSUnixSubprocess initialize: [ :ct |
+			ct
+				defineMethodReturnsReceiver: #run;
+				defineMethodReturnsReceiver: #initialize;
+				defineMethodReturnsReceiver: #command:;
+				defineMethodReturnsReceiver: #arguments:;
+				defineMethod: #waitForExit asReturn: Integer;
+				defineMethod: #isSuccess asReturn: Boolean
+		]
+]
+
 { #category : #accessing }
 SWShellEnvironment class >> default [
 	^ default ifNil: [ default := self newDefault ]

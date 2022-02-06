@@ -75,6 +75,14 @@ SWStackAnalyzerTest >> _12_try_catch [
 	]
 ]
 
+{ #category : #'as yet unclassified' }
+SWStackAnalyzerTest >> _13_return_literal [
+	|dict url|
+	dict := Dictionary new.
+	dict at: 'fuga' put: (url ifNil: [ 'hoge' ]).
+	^ dict
+]
+
 { #category : #'private - utility' }
 SWStackAnalyzerTest >> inspectMy: arg1 withArguments: arg2 [
 
@@ -146,6 +154,15 @@ SWStackAnalyzerTest >> test_03 [
 ]
 
 { #category : #tests }
+SWStackAnalyzerTest >> test_03_decode [
+
+	self
+		inspectMy: #_03_ifTrue_ifFalse:
+		withArguments: { Integer }
+
+]
+
+{ #category : #tests }
 SWStackAnalyzerTest >> test_04 [
 
 	self
@@ -193,10 +210,11 @@ SWStackAnalyzerTest >> test_09_access_to_instance_variables [
 	|sa|
 	sa := SWStackAnalyzer new: [|satp|
 		satp := SWStackAnalyzerTestProgram new.
+		satp var1: 999.
 		satp var1
 	].
 	sa decode.
-	sa inspect.
+	self assert: sa return value equals: SmallInteger
 ]
 
 { #category : #tests }
@@ -209,11 +227,21 @@ SWStackAnalyzerTest >> test_10_new [
 SWStackAnalyzerTest >> test_11_ZnServer [
 	|sa|
 	sa := SWStackAnalyzer new: SWServer>>#startOn: with: { SWServer. SmallInteger }.
+	SWServer addTranspilerTo: sa pool.
+"
+	sa debugMode: true.
+"
 	sa decode.
-	sa inspect.
+	self assert: sa return value equals: SWServer.
+
 ]
 
 { #category : #tests }
 SWStackAnalyzerTest >> test_12_decode [
 	self inspectMy: #_12_try_catch withArguments: {  }
+]
+
+{ #category : #tests }
+SWStackAnalyzerTest >> test_13 [
+	self inspectMy: #_13_return_literal withArguments: {  }
 ]

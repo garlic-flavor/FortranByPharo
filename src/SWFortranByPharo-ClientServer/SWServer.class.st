@@ -15,6 +15,7 @@ Class {
 
 { #category : #adding }
 SWServer class >> addTranspilerTo: pool [
+	SWShellEnvironment addTranspilerTo: pool.
 	pool
 		addTranspilerOf: ZnServer initialize: [ :ct |
 			ct
@@ -28,6 +29,71 @@ SWServer class >> addTranspilerTo: pool [
 		addTranspilerOf: ZnManagingMultiThreadedServer initialize: [ :ct |
 			ct
 				defineMethodReturnsReceiver: #closeConnections
+		];
+		addTranspilerOf: ZnCurrentOptions class initialize: [ :ct |
+			ct
+				defineMethod: #at: asReturn: String
+		];
+		addTranspilerOf: ZnHeaders initialize: [ :ct |
+			ct
+				defineMethodReturnsSecondArgument: #at:put:
+		];
+		addTranspilerOf: ZnHeaders class initialize: [ :ct |
+			ct
+				defineMethodReturnsReceiversClass: #defaultResponseHeaders
+		];
+		addTranspilerOf: ZnEntity initialize: [ :ct |
+			ct
+				defineMethod: #contents asReturn: String
+		];
+		addTranspilerOf: ZnEntity class initialize: [ :ct |
+			ct
+				defineMethodReturnsReceiversInstance: #type:
+		];
+		addTranspilerOf: ProcessSpecificVariable class initialize: [ :ct |
+			ct
+				defineMethodReturnsReceiversInstance: #new
+		];
+		addTranspilerOf: ZnCharacterEncoder class initialize: [ :ct |
+			ct
+				defineMethodReturnsReceiversInstance: #newForEncoding:
+		];
+		addTranspilerOf: ZnUtils class initialize: [ :ct |
+			ct
+				defineMethod: #isCapitalizedString: asReturn: Boolean;
+				defineMethod: #capitalizeString: asReturn: String
+		];
+		addTranspilerOf: STONWriter initialize: [ :ct |
+			ct
+				defineMethodReturnsReceiver: #jsonMode:
+		];
+		addTranspilerOf: ZnWebSocket initialize: [ :ct |
+			ct
+				defineMethodReturnsReceiver: #sendMessage:
+		];
+		addTranspilerOf: ZnRequest initialize: [ :ct |
+			ct
+				defineMethod: #uri asReturn: ZnUrl;
+				defineMethod: #requestLine asReturn: ZnRequestLine
+		];
+		addTranspilerOf: ZnMessage initialize: [ :ct |
+			ct
+				defineMethod: #entity asReturn: ZnEntity;
+				defineMethodReturnsReceiver: #entity:
+		];
+		addTranspilerOf: ZnUrl initialize: [ :ct |
+			ct
+				defineMethodReturnsSecondArgumentsElement: #queryAt:ifAbsent:
+		];
+		addTranspilerOf: ZnResponse class initialize: [ :ct |
+			ct
+				defineMethodReturnsReceiversInstance: #statusLine:;
+				defineMethodReturnsReceiversInstance: #notFound:;
+				defineMethodReturnsReceiversInstance: #badRequest:
+		];
+		addTranspilerOf: SWWebSocket initialize: [ :ct |
+			ct
+				defineMethod: #uri asReturn: ZnUrl
 		]
 ]
 
@@ -144,6 +210,8 @@ SWServer >> execute: webSocket [
 
 { #category : #responses }
 SWServer >> get: target [
+	self error; flag: #toRewrite.
+"
 	^ target exists ifTrue: [
 		target isDirectory ifTrue: [ |writer|
 			writer := XMLWriter new.
@@ -172,6 +240,7 @@ SWServer >> get: target [
 	] ifFalse: [ 
 		ZnResponse notFound: (self class relPathOf: target) fullName asZnUrl
 	]
+"
 "
 	session instruction target = FileLocator imageDirectory ifTrue: [
 		#(script src obj exe) do: [ :each |
@@ -250,6 +319,7 @@ SWServer >> put: target contents: contents [
 	|res|
 	target parent ensureCreateDirectory.
 	target writeStreamDo: [ :writer |
+		SWType declare: #writer as: BinaryFileStream.
 		writer 
 			position: 0;
 			truncate;

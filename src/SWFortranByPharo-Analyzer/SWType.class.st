@@ -120,6 +120,7 @@ SWType >> << rightType [
 
 { #category : #comparing }
 SWType >> = right [
+	self class = right class ifFalse: [ ^ false ].
 	^ self payload = right payload
 ]
 
@@ -132,6 +133,11 @@ SWType >> easyValue [
 { #category : #comparing }
 SWType >> hash [
 	^ self payload hash
+]
+
+{ #category : #testing }
+SWType >> isContainer [
+	^ false
 ]
 
 { #category : #accessing }

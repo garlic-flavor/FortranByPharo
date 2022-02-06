@@ -87,6 +87,7 @@ SWSlot >> doWithIndex: anIterator [
 
 { #category : #accessing }
 SWSlot >> first [
+self halt.
 	^ self at: 1
 ]
 
@@ -121,6 +122,11 @@ SWSlot >> putOn: aStream [
 		aStream << ', '
 	].
 	aStream << ')'
+]
+
+{ #category : #accessing }
+SWSlot >> receiver [
+	^ self at: 1
 ]
 
 { #category : #accessing }

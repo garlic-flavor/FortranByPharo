@@ -58,12 +58,22 @@ SWVariableTypeInfo class >> new: aType with: aPriority owner: anOwner pc: oldPC 
 { #category : #'accumulator ops' }
 SWVariableTypeInfo >> << rightObject [
 	(rightObject class includesBehavior: SWVariableTypeInfo) ifTrue: [
-		self type << rightObject type.
+		self priority < rightObject priority ifFalse: [ ^ rightObject ].
+		self type: rightObject type.
 		self properties addAll: rightObject properties.
-		self assignCounter add: rightObject
-	] ifFalse: [
-		self type << rightObject
-	]
+		self assignCounter add: rightObject.
+		^ rightObject
+	].
+
+	(rightObject class includesBehavior: SWType) ifTrue: [
+		self type priority < rightObject priority ifTrue: [
+			self type: rightObject
+		].
+		^ rightObject
+	].
+
+	self type << rightObject.
+	^ rightObject
 
 ]
 

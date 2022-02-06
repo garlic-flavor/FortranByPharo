@@ -192,6 +192,7 @@ SWServerStatus >> socket: anObject [
 
 { #category : #'ston persistence' }
 SWServerStatus >> stonOn: stonWriter [
+	self flag: #toFix.
 	^ STON mapClass new
 		at: 'code' put: self code asString;
 		at: 'message' put: self message;

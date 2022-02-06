@@ -44,6 +44,34 @@ SWStack >> pop: itemsCount [
 	^ arr
 ]
 
+{ #category : #'as yet unclassified' }
+SWStack >> popSlotForClosure: numArgs [
+	|args|
+	args := OrderedCollection new: numArgs + 1.
+	args add: self receiver.
+	args addAll: (self pop: numArgs).
+	^ SWSlot new
+		payload: args;
+		yourself
+	
+]
+
+{ #category : #'as yet unclassified' }
+SWStack >> popSlotForJumper: num [
+	^ SWSlot new
+		payload: ((self pop: num + 1)
+			addFirst: (SWVariableTypeInfo new: Boolean);
+			yourself);
+		yourself
+]
+
+{ #category : #'as yet unclassified' }
+SWStack >> popSlotForSender: num [
+	^ SWSlot new
+		payload: (self pop: num + 1);
+		yourself
+]
+
 { #category : #adding }
 SWStack >> push: anObject [
 	^ self payload addLast: anObject.
@@ -58,11 +86,4 @@ SWStack >> push: anObject afterIndex: idx [
 { #category : #accessing }
 SWStack >> receiver [
 	^ self at: 0
-]
-
-{ #category : #'as yet unclassified' }
-SWStack >> splitTop: num [
-	^ SWSlot new
-		payload: (self pop: num);
-		yourself
 ]

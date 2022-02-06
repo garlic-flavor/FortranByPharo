@@ -40,10 +40,8 @@ SWClass >> classSide: anObject [
 
 { #category : #api }
 SWClass >> defineMethod: aName as: initializer [
-self error; flag: #toRemove.
-
-	self generator at: aName put: [ :aCallee |
-		initializer value: (self transpilerClass newFrom: aCallee)
+	self generator at: aName put: [ :aSender |
+		initializer cull: aSender
 	]
 
 ]
@@ -63,7 +61,7 @@ SWClass >> defineMethodAsBinaryOperator: aName [
 
 	self generator at: aName put: [ :aSender |
 		aSender
-			return: aSender operands first;
+			return: aSender operands receiver;
 			yourself
 	]
 
@@ -127,6 +125,16 @@ self error; flag: #toRemove.
 ]
 
 { #category : #api }
+SWClass >> defineMethodReturnsFirstArgumentsElement: aName [
+	self generator at: aName put: [ :aSender |
+		aSender
+			return: aSender operands second type elementType;
+			yourself
+	]
+
+]
+
+{ #category : #api }
 SWClass >> defineMethodReturnsFirstOrSecondArgument: aName [
 	self generator at: aName put: [ :aSender |
 		aSender
@@ -158,7 +166,7 @@ self error; flag: #toRemove.
 SWClass >> defineMethodReturnsReceiver: aName [
 	self generator at: aName put: [ :aSender |
 		aSender
-			return: aSender operands first;
+			return: aSender operands receiver;
 			yourself
 	]
 
@@ -180,7 +188,7 @@ self error; flag: #toRemove.
 SWClass >> defineMethodReturnsReceiversClass: aName [
 	self generator at: aName put: [ :aSender |
 		aSender
-			specifyReturnTypeAs: aSender operands first value classSide;
+			specifyReturnTypeAs: aSender operands receiver value classSide;
 			yourself
 	]
 
@@ -199,10 +207,20 @@ self error; flag: #toRemove.
 ]
 
 { #category : #api }
+SWClass >> defineMethodReturnsReceiversElement: aName [
+	self generator at: aName put: [ :aSender |
+		aSender
+			return: aSender operands receiver type elementType;
+			yourself
+	]
+
+]
+
+{ #category : #api }
 SWClass >> defineMethodReturnsReceiversInstance: aName [
 	self generator at: aName put: [:aSender |
 		aSender
-			specifyReturnTypeAs: aSender operands first value instanceSide;
+			specifyReturnTypeAs: aSender operands receiver value instanceSide;
 			yourself
 	]
 
@@ -213,6 +231,16 @@ SWClass >> defineMethodReturnsSecondArgument: aName [
 	self generator at: aName put: [ :aSender |
 		aSender
 			return: aSender operands third;
+			yourself
+	]
+
+]
+
+{ #category : #api }
+SWClass >> defineMethodReturnsSecondArgumentsElement: aName [
+	self generator at: aName put: [ :aSender |
+		aSender
+			return: aSender operands third type elementType;
 			yourself
 	]
 
@@ -373,10 +401,43 @@ SWClass >> initialize: aClass [
 ]
 
 { #category : #initialization }
+SWClass >> initialize_AbstractBinaryFileStream [
+	self
+		defineMethodReturnsReceiver: #position:
+]
+
+{ #category : #initialization }
+SWClass >> initialize_AbstractFileReference [
+	self
+		defineMethodReturnsReceiver: #joinPath:;
+		defineMethod: #contains: asReturn: Boolean;
+		defineMethod: #exists asReturn: Boolean;
+		defineMethodReturnsReceiver: #resolve;
+		defineMethodReturnsReceiver: #relativeTo:;
+		defineMethod: #fullName asReturn: String;
+		defineMethod: #contents asReturn: String;
+		defineMethodReturnsReceiver: #parent;
+		defineMethodReturnsFirstArgumentsElement: #writeStreamDo:
+]
+
+{ #category : #initialization }
 SWClass >> initialize_Behavior [
 	self
 		defineMethodReturnsReceiversInstance: #basicNew:;
 		defineMethodReturnsReceiversInstance: #basicNew
+]
+
+{ #category : #initialization }
+SWClass >> initialize_BinaryFileStream [
+	self
+		defineMethodReturnsReceiver: #truncate:
+]
+
+{ #category : #initialization }
+SWClass >> initialize_BlockClosure [
+	self
+		defineMethodReturnsReceiversElement: #on:do:;
+		defineMethodReturnsReceiversElement: #ensure:
 ]
 
 { #category : #initialization }
@@ -403,16 +464,44 @@ SWClass >> initialize_Boolean [
 ]
 
 { #category : #initialization }
+SWClass >> initialize_Character [
+	self
+		defineMethod: #asInteger asReturn: Integer
+]
+
+{ #category : #initialization }
 SWClass >> initialize_CharacterClass [
 	self
-		defineMethodReturnsReceiversInstance: #cr
+		defineMethodReturnsReceiversInstance: #value:
+]
+
+{ #category : #initialization }
+SWClass >> initialize_Collection [
+	self
+		defineMethodReturnsSecondArgument: #detect:ifNone:;
+		defineMethodReturnsFirstArgument: #inject:into:
+]
+
+{ #category : #initialization }
+SWClass >> initialize_DateAndTimeClass [
+	self
+		defineMethodReturnsReceiversClass: #now
 ]
 
 { #category : #initialization }
 SWClass >> initialize_Dictionary [
 	self
 		defineMethodReturnsSecondArgument: #at:put:;
-		defineMethodReturnsSecondArgument: #at:ifAbsent:
+		defineMethodReturnsSecondArgumentsElement: #at:ifAbsent:;
+		defineMethodReturnsSecondArgumentsElement: #at:ifAbsentPut:;
+		defineMethod: #includesKey: asReturn: Boolean;
+		defineMethodReturnsReceiver: #stonOn:
+]
+
+{ #category : #initialization }
+SWClass >> initialize_Exception [
+	self
+		defineMethodReturnsReceiver: #signal
 ]
 
 { #category : #initialization }
@@ -440,7 +529,19 @@ SWClass >> initialize_Number [
 SWClass >> initialize_Object [
 	self
 		defineMethodAsCompareOperator: #=;
-		defineMethodReturnsReceiver: #error:
+		defineMethodReturnsReceiver: #error:;
+		setBreakpointOn: #subclassResponsibility;
+		defineMethod: #printString asReturn: String;
+		defineMethod: #size asReturn: Integer;
+		defineMethod: #asString asReturn: String;
+		defineMethodReturnsFirstArgument: #at:put:;
+		defineMethodReturnsReceiver: #putOn:
+]
+
+{ #category : #initialization }
+SWClass >> initialize_OrderedDictionary [
+	self
+		defineMethodReturnsReceiver: #initialize:
 ]
 
 { #category : #initialization }
@@ -453,16 +554,77 @@ SWClass >> initialize_ProtoObject [
 ]
 
 { #category : #initialization }
+SWClass >> initialize_SWStdClass [
+	self
+		setBreakpointOn: #haltOnDecoding
+]
+
+{ #category : #initialization }
+SWClass >> initialize_SWTypeClass [
+	self
+		defineMethod: #declare:as: asReturn: Association
+]
+
+{ #category : #initialization }
 SWClass >> initialize_Semaphore [
 	self
+		defineMethodReturnsReceiver: #wait;
 		defineMethodReturnsReceiver: #signal
+]
+
+{ #category : #initialization }
+SWClass >> initialize_SequenceableCollection [
+	self
+		defineMethodReturnsReceiver: #,;
+		defineMethodReturnsReceiver: #collect:;
+		defineMethod: #indexOf:startingAt:ifAbsent: asReturn: Integer
+]
+
+{ #category : #initialization }
+SWClass >> initialize_SequenceableCollectionClass [
+	self
+		defineMethodReturnsReceiversInstance: #streamContents:
+
 ]
 
 { #category : #initialization }
 SWClass >> initialize_Set [
 	self
 		defineMethodReturnsFirstOrSecondArgument: #remove:ifAbsent:;
-		defineMethodReturnsFirstArgument: #add:
+		defineMethodReturnsFirstArgument: #add:;
+		defineMethod: #includes: asReturn: Boolean
+]
+
+{ #category : #initialization }
+SWClass >> initialize_SmallDictionary [
+	self
+		defineMethodReturnsSecondArgument: #at:put:;
+		defineMethodReturnsSecondArgument: #at:ifAbsent:;
+		defineMethod: #includesKey: asReturn: Boolean
+]
+
+{ #category : #initialization }
+SWClass >> initialize_String [
+	self
+		defineMethodReturnsReceiver: #trimLeft:right:;
+		defineMethodReturnsReceiver: #asLowercase;
+		defineMethod: #asZnUrl asReturn: ZnUrl
+]
+
+{ #category : #initialization }
+SWClass >> initialize_StringClass [
+	self
+		defineMethodReturnsReceiversInstance: #crlf;
+		defineMethodReturnsReceiversInstance: #with:
+]
+
+{ #category : #initialization }
+SWClass >> initialize_ThreadSafeTranscript [
+	self
+		defineMethodReturnsFirstArgument: #nextPutAll:;
+		defineMethodReturnsFirstArgument: #nextPut:;
+		defineMethodReturnsReceiver: #endEntry;
+		defineMethodReturnsFirstArgument: #critical:
 ]
 
 { #category : #accessing }

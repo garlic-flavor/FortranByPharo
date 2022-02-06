@@ -17,6 +17,10 @@ SWStd class >> f90_print_With: arguments Using: transpiler [
 ]
 
 { #category : #'as yet unclassified' }
+SWStd class >> haltOnDecoding [
+]
+
+{ #category : #'as yet unclassified' }
 SWStd class >> haltOnTranspiling [
 ]
 

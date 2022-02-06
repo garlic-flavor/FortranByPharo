@@ -47,14 +47,16 @@ SWStackAnalyzer class >> poolClass [
 { #category : #private }
 SWStackAnalyzer >> addBytecode: description [
 	|item node operands sender beforeSize|
+	self logger log: [ String streamContents: [ :s |
+		s << '[' print: oldPC; << '] '; << description
+	] ] withStack: self stack.
 	super addBytecode: description.
 
 	(self jumperStack nextPeriodIs: scanner pc) ifFalse: [ ^ self  ]. 
-
 	"Below evaluates when ifTrue:ifFalse:."
 	item := self jumperStack pop.
 	node := self method sourceNodeForPC: item startPC.
-	operands := self stack splitTop: self stack size - item stackSize + 1.
+	operands := self stack popSlotForJumper: self stack size - item stackSize.
 	sender := self pool newSenderOf: node selector super: false with: operands.
 	self senders at: node put: sender.
 	self stack push: sender return.
@@ -140,7 +142,8 @@ SWStackAnalyzer >> jump: offset [
 SWStackAnalyzer >> jump: offset if: condition [
 
 	self jumperStack pushAt: oldPC period: scanner pc + offset size: self stack size.
-
+	self stack pop.
+	
 	super jump: offset if: condition.
 
 ]
@@ -310,24 +313,23 @@ SWStackAnalyzer >> pushConstant: obj [
 
 { #category : #'instruction decoding' }
 SWStackAnalyzer >> pushFullClosure: lit numCopied: numCopied receiverOnStack: rcvr ignoreOuterContext: ignore [
-	|args mi|
+	|mi ret|
 
 	rcvr ifTrue: [ self error ].
 	ignore ifTrue: [ self error ].
 
-	args := OrderedCollection new: numCopied + 1.
-	args add: self stack receiver.
-	args addAll: (self stack pop: numCopied).
-
 	"I only interest in type information on the stack.
 	So, I decode a closure before invoking. it's ok."
-	mi := self newFullClosure: lit with: args.
+	mi := self newFullClosure: lit with: (self stack popSlotForClosure: numCopied).
 	mi decode.
+	ret := (SWContainerType new: BlockClosure)
+		elementType: mi return value;
+		yourself.
 	lit hasMethodReturn ifTrue: [
-		self return << mi return
+		self return << ret
 	].
 	self senders addAll: mi senders.
-	self stack push: mi return.
+	self stack push: (SWVariableTypeInfo new: ret).
 
 	super pushFullClosure: lit numCopied: numCopied  receiverOnStack: rcvr ignoreOuterContext: ignore 
 ]
@@ -381,7 +383,7 @@ SWStackAnalyzer >> send: selector super: supered numArgs: numberArguments [
 	|operands sender|
 	self logger log: [ 'decode: ', selector ] withStack: self stack.
 
-	operands := self stack splitTop: numberArguments + 1.
+	operands := self stack popSlotForSender: numberArguments.
 
 	sender := self pool newSenderOf: selector super: supered with: operands.
 
@@ -395,7 +397,7 @@ SWStackAnalyzer >> send: selector super: supered numArgs: numberArguments [
 	self stack push: methodInfo return.
 "
 	"A special case for user specifying."
-	(selector = #declare:as: and: [ operands first value = SWType class ]) ifTrue: [|assoc|
+	(selector = #declare:as: and: [ operands receiver value = SWType class ]) ifTrue: [|assoc|
 		assoc := (self method sourceNodeForPC: oldPC) evaluate.
 		(assoc value)
 			owner: self;
