@@ -21,6 +21,11 @@ SWPool class >> search: selector in: aClass [
 
 ]
 
+{ #category : #adding }
+SWPool >> addTranspilerOf: aClass initialize: anInitializer [
+	anInitializer cull: (self getClassTranspiler: aClass)
+]
+
 { #category : #accessing }
 SWPool >> classTranspilerClass [
 

@@ -55,9 +55,14 @@ SWStack >> push: anObject afterIndex: idx [
 	^ self payload add: anObject afterIndex: (idx + 1)
 ]
 
+{ #category : #accessing }
+SWStack >> receiver [
+	^ self at: 0
+]
+
 { #category : #'as yet unclassified' }
 SWStack >> splitTop: num [
-	^ self class new
+	^ SWSlot new
 		payload: (self pop: num);
 		yourself
 ]

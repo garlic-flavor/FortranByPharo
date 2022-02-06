@@ -13,6 +13,24 @@ Class {
 	#category : #'SWFortranByPharo-ClientServer-Server'
 }
 
+{ #category : #adding }
+SWServer class >> addTranspilerTo: pool [
+	pool
+		addTranspilerOf: ZnServer initialize: [ :ct |
+			ct
+				defineMethodReturnsSecondArgument: #optionAt:ifAbsent:
+		];
+		addTranspilerOf: ZnSingleThreadedServer initialize: [ :ct |
+			ct
+				defineMethodReturnsReceiver: #stop:;
+				defineMethodReturnsReceiver: #start
+		];
+		addTranspilerOf: ZnManagingMultiThreadedServer initialize: [ :ct |
+			ct
+				defineMethodReturnsReceiver: #closeConnections
+		]
+]
+
 { #category : #accessing }
 SWServer class >> build [
 	<script>

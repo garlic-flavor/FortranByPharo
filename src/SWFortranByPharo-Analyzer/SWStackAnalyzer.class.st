@@ -314,10 +314,11 @@ SWStackAnalyzer >> pushFullClosure: lit numCopied: numCopied receiverOnStack: rc
 
 	rcvr ifTrue: [ self error ].
 	ignore ifTrue: [ self error ].
+
 	args := OrderedCollection new: numCopied + 1.
-	args add: self stack first.
+	args add: self stack receiver.
 	args addAll: (self stack pop: numCopied).
-	
+
 	"I only interest in type information on the stack.
 	So, I decode a closure before invoking. it's ok."
 	mi := self newFullClosure: lit with: args.
@@ -381,6 +382,7 @@ SWStackAnalyzer >> send: selector super: supered numArgs: numberArguments [
 	self logger log: [ 'decode: ', selector ] withStack: self stack.
 
 	operands := self stack splitTop: numberArguments + 1.
+
 	sender := self pool newSenderOf: selector super: supered with: operands.
 
 	self senders at: (self method sourceNodeForPC: oldPC) put: sender.
@@ -411,8 +413,9 @@ SWStackAnalyzer >> senderGenerator: aCalleeGenerator [
 
 { #category : #'instruction decoding' }
 SWStackAnalyzer >> storeIntoLiteralVariable: anAssociation [
-self halt.
-	(self getVariableInfoOf: anAssociation key) << self stack top.
+	self getVariableInfoOf: anAssociation key ifPresent: [ :vi |
+		vi << self stack top
+	].
 	super storeIntoLiteralVariable: anAssociation
 ]
 

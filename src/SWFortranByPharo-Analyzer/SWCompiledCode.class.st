@@ -78,14 +78,6 @@ SWCompiledCode class >> senderTranspilerClass [
 	^ SWSender
 ]
 
-{ #category : #comparing }
-SWCompiledCode >> = right [
-	self error; flag: #toRemove.
-	self method = right method ifFalse: [ ^ false ].
-	self operands = right operands ifFalse: [ ^ false ].
-	^ true
-]
-
 { #category : #adding }
 SWCompiledCode >> addLocalVariable: aVariableInfo [
 	self error; flag: #toRemove.

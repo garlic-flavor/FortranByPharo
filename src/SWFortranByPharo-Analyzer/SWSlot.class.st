@@ -87,7 +87,7 @@ SWSlot >> doWithIndex: anIterator [
 
 { #category : #accessing }
 SWSlot >> first [
-	^ self payload first
+	^ self at: 1
 ]
 
 { #category : #accessing }
@@ -105,6 +105,22 @@ SWSlot >> payload: anObject [
 { #category : #copying }
 SWSlot >> postCopy [
 	payload := payload copy
+]
+
+{ #category : #printing }
+SWSlot >> printOn: aStream [
+	self putOn: aStream
+]
+
+{ #category : #streaming }
+SWSlot >> putOn: aStream [
+	aStream << '('.
+	self payload do: [ :each |
+		aStream << each value name
+	] separatedBy: [
+		aStream << ', '
+	].
+	aStream << ')'
 ]
 
 { #category : #accessing }

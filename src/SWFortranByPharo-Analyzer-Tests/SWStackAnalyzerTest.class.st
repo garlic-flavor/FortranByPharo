@@ -182,8 +182,10 @@ SWStackAnalyzerTest >> test_07_decode_closure [
 SWStackAnalyzerTest >> test_08 [
 	|sa|
 	sa := SWStackAnalyzer new: self class>>#_08_ZnServer with: { self class }.
+	sa debugMode: true.
+	SWServer addTranspilerTo: sa pool.
 	sa decode.
-	sa inspect.
+	self assert: sa return value equals: ZnManagingMultiThreadedServer 
 ]
 
 { #category : #tests }

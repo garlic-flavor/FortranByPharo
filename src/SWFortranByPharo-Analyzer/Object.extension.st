@@ -2,6 +2,7 @@ Extension { #name : #Object }
 
 { #category : #'*SWFortranByPharo-Analyzer' }
 Object class >> initializeInstanceSideTranspiler: transpiler [
+	self error; flag: #toRemove.
 	transpiler
 		setBreakpointOn: #subclassResponsibility;
 		defineMethodAsCompareOperator: #=;

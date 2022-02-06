@@ -43,6 +43,18 @@ SWSender >> operands: anObject [
 	operands := anObject
 ]
 
+{ #category : #printing }
+SWSender >> printOn: aStream [
+	self putOn: aStream
+]
+
+{ #category : #streaming }
+SWSender >> putOn: aStream [
+	aStream
+		<< self selector;
+		<< self operands
+]
+
 { #category : #accessing }
 SWSender >> return [
 

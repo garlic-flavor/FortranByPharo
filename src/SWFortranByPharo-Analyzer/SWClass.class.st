@@ -50,12 +50,9 @@ self error; flag: #toRemove.
 
 { #category : #api }
 SWClass >> defineMethod: aName asReturn: rType [
-self error; flag: #toRemove.
-
-	^ self defineMethod: aName as: [ :newT |
-		newT
+	self generator at: aName put: [ :aSender |
+		aSender
 			specifyReturnTypeAs: rType;
-			markAsDecoded;
 			yourself
 	]
 
@@ -181,8 +178,11 @@ self error; flag: #toRemove.
 
 { #category : #api }
 SWClass >> defineMethodReturnsReceiversClass: aName [
-self error; flag: #toRemove.
-	^ self defineMethodReturnsReceiversClass: aName as: [ :newT | newT ]
+	self generator at: aName put: [ :aSender |
+		aSender
+			specifyReturnTypeAs: aSender operands first value classSide;
+			yourself
+	]
 
 ]
 
@@ -202,7 +202,7 @@ self error; flag: #toRemove.
 SWClass >> defineMethodReturnsReceiversInstance: aName [
 	self generator at: aName put: [:aSender |
 		aSender
-			return: aSender operands first value instanceSide;
+			specifyReturnTypeAs: aSender operands first value instanceSide;
 			yourself
 	]
 
@@ -210,11 +210,9 @@ SWClass >> defineMethodReturnsReceiversInstance: aName [
 
 { #category : #api }
 SWClass >> defineMethodReturnsSecondArgument: aName [
-self error; flag: #toRemove.
-	self generator at: aName put: [ :aCallee |
-		(self transpilerClass newFrom: aCallee)
-			return: (aCallee stack at: 2);
-			markAsDecoded;
+	self generator at: aName put: [ :aSender |
+		aSender
+			return: aSender operands third;
 			yourself
 	]
 
@@ -355,14 +353,14 @@ SWClass >> getVariableInfoOf: aName ifPresent: aPresentBlock [
 ]
 
 { #category : #initialization }
-SWClass >> initializeAs: aClass [
+SWClass >> initialize: aClass [
 	|initializer|
 	aClass ifNil: [ ^ self ].
-	self initializeAs: aClass superclass.
+	self initialize: aClass superclass.
 
 	initializer := (String streamContents: [ :s |
 		s
-			<< 'initializeAs_';
+			<< 'initialize_';
 			<< aClass instanceSide name;
 			<< (aClass isClassSide ifTrue: [ 'Class' ] ifFalse: [ '' ])
 	]) asSymbol.
@@ -375,14 +373,14 @@ SWClass >> initializeAs: aClass [
 ]
 
 { #category : #initialization }
-SWClass >> initializeAs_Behavior [
+SWClass >> initialize_Behavior [
 	self
 		defineMethodReturnsReceiversInstance: #basicNew:;
 		defineMethodReturnsReceiversInstance: #basicNew
 ]
 
 { #category : #initialization }
-SWClass >> initializeAs_Boolean [
+SWClass >> initialize_Boolean [
 	self
 		defineMethodReturnsFirstOrSecondArgument: #ifTrue:ifFalse:" as: [ :newT |
 			newT
@@ -405,13 +403,20 @@ SWClass >> initializeAs_Boolean [
 ]
 
 { #category : #initialization }
-SWClass >> initializeAs_CharacterClass [
+SWClass >> initialize_CharacterClass [
 	self
 		defineMethodReturnsReceiversInstance: #cr
 ]
 
 { #category : #initialization }
-SWClass >> initializeAs_Magnitude [
+SWClass >> initialize_Dictionary [
+	self
+		defineMethodReturnsSecondArgument: #at:put:;
+		defineMethodReturnsSecondArgument: #at:ifAbsent:
+]
+
+{ #category : #initialization }
+SWClass >> initialize_Magnitude [
 	self
 		defineMethodAsCompareOperator: #>=;
 		defineMethodAsCompareOperator: #<=;
@@ -422,7 +427,7 @@ SWClass >> initializeAs_Magnitude [
 ]
 
 { #category : #initialization }
-SWClass >> initializeAs_Number [
+SWClass >> initialize_Number [
 	self
 		defineMethodAsBinaryOperator: #+;
 		defineMethodAsBinaryOperator: #-;
@@ -432,17 +437,32 @@ SWClass >> initializeAs_Number [
 ]
 
 { #category : #initialization }
-SWClass >> initializeAs_Object [
+SWClass >> initialize_Object [
 	self
 		defineMethodAsCompareOperator: #=;
 		defineMethodReturnsReceiver: #error:
 ]
 
 { #category : #initialization }
-SWClass >> initializeAs_ProtoObject [
+SWClass >> initialize_ProtoObject [
 	self
 		setBreakpointOn: #primitiveFailed;
-		defineMethodAsCompareOperator: #==
+		defineMethodAsCompareOperator: #==;
+		defineMethodReturnsReceiversClass: #class;
+		defineMethodReturnsFirstOrSecondArgument: #ifNil:ifNotNil:
+]
+
+{ #category : #initialization }
+SWClass >> initialize_Semaphore [
+	self
+		defineMethodReturnsReceiver: #signal
+]
+
+{ #category : #initialization }
+SWClass >> initialize_Set [
+	self
+		defineMethodReturnsFirstOrSecondArgument: #remove:ifAbsent:;
+		defineMethodReturnsFirstArgument: #add:
 ]
 
 { #category : #accessing }
@@ -545,7 +565,7 @@ SWClass >> targetClass [
 { #category : #accessing }
 SWClass >> targetClass: anObject [
 	targetClass := anObject.
-	self initializeAs: anObject
+	self initialize: anObject
 	"
 	self error; flag: #toRemove.
 	initializer := targetClass isInstanceSide

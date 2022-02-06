@@ -69,7 +69,7 @@ SWVariableTypeInfo >> << rightObject [
 
 { #category : #comparing }
 SWVariableTypeInfo >> = right [
-	^ self type = right type
+	^ self value = right value
 ]
 
 { #category : #adding }
