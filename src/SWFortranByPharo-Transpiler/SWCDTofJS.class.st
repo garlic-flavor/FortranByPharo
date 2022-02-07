@@ -100,11 +100,25 @@ SWCDTofJS >> initialize_Object [
 { #category : #initialization }
 SWCDTofJS >> initialize_SWStdClass [
 	super initialize_SWStdClass.
-	self defineMethodSender: #print: as: [ :transpiler :node |
-		transpiler
-			put: 'console.log';
-			putArguments: node arguments
-	]
+	self
+		defineMethodSender: #print: as: [ :transpiler :node |
+			transpiler
+				put: 'console.log';
+				putArguments: node arguments
+		];
+		defineMethodSender: #import:from: as: [ :transpiler :node |
+			transpiler put: 'import {'.
+			node arguments first value do: [ :each |
+				transpiler put: each asString
+			] separatedBy: [
+				transpiler put: ', '
+			].
+			transpiler
+				put: '} from ';
+				putString: (String streamContents: [:s |
+					s << '../script/'; << node arguments second value; << '.mjs'
+				])
+		]
 ]
 
 { #category : #'as yet unclassified' }

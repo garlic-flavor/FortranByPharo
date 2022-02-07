@@ -22,14 +22,21 @@ SWServer class >> addTranspilerTo: pool [
 
 { #category : #accessing }
 SWServer class >> build [
-	<script>
 	|module|
 	module := SWMTofJS newFrom: self.
+	self addTranspilerTo: module pool.
 "
 	module enableDebugMode.
 "
 	module transpile.
-	module contents inspect.
+	^ module
+
+]
+
+{ #category : #accessing }
+SWServer class >> buildThenInspect [
+	<script>
+	self build contents inspect
 
 ]
 
@@ -88,7 +95,6 @@ SWServer class >> initialize_ZnManagingMultiThreadedServer: ct [
 SWServer class >> initialize_ZnServer: ct [
 	ct
 		declareMethodReturnsSecondArgument: #optionAt:ifAbsent:
-
 ]
 
 { #category : #initialization }
