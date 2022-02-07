@@ -391,12 +391,13 @@ SWClass >> getSenderOf: aMethod with: args [
 
 	sender := self senderTranspilerClass new
 		selector: aMethod selector;
+		method: aMethod;
 		operands: args;
 		yourself.
 	self methods associationAt: sender ifPresent: [ :assoc | ^ assoc key copy ].
 	self senderInitializer at: sender selector ifPresent: [ :gen ||newS|
 		newS := gen value: sender.
-		self methods at: newS put: nil.
+		self methods at: newS put: (self newDecoderOf: aMethod with: args).
 		^ newS copy
 	].
 	decoder := self newDecoderOf: aMethod with: args.
@@ -672,6 +673,12 @@ SWClass >> initialize_StringClass [
 ]
 
 { #category : #initialization }
+SWClass >> initialize_TestCaseClass [
+	self
+		declareMethod: #allTestSelectors asReturn: OrderedCollection
+]
+
+{ #category : #initialization }
 SWClass >> initialize_ThreadSafeTranscript [
 	self
 		declareMethodReturnsFirstArgument: #nextPutAll:;
@@ -699,6 +706,7 @@ SWClass >> newDecoderOf: aMethod with: args [
 		classInfo: self;
 		pool: self pool;
 		logger: self pool logger;
+		debugMode: self pool debugMode;
 		yourself.
 	self decoderInitializer at: aMethod selector ifPresent: [ :ini |
 		decoder := ini cull: decoder

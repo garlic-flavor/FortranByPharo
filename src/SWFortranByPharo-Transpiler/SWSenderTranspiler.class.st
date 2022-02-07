@@ -17,7 +17,9 @@ SWSenderTranspiler >> generator [
 		generator := [ :transpiler :aNode |
 			transpiler stream log.
 			transpiler
-				<< aNode receiver;
+				withoutMessageNestDo: [
+					transpiler << aNode receiver
+				];
 				putClassAccessor;
 				put: (transpiler mangle: self);
 				putArguments: aNode arguments

@@ -9,6 +9,7 @@ SWTestRunner class >> build [
 	|module|
 	module := self moduleTranspilerClass newFrom: self.
 	module enableDebugMode.
+	module pool addTranspilerIn: SWTestRunner.
 	module transpile.
 	^ module
 ]
@@ -37,6 +38,14 @@ SWTestRunner class >> initializeClassSideTranspiler: transpiler [
 		]
 ]
 
+{ #category : #initialization }
+SWTestRunner class >> initialize_selfClass: ct [
+	ct
+		defineMethodBody: #name as: [ :t |
+			t putReturnThisClassName
+		]
+]
+
 { #category : #accessing }
 SWTestRunner class >> main [
 	SWStd import: #(PharoObject TestAsserter TestSuite) from: 'Pharo'.
@@ -62,7 +71,7 @@ SWTestRunner class >> runAllTests [
 { #category : #'as yet unclassified' }
 SWTestRunner class >> solveDependenciesUsing: transpiler [
  	self methodDict select: [ :each | each selector beginsWith: 'test' ] thenDo: [ :each |
-		transpiler decode: each selector with: { self }
+		transpiler decode: each selector with: (SWSlot newFrom: { self })
 	].
 	transpiler
 		transpile: TestCase;

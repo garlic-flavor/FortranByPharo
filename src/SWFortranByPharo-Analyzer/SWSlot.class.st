@@ -15,6 +15,16 @@ SWSlot class >> elementClass [
 	^ SWVariableTypeInfo
 ]
 
+{ #category : #'instance creation' }
+SWSlot class >> newFrom: anArray [
+	|inst|
+	inst := self new.
+	anArray doWithIndex: [ :each :idx |
+		(inst at: idx) << each
+	].
+	^ inst
+]
+
 { #category : #comparing }
 SWSlot >> = right [
 	^ self payload = right payload

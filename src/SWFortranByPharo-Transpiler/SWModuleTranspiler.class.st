@@ -39,13 +39,13 @@ SWModuleTranspiler >> contents [
 
 { #category : #'as yet unclassified' }
 SWModuleTranspiler >> decode: aSelector with: args [
-	^ self pool getMethodTranspiler: aSelector supered: false with: args
+	^ self pool newSenderOf: aSelector super: false with: args
 ]
 
 { #category : #'as yet unclassified' }
 SWModuleTranspiler >> enableDebugMode [
 	self payload debugMode: true.
-	self stream logging: true.
+
 ]
 
 { #category : #accessing }

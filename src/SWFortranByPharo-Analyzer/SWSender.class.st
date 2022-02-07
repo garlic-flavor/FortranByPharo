@@ -8,7 +8,8 @@ Class {
 		'selector',
 		'return',
 		'operands',
-		'node'
+		'node',
+		'method'
 	],
 	#category : #'SWFortranByPharo-Analyzer-Analyzer'
 }
@@ -30,6 +31,18 @@ SWSender >> hash [
 		one hash
 	]).
 	^ buf hash
+]
+
+{ #category : #accessing }
+SWSender >> method [
+
+	^ method
+]
+
+{ #category : #accessing }
+SWSender >> method: anObject [
+
+	method := anObject
 ]
 
 { #category : #accessing }

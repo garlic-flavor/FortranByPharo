@@ -12,7 +12,7 @@ SWTestRunnerTest class >> build [
 { #category : #'as yet unclassified' }
 SWTestRunnerTest class >> buildThenInspect [
 	<script>
-	self build contents inspect.
+	self build inspect.
 ]
 
 { #category : #running }

@@ -8,6 +8,19 @@ Class {
 }
 
 { #category : #initialization }
+SWCDTofJS >> initialize_Behavior [
+	super initialize_Behavior.
+	self
+		defineMethodSender: #new as: [ :transpiler :aNode |
+			transpiler
+				put: '(new ';
+				<< aNode receiver;
+				putArguments: aNode arguments;
+				put: ')'
+		]
+]
+
+{ #category : #initialization }
 SWCDTofJS >> initialize_BlockClosure [
 	super initialize_BlockClosure.
 	self
@@ -89,11 +102,33 @@ SWCDTofJS >> initialize_Boolean [
 ]
 
 { #category : #initialization }
+SWCDTofJS >> initialize_Collection [
+	super initialize_Collection.
+	self
+		defineMethodSender: #inject:into: as: [ :transpiler :aNode |
+			transpiler
+				<< aNode receiver;
+				putClassAccessor;
+				put: 'reduce(';
+				<< (aNode arguments at: 2);
+				put: ', ';
+				<< (aNode arguments at: 1);
+				put: ')'
+		]
+]
+
+{ #category : #initialization }
 SWCDTofJS >> initialize_Object [
 	super initialize_Object.
 	self
 		defineMethodSender: #yourself as: [ :transpiler :aNode |
 			transpiler << aNode receiver
+		];
+		defineMethodSender: #asString as: [ :transpiler :aNode |
+			transpiler
+				<< aNode receiver;
+				putClassAccessor;
+				put: 'toString()'
 		]
 ]
 

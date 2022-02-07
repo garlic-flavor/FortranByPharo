@@ -120,7 +120,7 @@ SWServer class >> isRunning [
 { #category : #api }
 SWServer class >> main [
 	SWStd
-		import: #(PharoObject Transcript FileLocator Exception) from: 'Pharo';
+		import: #(PharoObject Transcript Exception) from: 'Pharo';
 		import: #(ZnServer ZnWebSocketDelegate SWWebSocketDelegate ZnResponse ZnEntity ZnStatusLine ZnHeaders) from: 'ZnServer'.
 
 	self new startOn: 50000
@@ -131,12 +131,11 @@ SWServer class >> put [
 	<script>
 	|module runner|
 	self start.
-	module := SWMTofJS newFrom: self.
-	module transpile.
-	module contents inspect.
+	module := self build.
 	runner := SWPRofJS new.
 	runner put: module.
 	self stop.
+	module contents inspect
 
 ]
 

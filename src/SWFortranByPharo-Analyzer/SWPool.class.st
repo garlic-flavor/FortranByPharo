@@ -24,7 +24,6 @@ SWPool class >> search: selector in: aClass [
 { #category : #adding }
 SWPool >> addTranspilerIn: aClass [
 	"invoke aClass>>$initialize_Hoge: with Hoge class transpiler."
-
 	 aClass classSide methodDict values select: [ :each |
 		each selector beginsWith: 'initialize_'
 	] thenDo: [ :each ||name target|

@@ -69,6 +69,21 @@ SWClassDefinitionTranspiler >> initialize_Number [
 		defineMethodSender: #/ as: [ :transpiler :node | transpiler putOpBinary: node ]
 ]
 
+{ #category : #initialization }
+SWClassDefinitionTranspiler >> initialize_TestCaseClass [
+	super initialize_TestCaseClass.
+	self
+		defineMethodBody: #allTestSelectors as: [ :transpiler |
+			transpiler putStatement: (RBReturnNode value: (RBLiteralArrayNode value: (
+				transpiler receiverClass instanceSide methodDict keys select: [ :each |
+					each beginsWith: 'test'
+				] thenCollect: [ :each |
+					RBLiteralValueNode value: each
+				])))
+		]
+
+]
+
 { #category : #testing }
 SWClassDefinitionTranspiler >> isTranspiled [
 	^ stream isNotNil
@@ -109,6 +124,7 @@ SWClassDefinitionTranspiler >> putMemberDeclarationOf: aVariableTypeInfo [
 
 { #category : #'as yet unclassified' }
 SWClassDefinitionTranspiler >> putMethodDefinition: aMBT [
+	aMBT ifNil: [ ^ self ].
 	aMBT class methodDefinitionTranspilerClass new
 		stream: self stream;
 		bodyTranspiler: aMBT;
