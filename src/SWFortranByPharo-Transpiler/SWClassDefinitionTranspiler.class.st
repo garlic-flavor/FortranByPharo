@@ -17,6 +17,7 @@ SWClassDefinitionTranspiler class >> methodDefinitionTranspilerClass [
 
 { #category : #api }
 SWClassDefinitionTranspiler >> defineMethodAsBinaryOperator: aName [
+	self error; flag: #toRewrite.
 	^ self defineMethodAsBinaryOperator: aName as: [ :newT |
 		newT
 			senderGenerator: [ :t :node | t putOpBinary: node ];
@@ -26,11 +27,15 @@ SWClassDefinitionTranspiler >> defineMethodAsBinaryOperator: aName [
 
 { #category : #api }
 SWClassDefinitionTranspiler >> defineMethodAsCompareOperator: aName [
+	^ super defineMethodAsCompareOperator: aName.
+"
+	self error; flag: #toRemove.
 	^ self defineMethodAsCompareOperator: aName as: [ :newT |
 		newT
 			senderGenerator: [ :t :node | t putOpBinary: node ];
 			yourself
 	]
+"
 ]
 
 { #category : #testing }

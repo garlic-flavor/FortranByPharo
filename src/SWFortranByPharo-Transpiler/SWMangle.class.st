@@ -8,18 +8,23 @@ Class {
 }
 
 { #category : #'as yet unclassified' }
-SWMangle class >> mangle: aCallee [
+SWMangle class >> mangle: aSender [
+	self halt; flag: #toRewrite.
+	^ self methodNameOf: aSender selector with: aSender operands.
+"	
 	aCallee method class = CompiledMethod ifTrue: [
 		^ self methodNameOf: aCallee method with: aCallee operands
 	].
 
 	aCallee method class = ByteSymbol ifTrue: [
 		^ self safeSelectorNameOf: aCallee method
-	].
+	]
+"
 ]
 
 { #category : #api }
 SWMangle class >> methodNameOf: method with: args [
+	self halt; flag: #toRewrite.
 	^ String streamContents: [ :s ||owner|
 		owner := (method methodClass).
 		owner isClassSide ifTrue: [ 
@@ -54,6 +59,7 @@ SWMangle class >> safeSelectorNameOf: selector [
 
 { #category : #'as yet unclassified' }
 SWMangle class >> selectorForTranspilerOf: aSelector [
+	self error; flag: #toRemove.
 	^ (String streamContents: [ :s |
 		s
 			<< 'put_';

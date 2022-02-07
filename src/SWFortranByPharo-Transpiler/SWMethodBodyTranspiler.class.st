@@ -9,13 +9,14 @@ Class {
 		'type',
 		'messageNest',
 		'senderGenerator',
-		'bodyGenerator'
+		'generator'
 	],
 	#category : #'SWFortranByPharo-Transpiler-Common'
 }
 
 { #category : #constants }
 SWMethodBodyTranspiler class >> mangleClass [
+	self error; flag: #toRemove.
 	^ self subclassResponsibility 
 ]
 
@@ -51,28 +52,6 @@ SWMethodBodyTranspiler >> << anObject [
 	self stream log.
 	anObject transpileUsing: self
 
-]
-
-{ #category : #accessing }
-SWMethodBodyTranspiler >> bodyGenerator [
-	^ bodyGenerator ifNil: [ bodyGenerator := [ :transpiler | |m|
-		m := transpiler method.
-		transpiler stream log.
-		transpiler locals do: [ :each | self putVariableDeclarationOf: each ].
-		m methodClass isInstanceSide ifTrue: [
-			self putSelfDefinition
-		].
-		transpiler putSequence: m sourceNode body.
-		(transpiler classInfo isNil or: [ m sourceNode lastIsReturn ]) ifFalse: [
-			transpiler putReturnSelf
-		]
-	] ]
-]
-
-{ #category : #accessing }
-SWMethodBodyTranspiler >> bodyGenerator: anObject [
-
-	bodyGenerator := anObject
 ]
 
 { #category : #'private - utilities' }
@@ -126,6 +105,28 @@ SWMethodBodyTranspiler >> decMessageNest [
 
 ]
 
+{ #category : #accessing }
+SWMethodBodyTranspiler >> generator [
+	^ generator ifNil: [ generator := [ :transpiler | |m|
+		m := transpiler method.
+		transpiler stream log.
+		transpiler locals do: [ :each | self putVariableDeclarationOf: each ].
+		m methodClass isInstanceSide ifTrue: [
+			self putSelfDefinition
+		].
+		transpiler putSequence: m sourceNode body.
+		(transpiler classInfo isNil or: [ m sourceNode lastIsReturn ]) ifFalse: [
+			transpiler putReturnSelf
+		]
+	] ]
+]
+
+{ #category : #accessing }
+SWMethodBodyTranspiler >> generator: anObject [
+
+	generator := anObject
+]
+
 { #category : #'private - testing' }
 SWMethodBodyTranspiler >> hasOwnMessageTranspilerMethodOf: aSelector ifTrue: aBlock [
 	|otms aMethod|
@@ -168,6 +169,11 @@ SWMethodBodyTranspiler >> incMessageNest [
 { #category : #'public API' }
 SWMethodBodyTranspiler >> logging: trueOrFalse [
 	self stream logging: trueOrFalse
+]
+
+{ #category : #'as yet unclassified' }
+SWMethodBodyTranspiler >> mangle: aName [
+	^ self class mangleClass mangle: aName
 ]
 
 { #category : #accessing }
@@ -356,6 +362,9 @@ SWMethodBodyTranspiler >> putMessage: aNode [
 	|t2|
 	self stream log: [ aNode receiver asString, ' >> ', aNode selector asString ].
 	0 < self messageNest ifTrue: [ self put: '(' ].
+	self halt; flag: #toImplement.
+	self << (self senders at: aNode).
+"
 	t2 := (self messages at: aNode) asCallee
 		messageNest: self messageNest + 1;
 		messages: self messages;
@@ -365,7 +374,8 @@ SWMethodBodyTranspiler >> putMessage: aNode [
 		yourself.
 
 	t2 putCallee: aNode.
-	0 < self messageNest ifTrue: [ self put: ')' ]
+"
+	 0 < self messageNest ifTrue: [ self put: ')' ]
 ]
 
 { #category : #'code generation' }
@@ -566,7 +576,7 @@ SWMethodBodyTranspiler >> selectTranspiler: aNode withReceiver: aRNode [
 
 { #category : #accessing }
 SWMethodBodyTranspiler >> senderGenerator [
-
+	self error; flag: #toRemove.
 	^ senderGenerator ifNil: [
 		senderGenerator := [ :transpiler :aNode ||transpilerSelector|
 			transpilerSelector := transpiler class mangleClass selectorForTranspilerOf: aNode selector.
@@ -581,7 +591,7 @@ SWMethodBodyTranspiler >> senderGenerator [
 
 { #category : #accessing }
 SWMethodBodyTranspiler >> senderGenerator: anObject [
-
+	self error; flag: #toRemove.
 	senderGenerator := anObject
 ]
 
@@ -604,7 +614,7 @@ SWMethodBodyTranspiler >> stream: anObject [
 
 { #category : #'public API' }
 SWMethodBodyTranspiler >> transpile [
-	self bodyGenerator value: self.
+	self generator value: self.
 	^ self stream contents
 ]
 

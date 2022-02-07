@@ -30,7 +30,7 @@ SWTestRunner class >> initializeClassSideTranspiler: transpiler [
 			newT
 				specifyReturnTypeAs: String;
 				markAsDecoded;
-				bodyGenerator: [ :t |
+				generator: [ :t |
 					t putReturnThisClassName
 				]
 		]

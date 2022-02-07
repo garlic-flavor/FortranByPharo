@@ -7,7 +7,7 @@ TestCase class >> initializeClassSideTranspiler: transpiler [
 		defineMethod: #allTestSelectors as: [ :newT |
 			newT
 				specifyReturnTypeAs: OrderedCollection;
-				bodyGenerator: [ :t |
+				generator: [ :t |
 					t putStatement: (RBReturnNode value: (RBLiteralArrayNode value: (
 						t receiverClass instanceSide methodDict keys select: [ :each |
 							each beginsWith: 'test'

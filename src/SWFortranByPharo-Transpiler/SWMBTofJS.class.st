@@ -14,12 +14,18 @@ SWMBTofJS class >> classTranspilerClass [
 
 { #category : #constants }
 SWMBTofJS class >> mangleClass [
+	self error; flag: #toRemove.
 	^ SWMangleOfJS 
 ]
 
 { #category : #'as yet unclassified' }
 SWMBTofJS class >> methodDefinitionTranspilerClass [
 	^ SWMDTofJS
+]
+
+{ #category : #accessing }
+SWMBTofJS class >> senderTranspilerClass [
+	^ SWSTofJS
 ]
 
 { #category : #accessing }

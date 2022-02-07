@@ -8,7 +8,7 @@ Class {
 }
 
 { #category : #api }
-SWMangleOfJS class >> methodNameOf: method with: args [
-	^ self safeSelectorNameOf: method selector
+SWMangleOfJS class >> methodNameOf: selector with: args [
+	^ self safeSelectorNameOf: selector
 
 ]

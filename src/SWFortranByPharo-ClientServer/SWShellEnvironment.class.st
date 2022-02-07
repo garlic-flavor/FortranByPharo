@@ -30,7 +30,7 @@ SWShellEnvironment class >> initializeInstanceSideTranspiler: transpiler [
 			newT
 				specifyReturnTypeAs: FileLocator;
 				markAsDecoded;
-				bodyGenerator: [ :t |
+				generator: [ :t |
 					t
 						put: 'return FileLocator.localDirectory()';
 						putStatementDelimiter;

@@ -77,10 +77,6 @@ SWStackAnalyzer >> blockReturnTop [
 	super blockReturnTop
 ]
 
-{ #category : #accessing }
-SWStackAnalyzer >> bodyGenerator: aBodyGenerator [
-]
-
 { #category : #'instruction decoding' }
 SWStackAnalyzer >> callPrimitive: primNumber [
 
@@ -129,6 +125,11 @@ SWStackAnalyzer >> doPop [
 	self stack pop.
 	super doPop.
 
+]
+
+{ #category : #accessing }
+SWStackAnalyzer >> generator: aBodyGenerator [
+	self error; flag: #toRemove.
 ]
 
 { #category : #'instruction decoding' }
@@ -385,9 +386,10 @@ SWStackAnalyzer >> send: selector super: supered numArgs: numberArguments [
 
 	operands := self stack popSlotForSender: numberArguments.
 
-	sender := self pool newSenderOf: selector super: supered with: operands.
-
-	self senders at: (self method sourceNodeForPC: oldPC) put: sender.
+	sender := (self pool newSenderOf: selector super: supered with: operands)
+		node: (self method sourceNodeForPC: oldPC);
+		yourself.
+	self senders at: sender node put: sender.
 	self stack push: sender return.
 "
 	self error; flag: #toRewrite.

@@ -14,6 +14,8 @@ SWMTofJSTest >> test_01 [
 	mod stream newline: String cr.
 	mod transpile.
 	output := mod stream contents.
+	self halt.
+
 	self assert: output equals: 'console.log("Hello, good-bye!");
 '.
 ]
