@@ -362,7 +362,7 @@ SWMethodBodyTranspiler >> putMessage: aNode [
 	|t2|
 	self stream log: [ aNode receiver asString, ' >> ', aNode selector asString ].
 	0 < self messageNest ifTrue: [ self put: '(' ].
-	self halt; flag: #toImplement.
+
 	self << (self senders at: aNode).
 "
 	t2 := (self messages at: aNode) asCallee

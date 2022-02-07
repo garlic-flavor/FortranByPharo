@@ -64,11 +64,13 @@ SWPool >> debugMode [
 
 { #category : #'as yet unclassified' }
 SWPool >> detect: aNeedle ifFound: aBlock [
+
 	^ self payload detect: aNeedle ifFound: aBlock
 ]
 
 { #category : #'as yet unclassified' }
 SWPool >> detect: aNeedle ifFound: aBlock ifNone: aNoneBlock [
+	self error; flag: #toRemove.
 	^ self payload detect: aNeedle ifFound: aBlock ifNone: aNoneBlock
 ]
 

@@ -7,6 +7,16 @@ Class {
 	#category : #'SWFortranByPharo-Transpiler-JS'
 }
 
+{ #category : #initialization }
+SWCDTofJS >> initialize_SWStdClass [
+	super initialize_SWStdClass.
+	self defineMethodSender: #print: as: [ :transpiler :node |
+		transpiler
+			put: 'console.log';
+			putArguments: node arguments
+	]
+]
+
 { #category : #'as yet unclassified' }
 SWCDTofJS >> putClassHeader [
 	self stream

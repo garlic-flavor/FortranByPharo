@@ -9,7 +9,7 @@ Class {
 
 { #category : #'as yet unclassified' }
 SWMangle class >> mangle: aSender [
-	self halt; flag: #toRewrite.
+
 	^ self methodNameOf: aSender selector with: aSender operands.
 "	
 	aCallee method class = CompiledMethod ifTrue: [

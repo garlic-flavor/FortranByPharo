@@ -22,6 +22,32 @@ Class {
 	#category : #'SWFortranByPharo-Analyzer-Analyzer'
 }
 
+{ #category : #adding }
+SWClass >> addDecoderInitializer: aName with: anInitializer [
+	self decoderInitializer at: aName ifPresent: [ :ini |
+		self decoderInitializer at: aName put: [ :decoder |
+			ini cull: decoder.
+			anInitializer cull: decoder.
+			decoder
+		]
+	] ifAbsentPut: [
+		anInitializer
+	]
+]
+
+{ #category : #adding }
+SWClass >> addSenderInitializer: aName with: initializer [
+	self senderInitializer at: aName ifPresent: [ :ini |
+		self senderInitializer at: aName put: [ :aSender |
+			ini cull: aSender.
+			initializer cull: aSender.
+			aSender
+		]
+	] ifAbsentPut: [
+		initializer
+	]
+]
+
 { #category : #accessing }
 SWClass >> classSide [
 
@@ -41,15 +67,13 @@ SWClass >> classSide: anObject [
 
 { #category : #api }
 SWClass >> declareMethod: aName as: initializer [
-	self senderInitializer at: aName put: [ :aSender |
-		initializer cull: aSender
-	]
+	self addSenderInitializer: aName with: initializer
 
 ]
 
 { #category : #api }
 SWClass >> declareMethod: aName asReturn: rType [
-	self senderInitializer at: aName put: [ :aSender |
+	self addSenderInitializer: aName with: [ :aSender |
 		aSender
 			specifyReturnTypeAs: rType;
 			yourself
@@ -60,7 +84,7 @@ SWClass >> declareMethod: aName asReturn: rType [
 { #category : #api }
 SWClass >> declareMethodAsBinaryOperator: aName [
 
-	self senderInitializer at: aName put: [ :aSender |
+	self addSenderInitializer: aName with: [ :aSender |
 		aSender
 			return: aSender operands receiver;
 			yourself
@@ -70,7 +94,7 @@ SWClass >> declareMethodAsBinaryOperator: aName [
 
 { #category : #api }
 SWClass >> declareMethodAsCompareOperator: aName [
-	self senderInitializer at: aName put: [ :aSender |
+	self addSenderInitializer: aName with: [ :aSender |
 		aSender
 			specifyReturnTypeAs: Boolean;
 			yourself
@@ -80,7 +104,7 @@ SWClass >> declareMethodAsCompareOperator: aName [
 
 { #category : #api }
 SWClass >> declareMethodReturnsFirstArgument: aName [
-	self senderInitializer at: aName put: [ :aSender |
+	self addSenderInitializer: aName with: [ :aSender |
 		aSender
 			return: aSender operands second;
 			yourself
@@ -90,7 +114,7 @@ SWClass >> declareMethodReturnsFirstArgument: aName [
 
 { #category : #api }
 SWClass >> declareMethodReturnsFirstArgumentsElement: aName [
-	self senderInitializer at: aName put: [ :aSender |
+	self addSenderInitializer: aName with: [ :aSender |
 		aSender
 			return: aSender operands second type elementType;
 			yourself
@@ -100,7 +124,7 @@ SWClass >> declareMethodReturnsFirstArgumentsElement: aName [
 
 { #category : #api }
 SWClass >> declareMethodReturnsFirstOrSecondArgument: aName [
-	self senderInitializer at: aName put: [ :aSender |
+	self addSenderInitializer: aName with: [ :aSender |
 		aSender
 			return: ((SWVariableTypeInfo new)
 				<< aSender operands second;
@@ -113,7 +137,7 @@ SWClass >> declareMethodReturnsFirstOrSecondArgument: aName [
 
 { #category : #api }
 SWClass >> declareMethodReturnsReceiver: aName [
-	self senderInitializer at: aName put: [ :aSender |
+	self addSenderInitializer: aName with: [ :aSender |
 		aSender
 			return: aSender operands receiver;
 			yourself
@@ -123,7 +147,7 @@ SWClass >> declareMethodReturnsReceiver: aName [
 
 { #category : #api }
 SWClass >> declareMethodReturnsReceiversClass: aName [
-	self senderInitializer at: aName put: [ :aSender |
+	self addSenderInitializer: aName with: [ :aSender |
 		aSender
 			specifyReturnTypeAs: aSender operands receiver value classSide;
 			yourself
@@ -133,7 +157,7 @@ SWClass >> declareMethodReturnsReceiversClass: aName [
 
 { #category : #api }
 SWClass >> declareMethodReturnsReceiversElement: aName [
-	self senderInitializer at: aName put: [ :aSender |
+	self addSenderInitializer: aName with: [ :aSender |
 		aSender
 			return: aSender operands receiver type elementType;
 			yourself
@@ -143,7 +167,7 @@ SWClass >> declareMethodReturnsReceiversElement: aName [
 
 { #category : #api }
 SWClass >> declareMethodReturnsReceiversInstance: aName [
-	self senderInitializer at: aName put: [:aSender |
+	self addSenderInitializer: aName with: [:aSender |
 		aSender
 			specifyReturnTypeAs: aSender operands receiver value instanceSide;
 			yourself
@@ -153,7 +177,7 @@ SWClass >> declareMethodReturnsReceiversInstance: aName [
 
 { #category : #api }
 SWClass >> declareMethodReturnsSecondArgument: aName [
-	self senderInitializer at: aName put: [ :aSender |
+	self addSenderInitializer: aName with: [ :aSender |
 		aSender
 			return: aSender operands third;
 			yourself
@@ -163,7 +187,7 @@ SWClass >> declareMethodReturnsSecondArgument: aName [
 
 { #category : #api }
 SWClass >> declareMethodReturnsSecondArgumentsElement: aName [
-	self senderInitializer at: aName put: [ :aSender |
+	self addSenderInitializer: aName with: [ :aSender |
 		aSender
 			return: aSender operands third type elementType;
 			yourself
@@ -206,11 +230,6 @@ self error; flag: #toRemove.
 			yourself)
 	]
 
-]
-
-{ #category : #'as yet unclassified' }
-SWClass >> defineMethodBody: aName as: anInitializer [
-	self decoderInitializer at: aName put: anInitializer
 ]
 
 { #category : #api }

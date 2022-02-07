@@ -18,10 +18,12 @@ SWStd class >> f90_print_With: arguments Using: transpiler [
 
 { #category : #'as yet unclassified' }
 SWStd class >> haltOnDecoding [
+	self error; flag: #toRemove
 ]
 
 { #category : #'as yet unclassified' }
 SWStd class >> haltOnTranspiling [
+	self error; flag: #toRemove
 ]
 
 { #category : #'code generation' }
@@ -30,6 +32,7 @@ SWStd class >> import: identifiers from: aFile [
 
 { #category : #initialization }
 SWStd class >> initializeClassSideTranspiler: transpiler [
+	self error; flag: #toRemove.
 	transpiler
 		declareMethod: #print: as: [ :newT |
 			newT

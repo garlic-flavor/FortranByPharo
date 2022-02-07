@@ -38,6 +38,24 @@ SWClassDefinitionTranspiler >> declareMethodAsCompareOperator: aName [
 "
 ]
 
+{ #category : #'as yet unclassified' }
+SWClassDefinitionTranspiler >> defineMethodBody: aName as: anInitializer [
+	self addDecoderInitializer: aName with: [ :decoder |
+		decoder
+			generator: 	anInitializer;
+			yourself
+	]
+]
+
+{ #category : #'as yet unclassified' }
+SWClassDefinitionTranspiler >> defineMethodSender: aName as: aGenerator [
+	self addSenderInitializer: aName with: [ :sender |
+		sender
+			generator: aGenerator;
+			yourself
+	]
+]
+
 { #category : #testing }
 SWClassDefinitionTranspiler >> isTranspiled [
 	^ stream isNotNil
