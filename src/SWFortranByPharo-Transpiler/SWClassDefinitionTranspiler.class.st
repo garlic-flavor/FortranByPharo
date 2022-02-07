@@ -17,12 +17,15 @@ SWClassDefinitionTranspiler class >> methodDefinitionTranspilerClass [
 
 { #category : #api }
 SWClassDefinitionTranspiler >> declareMethodAsBinaryOperator: aName [
+	^ super declareMethodAsBinaryOperator: aName
+"
 	self error; flag: #toRewrite.
 	^ self defineMethodAsBinaryOperator: aName as: [ :newT |
 		newT
 			senderGenerator: [ :t :node | t putOpBinary: node ];
 			yourself
 	]
+"
 ]
 
 { #category : #api }
@@ -54,6 +57,16 @@ SWClassDefinitionTranspiler >> defineMethodSender: aName as: aGenerator [
 			generator: aGenerator;
 			yourself
 	]
+]
+
+{ #category : #initialization }
+SWClassDefinitionTranspiler >> initialize_Number [
+	super initialize_Number.
+	self
+		defineMethodSender: #+ as: [ :transpiler :node | transpiler putOpBinary: node ];
+		defineMethodSender: #- as: [ :transpiler :node | transpiler putOpBinary: node ];
+		defineMethodSender: #* as: [ :transpiler :node | transpiler putOpBinary: node ];
+		defineMethodSender: #/ as: [ :transpiler :node | transpiler putOpBinary: node ]
 ]
 
 { #category : #testing }

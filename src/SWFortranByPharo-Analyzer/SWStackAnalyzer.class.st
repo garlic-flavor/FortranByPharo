@@ -46,7 +46,7 @@ SWStackAnalyzer class >> poolClass [
 
 { #category : #private }
 SWStackAnalyzer >> addBytecode: description [
-	|item node operands sender beforeSize|
+	|item node operands sender|
 	self logger log: [ String streamContents: [ :s |
 		s << '[' print: oldPC; << '] '; << description
 	] ] withStack: self stack.
@@ -58,6 +58,7 @@ SWStackAnalyzer >> addBytecode: description [
 	node := self method sourceNodeForPC: item startPC.
 	operands := self stack popSlotForJumper: self stack size - item stackSize.
 	sender := self pool newSenderOf: node selector super: false with: operands.
+	sender node: node.
 	self senders at: node put: sender.
 	self stack push: sender return.
 

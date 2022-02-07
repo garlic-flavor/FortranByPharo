@@ -601,6 +601,12 @@ SWClass >> initialize_ProtoObject [
 ]
 
 { #category : #initialization }
+SWClass >> initialize_STONClass [
+	self
+		declareMethod: #jsonWriter asReturn: STONWriter
+]
+
+{ #category : #initialization }
 SWClass >> initialize_SWStdClass [
 	self
 		setBreakpointOn: #haltOnDecoding

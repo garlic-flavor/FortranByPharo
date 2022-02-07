@@ -10,11 +10,6 @@ Class {
 	#category : #'SWFortranByPharo-Transpiler-Common'
 }
 
-{ #category : #constants }
-SWSenderTranspiler class >> mangleClass [
-	^ self subclassResponsibility 
-]
-
 { #category : #accessing }
 SWSenderTranspiler >> generator [
 
@@ -22,11 +17,9 @@ SWSenderTranspiler >> generator [
 		generator := [ :transpiler :aNode |
 			transpiler stream log.
 			transpiler
-				withoutMessageNestDo: [
-					transpiler << aNode receiver
-				];
+				<< aNode receiver;
 				putClassAccessor;
-				put: (self class mangleClass mangle: self);
+				put: (transpiler mangle: self);
 				putArguments: aNode arguments
 			"|transpilerSelector|
 

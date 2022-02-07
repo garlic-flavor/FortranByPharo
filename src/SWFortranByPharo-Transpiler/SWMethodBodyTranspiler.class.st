@@ -16,7 +16,6 @@ Class {
 
 { #category : #constants }
 SWMethodBodyTranspiler class >> mangleClass [
-	self error; flag: #toRemove.
 	^ self subclassResponsibility 
 ]
 
@@ -24,6 +23,11 @@ SWMethodBodyTranspiler class >> mangleClass [
 SWMethodBodyTranspiler class >> messageTranspilerMethodNameFor: aSelector [
 	self error; flag: #toRemove.
 	^ ((self mangleClass safeSelectorNameOf: aSelector), 'For:With:') asSymbol
+]
+
+{ #category : #'as yet unclassified' }
+SWMethodBodyTranspiler class >> methodDefinitionTranspilerClass [ 
+	^ self subclassResponsibility
 ]
 
 { #category : #utils }
@@ -35,6 +39,11 @@ SWMethodBodyTranspiler class >> search: selector in: aClass [
 			self search: selector in: aClass superclass
 	]
 
+]
+
+{ #category : #accessing }
+SWMethodBodyTranspiler class >> senderTranspilerClass [
+	^ SWSenderTranspiler
 ]
 
 { #category : #utils }
@@ -99,9 +108,8 @@ SWMethodBodyTranspiler >> decIndent [
 
 { #category : #'private - code generation' }
 SWMethodBodyTranspiler >> decMessageNest [
-	self error; flag: #toRemove.
-	messageNest push: { 0. messageNest pop - 1 } max.
-	0 < messageNest top ifTrue: [ self put: ')' ].
+	messageNest := messageNest - 1.
+	0 < messageNest ifTrue: [ self put: ')' ].
 
 ]
 
@@ -111,11 +119,11 @@ SWMethodBodyTranspiler >> generator [
 		m := transpiler method.
 		transpiler stream log.
 		transpiler locals do: [ :each | self putVariableDeclarationOf: each ].
-		m methodClass isInstanceSide ifTrue: [
+		(transpiler classInfo isNotNil and: [ m methodClass isInstanceSide ]) ifTrue: [
 			self putSelfDefinition
 		].
 		transpiler putSequence: m sourceNode body.
-		(transpiler classInfo isNil or: [ m sourceNode lastIsReturn ]) ifFalse: [
+		(transpiler classInfo isNotNil and: [ m sourceNode lastIsReturn not]) ifTrue: [
 			transpiler putReturnSelf
 		]
 	] ]
@@ -161,9 +169,8 @@ SWMethodBodyTranspiler >> incIndent [
 
 { #category : #'private - code generation' }
 SWMethodBodyTranspiler >> incMessageNest [
-	self error; flag: #toRemove.
-	messageNest push: (messageNest pop + 1).
-	1 < messageNest top ifTrue: [ self put: '(' ].
+	messageNest := messageNest + 1.
+	1 < messageNest ifTrue: [ self put: '(' ].
 ]
 
 { #category : #'public API' }
@@ -361,7 +368,7 @@ SWMethodBodyTranspiler >> putLine: anObject [
 SWMethodBodyTranspiler >> putMessage: aNode [
 	|t2|
 	self stream log: [ aNode receiver asString, ' >> ', aNode selector asString ].
-	0 < self messageNest ifTrue: [ self put: '(' ].
+	self incMessageNest.
 
 	self << (self senders at: aNode).
 "
@@ -375,19 +382,18 @@ SWMethodBodyTranspiler >> putMessage: aNode [
 
 	t2 putCallee: aNode.
 "
-	 0 < self messageNest ifTrue: [ self put: ')' ]
+	self decMessageNest
 ]
 
 { #category : #'code generation' }
 SWMethodBodyTranspiler >> putMessage: aNode withReceiver: aRNode [
+	|sender|
 	self stream log: [ aRNode asString, ' >> ', aNode selector asString ].
-	(self messages at: aNode)
-		stream: self stream;
-		messages: self messages;
-		putCallee: (aNode copy
-			receiver: aRNode
-			yourself).
-
+	sender := (self senders at: aNode) copy.
+	sender node: (aNode copy
+		receiver: aRNode
+		yourself).
+	self << sender
 ]
 
 { #category : #'as yet unclassified' }
@@ -405,6 +411,7 @@ SWMethodBodyTranspiler >> putOpBinary: aNode [
 		put: aNode selector;
 		put: ' ';
 		<< (aNode arguments at: 1)
+
 ]
 
 { #category : #'code generation' }

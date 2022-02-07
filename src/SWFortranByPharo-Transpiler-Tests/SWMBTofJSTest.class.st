@@ -125,12 +125,12 @@ SWMBTofJSTest >> test_06 [
 	|transpiler result|
 	transpiler := (self transpile_program: #_06_cascading: with: String).
 	result := transpiler stream contents.
-	self assert: result equals: 'return (function(uri, _receiver_) {
+	self assert: result equals: 'return (function(_receiver_) {
     _receiver_.failed();
     _receiver_.message_("hogehoge");
     _receiver_.uri_(uri);
     return _receiver_;
-})(uri, (new SWServerStatus())).toString();
+})(SWServerStatus.new()).toString();
 '
 ]
 
@@ -149,7 +149,13 @@ SWMBTofJSTest >> test_08 [
 	|transpiler result|
 	transpiler := (self transpile_program: #_08_try_catch with: #()).
 	result := transpiler stream contents.
-	result inspect.
+
+	self assert: result equals: 'return (function(){try {
+    return (Transcript.show_("hello"), Transcript.cr());
+} catch(e) {
+    return (Transcript.show_("error!"), Transcript.show_(e.asString()));
+}})();
+'
 
 ]
 
