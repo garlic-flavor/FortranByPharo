@@ -131,35 +131,12 @@ SWStackAnalyzerTest >> test_02 [
 ]
 
 { #category : #tests }
-SWStackAnalyzerTest >> test_02_decode [
-
-	self
-		inspectMy: #_02_call_wellknown_message:
-		withArguments: { Integer }.
-"
-		equals: Integer;
-		returnValueOfMy: #_02_call_wellknown_message:
-		withArguments: { Float }
-		equals: Float
-"
-]
-
-{ #category : #tests }
 SWStackAnalyzerTest >> test_03 [
 
 	self
 		returnValueOfMy: #_03_ifTrue_ifFalse:
 		withArguments: { Integer }
 		equals: SmallInteger
-]
-
-{ #category : #tests }
-SWStackAnalyzerTest >> test_03_decode [
-
-	self
-		inspectMy: #_03_ifTrue_ifFalse:
-		withArguments: { Integer }
-
 ]
 
 { #category : #tests }
@@ -237,11 +214,11 @@ SWStackAnalyzerTest >> test_11_ZnServer [
 ]
 
 { #category : #tests }
-SWStackAnalyzerTest >> test_12_decode [
-	self inspectMy: #_12_try_catch withArguments: {  }
+SWStackAnalyzerTest >> test_12 [
+	self returnValueOfMy: #_12_try_catch withArguments: {  } equals: self class
 ]
 
 { #category : #tests }
 SWStackAnalyzerTest >> test_13 [
-	self inspectMy: #_13_return_literal withArguments: {  }
+	self returnValueOfMy: #_13_return_literal withArguments: {  } equals: Dictionary
 ]

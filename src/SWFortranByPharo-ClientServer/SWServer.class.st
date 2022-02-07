@@ -15,86 +15,9 @@ Class {
 
 { #category : #adding }
 SWServer class >> addTranspilerTo: pool [
-	SWShellEnvironment addTranspilerTo: pool.
-	pool
-		addTranspilerOf: ZnServer initialize: [ :ct |
-			ct
-				defineMethodReturnsSecondArgument: #optionAt:ifAbsent:
-		];
-		addTranspilerOf: ZnSingleThreadedServer initialize: [ :ct |
-			ct
-				defineMethodReturnsReceiver: #stop:;
-				defineMethodReturnsReceiver: #start
-		];
-		addTranspilerOf: ZnManagingMultiThreadedServer initialize: [ :ct |
-			ct
-				defineMethodReturnsReceiver: #closeConnections
-		];
-		addTranspilerOf: ZnCurrentOptions class initialize: [ :ct |
-			ct
-				defineMethod: #at: asReturn: String
-		];
-		addTranspilerOf: ZnHeaders initialize: [ :ct |
-			ct
-				defineMethodReturnsSecondArgument: #at:put:
-		];
-		addTranspilerOf: ZnHeaders class initialize: [ :ct |
-			ct
-				defineMethodReturnsReceiversClass: #defaultResponseHeaders
-		];
-		addTranspilerOf: ZnEntity initialize: [ :ct |
-			ct
-				defineMethod: #contents asReturn: String
-		];
-		addTranspilerOf: ZnEntity class initialize: [ :ct |
-			ct
-				defineMethodReturnsReceiversInstance: #type:
-		];
-		addTranspilerOf: ProcessSpecificVariable class initialize: [ :ct |
-			ct
-				defineMethodReturnsReceiversInstance: #new
-		];
-		addTranspilerOf: ZnCharacterEncoder class initialize: [ :ct |
-			ct
-				defineMethodReturnsReceiversInstance: #newForEncoding:
-		];
-		addTranspilerOf: ZnUtils class initialize: [ :ct |
-			ct
-				defineMethod: #isCapitalizedString: asReturn: Boolean;
-				defineMethod: #capitalizeString: asReturn: String
-		];
-		addTranspilerOf: STONWriter initialize: [ :ct |
-			ct
-				defineMethodReturnsReceiver: #jsonMode:
-		];
-		addTranspilerOf: ZnWebSocket initialize: [ :ct |
-			ct
-				defineMethodReturnsReceiver: #sendMessage:
-		];
-		addTranspilerOf: ZnRequest initialize: [ :ct |
-			ct
-				defineMethod: #uri asReturn: ZnUrl;
-				defineMethod: #requestLine asReturn: ZnRequestLine
-		];
-		addTranspilerOf: ZnMessage initialize: [ :ct |
-			ct
-				defineMethod: #entity asReturn: ZnEntity;
-				defineMethodReturnsReceiver: #entity:
-		];
-		addTranspilerOf: ZnUrl initialize: [ :ct |
-			ct
-				defineMethodReturnsSecondArgumentsElement: #queryAt:ifAbsent:
-		];
-		addTranspilerOf: ZnResponse class initialize: [ :ct |
-			ct
-				defineMethodReturnsReceiversInstance: #statusLine:;
-				defineMethodReturnsReceiversInstance: #notFound:;
-				defineMethodReturnsReceiversInstance: #badRequest:
-		];
-		addTranspilerOf: SWWebSocket initialize: [ :ct |
-			ct
-				defineMethod: #uri asReturn: ZnUrl
-		]
+	pool addTranspilerIn: SWShellEnvironment.
+	pool addTranspilerIn: self.
+
 ]
 
 { #category : #accessing }
@@ -123,6 +46,63 @@ SWServer class >> filePathOf: aName [
 		self error: aName, ' is in out of the local directory.'
 	].
 	^ path
+
+]
+
+{ #category : #initialization }
+SWServer class >> initialize_STONWriter: ct [
+	ct
+		defineMethodReturnsReceiver: #jsonMode:
+
+]
+
+{ #category : #initialization }
+SWServer class >> initialize_ZnEntity: ct [
+	ct
+		defineMethod: #contents asReturn: String
+
+]
+
+{ #category : #initialization }
+SWServer class >> initialize_ZnEntityClass: ct [
+	ct
+		defineMethodReturnsReceiversInstance: #type:
+
+]
+
+{ #category : #initialization }
+SWServer class >> initialize_ZnHeadersClass: ct [
+	ct
+		defineMethodReturnsReceiversClass: #defaultResponseHeaders
+
+]
+
+{ #category : #initialization }
+SWServer class >> initialize_ZnManagingMultiThreadedServer: ct [
+	ct
+		defineMethodReturnsReceiver: #closeConnections
+
+]
+
+{ #category : #initialization }
+SWServer class >> initialize_ZnServer: ct [
+	ct
+		defineMethodReturnsSecondArgument: #optionAt:ifAbsent:
+
+]
+
+{ #category : #initialization }
+SWServer class >> initialize_ZnSingleThreadedServer: ct [
+	ct
+		defineMethodReturnsReceiver: #stop:;
+		defineMethodReturnsReceiver: #start
+
+]
+
+{ #category : #initialization }
+SWServer class >> initialize_ZnWebSocket: ct [
+	ct
+		defineMethodReturnsReceiver: #sendMessage:
 
 ]
 

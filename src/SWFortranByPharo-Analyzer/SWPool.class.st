@@ -22,6 +22,30 @@ SWPool class >> search: selector in: aClass [
 ]
 
 { #category : #adding }
+SWPool >> addTranspilerIn: aClass [
+	"invoke aClass>>$initialize_Hoge: with Hoge class transpiler."
+
+	 aClass classSide methodDict values select: [ :each |
+		each selector beginsWith: 'initialize_'
+	] thenDo: [ :each ||name target|
+		name := each selector copyAfter: $_.
+		name := (each selector endsWith: 'Class:') ifTrue: [
+			name copyUpToLast: $C
+		] ifFalse: [
+			name copyUpToLast: $:
+		].
+		name = 'self' ifTrue: [ name := aClass name ].
+		target := Smalltalk globals at: name asSymbol.
+		(each selector endsWith: 'Class:') ifTrue: [
+			target := target classSide
+		].
+		each valueWithReceiver: aClass arguments: {
+			self getClassTranspiler: target
+		}
+	]
+]
+
+{ #category : #adding }
 SWPool >> addTranspilerOf: aClass initialize: anInitializer [
 	anInitializer cull: (self getClassTranspiler: aClass)
 ]
