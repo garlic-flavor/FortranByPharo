@@ -16,7 +16,7 @@ SWClassDefinitionTranspiler class >> methodDefinitionTranspilerClass [
 ]
 
 { #category : #api }
-SWClassDefinitionTranspiler >> defineMethodAsBinaryOperator: aName [
+SWClassDefinitionTranspiler >> declareMethodAsBinaryOperator: aName [
 	self error; flag: #toRewrite.
 	^ self defineMethodAsBinaryOperator: aName as: [ :newT |
 		newT
@@ -26,8 +26,8 @@ SWClassDefinitionTranspiler >> defineMethodAsBinaryOperator: aName [
 ]
 
 { #category : #api }
-SWClassDefinitionTranspiler >> defineMethodAsCompareOperator: aName [
-	^ super defineMethodAsCompareOperator: aName.
+SWClassDefinitionTranspiler >> declareMethodAsCompareOperator: aName [
+	^ super declareMethodAsCompareOperator: aName.
 "
 	self error; flag: #toRemove.
 	^ self defineMethodAsCompareOperator: aName as: [ :newT |

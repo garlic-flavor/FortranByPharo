@@ -2,9 +2,10 @@ Extension { #name : #TestCase }
 
 { #category : #'*SWFortranByPharo-Transpiler' }
 TestCase class >> initializeClassSideTranspiler: transpiler [
+	self halt; flag: #toRewrite.
 	transpiler
 		setBreakpointOn: #suite;
-		defineMethod: #allTestSelectors as: [ :newT |
+		declareMethod: #allTestSelectors as: [ :newT |
 			newT
 				specifyReturnTypeAs: OrderedCollection;
 				generator: [ :t |

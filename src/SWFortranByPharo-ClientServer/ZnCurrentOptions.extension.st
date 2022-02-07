@@ -4,5 +4,5 @@ Extension { #name : #ZnCurrentOptions }
 ZnCurrentOptions class >> initializeClassSideTranspiler: transpiler [
 
 	transpiler
-		defineMethod: #at: asReturn: String
+		declareMethod: #at: asReturn: String
 ]

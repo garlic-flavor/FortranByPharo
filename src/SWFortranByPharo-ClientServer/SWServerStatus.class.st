@@ -45,7 +45,7 @@ SWServerStatus class >> fromSton: stonReader [
 { #category : #initialization }
 SWServerStatus class >> initializeInstanceSideTranspiler: transpiler [
 	transpiler
-		defineMethod: #stonOn: asReturn: STON
+		declareMethod: #stonOn: asReturn: STON
 ]
 
 { #category : #'code generation' }

@@ -3,7 +3,7 @@ Extension { #name : #ZnMimeType }
 { #category : #'*SWFortranByPharo-Analyzer' }
 ZnMimeType class >> initializeInstanceSideTranspiler: transpiler [
 	transpiler
-		defineMethod: #isBinary asReturn: Boolean;
-		defineMethodReturnsReceiver: #charSet:;
-		defineMethodReturnsSecondArgument: #parameterAt:ifAbsent:
+		declareMethod: #isBinary asReturn: Boolean;
+		declareMethodReturnsReceiver: #charSet:;
+		declareMethodReturnsSecondArgument: #parameterAt:ifAbsent:
 ]

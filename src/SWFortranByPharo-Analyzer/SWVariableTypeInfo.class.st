@@ -20,7 +20,7 @@ Class {
 { #category : #initialization }
 SWVariableTypeInfo class >> initializeInstanceSideTranspiler: transpiler [
 	transpiler
-		defineMethodReturnsReceiver: #<<
+		declareMethodReturnsReceiver: #<<
 ]
 
 { #category : #'instance creation' }

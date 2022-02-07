@@ -46,7 +46,7 @@ SWType class >> exactTypePriority [
 { #category : #initialization }
 SWType class >> initializeClassSideTranspiler: transpiler [
 	transpiler
-		defineMethod: #declare:as: as: [ :newT |
+		declareMethod: #declare:as: as: [ :newT |
 			newT
 				specifyReturnTypeAs: SWVariableTypeInfo;
 				senderGenerator: [ :t :node |

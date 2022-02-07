@@ -25,8 +25,9 @@ SWTestRunner class >> go [
 
 { #category : #accessing }
 SWTestRunner class >> initializeClassSideTranspiler: transpiler [
+	self halt; flag: #toRewrite.
 	transpiler
-		defineMethod: #name as: [ :newT |
+		declareMethod: #name as: [ :newT |
 			newT
 				specifyReturnTypeAs: String;
 				markAsDecoded;

@@ -52,57 +52,57 @@ SWServer class >> filePathOf: aName [
 { #category : #initialization }
 SWServer class >> initialize_STONWriter: ct [
 	ct
-		defineMethodReturnsReceiver: #jsonMode:
+		declareMethodReturnsReceiver: #jsonMode:
 
 ]
 
 { #category : #initialization }
 SWServer class >> initialize_ZnEntity: ct [
 	ct
-		defineMethod: #contents asReturn: String
+		declareMethod: #contents asReturn: String
 
 ]
 
 { #category : #initialization }
 SWServer class >> initialize_ZnEntityClass: ct [
 	ct
-		defineMethodReturnsReceiversInstance: #type:
+		declareMethodReturnsReceiversInstance: #type:
 
 ]
 
 { #category : #initialization }
 SWServer class >> initialize_ZnHeadersClass: ct [
 	ct
-		defineMethodReturnsReceiversClass: #defaultResponseHeaders
+		declareMethodReturnsReceiversClass: #defaultResponseHeaders
 
 ]
 
 { #category : #initialization }
 SWServer class >> initialize_ZnManagingMultiThreadedServer: ct [
 	ct
-		defineMethodReturnsReceiver: #closeConnections
+		declareMethodReturnsReceiver: #closeConnections
 
 ]
 
 { #category : #initialization }
 SWServer class >> initialize_ZnServer: ct [
 	ct
-		defineMethodReturnsSecondArgument: #optionAt:ifAbsent:
+		declareMethodReturnsSecondArgument: #optionAt:ifAbsent:
 
 ]
 
 { #category : #initialization }
 SWServer class >> initialize_ZnSingleThreadedServer: ct [
 	ct
-		defineMethodReturnsReceiver: #stop:;
-		defineMethodReturnsReceiver: #start
+		declareMethodReturnsReceiver: #stop:;
+		declareMethodReturnsReceiver: #start
 
 ]
 
 { #category : #initialization }
 SWServer class >> initialize_ZnWebSocket: ct [
 	ct
-		defineMethodReturnsReceiver: #sendMessage:
+		declareMethodReturnsReceiver: #sendMessage:
 
 ]
 

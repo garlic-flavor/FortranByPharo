@@ -5,11 +5,11 @@ Object class >> initializeInstanceSideTranspiler: transpiler [
 	self error; flag: #toRemove.
 	transpiler
 		setBreakpointOn: #subclassResponsibility;
-		defineMethodAsCompareOperator: #=;
-		defineMethod: #asString asReturn: String;
-		defineMethodReturnsReceiver: #copy;
-		defineMethodReturnsReceiver: #changed:;
-		defineMethod: #at: as: [:newT |
+		declareMethodAsCompareOperator: #=;
+		declareMethod: #asString asReturn: String;
+		declareMethodReturnsReceiver: #copy;
+		declareMethodReturnsReceiver: #changed:;
+		declareMethod: #at: as: [:newT |
 			self error; flag: #toRemove.
 "
 			(aCallee receiverClass = String or: [ aCallee receiverClass = ByteString ]) ifTrue: [ Character ] ifFalse: [

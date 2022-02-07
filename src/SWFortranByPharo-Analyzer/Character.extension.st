@@ -3,12 +3,12 @@ Extension { #name : #Character }
 { #category : #'*SWFortranByPharo-Analyzer' }
 Character class >> initializeClassSideTranspiler: transpiler [
 	transpiler
-		defineMethodReturnsReceiversInstance: #value:
+		declareMethodReturnsReceiversInstance: #value:
 ]
 
 { #category : #'*SWFortranByPharo-Analyzer' }
 Character class >> initializeInstanceSideTranspiler: transpiler [
 	transpiler
-		defineMethod: #asciiValue asReturn: SmallInteger
+		declareMethod: #asciiValue asReturn: SmallInteger
 
 ]

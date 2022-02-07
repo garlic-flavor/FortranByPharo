@@ -31,7 +31,7 @@ SWStd class >> import: identifiers from: aFile [
 { #category : #initialization }
 SWStd class >> initializeClassSideTranspiler: transpiler [
 	transpiler
-		defineMethod: #print: as: [ :newT |
+		declareMethod: #print: as: [ :newT |
 			newT
 				specifyReturnTypeAs: self;
 				senderGenerator: [ :t :aNode |
@@ -39,7 +39,7 @@ SWStd class >> initializeClassSideTranspiler: transpiler [
 				];
 				yourself
 		];
-		defineMethod: #import:from: as: [ :newT |
+		declareMethod: #import:from: as: [ :newT |
 			newT
 				specifyReturnTypeAs: self;
 				senderGenerator: [ :t :aNode |

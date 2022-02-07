@@ -3,7 +3,7 @@ Extension { #name : #ProtoObject }
 { #category : #'*SWFortranByPharo-Analyzer' }
 ProtoObject class >> initializeInstanceSideTranspiler: aCT [
 	aCT
-		defineMethodAsCompareOperator: #==;
+		declareMethodAsCompareOperator: #==;
 		defineMethodReturnsReceiversClass: #class as: [ :newT |
 			newT
 				senderGenerator: [ :t :node |

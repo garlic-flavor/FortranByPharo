@@ -4,7 +4,7 @@ Extension { #name : #ThreadSafeTranscript }
 ThreadSafeTranscript class >> initializeInstanceSideTranspiler: aCT [
 	aCT targetClass isInstanceSide ifTrue: [
  		aCT
-			defineMethodReturnsReceiver: #show:;
-			defineMethodReturnsReceiver: #cr
+			declareMethodReturnsReceiver: #show:;
+			declareMethodReturnsReceiver: #cr
 	]
 ]

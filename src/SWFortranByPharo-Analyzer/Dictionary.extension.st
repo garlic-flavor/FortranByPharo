@@ -4,8 +4,8 @@ Extension { #name : #Dictionary }
 Dictionary class >> initializeInstanceSideTranspiler: transpiler [
 
 	transpiler
-		defineMethodReturnsSecondArgument: #at:put:;
-		defineMethodReturnsSecondArgument: #at:ifAbsentPut:;
-		defineMethod: #includesKey: asReturn: Boolean
+		declareMethodReturnsSecondArgument: #at:put:;
+		declareMethodReturnsSecondArgument: #at:ifAbsentPut:;
+		declareMethod: #includesKey: asReturn: Boolean
 
 ]

@@ -26,7 +26,7 @@ SWShellEnvironment class >> default [
 SWShellEnvironment class >> initializeInstanceSideTranspiler: transpiler [
 	self error; flag: #toReimplement.
 	transpiler
-		defineMethod: #localDirectory as: [ :newT |
+		declareMethod: #localDirectory as: [ :newT |
 			newT
 				specifyReturnTypeAs: FileLocator;
 				markAsDecoded;
@@ -43,15 +43,15 @@ SWShellEnvironment class >> initializeInstanceSideTranspiler: transpiler [
 { #category : #initialization }
 SWShellEnvironment class >> initialize_OSEnvironmentClass: ct [
 	ct
-		defineMethodReturnsReceiversInstance: #environmentFor:
+		declareMethodReturnsReceiversInstance: #environmentFor:
 
 ]
 
 { #category : #initialization }
 SWShellEnvironment class >> initialize_OSSUnixSubprocess: ct [
 	ct
-		defineMethodReturnsReceiver: #run;
-		defineMethodReturnsReceiver: #initialize
+		declareMethodReturnsReceiver: #run;
+		declareMethodReturnsReceiver: #initialize
 
 ]
 
