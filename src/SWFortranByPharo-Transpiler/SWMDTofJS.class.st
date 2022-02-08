@@ -7,12 +7,6 @@ Class {
 	#category : #'SWFortranByPharo-Transpiler-JS'
 }
 
-{ #category : #'as yet unclassified' }
-SWMDTofJS class >> methodBodyTranspilerClass [
-	self error; flag: #toRemove.
-	^ SWMBTofJS
-]
-
 { #category : #'code generation' }
 SWMDTofJS >> putFunctionFooter [
 	self stream putLine: '}'.

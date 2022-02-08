@@ -11,13 +11,12 @@ Class {
 	#superclass : #Object,
 	#instVars : [
 		'targetClass',
+		'pool',
+		'classSide',
+		'slot',
 		'methods',
 		'senderInitializer',
-		'decoderInitializer',
-		'pool',
-		'sourceHash',
-		'slot',
-		'classSide'
+		'decoderInitializer'
 	],
 	#category : #'SWFortranByPharo-Analyzer-Analyzer'
 }
@@ -208,184 +207,6 @@ SWClass >> decoderInitializer: anObject [
 ]
 
 { #category : #api }
-SWClass >> defineMethodAsBinaryOperator: aName as: anInitializer [
-self error; flag: #toRemove.
-
-	self generator at: aName put: [ :aSender |
-		anInitializer value: (aSender
-			return: aSender operands first;
-			yourself)
-	]
-
-]
-
-{ #category : #api }
-SWClass >> defineMethodAsCompareOperator: aName as: anInitializer [
-self error; flag: #toRemove.
-
-	self generator at: aName put: [ :aCallee |
-		anInitializer value: ((self transpilerClass newFrom: aCallee)
-			specifyReturnTypeAs: Boolean;
-			markAsDecoded;
-			yourself)
-	]
-
-]
-
-{ #category : #api }
-SWClass >> defineMethodReturnsFirstArgument: aName as: anInitializer [
-self error; flag: #toRemove.
-	self generator at: aName put: [ :aCallee |
-		anInitializer value: ((self transpilerClass newFrom: aCallee)
-			return: (aCallee stack at: 1);
-			markAsDecoded;
-			yourself)
-	]
-
-]
-
-{ #category : #api }
-SWClass >> defineMethodReturnsFirstOrSecondArgument: aName as: anInitializer [
-self error; flag: #toRemove.
-	self generator at: aName put: [ :aCallee |
-		anInitializer value: ((self transpilerClass newFrom: aCallee)
-		return: ((SWVariableTypeInfo new)
-			<< (aCallee stack at: 1);
-			<< (aCallee stack at: 2);
-			yourself);
-		markAsDecoded;
-		yourself)
-	]
-
-]
-
-{ #category : #api }
-SWClass >> defineMethodReturnsReceiver: aName as: anInitializer [
-self error; flag: #toRemove.
-	self generator at: aName put: [ :aCallee |
-		anInitializer value: ((self transpilerClass newFrom: aCallee)
-		return: aCallee stack first;
-		markAsDecoded;
-		yourself)
-	]
-
-]
-
-{ #category : #api }
-SWClass >> defineMethodReturnsReceiversClass: aName as: anInitializer [
-self error; flag: #toRemove.
-	self generator at: aName put: [:aCallee |
-		anInitializer value: ((self transpilerClass newFrom: aCallee)
-			return: (SWVariableTypeInfo new: aCallee receiverClass classSide);
-			markAsDecoded;
-			yourself)
-	]
-
-]
-
-{ #category : #api }
-SWClass >> defineTypeOf: aName is: aType [
-self error; flag: #toRemove.
-
-	(self getVariableInfoOf: aName) << aType
-
-]
-
-{ #category : #private }
-SWClass >> definedMethod: aCallee ifAbsent: absentBlock [
-self error; flag: #toRemove.
-	^ self generator at: aCallee selector ifPresent: [ :gen |
-		gen value: aCallee
-	] ifAbsent: [
-		absentBlock value
-	].
-
-]
-
-{ #category : #private }
-SWClass >> definedMethod: aSender ifPresent: presentBlock [
-self error; flag: #toRemove.
-	self generator at: aSender selector ifPresent: [ :gen |
-		presentBlock value: (gen value: aSender)
-	]
-
-]
-
-{ #category : #accessing }
-SWClass >> getMethodDecoderOf: aSender [
-self error; flag: #toRewrite.
-
-	self methods at: aSender ifAbsent: [ |newT|
-		newT := self definedMethod: aSender ifAbsent: [
-			(self transpilerClass newFrom: aSender)
-				classInfo: self;
-				pool: self pool;
-				yourself
-		]
-	]
-"	
-	detect: [ :one | one = aCalleeInfo ] ifNone: [|transpiler|
-		transpiler := self definedMethod: aCalleeInfo ifAbsent: [
-			(self transpilerClass newFrom: aCalleeInfo)
-				classInfo: self;
-				pool: self pool;
-				yourself.
-		].
-		self methods add: transpiler.
-		transpiler
-			logger: self pool logger;
-			decode;
-			yourself
-	].
-"
-
-]
-
-{ #category : #accessing }
-SWClass >> getMethodDecoderOf: aSelector with: args [
-	self error; flag: #toImplement
-"
-	^ self methods detect: [ :one | one = aCalleeInfo ] ifNone: [|transpiler|
-		transpiler := self definedMethod: aCalleeInfo ifAbsent: [
-			(self transpilerClass newFrom: aCalleeInfo)
-				classInfo: self;
-				pool: self pool;
-				yourself.
-		].
-		self methods add: transpiler.
-		transpiler
-			logger: self pool logger;
-			decode;
-			yourself
-	].
-"
-
-]
-
-{ #category : #accessing }
-SWClass >> getMethodTranspiler: aCalleeInfo [
-	"This returns a decoded transpiler.
-	The returned object is derived from SWCalleeInfo. 
-	but the returned object never equal to the instance of aCalleeInfo."
-self error; flag: #toRemove.
-
-	^ self methods detect: [ :one | one = aCalleeInfo ] ifNone: [|transpiler|
-		transpiler := self definedMethod: aCalleeInfo ifAbsent: [
-			(self transpilerClass newFrom: aCalleeInfo)
-				classInfo: self;
-				pool: self pool;
-				yourself.
-		].
-		self methods add: transpiler.
-		transpiler
-			logger: self pool logger;
-			decode;
-			yourself
-	].
-
-]
-
-{ #category : #'instance creation' }
 SWClass >> getSenderOf: aMethod with: args [
 	|sender decoder|
 
@@ -408,20 +229,20 @@ SWClass >> getSenderOf: aMethod with: args [
 
 ]
 
-{ #category : #accessing }
+{ #category : #api }
 SWClass >> getVariableInfoAtOffset: offset [
 	"Return SWVariableInfo in slots at 0 based offset."
 	^ self slot atOffset: offset.
 ]
 
-{ #category : #accessing }
+{ #category : #api }
 SWClass >> getVariableInfoOf: aName [
 	"Return SWVariableInfo searched by its name."
 	^ self slot detect: [ :each | each isNotNil and: [ each name = aName ] ]
 
 ]
 
-{ #category : #accessing }
+{ #category : #api }
 SWClass >> getVariableInfoOf: aName ifPresent: aPresentBlock [
 	"Return SWVariableInfo searched by its name."
 	^ self slot detect: [ :each | each isNotNil and: [ each name = aName ] ] ifFound: aPresentBlock
@@ -699,7 +520,7 @@ SWClass >> methods: anObject [
 	methods := anObject
 ]
 
-{ #category : #'instance creation' }
+{ #category : #private }
 SWClass >> newDecoderOf: aMethod with: args [
 	|decoder|
 	decoder := (self transpilerClass new: aMethod with: args)
@@ -789,14 +610,6 @@ SWClass >> targetClass [
 SWClass >> targetClass: anObject [
 	targetClass := anObject.
 	self initialize: anObject
-	"
-	self error; flag: #toRemove.
-	initializer := targetClass isInstanceSide
-		ifTrue: [ #initializeInstanceSideTranspiler: ] ifFalse: [ #initializeClassSideTranspiler: ].
-	(targetClass instanceSide respondsTo: initializer) ifTrue: [
-		targetClass instanceSide perform: initializer with: self
-	]
-	"
 
 ]
 

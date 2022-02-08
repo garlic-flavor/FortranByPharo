@@ -1,12 +1,11 @@
+"
+This is an implementation of SWSenderTranspiler for ECMAScript.
+"
 Class {
 	#name : #SWSTofJS,
 	#superclass : #SWSenderTranspiler,
 	#category : #'SWFortranByPharo-Transpiler-JS'
 }
-
-{ #category : #accessing }
-SWSTofJS class >> generator [
-]
 
 { #category : #accessing }
 SWSTofJS >> generator [
@@ -17,7 +16,7 @@ SWSTofJS >> generator [
 		self method methodClass isInstanceSide ifTrue: [ ^ ordinary ].
 		receiverClass := self operands receiver value.
 		receiverClass = self method methodClass ifTrue: [ ^ ordinary ].
-
+		"For static method."
 		generator := [ :transpiler :aNode |
 			transpiler
 				put: self method methodClass instanceSide name;

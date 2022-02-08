@@ -134,7 +134,7 @@ SWTranspilerStream >> newline: anObject [
 	newline := anObject
 ]
 
-{ #category : #accessing }
+{ #category : #api }
 SWTranspilerStream >> preventDelimiter [
 	preventDelimiter := true
 ]
@@ -151,7 +151,7 @@ SWTranspilerStream >> put: code [
 	payload nextPutAll: code.
 ]
 
-{ #category : #'code generation' }
+{ #category : #api }
 SWTranspilerStream >> putComment: aComment [
 
 	aComment ifNil: [ ^ self ].
@@ -174,7 +174,7 @@ SWTranspilerStream >> putComment: aComment [
 	]
 ]
 
-{ #category : #'as yet unclassified' }
+{ #category : #api }
 SWTranspilerStream >> putDelimiter [
 	preventDelimiter ifNotNil: [
 		preventDelimiter := nil

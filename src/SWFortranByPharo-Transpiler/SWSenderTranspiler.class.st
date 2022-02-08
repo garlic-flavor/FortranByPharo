@@ -42,7 +42,7 @@ SWSenderTranspiler >> generator: anObject [
 	generator := anObject
 ]
 
-{ #category : #'as yet unclassified' }
+{ #category : #'code generation' }
 SWSenderTranspiler >> transpileUsing: transpiler [
 	self generator cull: transpiler cull: self node
 ]

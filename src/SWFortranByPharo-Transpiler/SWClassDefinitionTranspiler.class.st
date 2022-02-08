@@ -10,38 +10,12 @@ Class {
 	#category : #'SWFortranByPharo-Transpiler-Common'
 }
 
-{ #category : #'as yet unclassified' }
+{ #category : #accessing }
 SWClassDefinitionTranspiler class >> methodDefinitionTranspilerClass [
 	^ self subclassResponsibility 
 ]
 
-{ #category : #api }
-SWClassDefinitionTranspiler >> declareMethodAsBinaryOperator: aName [
-	^ super declareMethodAsBinaryOperator: aName
-"
-	self error; flag: #toRewrite.
-	^ self defineMethodAsBinaryOperator: aName as: [ :newT |
-		newT
-			senderGenerator: [ :t :node | t putOpBinary: node ];
-			yourself
-	]
-"
-]
-
-{ #category : #api }
-SWClassDefinitionTranspiler >> declareMethodAsCompareOperator: aName [
-	^ super declareMethodAsCompareOperator: aName.
-"
-	self error; flag: #toRemove.
-	^ self defineMethodAsCompareOperator: aName as: [ :newT |
-		newT
-			senderGenerator: [ :t :node | t putOpBinary: node ];
-			yourself
-	]
-"
-]
-
-{ #category : #'as yet unclassified' }
+{ #category : #'public API' }
 SWClassDefinitionTranspiler >> defineMethodBody: aName as: anInitializer [
 	self addDecoderInitializer: aName with: [ :decoder |
 		decoder
@@ -50,7 +24,7 @@ SWClassDefinitionTranspiler >> defineMethodBody: aName as: anInitializer [
 	]
 ]
 
-{ #category : #'as yet unclassified' }
+{ #category : #'public API' }
 SWClassDefinitionTranspiler >> defineMethodSender: aName as: aGenerator [
 	self addSenderInitializer: aName with: [ :sender |
 		sender
@@ -86,17 +60,17 @@ SWClassDefinitionTranspiler >> initialize_TestCaseClass [
 
 { #category : #testing }
 SWClassDefinitionTranspiler >> isTranspiled [
-	^ stream isNotNil
+	^ stream isNotNil or: [ stream isEmpty ]
 ]
 
-{ #category : #'as yet unclassified' }
+{ #category : #'code generation' }
 SWClassDefinitionTranspiler >> putClassFooter [
 	self stream
 		put: '}';
 		putLine
 ]
 
-{ #category : #'as yet unclassified' }
+{ #category : #'code generation' }
 SWClassDefinitionTranspiler >> putClassHeader [
 	self stream
 		put: 'class ';
@@ -105,7 +79,7 @@ SWClassDefinitionTranspiler >> putClassHeader [
 		putLine
 ]
 
-{ #category : #'as yet unclassified' }
+{ #category : #'code generation' }
 SWClassDefinitionTranspiler >> putMember [
 	self slot do: [ :each |
 		(each isNotNil and: [ each name isEmptyOrNil not ]) ifTrue: [
@@ -116,17 +90,16 @@ SWClassDefinitionTranspiler >> putMember [
 
 ]
 
-{ #category : #'as yet unclassified' }
+{ #category : #'code generation' }
 SWClassDefinitionTranspiler >> putMemberDeclarationOf: aVariableTypeInfo [
 	^ self subclassResponsibility
 
 ]
 
-{ #category : #'as yet unclassified' }
+{ #category : #'code generation' }
 SWClassDefinitionTranspiler >> putMethodDefinition: aMBT [
 	aMBT ifNil: [ ^ self ].
 	aMBT class methodDefinitionTranspilerClass new
-		stream: self stream;
 		bodyTranspiler: aMBT;
 		transpile
 
@@ -135,7 +108,7 @@ SWClassDefinitionTranspiler >> putMethodDefinition: aMBT [
 { #category : #accessing }
 SWClassDefinitionTranspiler >> stream [
 
-	^ stream ifNil: [ stream := SWTranspilerStream new ]
+	^ stream ifNil: [ stream := self pool owner stream ]
 ]
 
 { #category : #accessing }
@@ -155,23 +128,21 @@ SWClassDefinitionTranspiler >> transpile [
 
 ]
 
-{ #category : #'as yet unclassified' }
+{ #category : #private }
 SWClassDefinitionTranspiler >> transpileAsClassSide [
 
 	self putMember
 
 ]
 
-{ #category : #'as yet unclassified' }
+{ #category : #private }
 SWClassDefinitionTranspiler >> transpileAsInstanceSide [
 
 	self stream putComment: self targetClass comment.
 	self putClassHeader.
 	self stream incIndent.
 	classSide ifNotNil: [
-		classSide
-			stream: self stream;
-			transpileAsClassSide
+		classSide transpileAsClassSide
 	].
 	
 	self putMember.

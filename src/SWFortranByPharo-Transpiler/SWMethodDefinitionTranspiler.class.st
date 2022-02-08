@@ -11,22 +11,6 @@ Class {
 	#category : #'SWFortranByPharo-Transpiler-Common'
 }
 
-{ #category : #decoding }
-SWMethodDefinitionTranspiler class >> decode: selector types: types [
-	|mdt|
-	mdt := self new.
-	mdt bodyTranspiler: ((self methodBodyTranspilerClass
-		new: selector with: types)
-		stream: mdt stream).
-	^ mdt
-
-]
-
-{ #category : #'as yet unclassified' }
-SWMethodDefinitionTranspiler class >> methodBodyTranspilerClass [
-	^ self subclassResponsibility 
-]
-
 { #category : #accessing }
 SWMethodDefinitionTranspiler >> bodyTranspiler [
 
@@ -52,7 +36,7 @@ SWMethodDefinitionTranspiler >> putFunctionHeader [
 { #category : #accessing }
 SWMethodDefinitionTranspiler >> stream [
 
-	^ stream ifNil: [ stream := SWTranspilerStream new ]
+	^ stream ifNil: [ stream := self bodyTranspiler stream ]
 ]
 
 { #category : #accessing }
@@ -66,9 +50,7 @@ SWMethodDefinitionTranspiler >> transpile [
 	self stream putComment: self bodyTranspiler method comment.
 	self putFunctionHeader.
 	self stream incIndent.
-	self bodyTranspiler
-		stream: self stream;
-		transpile.
+	self bodyTranspiler transpile.
 	self stream decIndent.
 	self putFunctionFooter.
 

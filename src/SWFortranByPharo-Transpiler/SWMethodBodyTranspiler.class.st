@@ -6,9 +6,7 @@ Class {
 	#superclass : #SWDecoder,
 	#instVars : [
 		'stream',
-		'type',
 		'messageNest',
-		'senderGenerator',
 		'generator'
 	],
 	#category : #'SWFortranByPharo-Transpiler-Common'
@@ -19,26 +17,9 @@ SWMethodBodyTranspiler class >> mangleClass [
 	^ self subclassResponsibility 
 ]
 
-{ #category : #utils }
-SWMethodBodyTranspiler class >> messageTranspilerMethodNameFor: aSelector [
-	self error; flag: #toRemove.
-	^ ((self mangleClass safeSelectorNameOf: aSelector), 'For:With:') asSymbol
-]
-
 { #category : #'as yet unclassified' }
 SWMethodBodyTranspiler class >> methodDefinitionTranspilerClass [ 
 	^ self subclassResponsibility
-]
-
-{ #category : #utils }
-SWMethodBodyTranspiler class >> search: selector in: aClass [
-	self error; flag: #toRemove.
-	aClass ifNil: [ ^ nil ].
-
-	^ aClass methodDict at: selector ifAbsent: [
-			self search: selector in: aClass superclass
-	]
-
 ]
 
 { #category : #accessing }
@@ -46,54 +27,11 @@ SWMethodBodyTranspiler class >> senderTranspilerClass [
 	^ SWSenderTranspiler
 ]
 
-{ #category : #utils }
-SWMethodBodyTranspiler class >> uniqueMessageTranspilerNameFor: aSelector for: type [
-	self error; flag: #toRemove.
-	^ (String streamContents: [ :s |
-		s << type; <<  '_'; << (self mangleClass safeSelectorNameOf: aSelector); << 'With:Using:'
-	]) asSymbol
-	
-
-]
-
 { #category : #'code generation' }
 SWMethodBodyTranspiler >> << anObject [
 	self stream log.
 	anObject transpileUsing: self
 
-]
-
-{ #category : #'private - utilities' }
-SWMethodBodyTranspiler >> classOf: aNode [
-	self error; flag: #toRemove.
-	aNode class = RBVariableNode ifTrue: [
-		^ aNode name first isUppercase ifTrue: [
-			(Smalltalk globals at: aNode name asSymbol) class
-		] ifFalse: [
-			(self getVariableInfoOf: aNode name) type
-		]
-	].
-
-	aNode class = RBLiteralValueNode ifTrue: [
-		^ aNode value class
-	].
-
-	aNode class = RBMessageNode ifTrue: [
-		^ (self messages at: aNode) return type
-	].
-
-	self error: 'to implement'.
-	self flag: #toImplement.
-]
-
-{ #category : #'private - utilities' }
-SWMethodBodyTranspiler >> classSideClassOf: aNode [
-self error; flag: #toRemove.
-	^ aNode class = RBVariableNode ifTrue: [
-		aNode variable value class classSide
-	] ifFalse: [
-		nil
-	]
 ]
 
 { #category : #'code generation' }
@@ -135,33 +73,6 @@ SWMethodBodyTranspiler >> generator: anObject [
 	generator := anObject
 ]
 
-{ #category : #'private - testing' }
-SWMethodBodyTranspiler >> hasOwnMessageTranspilerMethodOf: aSelector ifTrue: aBlock [
-	|otms aMethod|
-	self error; flag: #toRemove.
-	otms := self class messageTranspilerMethodNameFor: aSelector.
-	(aMethod := self class search: otms in: self class) ifNotNil: [
-		aBlock value: [ :receiver :arguments |
-			aMethod valueWithReceiver: self arguments: { receiver. arguments }
-		]
-	]
-
-]
-
-{ #category : #'private - testing' }
-SWMethodBodyTranspiler >> ifUniqueMessageTranspilerExistsOn: receiver of: selector thenDo: aBlock [
-	| receiverClassSideClass selectorName transpiler |
-self error; flag: #toRemove.
-	receiverClassSideClass := self classSideClassOf: receiver.
-	selectorName := self class uniqueMessageTranspilerNameFor: selector for: self type.
-	(transpiler := self class search: selectorName in: receiverClassSideClass) ifNotNil: [
-		aBlock value: [ :arguments |
-			transpiler valueWithReceiver: receiverClassSideClass arguments: { arguments. self }
-		]
-	].
-
-]
-
 { #category : #'code generation - protected' }
 SWMethodBodyTranspiler >> incIndent [
 	self stream incIndent
@@ -178,7 +89,7 @@ SWMethodBodyTranspiler >> logging: trueOrFalse [
 	self stream logging: trueOrFalse
 ]
 
-{ #category : #'as yet unclassified' }
+{ #category : #'private - code generation' }
 SWMethodBodyTranspiler >> mangle: aName [
 	^ self class mangleClass mangle: aName
 ]
@@ -195,22 +106,12 @@ SWMethodBodyTranspiler >> messageNest: anObject [
 	messageNest := anObject
 ]
 
-{ #category : #'code generation' }
-SWMethodBodyTranspiler >> opEqual_For: receiver With: arguments [
-	self stream log: [ receiver asString, ' == ', (arguments at: 1) asString ].
-	self
-		<< receiver;
-		put: ' == ';
-		<< (arguments at: 1).
-
-]
-
 { #category : #'code generation - protected' }
 SWMethodBodyTranspiler >> preventNewline [
 	self stream preventNewline
 ]
 
-{ #category : #'as yet unclassified' }
+{ #category : #'code generation - protected' }
 SWMethodBodyTranspiler >> preventStatementDelimiter [
 	self stream preventDelimiter
 ]
@@ -268,16 +169,9 @@ SWMethodBodyTranspiler >> putBlock: aBlockNode [
 		put: '}'
 ]
 
-{ #category : #accessing }
+{ #category : #'code generation' }
 SWMethodBodyTranspiler >> putBlockAsExpression: aBlock [
 	^ self subclassResponsibility 
-]
-
-{ #category : #accessing }
-SWMethodBodyTranspiler >> putCallee: aNode [
-	self stream log.
-	self senderGenerator cull: self cull: aNode
-
 ]
 
 { #category : #'code generation' }
@@ -326,29 +220,29 @@ SWMethodBodyTranspiler >> putCode: code with: anAssociationArray [
 
 ]
 
-{ #category : #'as yet unclassified' }
+{ #category : #streaming }
 SWMethodBodyTranspiler >> putFilenameOn: aStream [
 	aStream
 		<< self receiverClass instanceSide name;
 		<< self selector asCamelCase
 ]
 
-{ #category : #'as yet unclassified' }
+{ #category : #'code generation' }
 SWMethodBodyTranspiler >> putIfFalse: aNode [
 	^ self subclassResponsibility 
 ]
 
-{ #category : #accessing }
+{ #category : #'code generation' }
 SWMethodBodyTranspiler >> putIfTrue: aNode [
 	^ self subclassResponsibility
 ]
 
-{ #category : #accessing }
+{ #category : #'code generation' }
 SWMethodBodyTranspiler >> putIfTrueIfFalse: aNode [
 	^ self subclassResponsibility
 ]
 
-{ #category : #'as yet unclassified' }
+{ #category : #'code generation' }
 SWMethodBodyTranspiler >> putImport: anArray from: aSource [
 	^ self subclassResponsibility 
 ]
@@ -366,22 +260,9 @@ SWMethodBodyTranspiler >> putLine: anObject [
 
 { #category : #'code generation' }
 SWMethodBodyTranspiler >> putMessage: aNode [
-	|t2|
 	self stream log: [ aNode receiver asString, ' >> ', aNode selector asString ].
 	self incMessageNest.
-
 	self << (self senders at: aNode).
-"
-	t2 := (self messages at: aNode) asCallee
-		messageNest: self messageNest + 1;
-		messages: self messages;
-		stack: self stack;
-		classInfo: self classInfo;
-		stream: self stream;
-		yourself.
-
-	t2 putCallee: aNode.
-"
 	self decMessageNest
 ]
 
@@ -396,12 +277,12 @@ SWMethodBodyTranspiler >> putMessage: aNode withReceiver: aRNode [
 	self << sender
 ]
 
-{ #category : #'as yet unclassified' }
+{ #category : #'code generation' }
 SWMethodBodyTranspiler >> putNew: aNode [
 	^ self subclassResponsibility
 ]
 
-{ #category : #'as yet unclassified' }
+{ #category : #'code generation' }
 SWMethodBodyTranspiler >> putOpBinary: aNode [
 	self stream log.
 	
@@ -411,39 +292,6 @@ SWMethodBodyTranspiler >> putOpBinary: aNode [
 		put: aNode selector;
 		put: ' ';
 		<< (aNode arguments at: 1)
-
-]
-
-{ #category : #'code generation' }
-SWMethodBodyTranspiler >> putOrdinaryCallee: aNode [
-	self stream log.
-	self 
-		withoutMessageNestDo: [
-			self << aNode receiver
-		];
-		putClassAccessor;
-		put: (self class mangleClass mangle: self);
-		putArguments: aNode arguments
-
-]
-
-{ #category : #'code generation' }
-SWMethodBodyTranspiler >> putOrdinaryMessage: aNode withReceiver: aRNode [
-	self error; flag: #toRemove.
-
-	self stream log.
-	self << aRNode.
-	aNode selector first isLetter ifTrue: [
-		self
-			putClassAccessor;
-			put: (self class mangleClass mangle: (self messages at: aNode));
-			putArguments: aNode arguments.
-	] ifFalse: [
-		self
-			put: aNode selector;
-			<< (aNode arguments at: 1)
-	]
-
 
 ]
 
@@ -468,7 +316,7 @@ SWMethodBodyTranspiler >> putReturn: value [
 		]
 ]
 
-{ #category : #'as yet unclassified' }
+{ #category : #'code generation' }
 SWMethodBodyTranspiler >> putReturnSelf [
 	self putStatement: (RBReturnNode value: (RBVariableNode named: 'self'))
 ]
@@ -478,7 +326,7 @@ SWMethodBodyTranspiler >> putSelf [
 	^ self subclassResponsibility 
 ]
 
-{ #category : #'as yet unclassified' }
+{ #category : #'code generation' }
 SWMethodBodyTranspiler >> putSelfDefinition [
 	^ self subclassResponsibility 
 ]
@@ -562,46 +410,6 @@ SWMethodBodyTranspiler >> putVariableDeclarationOf: aVariableInfo [
 	^ self subclassResponsibility 
 ]
 
-{ #category : #'as yet unclassified' }
-SWMethodBodyTranspiler >> putYourself: aNode [
-	^ self subclassResponsibility 
-]
-
-{ #category : #'private - code generation' }
-SWMethodBodyTranspiler >> selectTranspiler: aNode withReceiver: aRNode [
-	self error; flag: #toRemove.
-	self stream log: [ aNode receiver asString, ' >> ', aNode selector asString ].
-	self ifUniqueMessageTranspilerExistsOn: aRNode of: aNode selector thenDo: [ :proc |
-		^ proc value: aNode arguments
-	].
-	self hasOwnMessageTranspilerMethodOf: aNode selector ifTrue: [ :proc |
-		^ proc with: aRNode with: aNode arguments
-	].
-	^ self putOrdinaryMessage: aNode withReceiver: aRNode
-
-]
-
-{ #category : #accessing }
-SWMethodBodyTranspiler >> senderGenerator [
-	self error; flag: #toRemove.
-	^ senderGenerator ifNil: [
-		senderGenerator := [ :transpiler :aNode ||transpilerSelector|
-			transpilerSelector := transpiler class mangleClass selectorForTranspilerOf: aNode selector.
-			(transpiler respondsTo: transpilerSelector) ifTrue: [
-				transpiler perform: transpilerSelector with: aNode
-			] ifFalse: [
-				transpiler putOrdinaryCallee: aNode
-			]
-		]
-	]
-]
-
-{ #category : #accessing }
-SWMethodBodyTranspiler >> senderGenerator: anObject [
-	self error; flag: #toRemove.
-	senderGenerator := anObject
-]
-
 { #category : #accessing }
 SWMethodBodyTranspiler >> stream [
 
@@ -625,19 +433,7 @@ SWMethodBodyTranspiler >> transpile [
 	^ self stream contents
 ]
 
-{ #category : #accessing }
-SWMethodBodyTranspiler >> type [
-self error; flag: #toRemove.
-	^ type
-]
-
-{ #category : #accessing }
-SWMethodBodyTranspiler >> type: anObject [
-
-	type := anObject
-]
-
-{ #category : #enumerating }
+{ #category : #'private - code generation' }
 SWMethodBodyTranspiler >> withoutMessageNestDo: aBlock [
 	|nest|
 	nest := messageNest.

@@ -32,16 +32,16 @@ SWModuleTranspiler class >> newFrom: aClass [
 
 { #category : #accessing }
 SWModuleTranspiler >> contents [
-	self stream isEmpty ifTrue: [ self transpile ].
+	self payload isDecoded ifFalse: [ self transpile ].
 	^ self stream contents
 ]
 
-{ #category : #'as yet unclassified' }
+{ #category : #'public API' }
 SWModuleTranspiler >> decode: aSelector with: args [
-	^ self pool newSenderOf: aSelector super: false with: args
+	^ self payload pool newSenderOf: aSelector super: false with: args
 ]
 
-{ #category : #'as yet unclassified' }
+{ #category : #'public API' }
 SWModuleTranspiler >> enableDebugMode [
 	self payload debugMode: true.
 
@@ -52,28 +52,12 @@ SWModuleTranspiler >> filename [
 	^ String streamContents: [ :s | self payload putFilenameOn: s ]
 ]
 
-{ #category : #'code generation' }
+{ #category : #'public API' }
 SWModuleTranspiler >> import: anArray from: basename [
 	self payload
 		putImport: anArray from: basename;
 		putStatementDelimiter;
 		cr
-]
-
-{ #category : #testing }
-SWModuleTranspiler >> isToTranspile: aClass [
-	|tClass|
-self error; flag: #toRemove.
-
-	tClass := self payload methodClass.
-	tClass ifNil: [ ^ false ].
-	tClass instanceSide = aClass instanceSide ifTrue: [ ^ true ].
-
-	^ (tClass instanceSide respondsTo: #dependings) ifTrue: [
-		(tClass instanceSide perform: #dependings)
-			anySatisfy: [ :each | each = aClass instanceSide ]
-	] ifFalse: [ false ]
-
 ]
 
 { #category : #accessing }
@@ -88,12 +72,7 @@ SWModuleTranspiler >> payload: anObject [
 	payload := anObject
 ]
 
-{ #category : #accessing }
-SWModuleTranspiler >> pool [
-	^ self payload pool
-]
-
-{ #category : #'as yet unclassified' }
+{ #category : #private }
 SWModuleTranspiler >> solveDependencies [
 	|solver tClass|
 	solver := #solveDependenciesUsing:.
@@ -101,14 +80,13 @@ SWModuleTranspiler >> solveDependencies [
 	(tClass respondsTo: solver) ifTrue: [
 		tClass perform: solver with: self
 	].
-	self pool detect: [ :each | each targetClass = tClass ] ifFound: [ :t |
+	self payload pool detect: [ :each | each targetClass = tClass ] ifFound: [ :t |
 		self transpile: tClass
 	]
 ]
 
 { #category : #accessing }
 SWModuleTranspiler >> stream [
-
 	^ self payload stream
 ]
 
@@ -116,26 +94,17 @@ SWModuleTranspiler >> stream [
 SWModuleTranspiler >> transpile [
 	self payload decode.
 	self solveDependencies.
-"
-	self flag: #toRemove.
-	self payload pool select: [ :each | self isToTranspile: each targetClass ] thenDo: [ :each |
-		each
-			stream: self stream;
-			transpile
-	].
-"
 	self payload transpile.
 
 ]
 
-{ #category : #'code generation' }
+{ #category : #'public API' }
 SWModuleTranspiler >> transpile: aClass [
 	|ct solver|
-	ct := (self pool getClassTranspiler: aClass).
+	ct := (self payload pool getClassTranspiler: aClass).
 	ct isTranspiled ifTrue: [ ^ self ].
 
 	solver := #solveDependenciesUsing:.
-	ct stream: self stream.
 	(aClass instanceSide respondsTo: solver) ifTrue: [
 		aClass instanceSide perform: solver with: self
 	].

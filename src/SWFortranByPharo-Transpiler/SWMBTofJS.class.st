@@ -32,7 +32,7 @@ SWMBTofJS >> mangledName [
 	^ self class mangleClass safeSelectorNameOf: (method class = ByteSymbol ifTrue: [ method ] ifFalse: [ self method selector ])
 ]
 
-{ #category : #'as yet unclassified' }
+{ #category : #'code generation' }
 SWMBTofJS >> putBlock: aBlock [
 	self stream log.
 
@@ -49,7 +49,7 @@ SWMBTofJS >> putBlock: aBlock [
 
 ]
 
-{ #category : #'as yet unclassified' }
+{ #category : #'code generation' }
 SWMBTofJS >> putBlockAsExpression: aBlock [
 	self stream log.
 	
@@ -90,7 +90,7 @@ SWMBTofJS >> putCascade: aRBCascadeNode [
 	
 ]
 
-{ #category : #'as yet unclassified' }
+{ #category : #'code generation' }
 SWMBTofJS >> putClosure: aBlock [
 	self stream log.
 
@@ -106,14 +106,14 @@ SWMBTofJS >> putClosure: aBlock [
 
 ]
 
-{ #category : #accessing }
+{ #category : #streaming }
 SWMBTofJS >> putFilenameOn: aStream [
 	aStream << 'cache/'.
 	super putFilenameOn: aStream.
 	aStream << '.mjs'
 ]
 
-{ #category : #'as yet unclassified' }
+{ #category : #'code generation' }
 SWMBTofJS >> putIfFalse: aNode [
 	self stream log.
 
@@ -133,7 +133,7 @@ SWMBTofJS >> putIfFalse: aNode [
 	]
 ]
 
-{ #category : #'as yet unclassified' }
+{ #category : #'code generation' }
 SWMBTofJS >> putIfTrue: aNode [
 	self stream log.
 	
@@ -153,7 +153,7 @@ SWMBTofJS >> putIfTrue: aNode [
 	]
 ]
 
-{ #category : #'as yet unclassified' }
+{ #category : #'code generation' }
 SWMBTofJS >> putIfTrueIfFalse: aNode [
 	self stream log.
 	
@@ -177,7 +177,7 @@ SWMBTofJS >> putIfTrueIfFalse: aNode [
 	]
 ]
 
-{ #category : #'as yet unclassified' }
+{ #category : #'code generation' }
 SWMBTofJS >> putImport: anArray from: aSource [
 	self put: 'import {'.
 	anArray do: [ :each |
@@ -190,7 +190,7 @@ SWMBTofJS >> putImport: anArray from: aSource [
 		putString: ('../script/', aSource, '.mjs')
 ]
 
-{ #category : #'as yet unclassified' }
+{ #category : #'code generation' }
 SWMBTofJS >> putNew: aNode [
 	self
 		put: '(new ';
@@ -199,7 +199,7 @@ SWMBTofJS >> putNew: aNode [
 		put: ')'
 ]
 
-{ #category : #'as yet unclassified' }
+{ #category : #'code generation' }
 SWMBTofJS >> putOpBinary: aNode [
 	super putOpBinary: (aNode selector = #= ifTrue: [
 		aNode copy
@@ -225,7 +225,7 @@ SWMBTofJS >> putOrdinaryCallee: aNode [
 
 ]
 
-{ #category : #'as yet unclassified' }
+{ #category : #'code generation' }
 SWMBTofJS >> putReturnThisClassName [
 	self
 		put: 'return this.name';
@@ -239,17 +239,9 @@ SWMBTofJS >> putSelf [
 	self put: (self receiverClass isClassSide ifTrue: [ self receiverClass soleInstance name ] ifFalse: [ 'self' ])
 ]
 
-{ #category : #'as yet unclassified' }
+{ #category : #'code generation' }
 SWMBTofJS >> putSelfDefinition [
 	self put: 'var self = this;'; cr
-]
-
-{ #category : #'as yet unclassified' }
-SWMBTofJS >> putStdOut: arguments [
-	self stream log.
-	self
-		put: 'console.log';
-		putArguments: arguments
 ]
 
 { #category : #'code generation' }
@@ -264,44 +256,8 @@ SWMBTofJS >> putVariableDeclarationOf: aVariableInfo [
 ]
 
 { #category : #'as yet unclassified' }
-SWMBTofJS >> putYourself: aNode [
-	self stream log.
-	self << aNode receiver
-]
-
-{ #category : #'as yet unclassified' }
-SWMBTofJS >> put_asString: aNode [
-	self stream log.
-	self
-		<< aNode receiver;
-		putClassAccessor;
-		put: 'toString()'
-]
-
-{ #category : #'as yet unclassified' }
-SWMBTofJS >> put_beginsWith_: aNode [
-	self
-		withoutMessageNestDo: [
-			self << aNode receiver
-		];
-		putClassAccessor;
-		put: 'startsWith';
-		putArguments: aNode arguments
-]
-
-{ #category : #'as yet unclassified' }
-SWMBTofJS >> put_endsWith_: aNode [
-	self
-		withoutMessageNestDo: [
-			self << aNode receiver
-		];
-		putClassAccessor;
-		put: 'endsWith';
-		putArguments: aNode arguments
-]
-
-{ #category : #'as yet unclassified' }
 SWMBTofJS >> put_ensure_:aNode [
+	self error; flag: #toRemove.
 	self
 		put: '(function(){ try {';
 		cr;
@@ -315,6 +271,7 @@ SWMBTofJS >> put_ensure_:aNode [
 
 { #category : #'as yet unclassified' }
 SWMBTofJS >> put_ifNil_: aNode [
+	self error; flag: #toRemove.
 	self
 		put: '(function(_receiver_){ return (_receiver_ === null ) ? ';
 		putBlockAsExpression: aNode arguments first;
@@ -326,6 +283,7 @@ SWMBTofJS >> put_ifNil_: aNode [
 
 { #category : #'as yet unclassified' }
 SWMBTofJS >> put_ifNotNil_: aNode [
+	self error; flag: #toRemove.
 	self
 		put: '((';
 		<< aNode receiver;
@@ -336,20 +294,8 @@ SWMBTofJS >> put_ifNotNil_: aNode [
 ]
 
 { #category : #'as yet unclassified' }
-SWMBTofJS >> put_inject_into_: aNode [
-	self
-		<< aNode receiver;
-		putClassAccessor;
-		put: 'reduce(';
-		<< (aNode arguments at: 2);
-		put: ', ';
-		<< (aNode arguments at: 1);
-		put: ')'
-]
-
-{ #category : #'as yet unclassified' }
 SWMBTofJS >> put_on_do_: aNode [
-
+	self error; flag: #toRemove.
 	aNode isExpression ifTrue: [
 		self put: '(function(){'
 	].
@@ -386,6 +332,7 @@ SWMBTofJS >> put_on_do_: aNode [
 
 { #category : #'as yet unclassified' }
 SWMBTofJS >> put_upToEnd: aNode [
+	self error; flag: #toRemove.
 	self
 		withoutMessageNestDo: [
 			self << aNode receiver
@@ -394,7 +341,7 @@ SWMBTofJS >> put_upToEnd: aNode [
 		put: 'read()'
 ]
 
-{ #category : #'as yet unclassified' }
+{ #category : #'code generation' }
 SWMBTofJS >> trySimpleCascade: aRBCascadeNode [
 
 	aRBCascadeNode receiver class = RBVariableNode ifFalse: [ ^ false ].
@@ -414,9 +361,4 @@ SWMBTofJS >> trySimpleCascade: aRBCascadeNode [
 	].
 	^ true
 
-]
-
-{ #category : #accessing }
-SWMBTofJS >> type [
-	^ type ifNil: [ type := #js ]
 ]

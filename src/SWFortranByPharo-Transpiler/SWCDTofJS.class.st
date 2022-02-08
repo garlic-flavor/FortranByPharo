@@ -7,6 +7,11 @@ Class {
 	#category : #'SWFortranByPharo-Transpiler-JS'
 }
 
+{ #category : #accessing }
+SWCDTofJS class >> methodDefinitionTranspilerClass [
+	^ SWMDTofJS
+]
+
 { #category : #initialization }
 SWCDTofJS >> initialize_Behavior [
 	super initialize_Behavior.
@@ -156,7 +161,7 @@ SWCDTofJS >> initialize_SWStdClass [
 		]
 ]
 
-{ #category : #'as yet unclassified' }
+{ #category : #'code generation' }
 SWCDTofJS >> putClassHeader [
 	self stream
 		put: 'class ';
@@ -167,7 +172,7 @@ SWCDTofJS >> putClassHeader [
 		putLine
 ]
 
-{ #category : #'as yet unclassified' }
+{ #category : #'code generation' }
 SWCDTofJS >> putMemberDeclarationOf: aVariableTypeInfo [
 
 	self targetClass isClassSide ifTrue: [

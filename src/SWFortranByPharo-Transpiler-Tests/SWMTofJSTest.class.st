@@ -27,7 +27,7 @@ SWMTofJSTest >> test_program_01 [
 	project transpile.
 	self assert: project contents equals: 'console.log("Hello, good-bye!");
 '.
-
+	self halt; flag: #toImplement.
 ]
 
 { #category : #tests }

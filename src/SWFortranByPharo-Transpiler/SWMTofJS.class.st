@@ -7,12 +7,6 @@ Class {
 	#category : #'SWFortranByPharo-Transpiler-JS'
 }
 
-{ #category : #constants }
-SWMTofJS class >> extension [
-	self error; flag: #toRemove.
-	^ #mjs
-]
-
 { #category : #'as yet unclassified' }
 SWMTofJS class >> methodBodyTranspilerClass [ 
 	^ SWMBTofJS

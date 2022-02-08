@@ -11,15 +11,7 @@ Class {
 SWMangle class >> mangle: aSender [
 
 	^ self methodNameOf: aSender selector with: aSender operands.
-"	
-	aCallee method class = CompiledMethod ifTrue: [
-		^ self methodNameOf: aCallee method with: aCallee operands
-	].
 
-	aCallee method class = ByteSymbol ifTrue: [
-		^ self safeSelectorNameOf: aCallee method
-	]
-"
 ]
 
 { #category : #api }
@@ -55,17 +47,6 @@ SWMangle class >> safeSelectorNameOf: selector [
 	selector = '-' ifTrue: [ ^ 'opSub_' ].
 	^ selector collect: [:c | (#' >#:/' anySatisfy: [ :each | each = c]) ifTrue: [ $_ ] ifFalse: [ c ] ]
 
-]
-
-{ #category : #'as yet unclassified' }
-SWMangle class >> selectorForTranspilerOf: aSelector [
-	self error; flag: #toRemove.
-	^ (String streamContents: [ :s |
-		s
-			<< 'put_';
-			<< (self safeSelectorNameOf: aSelector);
-			<< ':'
-	]) asSymbol
 ]
 
 { #category : #api }
