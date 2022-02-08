@@ -43,19 +43,6 @@ SWType class >> exactTypePriority [
 	^ 90
 ]
 
-{ #category : #initialization }
-SWType class >> initializeClassSideTranspiler: transpiler [
-	transpiler
-		declareMethod: #declare:as: as: [ :newT |
-			newT
-				specifyReturnTypeAs: SWVariableTypeInfo;
-				senderGenerator: [ :t :node |
-					t preventStatementDelimiter; preventNewline
-				];
-				yourself
-		]
-]
-
 { #category : #'private - utilities' }
 SWType class >> nameOfPriority: aPriority [
 	^ ((SWType class methodDict values select: [ :m |
@@ -124,12 +111,6 @@ SWType >> = right [
 	^ self payload = right payload
 ]
 
-{ #category : #accessing }
-SWType >> easyValue [
-	self error; flag: #toRemove.
-	^ self class exactTypePriority <= self priority ifTrue: [ self value ] ifFalse: [ nil ]
-]
-
 { #category : #comparing }
 SWType >> hash [
 	^ self payload hash
@@ -179,11 +160,6 @@ SWType >> putOn: aStream [
 
 { #category : #accessing }
 SWType >> value [
-	^ payload isBlock ifTrue: [
-		priority := nil.
-		payload := payload value
-	] ifFalse: [
-		self payload
-	].
+	^ self payload
 
 ]

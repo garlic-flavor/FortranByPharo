@@ -1,17 +1,17 @@
 Class {
-	#name : #SWStackAnalyzerTest,
+	#name : #SWDecoderTest,
 	#superclass : #TestCase,
 	#category : #'SWFortranByPharo-Analyzer-Tests-Analyzer'
 }
 
 { #category : #'tests - source' }
-SWStackAnalyzerTest >> _01_return_constant [
+SWDecoderTest >> _01_return_constant [
 
 	^ 345
 ]
 
 { #category : #'tests - source' }
-SWStackAnalyzerTest >> _02_call_wellknown_message: arg1 [
+SWDecoderTest >> _02_call_wellknown_message: arg1 [
 
 	| tmp1 |
 	tmp1 := 123.
@@ -19,7 +19,7 @@ SWStackAnalyzerTest >> _02_call_wellknown_message: arg1 [
 ]
 
 { #category : #'tests - source' }
-SWStackAnalyzerTest >> _03_ifTrue_ifFalse: arg1 [
+SWDecoderTest >> _03_ifTrue_ifFalse: arg1 [
 
 	| tmp1 |
 	^ arg1 = 5
@@ -30,7 +30,7 @@ SWStackAnalyzerTest >> _03_ifTrue_ifFalse: arg1 [
 ]
 
 { #category : #'tests - source' }
-SWStackAnalyzerTest >> _04_recursive_message_call: arg1 [
+SWDecoderTest >> _04_recursive_message_call: arg1 [
 
 	^ 0 < arg1
 		  ifTrue: [ arg1 + (self _04_recursive_message_call: arg1 - 1) ]
@@ -38,7 +38,7 @@ SWStackAnalyzerTest >> _04_recursive_message_call: arg1 [
 ]
 
 { #category : #tests }
-SWStackAnalyzerTest >> _05_local_variables [
+SWDecoderTest >> _05_local_variables [
 
 	| tmp1 tmp2 tmp3 tmp4 tmp5 tmp6 tmp7 tmp8 tmp9 |
 
@@ -46,19 +46,19 @@ SWStackAnalyzerTest >> _05_local_variables [
 ]
 
 { #category : #'tests - source' }
-SWStackAnalyzerTest >> _06_method_call [
+SWDecoderTest >> _06_method_call [
 	^ SWStd print: 'hoge!'
 ]
 
 { #category : #'tests - source' }
-SWStackAnalyzerTest >> _08_ZnServer [
+SWDecoderTest >> _08_ZnServer [
 
 	ZnServer startDefaultOn: 50000.
 	^ ZnServer default
 ]
 
 { #category : #tests }
-SWStackAnalyzerTest >> _10_new: arg1 [
+SWDecoderTest >> _10_new: arg1 [
 	|loc1 loc2|
 	loc1 := Dictionary new.
 	loc2 := Set new.
@@ -66,7 +66,7 @@ SWStackAnalyzerTest >> _10_new: arg1 [
 ]
 
 { #category : #'as yet unclassified' }
-SWStackAnalyzerTest >> _12_try_catch [
+SWDecoderTest >> _12_try_catch [
 
 	[  
 		Transcript show: 'hello'; cr
@@ -76,26 +76,31 @@ SWStackAnalyzerTest >> _12_try_catch [
 ]
 
 { #category : #'as yet unclassified' }
-SWStackAnalyzerTest >> _13_return_literal [
+SWDecoderTest >> _13_return_literal [
 	|dict url|
 	dict := Dictionary new.
 	dict at: 'fuga' put: (url ifNil: [ 'hoge' ]).
 	^ dict
 ]
 
-{ #category : #'private - utility' }
-SWStackAnalyzerTest >> inspectMy: arg1 withArguments: arg2 [
+{ #category : #'as yet unclassified' }
+SWDecoderTest >> _14_TestCase [
+	^ TestCase selector: 'hoge'
+]
 
-	(SWStackAnalyzer new: self class>>arg1 with: ({self class}, arg2))
+{ #category : #'private - utility' }
+SWDecoderTest >> inspectMy: arg1 withArguments: arg2 [
+
+	(SWDecoder new: self class>>arg1 with: ({self class}, arg2))
 		debugMode: true;
 		decode; inspect
 
 ]
 
 { #category : #'private - utility' }
-SWStackAnalyzerTest >> returnValueOf: arg1 withArguments: arg2 equals: arg3 [
+SWDecoderTest >> returnValueOf: arg1 withArguments: arg2 equals: arg3 [
 	|analyzer|
-	analyzer := SWStackAnalyzer new: arg1 with: arg2.
+	analyzer := SWDecoder new: arg1 with: arg2.
 	analyzer decode.
 	self
 		assert: analyzer return value
@@ -103,14 +108,14 @@ SWStackAnalyzerTest >> returnValueOf: arg1 withArguments: arg2 equals: arg3 [
 ]
 
 { #category : #'private - utility' }
-SWStackAnalyzerTest >> returnValueOfMy: arg1 withArguments: arg2 equals: arg3 [
+SWDecoderTest >> returnValueOfMy: arg1 withArguments: arg2 equals: arg3 [
 
 	self returnValueOf: self class>>arg1 withArguments: ({ self class }, arg2) equals: arg3
 
 ]
 
 { #category : #tests }
-SWStackAnalyzerTest >> test_01 [
+SWDecoderTest >> test_01 [
 
 	self
 		returnValueOfMy: #_01_return_constant
@@ -119,7 +124,7 @@ SWStackAnalyzerTest >> test_01 [
 ]
 
 { #category : #tests }
-SWStackAnalyzerTest >> test_02 [
+SWDecoderTest >> test_02 [
 
 	self
 		returnValueOfMy: #_02_call_wellknown_message:
@@ -131,7 +136,7 @@ SWStackAnalyzerTest >> test_02 [
 ]
 
 { #category : #tests }
-SWStackAnalyzerTest >> test_03 [
+SWDecoderTest >> test_03 [
 
 	self
 		returnValueOfMy: #_03_ifTrue_ifFalse:
@@ -140,7 +145,7 @@ SWStackAnalyzerTest >> test_03 [
 ]
 
 { #category : #tests }
-SWStackAnalyzerTest >> test_04 [
+SWDecoderTest >> test_04 [
 
 	self
 		returnValueOfMy: #_04_recursive_message_call:
@@ -149,7 +154,7 @@ SWStackAnalyzerTest >> test_04 [
 ]
 
 { #category : #tests }
-SWStackAnalyzerTest >> test_05 [
+SWDecoderTest >> test_05 [
 
 	self
 		returnValueOfMy: #_05_local_variables
@@ -158,7 +163,7 @@ SWStackAnalyzerTest >> test_05 [
 ]
 
 { #category : #tests }
-SWStackAnalyzerTest >> test_06 [
+SWDecoderTest >> test_06 [
 
 	self
 		returnValueOfMy: #_06_method_call
@@ -167,15 +172,15 @@ SWStackAnalyzerTest >> test_06 [
 ]
 
 { #category : #tests }
-SWStackAnalyzerTest >> test_07_decode_closure [
+SWDecoderTest >> test_07_decode_closure [
 	self returnValueOf: [ 123 ] withArguments: { } equals: SmallInteger
 
 ]
 
 { #category : #tests }
-SWStackAnalyzerTest >> test_08 [
+SWDecoderTest >> test_08 [
 	|sa|
-	sa := SWStackAnalyzer new: self class>>#_08_ZnServer with: { self class }.
+	sa := SWDecoder new: self class>>#_08_ZnServer with: { self class }.
 	sa debugMode: true.
 	SWServer addTranspilerTo: sa pool.
 	sa decode.
@@ -183,10 +188,10 @@ SWStackAnalyzerTest >> test_08 [
 ]
 
 { #category : #tests }
-SWStackAnalyzerTest >> test_09_access_to_instance_variables [
+SWDecoderTest >> test_09_access_to_instance_variables [
 	|sa|
-	sa := SWStackAnalyzer new: [|satp|
-		satp := SWStackAnalyzerTestProgram new.
+	sa := SWDecoder new: [|satp|
+		satp := SWDecoderTestProgram new.
 		satp var1: 999.
 		satp var1
 	].
@@ -195,15 +200,15 @@ SWStackAnalyzerTest >> test_09_access_to_instance_variables [
 ]
 
 { #category : #tests }
-SWStackAnalyzerTest >> test_10_new [
+SWDecoderTest >> test_10_new [
 	self returnValueOfMy: #_10_new: withArguments: { Integer } equals: Set
 
 ]
 
 { #category : #tests }
-SWStackAnalyzerTest >> test_11_ZnServer [
+SWDecoderTest >> test_11_ZnServer [
 	|sa|
-	sa := SWStackAnalyzer new: SWServer>>#startOn: with: { SWServer. SmallInteger }.
+	sa := SWDecoder new: SWServer>>#startOn: with: { SWServer. SmallInteger }.
 	SWServer addTranspilerTo: sa pool.
 "
 	sa debugMode: true.
@@ -214,11 +219,16 @@ SWStackAnalyzerTest >> test_11_ZnServer [
 ]
 
 { #category : #tests }
-SWStackAnalyzerTest >> test_12 [
+SWDecoderTest >> test_12 [
 	self returnValueOfMy: #_12_try_catch withArguments: {  } equals: self class
 ]
 
 { #category : #tests }
-SWStackAnalyzerTest >> test_13 [
+SWDecoderTest >> test_13 [
 	self returnValueOfMy: #_13_return_literal withArguments: {  } equals: Dictionary
+]
+
+{ #category : #tests }
+SWDecoderTest >> test_14 [
+	self returnValueOfMy: #_14_TestCase withArguments: {  } equals: TestCase
 ]

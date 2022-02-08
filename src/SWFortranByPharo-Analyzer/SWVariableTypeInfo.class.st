@@ -17,32 +17,21 @@ Class {
 	#category : #'SWFortranByPharo-Analyzer-Type'
 }
 
-{ #category : #initialization }
-SWVariableTypeInfo class >> initializeInstanceSideTranspiler: transpiler [
-	transpiler
-		declareMethodReturnsReceiver: #<<
-]
-
 { #category : #'instance creation' }
 SWVariableTypeInfo class >> new: aType [
-	^ self new: aType with: nil
+	^ self new: aType with: nil owner: nil pc: nil
 ]
 
 { #category : #'instance creation' }
 SWVariableTypeInfo class >> new: aType owner: anOwner pc: oldPC [
-	^ self new
-		<< aType;
-		owner: anOwner;
-		pc: oldPC;
-		yourself.
+	^ self new: aType with: nil owner: anOwner pc: oldPC
+
 ]
 
 { #category : #'instance creation' }
 SWVariableTypeInfo class >> new: aType with: aPriority [
-	^ self new
-		<< aType;
-		priority: aPriority;
-		yourself.
+	^ self new: aType with: aPriority owner: nil pc: nil
+
 ]
 
 { #category : #'instance creation' }
@@ -91,12 +80,6 @@ SWVariableTypeInfo >> addProperty: aProp [
 SWVariableTypeInfo >> assignCounter [
 
 	^ assignCounter ifNil: [ assignCounter := OrderedCollection new ]
-]
-
-{ #category : #accessing }
-SWVariableTypeInfo >> easyValue [
-	^ self type easyValue
-
 ]
 
 { #category : #testing }

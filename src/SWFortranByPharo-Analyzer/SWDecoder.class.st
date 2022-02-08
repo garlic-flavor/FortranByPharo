@@ -2,11 +2,10 @@
 SWStackAnalyzer forks decode process of SymbolicBytecodeBuilder to emulate stack status.
 "
 Class {
-	#name : #SWStackAnalyzer,
+	#name : #SWDecoder,
 	#superclass : #SWCompiledCode,
 	#instVars : [
 		'jumperStack',
-		'tempStore',
 		'pool',
 		'logger',
 		'debugMode'
@@ -14,38 +13,13 @@ Class {
 	#category : #'SWFortranByPharo-Analyzer-Analyzer'
 }
 
-{ #category : #initialization }
-SWStackAnalyzer class >> initializeDefaultClassTranspiler: transpiler [
-	self error; flag: #toRemove.
-"
-	transpiler
-		defineMethod: #= as: Boolean;
-		defineMethod: #== as: Boolean;
-		defineMethod: #~= as: Boolean;
-		defineMethod: #< as: Boolean;
-		defineMethod: #> as: Boolean;
-		defineMethod: #>= as: Boolean;
-		defineMethod: #<= as: Boolean;
-		defineMethodAsBinaryOperator: #+;
-		defineMethodReturnsReceiver: #* with: [:t :node | t putOpBinary: node ];
-		defineMethodReturnsReceiver: #-;
-		defineMethodReturnsReceiver: #error:;
-		defineMethodReturnsReceiversInstance: #basicNew;
-		defineMethodReturnsReceiversInstance: #basicNew:;
-		defineMethodReturnsSecondArgument: #at:put:;
-		defineMethodReturnsSecondArgument: #at:ifAbsent:;
-		defineMethod: #asInteger as: Integer;
-		defineMethod: #asString as: String
-"
-]
-
 { #category : #'as yet unclassified' }
-SWStackAnalyzer class >> poolClass [
+SWDecoder class >> poolClass [
 	^ SWPool
 ]
 
 { #category : #private }
-SWStackAnalyzer >> addBytecode: description [
+SWDecoder >> addBytecode: description [
 	|item node operands sender|
 	self logger log: [ String streamContents: [ :s |
 		s << '[' print: oldPC; << '] '; << description
@@ -65,40 +39,40 @@ SWStackAnalyzer >> addBytecode: description [
 ]
 
 { #category : #'instruction decoding' }
-SWStackAnalyzer >> blockReturnConstant: cst [
+SWDecoder >> blockReturnConstant: cst [
 	self halt.
 	
 	super blockReturnConstant: cst
 ]
 
 { #category : #'instruction decoding' }
-SWStackAnalyzer >> blockReturnTop [
+SWDecoder >> blockReturnTop [
 	self return << self stack pop.
 	
 	super blockReturnTop
 ]
 
 { #category : #'instruction decoding' }
-SWStackAnalyzer >> callPrimitive: primNumber [
+SWDecoder >> callPrimitive: primNumber [
 
 	super callPrimitive: primNumber
 ]
 
 { #category : #accessing }
-SWStackAnalyzer >> debugMode [
+SWDecoder >> debugMode [
 
 	^ debugMode ifNil: [ debugMode := false ]
 ]
 
 { #category : #accessing }
-SWStackAnalyzer >> debugMode: trueOrFalse [
+SWDecoder >> debugMode: trueOrFalse [
 
 	debugMode := trueOrFalse.
 	self logger enabled: trueOrFalse
 ]
 
 { #category : #'instruction decoding' }
-SWStackAnalyzer >> directedSuperSend: selector numArgs: numberArguments [
+SWDecoder >> directedSuperSend: selector numArgs: numberArguments [
 
 	self halt.
 	
@@ -106,42 +80,30 @@ SWStackAnalyzer >> directedSuperSend: selector numArgs: numberArguments [
 ]
 
 { #category : #'instruction decoding' }
-SWStackAnalyzer >> doDup [
+SWDecoder >> doDup [
 	|top|
 	top := self stack top.
 	self stack push: top.
-	"For a cascade node, create new variable."
-	self flag: #toRemove.
-"
-	(self tempStore push: top) ifTrue: [
-		self addLocalVariable: top
-	].
-"
 	super doDup.
 
 ]
 
 { #category : #'instruction decoding' }
-SWStackAnalyzer >> doPop [
+SWDecoder >> doPop [
 	self stack pop.
 	super doPop.
 
 ]
 
-{ #category : #accessing }
-SWStackAnalyzer >> generator: aBodyGenerator [
-	self error; flag: #toRemove.
-]
-
 { #category : #'instruction decoding' }
-SWStackAnalyzer >> jump: offset [
+SWDecoder >> jump: offset [
 	self jumperStack update: scanner pc + offset.
 	super jump: offset.
 	
 ]
 
 { #category : #'instruction decoding' }
-SWStackAnalyzer >> jump: offset if: condition [
+SWDecoder >> jump: offset if: condition [
 
 	self jumperStack pushAt: oldPC period: scanner pc + offset size: self stack size.
 	self stack pop.
@@ -151,31 +113,31 @@ SWStackAnalyzer >> jump: offset if: condition [
 ]
 
 { #category : #'private - accessing' }
-SWStackAnalyzer >> jumperStack [
+SWDecoder >> jumperStack [
 
 	^ jumperStack ifNil: [ jumperStack := SWJumperStack new ]
 ]
 
 { #category : #'private - accessing' }
-SWStackAnalyzer >> jumperStack: anObject [
+SWDecoder >> jumperStack: anObject [
 
 	jumperStack := anObject
 ]
 
 { #category : #accessing }
-SWStackAnalyzer >> logger [
+SWDecoder >> logger [
 
 	^ logger ifNil: [ logger := SWLogger new ]
 ]
 
 { #category : #accessing }
-SWStackAnalyzer >> logger: anObject [
+SWDecoder >> logger: anObject [
 
 	logger := anObject
 ]
 
 { #category : #private }
-SWStackAnalyzer >> mergeStackTopAndSecond [
+SWDecoder >> mergeStackTopAndSecond [
 	|right|
 	right := self stack pop.
 	self stack top << right.
@@ -184,27 +146,27 @@ SWStackAnalyzer >> mergeStackTopAndSecond [
 ]
 
 { #category : #'instruction decoding' }
-SWStackAnalyzer >> methodReturnConstant: value [
+SWDecoder >> methodReturnConstant: value [
 	self return << (SWVariableTypeInfo new: value class owner: self pc: oldPC).
 	super methodReturnConstant: value
 ]
 
 { #category : #'instruction decoding' }
-SWStackAnalyzer >> methodReturnReceiver [
+SWDecoder >> methodReturnReceiver [
 	self return << (self stack at: 0).
 	super methodReturnReceiver
 
 ]
 
 { #category : #'instruction decoding' }
-SWStackAnalyzer >> methodReturnTop [
+SWDecoder >> methodReturnTop [
 	self return << self stack pop.
 	super methodReturnTop.
 
 ]
 
-{ #category : #'instance creation' }
-SWStackAnalyzer >> newFullClosure: lit with: args [
+{ #category : #private }
+SWDecoder >> newFullClosure: lit with: args [
 	^ (self class new: lit with: args)
 		pool: self pool;
 		classInfo: self classInfo;
@@ -214,7 +176,7 @@ SWStackAnalyzer >> newFullClosure: lit with: args [
 ]
 
 { #category : #accessing }
-SWStackAnalyzer >> pool [
+SWDecoder >> pool [
 
 	^ pool ifNil: [
 		pool := self class poolClass new
@@ -224,14 +186,14 @@ SWStackAnalyzer >> pool [
 ]
 
 { #category : #accessing }
-SWStackAnalyzer >> pool: anObject [
+SWDecoder >> pool: anObject [
 
 	pool := anObject
 
 ]
 
 { #category : #'instruction decoding' }
-SWStackAnalyzer >> popIntoLiteralVariable: anAssociation [
+SWDecoder >> popIntoLiteralVariable: anAssociation [
 
 	self halt.
 	
@@ -239,13 +201,13 @@ SWStackAnalyzer >> popIntoLiteralVariable: anAssociation [
 ]
 
 { #category : #'instruction decoding' }
-SWStackAnalyzer >> popIntoReceiverVariable: offset [
+SWDecoder >> popIntoReceiverVariable: offset [
 	(self classInfo getVariableInfoAtOffset: offset) << self stack pop.
 	super popIntoReceiverVariable: offset
 ]
 
 { #category : #'instruction decoding' }
-SWStackAnalyzer >> popIntoRemoteTemp: remoteTempIndex inVectorAt: tempVectorIndex [
+SWDecoder >> popIntoRemoteTemp: remoteTempIndex inVectorAt: tempVectorIndex [
 
 	self halt.
 	
@@ -253,7 +215,7 @@ SWStackAnalyzer >> popIntoRemoteTemp: remoteTempIndex inVectorAt: tempVectorInde
 ]
 
 { #category : #'instruction decoding' }
-SWStackAnalyzer >> popIntoTemporaryVariable: offset [
+SWDecoder >> popIntoTemporaryVariable: offset [
 	|left right|
 
 	left := self stack atOffset: offset.
@@ -266,19 +228,19 @@ SWStackAnalyzer >> popIntoTemporaryVariable: offset [
 ]
 
 { #category : #'instruction decoding' }
-SWStackAnalyzer >> pushActiveContext [ 
+SWDecoder >> pushActiveContext [ 
 	self stack push: (SWVariableTypeInfo new: Context owner: self pc: oldPC).
 	super pushActiveContext
 ]
 
 { #category : #'instruction decoding' }
-SWStackAnalyzer >> pushActiveProcess [ 
+SWDecoder >> pushActiveProcess [ 
 	self halt.
 	super pushActiveProcess 
 ]
 
 { #category : #'instruction decoding' }
-SWStackAnalyzer >> pushClosureCopyNumCopiedValues: numCopied numArgs: numArgs blockSize: blockSize [
+SWDecoder >> pushClosureCopyNumCopiedValues: numCopied numArgs: numArgs blockSize: blockSize [
 
 	self halt.
 	
@@ -286,7 +248,7 @@ SWStackAnalyzer >> pushClosureCopyNumCopiedValues: numCopied numArgs: numArgs bl
 ]
 
 { #category : #'instruction decoding' }
-SWStackAnalyzer >> pushClosureTemps: numTemps [
+SWDecoder >> pushClosureTemps: numTemps [
 
 	self halt.
 	
@@ -294,7 +256,7 @@ SWStackAnalyzer >> pushClosureTemps: numTemps [
 ]
 
 { #category : #'instruction decoding' }
-SWStackAnalyzer >> pushConsArrayWithElements: numElements [
+SWDecoder >> pushConsArrayWithElements: numElements [
 
 	|args|
 	args := self stack pop: numElements.
@@ -306,7 +268,7 @@ SWStackAnalyzer >> pushConsArrayWithElements: numElements [
 ]
 
 { #category : #'instruction decoding' }
-SWStackAnalyzer >> pushConstant: obj [
+SWDecoder >> pushConstant: obj [
 	self stack push: (SWVariableTypeInfo new: obj class owner: self pc: oldPC).
 
 	super pushConstant: obj.
@@ -314,7 +276,7 @@ SWStackAnalyzer >> pushConstant: obj [
 ]
 
 { #category : #'instruction decoding' }
-SWStackAnalyzer >> pushFullClosure: lit numCopied: numCopied receiverOnStack: rcvr ignoreOuterContext: ignore [
+SWDecoder >> pushFullClosure: lit numCopied: numCopied receiverOnStack: rcvr ignoreOuterContext: ignore [
 	|mi ret|
 
 	rcvr ifTrue: [ self error ].
@@ -337,7 +299,7 @@ SWStackAnalyzer >> pushFullClosure: lit numCopied: numCopied receiverOnStack: rc
 ]
 
 { #category : #'instruction decoding' }
-SWStackAnalyzer >> pushLiteralVariable: anAssociation [
+SWDecoder >> pushLiteralVariable: anAssociation [
 	self stack push: (SWVariableTypeInfo new: anAssociation value class owner: self pc: oldPC).
 
 	super pushLiteralVariable: anAssociation.
@@ -345,7 +307,7 @@ SWStackAnalyzer >> pushLiteralVariable: anAssociation [
 ]
 
 { #category : #'instruction decoding' }
-SWStackAnalyzer >> pushNewArrayOfSize: numElements [
+SWDecoder >> pushNewArrayOfSize: numElements [
 
 	self stack push: (SWVariableTypeInfo new: Array owner: self pc: oldPC).
 	
@@ -353,7 +315,7 @@ SWStackAnalyzer >> pushNewArrayOfSize: numElements [
 ]
 
 { #category : #'instruction decoding' }
-SWStackAnalyzer >> pushReceiver [
+SWDecoder >> pushReceiver [
 	self stack push: (self stack at: 0).
 
 	super pushReceiver.
@@ -361,32 +323,32 @@ SWStackAnalyzer >> pushReceiver [
 ]
 
 { #category : #'instruction decoding' }
-SWStackAnalyzer >> pushReceiverVariable: offset [
+SWDecoder >> pushReceiverVariable: offset [
 	self stack push: (self classInfo getVariableInfoAtOffset: offset).
 	super pushReceiverVariable: offset
 ]
 
 { #category : #'instruction decoding' }
-SWStackAnalyzer >> pushRemoteTemp: remoteTempIndex inVectorAt: tempVectorIndex [
+SWDecoder >> pushRemoteTemp: remoteTempIndex inVectorAt: tempVectorIndex [
 
 	self halt.
 	super pushRemoteTemp: remoteTempIndex  inVectorAt: tempVectorIndex 
 ]
 
 { #category : #'instruction decoding' }
-SWStackAnalyzer >> pushTemporaryVariable:  offset [
+SWDecoder >> pushTemporaryVariable:  offset [
 	self stack push: (self stack atOffset: offset).
 	super pushTemporaryVariable: offset.
 
 ]
 
 { #category : #'instruction decoding' }
-SWStackAnalyzer >> send: selector super: supered numArgs: numberArguments [
+SWDecoder >> send: selector super: supered numArgs: numberArguments [
 	|operands sender|
 	self logger log: [ 'decode: ', selector ] withStack: self stack.
 
 	operands := self stack popSlotForSender: numberArguments.
-selector = #selector: ifTrue: [ self halt ].
+
 	sender := (self pool newSenderOf: selector super: supered with: operands)
 		node: (self method sourceNodeForPC: oldPC);
 		yourself.
@@ -411,13 +373,8 @@ selector = #selector: ifTrue: [ self halt ].
 
 ]
 
-{ #category : #accessing }
-SWStackAnalyzer >> senderGenerator: aCalleeGenerator [
-	self error; flag: #toRemove.
-]
-
 { #category : #'instruction decoding' }
-SWStackAnalyzer >> storeIntoLiteralVariable: anAssociation [
+SWDecoder >> storeIntoLiteralVariable: anAssociation [
 	self getVariableInfoOf: anAssociation key ifPresent: [ :vi |
 		vi << self stack top
 	].
@@ -425,19 +382,19 @@ SWStackAnalyzer >> storeIntoLiteralVariable: anAssociation [
 ]
 
 { #category : #'instruction decoding' }
-SWStackAnalyzer >> storeIntoReceiverVariable: offset [
+SWDecoder >> storeIntoReceiverVariable: offset [
 	(self classInfo getVariableInfoAtOffset: offset) << self stack top.
 	super storeIntoReceiverVariable: offset
 ]
 
 { #category : #'instruction decoding' }
-SWStackAnalyzer >> storeIntoRemoteTemp: remoteTempIndex inVectorAt: tempVectorIndex [
+SWDecoder >> storeIntoRemoteTemp: remoteTempIndex inVectorAt: tempVectorIndex [
 	self halt.
 	super storeIntoRemoteTemp: remoteTempIndex  inVectorAt: tempVectorIndex 
 ]
 
 { #category : #'instruction decoding' }
-SWStackAnalyzer >> storeIntoTemporaryVariable: offset [
+SWDecoder >> storeIntoTemporaryVariable: offset [
 	|left right|
 	left := self stack atOffset: offset.
 	right := self stack top.
@@ -446,25 +403,8 @@ SWStackAnalyzer >> storeIntoTemporaryVariable: offset [
 	super storeIntoTemporaryVariable: offset
 ]
 
-{ #category : #accessing }
-SWStackAnalyzer >> tempStore [
-	self error; flag: #toRemove.
-
-	^ tempStore ifNil: [
-		tempStore := SWTempStore new
-			method: self method;
-			yourself
-	]
-]
-
-{ #category : #accessing }
-SWStackAnalyzer >> tempStore: anObject [
-	self error; flag: #toRemove.
-	tempStore := anObject
-]
-
 { #category : #'instruction decoding' }
-SWStackAnalyzer >> trap [
+SWDecoder >> trap [
 	self halt.
 	super trap
 ]

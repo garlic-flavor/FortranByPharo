@@ -5,7 +5,6 @@ Class {
 	#name : #SWModuleTranspiler,
 	#superclass : #Object,
 	#instVars : [
-		'stream',
 		'payload'
 	],
 	#category : #'SWFortranByPharo-Transpiler-Common'
@@ -33,7 +32,7 @@ SWModuleTranspiler class >> newFrom: aClass [
 
 { #category : #accessing }
 SWModuleTranspiler >> contents [
-	stream ifNil: [ self transpile ].
+	self stream isEmpty ifTrue: [ self transpile ].
 	^ self stream contents
 ]
 
@@ -110,20 +109,12 @@ SWModuleTranspiler >> solveDependencies [
 { #category : #accessing }
 SWModuleTranspiler >> stream [
 
-	^ stream ifNil: [ stream := SWTranspilerStream new ]
-]
-
-{ #category : #accessing }
-SWModuleTranspiler >> stream: anObject [
-
-	stream := anObject
+	^ self payload stream
 ]
 
 { #category : #'public API' }
 SWModuleTranspiler >> transpile [
-	self payload
-		stream: self stream;
-		decode.
+	self payload decode.
 	self solveDependencies.
 "
 	self flag: #toRemove.

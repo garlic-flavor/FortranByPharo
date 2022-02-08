@@ -21,7 +21,7 @@ SWPool class >> search: selector in: aClass [
 
 ]
 
-{ #category : #adding }
+{ #category : #api }
 SWPool >> addTranspilerIn: aClass [
 	"invoke aClass>>$initialize_Hoge: with Hoge class transpiler."
 	 aClass classSide methodDict values select: [ :each |
@@ -44,7 +44,7 @@ SWPool >> addTranspilerIn: aClass [
 	]
 ]
 
-{ #category : #adding }
+{ #category : #api }
 SWPool >> addTranspilerOf: aClass initialize: anInitializer [
 	anInitializer cull: (self getClassTranspiler: aClass)
 ]
@@ -61,19 +61,13 @@ SWPool >> debugMode [
 	^ self owner debugMode
 ]
 
-{ #category : #'as yet unclassified' }
+{ #category : #enumerating }
 SWPool >> detect: aNeedle ifFound: aBlock [
 
 	^ self payload detect: aNeedle ifFound: aBlock
 ]
 
-{ #category : #'as yet unclassified' }
-SWPool >> detect: aNeedle ifFound: aBlock ifNone: aNoneBlock [
-	self error; flag: #toRemove.
-	^ self payload detect: aNeedle ifFound: aBlock ifNone: aNoneBlock
-]
-
-{ #category : #'instance creation' }
+{ #category : #private }
 SWPool >> getClassTranspiler: aClass [
 	^ (aClass isClassSide ifTrue: [
 		(self getClassTranspiler: aClass instanceSide) classSide
@@ -88,33 +82,12 @@ SWPool >> getClassTranspiler: aClass [
 
 ]
 
-{ #category : #'instance creation' }
-SWPool >> getMethodTranspiler: aSelector supered: supered with: args [
-	self error; flag: #toRemove.
-"
-	|method sender methodClass|
-
-	method := self class search: aSelector
-		in: (supered ifTrue: [ args first value superclass ] ifFalse: [ args first value ]).
-	sender := SWSender new
-		selector: aSelector;
-		operands: args;
-		yourself.
-		
-	callee := SWCalleeInfo new: (method ifNotNil: [ method ] ifNil: [ aSelector ]) with: args.
-	methodClass := (method ifNotNil: [ method methodClass ] ifNil: [ UndefinedObject ] ).
-	^ (self getClassTranspiler: methodClass)
-		getMethodTranspiler: callee
-"
-
-]
-
 { #category : #accessing }
 SWPool >> logger [
 	^ self owner logger
 ]
 
-{ #category : #'as yet unclassified' }
+{ #category : #api }
 SWPool >> newSenderOf: aSelector super: supered with: args [
 	|method|
 	method := self class search: aSelector
@@ -134,7 +107,7 @@ SWPool >> newSenderOf: aSelector super: supered with: args [
 
 ]
 
-{ #category : #'instance creation' }
+{ #category : #private }
 SWPool >> newUndefinedSenderOf: aSelector with: args [
 	self logger log: [ 'An unknown method detected: ', aSelector ].
 	self debugMode ifTrue: [ self halt ].
@@ -180,12 +153,6 @@ SWPool >> putOn: aStream [
 	aStream << $#; << (self hash % 16rFFFF) printStringHex
 ]
 
-{ #category : #enumerating }
-SWPool >> select: aNeedle thenDo: anIterator [
-self error; flag: #toRemove.
-	^ self payload values select: aNeedle thenDo: anIterator
-]
-
 { #category : #accessing }
 SWPool >> senderTranspilerClass [
 
@@ -196,12 +163,4 @@ SWPool >> senderTranspilerClass [
 SWPool >> transpilerClass [
 
 	^ self owner class
-]
-
-{ #category : #accessing }
-SWPool >> transpilerClass: anObject [
-	self error; flag: #toRemove.
-	"
-	transpilerClass := anObject
-	"
 ]

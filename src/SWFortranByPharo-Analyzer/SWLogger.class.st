@@ -31,17 +31,6 @@ SWLogger >> enabled: anObject [
 	enabled := anObject
 ]
 
-{ #category : #private }
-SWLogger >> getDepthOf: aContext [
-	self error; flag: #toRemove.
-	aContext ifNil: [ ^ 0	].
-	(self selector value: aContext) ifTrue: [ 
-		^ 1 + (self getDepthOf: aContext sender)
-	] ifFalse: [
-		^ self getDepthOf: aContext sender
-	]
-]
-
 { #category : #public }
 SWLogger >> log [
 	self log: '' withContext: thisContext sender.
@@ -59,15 +48,10 @@ SWLogger >> log: msg withContext: aContext [
 		message: msg value;
 		context: aContext copy;
 		yourself).
-	self flag: #toRemove.	
-"
-	|depth|
-	depth := self getDepthOf: aContext.
-	Transcript << ('  ' repeat: depth); << aContext asString; << '> '; << msg value; cr; flush
-"
+
 ]
 
-{ #category : #'as yet unclassified' }
+{ #category : #public }
 SWLogger >> log: msg withStack: aStack [
 	self enabled ifFalse: [ ^ self ].
 	self payload add: (SWLog new
@@ -88,20 +72,4 @@ SWLogger >> payload [
 SWLogger >> payload: anObject [
 
 	payload := anObject
-]
-
-{ #category : #accessing }
-SWLogger >> selector [
-	self error; flag: #toRemove.
-	^ selector ifNil: [
-		selector := [ :aContext |
-			aContext receiver className beginsWith: 'SW'
-		]
-	]
-]
-
-{ #category : #accessing }
-SWLogger >> selector: aSelectorBlock [
-	self error; flag: #toRemove.
-	selector := aSelectorBlock 
 ]

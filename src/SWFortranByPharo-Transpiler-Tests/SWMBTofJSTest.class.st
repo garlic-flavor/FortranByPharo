@@ -81,7 +81,7 @@ Transcript.cr();
 { #category : #tests }
 SWMBTofJSTest >> test_01_analyze [
 	self
-		assert: (SWStackAnalyzer new: self class>>#_01_call_Transcript with: { self class }) decode return value
+		assert: (SWDecoder new: self class>>#_01_call_Transcript with: { self class }) decode return value
 		equals: self class
 ]
 
@@ -98,7 +98,7 @@ SWMBTofJSTest >> test_02 [
 { #category : #tests }
 SWMBTofJSTest >> test_03_analyze [
 	self
-		assert: (SWStackAnalyzer new: self class>>#_03_user_specified_variable_type with: { self class }) decode return value
+		assert: (SWDecoder new: self class>>#_03_user_specified_variable_type with: { self class }) decode return value
 		equals: Integer
 ]
 
@@ -130,7 +130,7 @@ SWMBTofJSTest >> test_06 [
     _receiver_.message_("hogehoge");
     _receiver_.uri_(uri);
     return _receiver_;
-})(SWServerStatus.new()).toString();
+})((new SWServerStatus())).toString();
 '
 ]
 
@@ -153,7 +153,7 @@ SWMBTofJSTest >> test_08 [
 	self assert: result equals: 'return (function(){try {
     return (Transcript.show_("hello"), Transcript.cr());
 } catch(e) {
-    return (Transcript.show_("error!"), Transcript.show_(e.asString()));
+    return (Transcript.show_("error!"), Transcript.show_(e.toString()));
 }})();
 '
 

@@ -26,9 +26,9 @@ SWSender >> hash [
 	|args buf|
 	args := self operands.
 	buf := OrderedCollection new: self operands size + 1.
-	buf add: self selector hash.
+	buf add: self selector.
 	buf addAll: (self operands collect: [ :one |
-		one hash
+		one
 	]).
 	^ buf hash
 ]

@@ -21,7 +21,7 @@ SWCompiledCodeTest >> _02_has_arguments: arg [
 SWCompiledCodeTest >> testBasics [
 	|cc|
 	cc := SWCompiledCode new: self class>>#_01_return_value with: { self class }.
-	self assert: cc stack first value equals: self class.
+	self assert: cc stack receiver value equals: self class.
 	
 	self assert: cc isDecoded not.
 	cc markAsDecoded.
@@ -29,8 +29,6 @@ SWCompiledCodeTest >> testBasics [
 	self assert: cc methodClass equals: self class.
 	self assert: cc receiverClass equals: self class.
 	self assert: cc return value equals: UndefinedObject.
-	cc specifyReturnTypeAs: Integer.
-	self assert: cc return value equals: Integer.
 	
 	cc := SWCompiledCode new: self class>>#_02_has_arguments: with: { self class. String }.
 	self assert: cc arguments size equals: 1.

@@ -3,7 +3,7 @@ I transpile a method of Pharo class.
 "
 Class {
 	#name : #SWMethodBodyTranspiler,
-	#superclass : #SWStackAnalyzer,
+	#superclass : #SWDecoder,
 	#instVars : [
 		'stream',
 		'type',

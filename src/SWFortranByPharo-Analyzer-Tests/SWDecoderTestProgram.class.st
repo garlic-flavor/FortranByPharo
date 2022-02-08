@@ -1,5 +1,8 @@
+"
+I'm a test class for SWDecoderTest.
+"
 Class {
-	#name : #SWStackAnalyzerTestProgram,
+	#name : #SWDecoderTestProgram,
 	#superclass : #Object,
 	#instVars : [
 		'var1'
@@ -8,13 +11,13 @@ Class {
 }
 
 { #category : #accessing }
-SWStackAnalyzerTestProgram >> var1 [
+SWDecoderTestProgram >> var1 [
 
 	^ var1
 ]
 
 { #category : #accessing }
-SWStackAnalyzerTestProgram >> var1: anObject [
+SWDecoderTestProgram >> var1: anObject [
 
 	var1 := anObject
 ]

@@ -39,12 +39,6 @@ SWCompiledCode class >> new: aMethod [
 			method: aMethod;
 			yourself
 	].
-	aMethod class = ByteSymbol ifTrue: [
-		self error; flag: #toRemove.
-		^ self new
-			selector: aMethod;
-			yourself
-	].
 	self error
 
 ]
@@ -57,51 +51,14 @@ SWCompiledCode class >> new: aMethod with: anArrayOfVariableTypeInfoOrTypes [
 
 ]
 
-{ #category : #'instance creation' }
-SWCompiledCode class >> newDefaultPool [
-	self error; flag: #toRemove.
-	^ self poolClass new
-		transpilerClass: self;
-		yourself
-]
-
-{ #category : #'instance creation' }
-SWCompiledCode class >> newFrom: anOriginal [
-	self error; flag: #toRemove.
-	^ self new
-		copyFrom: anOriginal;
-		yourself
-]
-
 { #category : #'as yet unclassified' }
 SWCompiledCode class >> senderTranspilerClass [
 	^ SWSender
 ]
 
-{ #category : #adding }
-SWCompiledCode >> addLocalVariable: aVariableInfo [
-	self error; flag: #toRemove.
-	self stack push: aVariableInfo afterIndex: self numTemps.
-	self numTemps: self numTemps + 1.
-	aVariableInfo stackPos: self numTemps.
-]
-
-{ #category : #accessing }
-SWCompiledCode >> allTemps [
-	self error; flag: #toRemove.
-	^ self stack copyFrom: 1 to: self method numTemps
-]
-
 { #category : #accessing }
 SWCompiledCode >> arguments [
 	^ self stack copyFrom: 1 to: self method numArgs
-]
-
-{ #category : #converting }
-SWCompiledCode >> asCallee [
-	"This will be called to preserve #message member variable."
-	self error; flag: #toRewrite.
-	^ self copy
 ]
 
 { #category : #accessing }
@@ -150,14 +107,6 @@ SWCompiledCode >> classInfo: anObject [
 	classInfo := anObject
 ]
 
-{ #category : #copying }
-SWCompiledCode >> copyFrom: right [
-	self error; flag: #toRewrite.
-	method := right method.
-	stack := right stack.
-	right isDecoded ifTrue: [ self markAsDecoded ]
-]
-
 { #category : #api }
 SWCompiledCode >> decode [
 	self isDecoded ifTrue: [ ^self ].
@@ -188,20 +137,6 @@ SWCompiledCode >> getVariableInfoOf: aName ifPresent: aPresentBlock [
 	]
 ]
 
-{ #category : #comparing }
-SWCompiledCode >> hash [
-	"The hash depends on this method and its operands."
-	|args buf|
-	self error; flag: #toRemove.
-	args := self operands.
-	buf := OrderedCollection new: args size + 1.
-	buf add: self method hash.
-	buf addAll: (args collect: [ :one |
-		one type hash
-	]).
-	^ buf hash
-]
-
 { #category : #testing }
 SWCompiledCode >> isDecoded [
 	^ oldPC isNotNil
@@ -216,26 +151,6 @@ SWCompiledCode >> locals [
 { #category : #modifying }
 SWCompiledCode >> markAsDecoded [
 	oldPC := 9999
-]
-
-{ #category : #accessing }
-SWCompiledCode >> messages [
-	self error; flag: #toRemove.
-	"messages is used to 2 deferent purpose.
-	The one is to store transpilers to transpile the contents of the method.
-	Another is to store transpilers to transpile its arguments when transpiling it as a callee.
-	In latter case, messages correspond to these of outer transpiler."
-"
-	^ messages ifNil: [ messages := OrderedDictionary new ]
-"
-]
-
-{ #category : #accessing }
-SWCompiledCode >> messages: anObject [
-	self error; flag: #toRemove.
-"
-	messages := anObject
-"
 ]
 
 { #category : #accessing }
@@ -259,38 +174,6 @@ SWCompiledCode >> method: aCompiledMethod [
 { #category : #accessing }
 SWCompiledCode >> methodClass [
 	^ method class = CompiledMethod ifTrue: [ method methodClass ] ifFalse: [ nil ]
-]
-
-{ #category : #accessing }
-SWCompiledCode >> name [
-	self error; flag: #toRemove.
-	^ self method selector asString
-]
-
-{ #category : #accessing }
-SWCompiledCode >> numTemps [
-	self error; flag: #toRemove.
-
-	^ numTemps ifNil: [ numTemps := self method numTemps ]
-]
-
-{ #category : #accessing }
-SWCompiledCode >> numTemps: anObject [
-	self error; flag: #toRemove.
-	numTemps := anObject
-]
-
-{ #category : #accessing }
-SWCompiledCode >> operands [
-	"The operands consist of its receiver and its arguments."
-	method class = CompiledMethod ifTrue: [
-		^ self stack copyFrom: 0 to: self method numArgs
-	].
-	method class = ByteSymbol ifTrue: [
-		self error; flag: #toRemove.
-		^ #()
-	].
-	self error
 ]
 
 { #category : #printing }
@@ -331,19 +214,7 @@ SWCompiledCode >> selector [
 		^ method selector
 	].
 
-	method class = ByteSymbol ifTrue: [
-		self error; flag: #toRemove.
-		^ method
-	].
-
 	^ #closure
-]
-
-{ #category : #accessing }
-SWCompiledCode >> selector: aSelector [
-	self error; flag: #toRemove.
-	method := aSelector.
-	self markAsDecoded
 ]
 
 { #category : #accessing }
@@ -356,14 +227,6 @@ SWCompiledCode >> senders [
 SWCompiledCode >> senders: anObject [
 
 	senders := anObject
-]
-
-{ #category : #accessing }
-SWCompiledCode >> specifyReturnTypeAs: aType [
-
-	self return
-		<< aType;
-		priority: SWType userSpecifyingPriority
 ]
 
 { #category : #accessing }

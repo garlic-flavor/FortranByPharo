@@ -21,10 +21,8 @@ SWVariableTypeInfoTest >> putOnOf: anObject mustMatchesWith: exp [
 SWVariableTypeInfoTest >> testBasics [
 
 	|vi|
-	vi := SWVariableTypeInfo new: [ SmallInteger ].
-	self assert: vi easyValue equals: nil.
+	vi := SWVariableTypeInfo new: SmallInteger.
 	self assert: vi value equals: SmallInteger.
-	self assert: vi easyValue equals: SmallInteger.
 	self assert: vi priority equals: SWType exactTypePriority.
 ]
 

@@ -49,13 +49,6 @@ SWStackTest >> testPush [
 ]
 
 { #category : #tests }
-SWStackTest >> testPushAfterIndex [
-self error; flag: #toRemove.
-	stack push: 99 afterIndex: 2.
-	self assert: stack asArray equals: { 1. 2. 3. 99. 4 }
-]
-
-{ #category : #tests }
 SWStackTest >> testSize [
 
 	self assert: stack size equals: 4

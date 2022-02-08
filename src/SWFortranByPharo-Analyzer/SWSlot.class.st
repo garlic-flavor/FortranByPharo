@@ -66,16 +66,6 @@ SWSlot >> copyFrom: start to: end [
 ]
 
 { #category : #enumerating }
-SWSlot >> detect: aNeedle [
-	^ self payload detect: aNeedle
-]
-
-{ #category : #enumerating }
-SWSlot >> detect: aNeedle ifFound: foundBlock [
-	^ self payload detect: aNeedle ifFound: foundBlock
-]
-
-{ #category : #enumerating }
 SWSlot >> detect: aNeedle ifFound: foundBlock ifNone: noneBlock [
 	^ self payload detect: aNeedle ifFound: foundBlock ifNone: noneBlock
 ]
@@ -86,18 +76,12 @@ SWSlot >> detect: aNeedle ifNone: noneBlock [
 ]
 
 { #category : #enumerating }
-SWSlot >> do: aBlock [
-	^ self payload do: aBlock
-]
-
-{ #category : #enumerating }
 SWSlot >> doWithIndex: anIterator [
 	^ self payload doWithIndex: anIterator
 ]
 
 { #category : #accessing }
 SWSlot >> first [
-self halt.
 	^ self at: 1
 ]
 
