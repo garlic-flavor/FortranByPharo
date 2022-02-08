@@ -182,7 +182,7 @@ SWDecoderTest >> test_08 [
 	|sa|
 	sa := SWDecoder new: self class>>#_08_ZnServer with: { self class }.
 	sa debugMode: true.
-	SWServer addTranspilerTo: sa pool.
+	SWServer addInitializerTo: sa pool.
 	sa decode.
 	self assert: sa return value equals: ZnManagingMultiThreadedServer 
 ]
@@ -209,7 +209,7 @@ SWDecoderTest >> test_10_new [
 SWDecoderTest >> test_11_ZnServer [
 	|sa|
 	sa := SWDecoder new: SWServer>>#startOn: with: { SWServer. SmallInteger }.
-	SWServer addTranspilerTo: sa pool.
+	SWServer addInitializerTo: sa pool.
 "
 	sa debugMode: true.
 "

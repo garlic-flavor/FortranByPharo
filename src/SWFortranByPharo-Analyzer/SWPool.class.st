@@ -22,7 +22,7 @@ SWPool class >> search: selector in: aClass [
 ]
 
 { #category : #api }
-SWPool >> addTranspilerIn: aClass [
+SWPool >> addInitializerIn: aClass [
 	"invoke aClass>>$initialize_Hoge: with Hoge class transpiler."
 	 aClass classSide methodDict values select: [ :each |
 		each selector beginsWith: 'initialize_'

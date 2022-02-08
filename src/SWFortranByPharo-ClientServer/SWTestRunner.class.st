@@ -1,15 +1,23 @@
 Class {
 	#name : #SWTestRunner,
 	#superclass : #TestCase,
+	#classInstVars : [
+		'debugMode'
+	],
 	#category : #'SWFortranByPharo-ClientServer-Client'
 }
+
+{ #category : #adding }
+SWTestRunner class >> addInitializerTo: pool [
+	pool addInitializerIn: SWTestRunner.
+]
 
 { #category : #building }
 SWTestRunner class >> build [
 	|module|
 	module := self moduleTranspilerClass newFrom: self.
-	module enableDebugMode.
-	module pool addTranspilerIn: SWTestRunner.
+	debugMode == true ifTrue: [ module enableDebugMode ].
+	self addInitializerTo: module pool.
 	module transpile.
 	^ module
 ]
@@ -22,20 +30,6 @@ SWTestRunner class >> go [
 	(STON reader
 		on: result message readStream;
 		next) inspect
-]
-
-{ #category : #accessing }
-SWTestRunner class >> initializeClassSideTranspiler: transpiler [
-	self halt; flag: #toRewrite.
-	transpiler
-		declareMethod: #name as: [ :newT |
-			newT
-				specifyReturnTypeAs: String;
-				markAsDecoded;
-				generator: [ :t |
-					t putReturnThisClassName
-				]
-		]
 ]
 
 { #category : #initialization }
@@ -75,6 +69,6 @@ SWTestRunner class >> solveDependenciesUsing: transpiler [
 	].
 	transpiler
 		transpile: TestCase;
-		transpile: SWTestRunner;
-		transpile: self
+		transpile: SWTestRunner
+
 ]

@@ -1,11 +1,11 @@
 Class {
 	#name : #SWNag3Line,
-	#superclass : #SWTypeOld,
+	#superclass : #AnObsoleteSWTypeOld,
 	#instVars : [
 		'p1',
 		'p2'
 	],
-	#category : #'SWFortranByPharo-ClientServer-Tests'
+	#category : #'SWFortranByPharo-ClientServer-Tests-Nag'
 }
 
 { #category : #initialization }

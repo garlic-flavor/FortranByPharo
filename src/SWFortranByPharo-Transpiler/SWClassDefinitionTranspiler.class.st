@@ -5,7 +5,8 @@ Class {
 	#name : #SWClassDefinitionTranspiler,
 	#superclass : #SWClass,
 	#instVars : [
-		'stream'
+		'stream',
+		'isTranspiled'
 	],
 	#category : #'SWFortranByPharo-Transpiler-Common'
 }
@@ -60,7 +61,24 @@ SWClassDefinitionTranspiler >> initialize_TestCaseClass [
 
 { #category : #testing }
 SWClassDefinitionTranspiler >> isTranspiled [
-	^ stream isNotNil or: [ stream isEmpty ]
+	^ isTranspiled ifNil: [ isTranspiled := false ]
+]
+
+{ #category : #'as yet unclassified' }
+SWClassDefinitionTranspiler >> markAsNotTranspiled [
+	isTranspiled := false
+]
+
+{ #category : #'as yet unclassified' }
+SWClassDefinitionTranspiler >> markAsTranspiled [
+	isTranspiled := true
+]
+
+{ #category : #'instance creation' }
+SWClassDefinitionTranspiler >> newDecoderOf: aMethod with: args [
+	^ (super newDecoderOf: aMethod with: args)
+		stream: self stream;
+		yourself
 ]
 
 { #category : #'code generation' }
@@ -123,8 +141,8 @@ SWClassDefinitionTranspiler >> transpile [
 		self transpileAsInstanceSide
 	] ifFalse: [
 		self transpileAsClassSide
-	]
-	
+	].
+	self markAsTranspiled
 
 ]
 

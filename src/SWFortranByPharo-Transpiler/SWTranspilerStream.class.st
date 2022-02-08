@@ -71,6 +71,11 @@ SWTranspilerStream >> initialize [
 	preventNewline := false.
 ]
 
+{ #category : #testing }
+SWTranspilerStream >> isNotEmpty [
+	^ payload isNotNil and: [ payload isEmpty not ]
+]
+
 { #category : #accessing }
 SWTranspilerStream >> lastLineOfComment [
 

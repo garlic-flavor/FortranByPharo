@@ -1,7 +1,7 @@
 Class {
 	#name : #SWNag3,
 	#superclass : #Object,
-	#category : #'SWFortranByPharo-ClientServer-Tests'
+	#category : #'SWFortranByPharo-ClientServer-Tests-Nag'
 }
 
 { #category : #running }

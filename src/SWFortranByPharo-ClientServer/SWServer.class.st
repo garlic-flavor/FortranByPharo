@@ -14,9 +14,9 @@ Class {
 }
 
 { #category : #adding }
-SWServer class >> addTranspilerTo: pool [
-	pool addTranspilerIn: SWShellEnvironment.
-	pool addTranspilerIn: self.
+SWServer class >> addInitializerTo: pool [
+	pool addInitializerIn: SWShellEnvironment.
+	pool addInitializerIn: self.
 
 ]
 
@@ -24,7 +24,7 @@ SWServer class >> addTranspilerTo: pool [
 SWServer class >> build [
 	|module|
 	module := SWMTofJS newFrom: self.
-	self addTranspilerTo: module pool.
+	self addInitializerTo: module pool.
 "
 	module enableDebugMode.
 "

@@ -12,6 +12,7 @@ SWTestRunnerTest class >> build [
 { #category : #'as yet unclassified' }
 SWTestRunnerTest class >> buildThenInspect [
 	<script>
+	debugMode := true.
 	self build inspect.
 ]
 

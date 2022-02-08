@@ -1,11 +1,11 @@
 Class {
 	#name : #SWNag3Point,
-	#superclass : #SWTypeOld,
+	#superclass : #AnObsoleteSWTypeOld,
 	#instVars : [
 		'x',
 		'y'
 	],
-	#category : #'SWFortranByPharo-ClientServer-Tests'
+	#category : #'SWFortranByPharo-ClientServer-Tests-Nag'
 }
 
 { #category : #'instance creation' }

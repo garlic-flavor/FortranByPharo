@@ -66,6 +66,11 @@ SWSlot >> copyFrom: start to: end [
 ]
 
 { #category : #enumerating }
+SWSlot >> detect: aNeedle ifFound: foundBlock [
+	^ self payload detect: aNeedle ifFound: foundBlock
+]
+
+{ #category : #enumerating }
 SWSlot >> detect: aNeedle ifFound: foundBlock ifNone: noneBlock [
 	^ self payload detect: aNeedle ifFound: foundBlock ifNone: noneBlock
 ]
@@ -73,6 +78,11 @@ SWSlot >> detect: aNeedle ifFound: foundBlock ifNone: noneBlock [
 { #category : #enumerating }
 SWSlot >> detect: aNeedle ifNone: noneBlock [
 	^ self payload detect: aNeedle ifNone: noneBlock
+]
+
+{ #category : #enumerating }
+SWSlot >> do: aBlock [
+	^ self payload do: aBlock
 ]
 
 { #category : #enumerating }
@@ -111,7 +121,7 @@ SWSlot >> printOn: aStream [
 SWSlot >> putOn: aStream [
 	aStream << '('.
 	self payload do: [ :each |
-		aStream << each value name
+		aStream << each value asString
 	] separatedBy: [
 		aStream << ', '
 	].

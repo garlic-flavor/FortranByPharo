@@ -38,7 +38,7 @@ SWModuleTranspiler >> contents [
 
 { #category : #'public API' }
 SWModuleTranspiler >> decode: aSelector with: args [
-	^ self payload pool newSenderOf: aSelector super: false with: args
+	^ self pool newSenderOf: aSelector super: false with: args
 ]
 
 { #category : #'public API' }
@@ -72,6 +72,11 @@ SWModuleTranspiler >> payload: anObject [
 	payload := anObject
 ]
 
+{ #category : #accessing }
+SWModuleTranspiler >> pool [
+	^ self payload pool
+]
+
 { #category : #private }
 SWModuleTranspiler >> solveDependencies [
 	|solver tClass|
@@ -80,9 +85,12 @@ SWModuleTranspiler >> solveDependencies [
 	(tClass respondsTo: solver) ifTrue: [
 		tClass perform: solver with: self
 	].
-	self payload pool detect: [ :each | each targetClass = tClass ] ifFound: [ :t |
-		self transpile: tClass
-	]
+
+	self transpile: tClass.
+"
+	self pool detect: [ :each | each targetClass = tClass ] ifFound: [ :t |
+		self transpile: tClass.
+	]"
 ]
 
 { #category : #accessing }
@@ -101,12 +109,12 @@ SWModuleTranspiler >> transpile [
 { #category : #'public API' }
 SWModuleTranspiler >> transpile: aClass [
 	|ct solver|
-	ct := (self payload pool getClassTranspiler: aClass).
+	ct := (self payload pool getClassTranspiler: aClass instanceSide).
 	ct isTranspiled ifTrue: [ ^ self ].
-
+	ct markAsTranspiled.
 	solver := #solveDependenciesUsing:.
 	(aClass instanceSide respondsTo: solver) ifTrue: [
-		aClass instanceSide perform: solver with: self
+		aClass perform: solver with: self
 	].
 	ct transpile.
 
