@@ -94,6 +94,17 @@ SWDecoderTest >> _15_test_ifNil [
 	^ val ifNil: [ val := 100 ]
 ]
 
+{ #category : #'as yet unclassified' }
+SWDecoderTest >> _17_test_ensure [
+	^ [ 
+		123 = 234 ifTrue: [ 
+			123
+		] ifFalse: [
+			2.2362
+		]
+	] ensure: [ 'hoge' ]
+]
+
 { #category : #'private - utility' }
 SWDecoderTest >> inspectMy: arg1 withArguments: arg2 [
 	|dec|
@@ -251,6 +262,14 @@ SWDecoderTest >> test_16 [
 	|dec|
 	dec := SWDecoder new: SWShell class>>#executeProcess: with: { SWShell class. OSSUnixSubprocess }.
 	dec pool addInitializerIn: SWShell.
+"
+	dec logger enabled: true.
+"
 	dec decode.
 	dec inspect.
+]
+
+{ #category : #tests }
+SWDecoderTest >> test_17 [
+	self inspectMy: #_17_test_ensure withArguments: {  } 
 ]

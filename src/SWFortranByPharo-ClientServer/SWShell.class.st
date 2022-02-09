@@ -29,6 +29,7 @@ SWShell class >> execute: exe arguments: list [
 { #category : #execution }
 SWShell class >> executeProcess: process [
 	"I execute 'exe' with 'list', then return its result."
+	SWType declare: #return as: String.
 	^ [
 		process
 			workingDirectory: SWShellEnvironment default localDirectory fullName;

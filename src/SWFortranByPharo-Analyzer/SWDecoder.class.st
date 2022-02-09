@@ -28,12 +28,17 @@ SWDecoder >> addBytecode: description [
 	super addBytecode: description.
 
 	(self jumperStack nextPeriodIs: scanner pc) ifFalse: [ ^ self  ]. 
+
 	"Below evaluates when ifTrue:ifFalse:."
 	item := self jumperStack pop.
 	node := self method sourceNodeForPC: item startPC.
 	operands := self stack popSlotForJumper: self stack size - item stackSize.
 	sender := self pool newSenderOf: node selector super: false with: operands.
-	sender return << self stack top.
+	sender hasReturn ifTrue: [
+		self stack push: sender return 
+	] ifFalse: [
+		sender return << self stack top
+	].
 	sender node: node.
 	self senders at: node put: sender.
 
@@ -48,7 +53,7 @@ SWDecoder >> blockReturnConstant: cst [
 
 { #category : #'instruction decoding' }
 SWDecoder >> blockReturnTop [
-	self return << self stack pop.
+	self return << self stack top.
 	
 	super blockReturnTop
 ]
@@ -355,10 +360,14 @@ selector = #beginsWith: ifTrue: [ self halt ].
 	"A special case for user specifying."
 	(selector = #declare:as: and: [ operands receiver value = SWType class ]) ifTrue: [|assoc|
 		assoc := (self method sourceNodeForPC: oldPC) evaluate.
-		(assoc value)
+		(assoc key = #return ifTrue: [
+			self return
+		] ifFalse: [
+			(self getVariableInfoOf: assoc key) 
+		])
+			<<  assoc value;
 			owner: self;
-			pc: oldPC.
-		(self getVariableInfoOf: assoc key) << assoc value
+			pc: oldPC
 	].
 	super send: selector super: supered numArgs: numberArguments.
 

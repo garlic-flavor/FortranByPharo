@@ -27,7 +27,7 @@ SWType class >> calcPriorityOf: aClass [
 { #category : #api }
 SWType class >> declare: aName as: aType [
 
-	^ aName -> (SWVariableTypeInfo new
+	^ aName -> (self new
 		<< aType;
 		priority: self userSpecifyingPriority;
 		yourself)

@@ -67,6 +67,12 @@ SWShellEnvironment class >> initialize_self: transpiler [
 		]
 ]
 
+{ #category : #initialization }
+SWShellEnvironment class >> initialize_selfClass: transpiler [
+	transpiler
+		declareMethodReturnsReceiversInstance: #default
+]
+
 { #category : #'instance creation' }
 SWShellEnvironment class >> newDefault [
 	OSPlatform current isMacOS ifTrue: [ 
