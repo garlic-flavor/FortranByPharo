@@ -13,13 +13,6 @@ Class {
 	#category : #'SWFortranByPharo-ClientServer-Server'
 }
 
-{ #category : #adding }
-SWServer class >> addInitializerTo: pool [
-	pool addInitializerIn: SWShellEnvironment.
-	pool addInitializerIn: self.
-
-]
-
 { #category : #accessing }
 SWServer class >> build [
 	|module|

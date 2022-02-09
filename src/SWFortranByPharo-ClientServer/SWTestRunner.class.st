@@ -4,17 +4,11 @@ Class {
 	#category : #'SWFortranByPharo-ClientServer-Client'
 }
 
-{ #category : #adding }
-SWTestRunner class >> addInitializerTo: pool [
-	pool addInitializerIn: SWTestRunner.
-]
-
 { #category : #building }
 SWTestRunner class >> build: debugMode [
 	|module|
 	module := self moduleTranspilerClass newFrom: self.
 	debugMode == true ifTrue: [ module enableDebugMode ].
-	self addInitializerTo: module pool.
 	module transpile.
 	^ module
 ]
@@ -50,7 +44,7 @@ SWTestRunner class >> main [
 
 ]
 
-{ #category : #'as yet unclassified' }
+{ #category : #accessing }
 SWTestRunner class >> moduleTranspilerClass [
 	^ self subclassResponsibility
 ]
@@ -65,7 +59,7 @@ SWTestRunner class >> runAllTests [
 	^ self buildSuiteFromSelectors run
 ]
 
-{ #category : #'as yet unclassified' }
+{ #category : #'code generation' }
 SWTestRunner class >> solveDependenciesUsing: transpiler [
  	self methodDict select: [ :each | each selector beginsWith: 'test' ] thenDo: [ :each |
 		transpiler decode: each selector with: (SWSlot newFrom: { self })

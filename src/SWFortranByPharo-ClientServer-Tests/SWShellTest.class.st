@@ -4,7 +4,7 @@ A SWShellTest is a test class for testing the behavior of SWShell
 Class {
 	#name : #SWShellTest,
 	#superclass : #SWTestRunner,
-	#category : #'SWFortranByPharo-ClientServer-Tests'
+	#category : #'SWFortranByPharo-ClientServer-Tests-Shell'
 }
 
 { #category : #running }
@@ -28,7 +28,7 @@ SWShellTest class >> solveDependenciesUsing: transpiler [
 { #category : #building }
 SWShellTest class >> tryBuild [
 	<script>
-	super build inspect
+	(self build: true) inspect
 ]
 
 { #category : #tests }

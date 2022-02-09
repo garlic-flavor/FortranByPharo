@@ -100,6 +100,7 @@ SWModuleTranspiler >> stream [
 
 { #category : #'public API' }
 SWModuleTranspiler >> transpile [
+	self pool addInitializerIn: self payload receiverClass.
 	self payload decode.
 	self solveDependencies.
 	self payload transpile.

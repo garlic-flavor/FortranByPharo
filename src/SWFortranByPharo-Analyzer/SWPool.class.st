@@ -33,12 +33,12 @@ SWPool >> addInitializerIn: aClass [
 		] ifFalse: [
 			name copyUpToLast: $:
 		].
-		name = 'self' ifTrue: [ name := aClass name ].
+		name = 'self' ifTrue: [ name := aClass instanceSide name ].
 		target := Smalltalk globals at: name asSymbol.
 		(each selector endsWith: 'Class:') ifTrue: [
 			target := target classSide
 		].
-		each valueWithReceiver: aClass arguments: {
+		each valueWithReceiver: aClass instanceSide arguments: {
 			self getClassTranspiler: target
 		}
 	]
@@ -72,10 +72,14 @@ SWPool >> getClassTranspiler: aClass [
 	^ (aClass isClassSide ifTrue: [
 		(self getClassTranspiler: aClass instanceSide) classSide
 	] ifFalse: [
-		self payload at: aClass ifAbsentPut: [
-			self classTranspilerClass new
-				pool: self;
-				targetClass: aClass;
+		self payload at: aClass ifAbsent: [|newCT|
+			newCT := self classTranspilerClass new
+					pool: self;
+					targetClass: aClass;
+					yourself.
+			self payload at: aClass put: newCT.
+			newCT
+				readyInitializers;
 				yourself
 		]
 	])

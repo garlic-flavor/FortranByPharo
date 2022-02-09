@@ -1,10 +1,10 @@
 Class {
 	#name : #SWTestRunnerTest,
 	#superclass : #SWTestRunner,
-	#category : #'SWFortranByPharo-ClientServer-Tests'
+	#category : #'SWFortranByPharo-ClientServer-Tests-Client'
 }
 
-{ #category : #'as yet unclassified' }
+{ #category : #debug }
 SWTestRunnerTest class >> buildThenInspect [
 	<script>
 	(self build: false) inspect.
@@ -16,7 +16,7 @@ SWTestRunnerTest class >> go [
 	super go
 ]
 
-{ #category : #'as yet unclassified' }
+{ #category : #accessing }
 SWTestRunnerTest class >> moduleTranspilerClass [
 	^ SWMTofJS
 ]

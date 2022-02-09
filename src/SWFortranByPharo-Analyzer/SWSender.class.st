@@ -113,6 +113,5 @@ SWSender >> selector: anObject [
 { #category : #accessing }
 SWSender >> specifyReturnTypeAs: aType [
 	self return
-		<< aType;
-		priority: SWType userSpecifyingPriority
+		<< aType
 ]

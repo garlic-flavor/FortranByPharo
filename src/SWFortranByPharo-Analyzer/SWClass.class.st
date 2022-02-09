@@ -54,6 +54,9 @@ SWClass >> classSide [
 		classSide := self class new
 			pool: self pool;
 			targetClass: self targetClass classSide;
+			yourself.
+		classSide
+			readyInitializers;
 			yourself
 	]
 ]
@@ -257,6 +260,7 @@ SWClass >> getVariableInfoOf: aName ifPresent: aPresentBlock [
 { #category : #initialization }
 SWClass >> initialize: aClass [
 	|initializer|
+
 	aClass ifNil: [ ^ self ].
 	self initialize: aClass superclass.
 
@@ -269,8 +273,7 @@ SWClass >> initialize: aClass [
 
 	(self respondsTo: initializer) ifTrue: [
 		self perform: initializer
-	]
-
+	].
 
 ]
 
@@ -557,6 +560,12 @@ SWClass >> putOn: aStream [
 	aStream << self targetClass name
 ]
 
+{ #category : #'as yet unclassified' }
+SWClass >> readyInitializers [
+	self initialize: self targetClass.
+	self pool addInitializerIn: self targetClass
+]
+
 { #category : #accessing }
 SWClass >> senderInitializer [
 
@@ -614,7 +623,6 @@ SWClass >> targetClass [
 { #category : #accessing }
 SWClass >> targetClass: anObject [
 	targetClass := anObject.
-	self initialize: anObject
 
 ]
 
