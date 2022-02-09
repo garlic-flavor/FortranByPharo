@@ -427,7 +427,8 @@ SWClass >> initialize_ProtoObject [
 		setBreakpointOn: #primitiveFailed;
 		declareMethodAsCompareOperator: #==;
 		declareMethodReturnsReceiversClass: #class;
-		declareMethodReturnsFirstOrSecondArgument: #ifNil:ifNotNil:
+		declareMethodReturnsFirstOrSecondArgument: #ifNil:ifNotNil:;
+		declareMethodReturnsFirstArgument: #ifNil:
 ]
 
 { #category : #initialization }
@@ -535,7 +536,6 @@ SWClass >> newDecoderOf: aMethod with: args [
 		classInfo: self;
 		pool: self pool;
 		logger: self pool logger;
-		debugMode: self pool debugMode;
 		yourself.
 	self decoderInitializer at: aMethod selector ifPresent: [ :ini |
 		decoder := ini cull: decoder

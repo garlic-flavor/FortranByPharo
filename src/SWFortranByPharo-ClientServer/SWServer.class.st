@@ -85,6 +85,12 @@ SWServer class >> initialize_ZnManagingMultiThreadedServer: ct [
 ]
 
 { #category : #initialization }
+SWServer class >> initialize_ZnResponseClass: transpiler [
+	transpiler
+		declareMethodReturnsReceiversInstance: #notFound:
+]
+
+{ #category : #initialization }
 SWServer class >> initialize_ZnServer: ct [
 	ct
 		declareMethodReturnsSecondArgument: #optionAt:ifAbsent:

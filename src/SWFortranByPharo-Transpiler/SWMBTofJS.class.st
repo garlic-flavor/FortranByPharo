@@ -34,7 +34,6 @@ SWMBTofJS >> mangledName [
 
 { #category : #'code generation' }
 SWMBTofJS >> putBlock: aBlock [
-	self stream log.
 
 	self
 		put: '{';
@@ -51,8 +50,7 @@ SWMBTofJS >> putBlock: aBlock [
 
 { #category : #'code generation' }
 SWMBTofJS >> putBlockAsExpression: aBlock [
-	self stream log.
-	
+
 	aBlock statements size = 1 ifTrue: [
 		self << (aBlock statements at: 1)
 	] ifFalse: [
@@ -92,8 +90,6 @@ SWMBTofJS >> putCascade: aRBCascadeNode [
 
 { #category : #'code generation' }
 SWMBTofJS >> putClosure: aBlock [
-	self stream log.
-
 	self
 		put: 'function';
 		putArguments: aBlock arguments;
@@ -253,81 +249,6 @@ SWMBTofJS >> putVariableDeclarationOf: aVariableInfo [
 		cr
 
 		
-]
-
-{ #category : #'as yet unclassified' }
-SWMBTofJS >> put_ensure_:aNode [
-	self error; flag: #toRemove.
-	self
-		put: '(function(){ try {';
-		cr;
-		incIndent;
-		putSequenceWithReturn: aNode receiver;
-		decIndent;
-		put: '} finally';
-		putBlock: aNode arguments first;
-		put: '})()'
-]
-
-{ #category : #'as yet unclassified' }
-SWMBTofJS >> put_ifNil_: aNode [
-	self error; flag: #toRemove.
-	self
-		put: '(function(_receiver_){ return (_receiver_ === null ) ? ';
-		putBlockAsExpression: aNode arguments first;
-		put: ' : _receiver_; })(';
-		<< aNode receiver;
-		put: ')'
-
-]
-
-{ #category : #'as yet unclassified' }
-SWMBTofJS >> put_ifNotNil_: aNode [
-	self error; flag: #toRemove.
-	self
-		put: '((';
-		<< aNode receiver;
-		put: ' === null) ? null : ';
-		putBlockAsExpression: aNode arguments first;
-		put: ')'
-
-]
-
-{ #category : #'as yet unclassified' }
-SWMBTofJS >> put_on_do_: aNode [
-	self error; flag: #toRemove.
-	aNode isExpression ifTrue: [
-		self put: '(function(){'
-	].
-	self
-		put: 'try {'; cr;
-		incIndent.
-	aNode isExpression ifTrue: [
-		self putSequenceWithReturn: aNode receiver
-	] ifFalse: [
-		self putSequence: aNode receiver
-	].
-	self
-		decIndent;
-		put: '} catch'.
-	(aNode arguments at: 2) arguments ifNotEmpty: [
-		self putArguments: (aNode arguments at: 2) arguments
-	].
-	self
-		put: ' {'; cr;
-		incIndent.
-	aNode isExpression ifTrue: [
-		self putSequenceWithReturn: (aNode arguments at: 2)
-	] ifFalse: [
-		self putSequence: (aNode arguments at: 2)
-	].
-	self
-		decIndent;
-		put: '}'.
-	aNode isExpression ifTrue: [
-		self put: '})()'
-	]
-
 ]
 
 { #category : #'as yet unclassified' }

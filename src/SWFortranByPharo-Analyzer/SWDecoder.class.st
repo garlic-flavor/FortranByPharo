@@ -21,6 +21,7 @@ SWDecoder class >> poolClass [
 { #category : #private }
 SWDecoder >> addBytecode: description [
 	|item node operands sender|
+
 	self logger log: [ String streamContents: [ :s |
 		s << '[' print: oldPC; << '] '; << description
 	] ] withStack: self stack.
@@ -32,9 +33,9 @@ SWDecoder >> addBytecode: description [
 	node := self method sourceNodeForPC: item startPC.
 	operands := self stack popSlotForJumper: self stack size - item stackSize.
 	sender := self pool newSenderOf: node selector super: false with: operands.
+	sender return << self stack top.
 	sender node: node.
 	self senders at: node put: sender.
-	self stack push: sender return.
 
 ]
 
@@ -56,19 +57,6 @@ SWDecoder >> blockReturnTop [
 SWDecoder >> callPrimitive: primNumber [
 
 	super callPrimitive: primNumber
-]
-
-{ #category : #accessing }
-SWDecoder >> debugMode [
-
-	^ debugMode ifNil: [ debugMode := false ]
-]
-
-{ #category : #accessing }
-SWDecoder >> debugMode: trueOrFalse [
-
-	debugMode := trueOrFalse.
-	self logger enabled: trueOrFalse
 ]
 
 { #category : #'instruction decoding' }
@@ -160,7 +148,7 @@ SWDecoder >> methodReturnReceiver [
 
 { #category : #'instruction decoding' }
 SWDecoder >> methodReturnTop [
-	self return << self stack pop.
+	self return << self stack top.
 	super methodReturnTop.
 
 ]
@@ -170,6 +158,7 @@ SWDecoder >> newFullClosure: lit with: args [
 	^ (self class new: lit with: args)
 		pool: self pool;
 		classInfo: self classInfo;
+		logger: self logger;
 		yourself
 
 
@@ -285,6 +274,7 @@ SWDecoder >> pushFullClosure: lit numCopied: numCopied receiverOnStack: rcvr ign
 	"I only interest in type information on the stack.
 	So, I decode a closure before invoking. it's ok."
 	mi := self newFullClosure: lit with: (self stack popSlotForClosure: numCopied).
+	self logger log: 'decode closure' withStack: self stack.
 	mi decode.
 	ret := (SWContainerType new: BlockClosure)
 		elementType: mi return value;

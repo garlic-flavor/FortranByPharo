@@ -55,17 +55,10 @@ SWShellEnvironment class >> initialize_OSSUnixSubprocess: ct [
 
 ]
 
-{ #category : #'code generation' }
-SWShellEnvironment class >> mjs_localDirectoryUsing: transpiler [
-	self error; flag: #toRemove.
-	transpiler put: 'return new FileLocator(process.cwd());'
-]
-
-{ #category : #'code generation' }
-SWShellEnvironment class >> mjs_requirements: transpiler [
-	self error; flag: #toRemove.
+{ #category : #initialization }
+SWShellEnvironment class >> initialize_self: transpiler [
 	transpiler
-		putImportNative: #(PharoObject OSPlatform SWGFortranCompilerAdapter FileLocator)  from: 'Pharo.mjs'
+		declareMethod: #localDirectory asReturn: FileLocator
 ]
 
 { #category : #'instance creation' }

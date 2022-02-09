@@ -6,7 +6,6 @@ Class {
 	#superclass : #Object,
 	#instVars : [
 		'payload',
-		'logger',
 		'tabWidth',
 		'indent',
 		'isNewline',
@@ -73,6 +72,7 @@ SWTranspilerStream >> initialize [
 
 { #category : #testing }
 SWTranspilerStream >> isNotEmpty [
+
 	^ payload isNotNil and: [ payload isEmpty not ]
 ]
 
@@ -86,33 +86,6 @@ SWTranspilerStream >> lastLineOfComment [
 SWTranspilerStream >> lastLineOfComment: anObject [
 
 	lastLineOfComment := anObject
-]
-
-{ #category : #api }
-SWTranspilerStream >> log [
-	self logger log: '' withContext: thisContext sender
-]
-
-{ #category : #api }
-SWTranspilerStream >> log: msg [
-	self logger log: msg withContext: thisContext sender
-]
-
-{ #category : #accessing }
-SWTranspilerStream >> logger [
-
-	^ logger ifNil: [ logger := SWLogger new ]
-]
-
-{ #category : #accessing }
-SWTranspilerStream >> logger: anObject [
-
-	logger := anObject
-]
-
-{ #category : #api }
-SWTranspilerStream >> logging: trueOrFalse [
-	self logger enabled: trueOrFalse
 ]
 
 { #category : #accessing }
@@ -151,7 +124,6 @@ SWTranspilerStream >> preventNewline [
 
 { #category : #api }
 SWTranspilerStream >> put: code [
-	self logger log: code.
 	self putIndent.
 	payload nextPutAll: code.
 ]

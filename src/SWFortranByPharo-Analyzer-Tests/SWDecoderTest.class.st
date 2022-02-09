@@ -88,12 +88,18 @@ SWDecoderTest >> _14_TestCase [
 	^ TestCase selector: 'hoge'
 ]
 
+{ #category : #'as yet unclassified' }
+SWDecoderTest >> _15_test_ifNil [
+	|val|
+	^ val ifNil: [ val := 100 ]
+]
+
 { #category : #'private - utility' }
 SWDecoderTest >> inspectMy: arg1 withArguments: arg2 [
-
-	(SWDecoder new: self class>>arg1 with: ({self class}, arg2))
-		debugMode: true;
-		decode; inspect
+	|dec|
+	dec := SWDecoder new: self class>>arg1 with: ({self class}, arg2).
+	dec logger enabled: true.
+	dec decode; inspect
 
 ]
 
@@ -182,7 +188,9 @@ SWDecoderTest >> test_08 [
 	|sa|
 	sa := SWDecoder new: self class>>#_08_ZnServer with: { self class }.
 	sa pool addInitializerIn: SWServer.
-	sa debugMode: true.
+"
+	sa logger enabled: true.
+"
 	sa decode.
 	self assert: sa return value equals: ZnManagingMultiThreadedServer 
 ]
@@ -231,4 +239,9 @@ SWDecoderTest >> test_13 [
 { #category : #tests }
 SWDecoderTest >> test_14 [
 	self returnValueOfMy: #_14_TestCase withArguments: {  } equals: TestCase
+]
+
+{ #category : #tests }
+SWDecoderTest >> test_15 [
+	self returnValueOfMy: #_15_test_ifNil withArguments: {  } equals: SmallInteger
 ]

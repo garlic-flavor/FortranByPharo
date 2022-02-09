@@ -55,12 +55,6 @@ SWPool >> classTranspilerClass [
 	^ self owner class classTranspilerClass
 ]
 
-{ #category : #accessing }
-SWPool >> debugMode [
-
-	^ self owner debugMode
-]
-
 { #category : #enumerating }
 SWPool >> detect: aNeedle ifFound: aBlock [
 
@@ -114,7 +108,7 @@ SWPool >> newSenderOf: aSelector super: supered with: args [
 { #category : #private }
 SWPool >> newUndefinedSenderOf: aSelector with: args [
 	self logger log: [ 'An unknown method detected: ', aSelector ].
-	self debugMode ifTrue: [ self halt ].
+	self logger enabled  ifTrue: [ self halt ].
 	^ self senderTranspilerClass new
 		selector: aSelector;
 		operands: args;

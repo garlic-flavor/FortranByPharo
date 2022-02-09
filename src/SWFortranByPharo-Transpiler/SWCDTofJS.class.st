@@ -29,39 +29,8 @@ SWCDTofJS >> initialize_Behavior [
 SWCDTofJS >> initialize_BlockClosure [
 	super initialize_BlockClosure.
 	self
-		defineMethodSender: #on:do: as: [ :transpiler :aNode |
-			aNode isExpression ifTrue: [
-				transpiler put: '(function(){'
-			].
-			transpiler
-				put: 'try {'; cr;
-				incIndent.
-			aNode isExpression ifTrue: [
-				transpiler putSequenceWithReturn: aNode receiver
-			] ifFalse: [
-				transpiler putSequence: aNode receiver
-			].
-			transpiler
-				decIndent;
-				put: '} catch'.
-			(aNode arguments at: 2) arguments ifNotEmpty: [
-				transpiler putArguments: (aNode arguments at: 2) arguments
-			].
-			transpiler
-				put: ' {'; cr;
-				incIndent.
-			aNode isExpression ifTrue: [
-				transpiler putSequenceWithReturn: (aNode arguments at: 2)
-			] ifFalse: [
-				transpiler putSequence: (aNode arguments at: 2)
-			].
-			transpiler
-				decIndent;
-				put: '}'.
-			aNode isExpression ifTrue: [
-				transpiler put: '})()'
-			]
-		]
+		defineMethodSender: #on:do: as: [ :transpiler :aNode | self put_on_do_: transpiler with: aNode ];
+		defineMethodSender: #ensure: as: [ :transpiler :aNode | self put_ensure_: transpiler with: aNode  ]
 ]
 
 { #category : #initialization }
@@ -138,6 +107,28 @@ SWCDTofJS >> initialize_Object [
 ]
 
 { #category : #initialization }
+SWCDTofJS >> initialize_ProtoObject [
+	super initialize_ProtoObject.
+	self
+		defineMethodSender: #ifNotNil: as: [ :transpiler :aNode |
+			transpiler
+				put: '((';
+				<< aNode receiver;
+				put: ' === null) ? null : ';
+				putBlockAsExpression: aNode arguments first;
+				put: ')'
+		];
+		defineMethodSender: #ifNil: as: [ :transpiler :aNode |
+			transpiler
+				put: '(function(_receiver_){ return (_receiver_ === null ) ? ';
+				putBlockAsExpression: aNode arguments first;
+				put: ' : _receiver_; })(';
+				<< aNode receiver;
+				put: ')'
+		]
+]
+
+{ #category : #initialization }
 SWCDTofJS >> initialize_SWStdClass [
 	super initialize_SWStdClass.
 	self
@@ -184,5 +175,54 @@ SWCDTofJS >> putMemberDeclarationOf: aVariableTypeInfo [
 		put: ' = null';
 		putDelimiter;
 		putLine
+
+]
+
+{ #category : #'as yet unclassified' }
+SWCDTofJS >> put_ensure_: transpiler with: aNode [
+	transpiler
+		put: '(function(){ try {';
+		cr;
+		incIndent;
+		putSequenceWithReturn: aNode receiver;
+		decIndent;
+		put: '} finally';
+		putBlock: aNode arguments first;
+		put: '})()'
+]
+
+{ #category : #'as yet unclassified' }
+SWCDTofJS >> put_on_do_: transpiler with: aNode [ 
+	aNode isExpression ifTrue: [
+		transpiler put: '(function(){'
+	].
+	transpiler
+		put: 'try {'; cr;
+		incIndent.
+	aNode isExpression ifTrue: [
+		transpiler putSequenceWithReturn: aNode receiver
+	] ifFalse: [
+		transpiler putSequence: aNode receiver
+	].
+	transpiler
+		decIndent;
+		put: '} catch'.
+	(aNode arguments at: 2) arguments ifNotEmpty: [
+		transpiler putArguments: (aNode arguments at: 2) arguments
+	].
+	transpiler
+		put: ' {'; cr;
+		incIndent.
+	aNode isExpression ifTrue: [
+		transpiler putSequenceWithReturn: (aNode arguments at: 2)
+	] ifFalse: [
+		transpiler putSequence: (aNode arguments at: 2)
+	].
+	transpiler
+		decIndent;
+		put: '}'.
+	aNode isExpression ifTrue: [
+		transpiler put: '})()'
+	]
 
 ]

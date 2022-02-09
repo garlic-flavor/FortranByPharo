@@ -15,7 +15,6 @@ SWSenderTranspiler >> generator [
 
 	^ generator ifNil: [
 		generator := [ :transpiler :aNode |
-			transpiler stream log.
 			transpiler
 				withoutMessageNestDo: [
 					transpiler << aNode receiver

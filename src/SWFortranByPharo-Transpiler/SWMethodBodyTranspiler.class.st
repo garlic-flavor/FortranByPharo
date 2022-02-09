@@ -29,7 +29,6 @@ SWMethodBodyTranspiler class >> senderTranspilerClass [
 
 { #category : #'code generation' }
 SWMethodBodyTranspiler >> << anObject [
-	self stream log.
 	anObject transpileUsing: self
 
 ]
@@ -55,7 +54,7 @@ SWMethodBodyTranspiler >> decMessageNest [
 SWMethodBodyTranspiler >> generator [
 	^ generator ifNil: [ generator := [ :transpiler | |m|
 		m := transpiler method.
-		transpiler stream log.
+
 		transpiler locals do: [ :each | self putVariableDeclarationOf: each ].
 		(transpiler classInfo isNotNil and: [ m methodClass isInstanceSide ]) ifTrue: [
 			self putSelfDefinition
@@ -82,11 +81,6 @@ SWMethodBodyTranspiler >> incIndent [
 SWMethodBodyTranspiler >> incMessageNest [
 	messageNest := messageNest + 1.
 	1 < messageNest ifTrue: [ self put: '(' ].
-]
-
-{ #category : #'public API' }
-SWMethodBodyTranspiler >> logging: trueOrFalse [
-	self stream logging: trueOrFalse
 ]
 
 { #category : #'private - code generation' }
@@ -123,7 +117,7 @@ SWMethodBodyTranspiler >> put: anObject [
 
 { #category : #'code generation' }
 SWMethodBodyTranspiler >> putArguments: arguments [
-	self stream log.
+
 	self
 		put: '(';
 		withoutMessageNestDo: [
@@ -139,7 +133,7 @@ SWMethodBodyTranspiler >> putArguments: arguments [
 
 { #category : #'code generation' }
 SWMethodBodyTranspiler >> putArray: anArray [
-	self stream log.
+
 	self put: '['.
 	anArray do: [:each |
 		self << each
@@ -152,7 +146,7 @@ SWMethodBodyTranspiler >> putArray: anArray [
 
 { #category : #'code generation' }
 SWMethodBodyTranspiler >> putAssignTo: key with: value [
-	self stream log: [ key asString, ' = ', value asString ].
+
 	self
 		<< key;
 		put: ' = ';
@@ -162,7 +156,7 @@ SWMethodBodyTranspiler >> putAssignTo: key with: value [
 
 { #category : #'code generation' }
 SWMethodBodyTranspiler >> putBlock: aBlockNode [
-	self stream log.
+
 	self
 		put: '{';
 		putSequence: aBlockNode body;
@@ -181,8 +175,6 @@ SWMethodBodyTranspiler >> putCascade: aRBCascadeNode [
 
 { #category : #'code generation' }
 SWMethodBodyTranspiler >> putCharacter: c [
-	self stream log.
-
 	self
 		put: '"';
 		put: c asString;
@@ -203,7 +195,6 @@ SWMethodBodyTranspiler >> putCode: code [
 SWMethodBodyTranspiler >> putCode: code with: anAssociationArray [
 	"when a line in code ends with $\, the line continues to the next."
 	|matcher leftPad escaped|
-	self stream log.
 
 	matcher := RxMatcher forString: '(\\\r|\s+\\$)'.
 	escaped := matcher copy: code replacingMatchesWith: ''.
@@ -249,7 +240,6 @@ SWMethodBodyTranspiler >> putImport: anArray from: aSource [
 
 { #category : #'code generation' }
 SWMethodBodyTranspiler >> putInteger: anInteger [
-	self stream log.
 	self put: anInteger asString
 ]
 
@@ -260,7 +250,6 @@ SWMethodBodyTranspiler >> putLine: anObject [
 
 { #category : #'code generation' }
 SWMethodBodyTranspiler >> putMessage: aNode [
-	self stream log: [ aNode receiver asString, ' >> ', aNode selector asString ].
 	self incMessageNest.
 	self << (self senders at: aNode).
 	self decMessageNest
@@ -269,7 +258,6 @@ SWMethodBodyTranspiler >> putMessage: aNode [
 { #category : #'code generation' }
 SWMethodBodyTranspiler >> putMessage: aNode withReceiver: aRNode [
 	|sender|
-	self stream log: [ aRNode asString, ' >> ', aNode selector asString ].
 	sender := (self senders at: aNode) copy.
 	sender node: (aNode copy
 		receiver: aRNode
@@ -284,8 +272,6 @@ SWMethodBodyTranspiler >> putNew: aNode [
 
 { #category : #'code generation' }
 SWMethodBodyTranspiler >> putOpBinary: aNode [
-	self stream log.
-	
 	self
 		<< aNode receiver;
 		put: ' ';
@@ -297,7 +283,7 @@ SWMethodBodyTranspiler >> putOpBinary: aNode [
 
 { #category : #'code generation' }
 SWMethodBodyTranspiler >> putParameters: anArray [
-	self stream log.
+
 	anArray do: [:each |
 		self put: each asString
 	] separatedBy: [
@@ -308,7 +294,7 @@ SWMethodBodyTranspiler >> putParameters: anArray [
 
 { #category : #'code generation' }
 SWMethodBodyTranspiler >> putReturn: value [
-	self stream log.
+	
 	^ self
 		put: 'return ';
 		withoutMessageNestDo: [
@@ -372,7 +358,6 @@ SWMethodBodyTranspiler >> putStatementDelimiter [
 
 { #category : #'code generation' }
 SWMethodBodyTranspiler >> putString: aString [
-	self stream log.
 	self
 		put: '"';
 		put: aString;
@@ -389,7 +374,7 @@ SWMethodBodyTranspiler >> putSymbol: aByteSymbol [
 
 { #category : #'code generation' }
 SWMethodBodyTranspiler >> putVariable: aVariableNode [
-	self stream log: aVariableNode name.
+
 	aVariableNode name = #self ifTrue: [
 		^ self putSelf
 	].
@@ -415,7 +400,6 @@ SWMethodBodyTranspiler >> stream [
 
 	^ stream ifNil: [
 		stream := SWTranspilerStream new
-			logger: self logger;
 			yourself
 	]
 ]
@@ -424,7 +408,7 @@ SWMethodBodyTranspiler >> stream [
 SWMethodBodyTranspiler >> stream: anObject [
 
 	stream := anObject.
-	self logger: anObject logger
+
 ]
 
 { #category : #'public API' }

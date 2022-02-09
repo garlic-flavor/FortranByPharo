@@ -42,6 +42,18 @@ SWShell class >> executeProcess: process [
 
 ]
 
+{ #category : #initialization }
+SWShell class >> initialize_OSEnvironmentClass: transpiler [
+	transpiler
+		declareMethodReturnsReceiversInstance: #current
+]
+
+{ #category : #initialization }
+SWShell class >> initialize_OSSUnixSubprocess: transpiler [
+	transpiler
+		declareMethod: #createADefaultWriteStream asReturn: WriteStream
+]
+
 { #category : #execution }
 SWShell class >> ls: path [
 	^ Dictionary new
@@ -77,21 +89,6 @@ SWShell class >> lsr: path [
 		yourself.
 
 
-]
-
-{ #category : #'code generation' }
-SWShell class >> mjs_requirements: transpiler [
-	self error; flag: #toRemove.
-	transpiler
-		putImportNative: {'PharoObject'. 'Dictionary'. 'FileLocator' } from: 'Pharo.mjs';
-		putImportNative: 'OSSUnixSubprocess' from: 'OSSUnixSubprocess.mjs';
-		putImportClass: SWShellEnvironment
-]
-
-{ #category : #'code generation' }
-SWShell class >> rb_requirements [
-	self error; flag: #toRemove.
-	^ { 'OSSUnixSubprocess.rb' }
 ]
 
 { #category : #'as yet unclassified' }

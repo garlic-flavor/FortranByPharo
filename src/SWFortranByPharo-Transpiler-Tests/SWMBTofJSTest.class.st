@@ -162,9 +162,8 @@ SWMBTofJSTest >> test_08 [
 { #category : #utilities }
 SWMBTofJSTest >> transpile_program: selector [
 	|transpiler|
-	transpiler := (SWMBTofJS new: self class>>selector with: { self class })
-		logging: true;
-		yourself.
+	transpiler := SWMBTofJS new: self class>>selector with: { self class }.
+	transpiler logger enabled: true.
 	transpiler stream newline: String cr.
 	transpiler decode; transpile.
 	^ transpiler
@@ -174,9 +173,8 @@ SWMBTofJSTest >> transpile_program: selector [
 { #category : #utilities }
 SWMBTofJSTest >> transpile_program: selector with: arg1 [
 	|transpiler|
-	transpiler := (SWMBTofJS new: self class>>selector with: { self class. arg1 })
-		logging: true;
-		yourself.
+	transpiler := SWMBTofJS new: self class>>selector with: { self class. arg1 }.
+	transpiler logger enabled: true.
 	transpiler stream newline: String cr.
 	transpiler decode; transpile.
 	^ transpiler

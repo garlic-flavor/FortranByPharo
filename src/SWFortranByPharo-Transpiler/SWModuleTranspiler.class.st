@@ -43,8 +43,7 @@ SWModuleTranspiler >> decode: aSelector with: args [
 
 { #category : #'public API' }
 SWModuleTranspiler >> enableDebugMode [
-	self payload debugMode: true.
-
+	self payload logger enabled: true
 ]
 
 { #category : #accessing }

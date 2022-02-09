@@ -24,6 +24,12 @@ SWTestRunner class >> go [
 ]
 
 { #category : #initialization }
+SWTestRunner class >> initialize_TestAsserter: transpiler [
+	transpiler
+		declareMethodReturnsReceiver: #assert:description:resumable:
+]
+
+{ #category : #initialization }
 SWTestRunner class >> initialize_TestSuite: transpiler [
 	transpiler
 		declareMethodReturnsReceiver: #run:
