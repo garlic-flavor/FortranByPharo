@@ -338,6 +338,7 @@ SWDecoder >> send: selector super: supered numArgs: numberArguments [
 	self logger log: [ 'decode: ', selector ] withStack: self stack.
 
 	operands := self stack popSlotForSender: numberArguments.
+selector = #beginsWith: ifTrue: [ self halt ].
 
 	sender := (self pool newSenderOf: selector super: supered with: operands)
 		node: (self method sourceNodeForPC: oldPC);

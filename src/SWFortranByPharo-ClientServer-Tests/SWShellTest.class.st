@@ -28,7 +28,7 @@ SWShellTest class >> solveDependenciesUsing: transpiler [
 { #category : #building }
 SWShellTest class >> tryBuild [
 	<script>
-	(self build: true) inspect
+	(self build: false) inspect
 ]
 
 { #category : #tests }

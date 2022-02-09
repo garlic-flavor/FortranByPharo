@@ -245,3 +245,12 @@ SWDecoderTest >> test_14 [
 SWDecoderTest >> test_15 [
 	self returnValueOfMy: #_15_test_ifNil withArguments: {  } equals: SmallInteger
 ]
+
+{ #category : #tests }
+SWDecoderTest >> test_16 [
+	|dec|
+	dec := SWDecoder new: SWShell class>>#executeProcess: with: { SWShell class. OSSUnixSubprocess }.
+	dec pool addInitializerIn: SWShell.
+	dec decode.
+	dec inspect.
+]

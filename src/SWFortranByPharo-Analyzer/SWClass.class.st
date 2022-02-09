@@ -209,6 +209,10 @@ SWClass >> decoderInitializer: anObject [
 	decoderInitializer := anObject
 ]
 
+{ #category : #'public API' }
+SWClass >> defineMethodBody: selector as: generator [
+]
+
 { #category : #api }
 SWClass >> getSenderOf: aMethod with: args [
 	|sender decoder|
@@ -406,7 +410,7 @@ SWClass >> initialize_Number [
 SWClass >> initialize_Object [
 	self
 		declareMethodAsCompareOperator: #=;
-		declareMethodReturnsReceiver: #error:;
+		declareMethod: #error: asReturn: nil;
 		setBreakpointOn: #subclassResponsibility;
 		declareMethod: #printString asReturn: String;
 		declareMethod: #size asReturn: Integer;

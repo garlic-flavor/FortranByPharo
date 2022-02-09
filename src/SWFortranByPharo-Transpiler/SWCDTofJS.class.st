@@ -107,6 +107,17 @@ SWCDTofJS >> initialize_Object [
 ]
 
 { #category : #initialization }
+SWCDTofJS >> initialize_PositionableStream [
+	self
+		defineMethodSender:  #upToEnd as: [ :transpiler :aNode |
+			transpiler
+				<< aNode receiver;
+				putClassAccessor;
+				put: 'read()'
+		]
+]
+
+{ #category : #initialization }
 SWCDTofJS >> initialize_ProtoObject [
 	super initialize_ProtoObject.
 	self
@@ -150,6 +161,21 @@ SWCDTofJS >> initialize_SWStdClass [
 					s << '../script/'; << node arguments second value; << '.mjs'
 				])
 		]
+]
+
+{ #category : #initialization }
+SWCDTofJS >> initialize_String [
+	self
+		setBreakpointOn:  #beginsWith:
+"		
+		defineMethodSender: #beginsWith: as: [ :transpiler :aNode |
+			transpiler
+				<< aNode receiver;
+				putClassAccessor;
+				put: 'startsWith';
+				putArguments: aNode arguments
+		]
+"
 ]
 
 { #category : #'code generation' }
