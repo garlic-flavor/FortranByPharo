@@ -564,6 +564,7 @@ SWClass >> putOn: aStream [
 SWClass >> readyInitializers [
 	self initialize: self targetClass.
 	self pool addInitializerIn: self targetClass
+
 ]
 
 { #category : #accessing }
