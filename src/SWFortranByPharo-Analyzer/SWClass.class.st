@@ -105,7 +105,7 @@ SWClass >> declareMethodAsCompareOperator: aName [
 SWClass >> declareMethodReturnsFirstArgument: aName [
 	self addSenderInitializer: aName with: [ :aSender |
 		aSender
-			return: aSender operands second;
+			specifyReturnTypeAs: aSender operands second;
 			yourself
 	]
 
@@ -218,7 +218,12 @@ SWClass >> getSenderOf: aMethod with: args [
 	self methods associationAt: sender ifPresent: [ :assoc | ^ assoc key copy ].
 	self senderInitializer at: sender selector ifPresent: [ :gen ||newS|
 		newS := gen value: sender.
-		self methods at: newS put: (self newDecoderOf: aMethod with: args).
+		decoder := self newDecoderOf: aMethod with: args.
+		newS hasReturn ifFalse: [
+			decoder decode.
+			newS return: decoder return.
+		].
+		self methods at: newS put: decoder.
 		^ newS copy
 	].
 	decoder := self newDecoderOf: aMethod with: args.

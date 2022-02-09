@@ -20,6 +20,11 @@ SWSender >> = right [
 	^ self operands = right operands
 ]
 
+{ #category : #testing }
+SWSender >> hasReturn [
+	^ return isNotNil
+]
+
 { #category : #comparing }
 SWSender >> hash [
 	"The hash depends on this method and its operands."
@@ -107,5 +112,7 @@ SWSender >> selector: anObject [
 
 { #category : #accessing }
 SWSender >> specifyReturnTypeAs: aType [
-	self return << aType
+	self return
+		<< aType;
+		priority: SWType userSpecifyingPriority
 ]

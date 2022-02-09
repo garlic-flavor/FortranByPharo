@@ -1,9 +1,6 @@
 Class {
 	#name : #SWTestRunner,
 	#superclass : #TestCase,
-	#classInstVars : [
-		'debugMode'
-	],
 	#category : #'SWFortranByPharo-ClientServer-Client'
 }
 
@@ -13,7 +10,7 @@ SWTestRunner class >> addInitializerTo: pool [
 ]
 
 { #category : #building }
-SWTestRunner class >> build [
+SWTestRunner class >> build: debugMode [
 	|module|
 	module := self moduleTranspilerClass newFrom: self.
 	debugMode == true ifTrue: [ module enableDebugMode ].
@@ -25,11 +22,17 @@ SWTestRunner class >> build [
 { #category : #running }
 SWTestRunner class >> go [
 	|module result|
-	module := self build.
+	module := self build: false.
 	result := (SWPRofJS go: module).
 	(STON reader
 		on: result message readStream;
 		next) inspect
+]
+
+{ #category : #initialization }
+SWTestRunner class >> initialize_TestSuite: transpiler [
+	transpiler
+		declareMethodReturnsReceiver: #run:
 ]
 
 { #category : #initialization }

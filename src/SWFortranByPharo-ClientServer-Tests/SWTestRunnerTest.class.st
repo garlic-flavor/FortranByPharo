@@ -4,16 +4,10 @@ Class {
 	#category : #'SWFortranByPharo-ClientServer-Tests'
 }
 
-{ #category : #building }
-SWTestRunnerTest class >> build [
-	^ super build
-]
-
 { #category : #'as yet unclassified' }
 SWTestRunnerTest class >> buildThenInspect [
 	<script>
-	debugMode := true.
-	self build inspect.
+	(self build: false) inspect.
 ]
 
 { #category : #running }
