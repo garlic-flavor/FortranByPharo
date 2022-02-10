@@ -133,7 +133,7 @@ SWDecoder >> mergeStackTopAndSecond [
 
 { #category : #'instruction decoding' }
 SWDecoder >> methodReturnConstant: value [
-	self return << (SWVariableTypeInfo new: value class owner: self pc: oldPC).
+	self return << (SWVariableTypeInfo new: value class).
 	super methodReturnConstant: value
 ]
 
@@ -250,7 +250,7 @@ SWDecoder >> popIntoTemporaryVariable: offset [
 
 { #category : #'instruction decoding' }
 SWDecoder >> pushActiveContext [ 
-	self stack push: (SWVariableTypeInfo new: Context owner: self pc: oldPC).
+	self stack push: (SWVariableTypeInfo new: Context).
 	super pushActiveContext
 ]
 
@@ -290,7 +290,7 @@ SWDecoder >> pushConsArrayWithElements: numElements [
 
 { #category : #'instruction decoding' }
 SWDecoder >> pushConstant: obj [
-	self stack push: (SWVariableTypeInfo new: obj class owner: self pc: oldPC).
+	self stack push: (SWVariableTypeInfo new: obj class).
 
 	super pushConstant: obj.
 
@@ -322,7 +322,7 @@ SWDecoder >> pushFullClosure: lit numCopied: numCopied receiverOnStack: rcvr ign
 
 { #category : #'instruction decoding' }
 SWDecoder >> pushLiteralVariable: anAssociation [
-	self stack push: (SWVariableTypeInfo new: anAssociation value class owner: self pc: oldPC).
+	self stack push: (SWVariableTypeInfo new: anAssociation value class).
 
 	super pushLiteralVariable: anAssociation.
 
@@ -331,7 +331,7 @@ SWDecoder >> pushLiteralVariable: anAssociation [
 { #category : #'instruction decoding' }
 SWDecoder >> pushNewArrayOfSize: numElements [
 
-	self stack push: (SWVariableTypeInfo new: Array owner: self pc: oldPC).
+	self stack push: (SWVariableTypeInfo new: Array).
 	
 	super pushNewArrayOfSize: numElements 
 ]
@@ -392,9 +392,7 @@ selector = #beginsWith: ifTrue: [ self halt ].
 		] ifFalse: [
 			(self getVariableInfoOf: assoc key) 
 		])
-			<<  assoc value;
-			owner: self;
-			pc: oldPC
+			<<  assoc value
 	].
 	super send: selector super: supered numArgs: numberArguments.
 

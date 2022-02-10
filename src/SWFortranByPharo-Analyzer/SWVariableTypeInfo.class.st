@@ -10,38 +10,23 @@ Class {
 		'name',
 		'type',
 		'properties',
-		'assignCounter',
-		'owner',
-		'pc'
+		'assignCounter'
 	],
 	#category : #'SWFortranByPharo-Analyzer-Type'
 }
 
 { #category : #'instance creation' }
 SWVariableTypeInfo class >> new: aType [
-	^ self new: aType with: nil owner: nil pc: nil
-]
-
-{ #category : #'instance creation' }
-SWVariableTypeInfo class >> new: aType owner: anOwner pc: oldPC [
-	^ self new: aType with: nil owner: anOwner pc: oldPC
-
+	^ self new: aType with: nil 
 ]
 
 { #category : #'instance creation' }
 SWVariableTypeInfo class >> new: aType with: aPriority [
-	^ self new: aType with: aPriority owner: nil pc: nil
-
-]
-
-{ #category : #'instance creation' }
-SWVariableTypeInfo class >> new: aType with: aPriority owner: anOwner pc: oldPC [
 	^ self new
 		<< aType;
 		priority: aPriority;
-		owner: anOwner;
-		pc: oldPC;
 		yourself.
+
 ]
 
 { #category : #'accumulator ops' }
@@ -100,30 +85,6 @@ SWVariableTypeInfo >> name [
 { #category : #accessing }
 SWVariableTypeInfo >> name: aName [
 	name := aName
-]
-
-{ #category : #accessing }
-SWVariableTypeInfo >> owner [
-
-	^ owner
-]
-
-{ #category : #accessing }
-SWVariableTypeInfo >> owner: anObject [
-
-	owner := anObject
-]
-
-{ #category : #accessing }
-SWVariableTypeInfo >> pc [
-
-	^ pc
-]
-
-{ #category : #accessing }
-SWVariableTypeInfo >> pc: anObject [
-
-	pc := anObject
 ]
 
 { #category : #printing }

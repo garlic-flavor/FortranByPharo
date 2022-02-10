@@ -72,8 +72,6 @@ SWCompiledCode >> block: aFullClosure [
 	aFullClosure tempNames doWithIndex: [ :name :idx |
 		(self stack at: idx + aFullClosure numArgs)
 			name: name;
-			owner: self;
-			pc: 0;
 			stackPos: idx + aFullClosure numArgs
 	].
 	method := aFullClosure compiledBlock
@@ -87,8 +85,6 @@ SWCompiledCode >> cblock: aCompiledBlock [
 	aCompiledBlock argumentNames doWithIndex: [ :name :idx |
 		(self stack at: idx)
 			name: name;
-			owner: self;
-			pc: 0;
 			stackPos: idx
 	].
 	method := aCompiledBlock
@@ -158,14 +154,7 @@ SWCompiledCode >> method: aCompiledMethod [
 	aCompiledMethod temporaryVariables doWithIndex: [ :var :idx |
 		(self stack at: idx)
 			name: var name;
-			owner: self;
-			pc: 0;
 			stackPos: idx
-	].
-	aCompiledMethod argumentNames doWithIndex: [ :var :idx |
-		(self stack at: idx)
-			owner: self;
-			pc: 0
 	].
 
 	^ super method: aCompiledMethod
@@ -194,12 +183,7 @@ SWCompiledCode >> receiverClass [
 { #category : #accessing }
 SWCompiledCode >> return [
 	"The return type of this method."
-	^ return ifNil: [
-		return := (SWVariableTypeInfo new)
-			owner: self;
-			pc: 0;
-			yourself
-	]
+	^ return ifNil: [ return := SWVariableTypeInfo new ]
 ]
 
 { #category : #accessing }

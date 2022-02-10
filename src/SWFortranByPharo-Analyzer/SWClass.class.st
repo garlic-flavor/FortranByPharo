@@ -606,7 +606,6 @@ SWClass >> slot [
 		self targetClass slots do: [ :ids |
 			(slot at: ids index)
 				name: ids name;
-				owner: self;
 				stackPos: ids index
 		].
 		slot
