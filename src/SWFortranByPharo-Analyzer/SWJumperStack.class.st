@@ -36,11 +36,10 @@ SWJumperStack >> pop [
 ]
 
 { #category : #adding }
-SWJumperStack >> pushAt: pc period: aPeriod size: size [
+SWJumperStack >> pushAt: pc period: aPeriod [
 	self payload push: (SWJumperItem new
 		startPC: pc;
 		endPC: aPeriod;
-		stackSize: size;
 		yourself)
 
 ]

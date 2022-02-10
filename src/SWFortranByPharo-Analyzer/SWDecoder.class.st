@@ -20,7 +20,7 @@ SWDecoder class >> poolClass [
 
 { #category : #private }
 SWDecoder >> addBytecode: description [
-	|item node operands sender|
+	|item sender|
 
 	self logger log: [ String streamContents: [ :s |
 		s << '[' print: oldPC; << '] '; << description
@@ -28,20 +28,13 @@ SWDecoder >> addBytecode: description [
 	super addBytecode: description.
 
 	(self jumperStack nextPeriodIs: scanner pc) ifFalse: [ ^ self  ]. 
-
 	"Below evaluates when ifTrue:ifFalse:."
 	item := self jumperStack pop.
-	node := self method sourceNodeForPC: item startPC.
-	operands := self stack popSlotForJumper: self stack size - item stackSize.
-	sender := self pool newSenderOf: node selector super: false with: operands.
-	sender hasReturn ifTrue: [
-		self stack push: sender return 
-	] ifFalse: [
-		sender return << self stack top
-	].
-	sender node: node.
-	self senders at: node put: sender.
+	sender := self newSenderOfJumper: (self method sourceNodeForPC: item startPC).
 
+	self stack push: sender return.
+	self senders at: sender node put: sender.
+	
 ]
 
 { #category : #'instruction decoding' }
@@ -98,8 +91,8 @@ SWDecoder >> jump: offset [
 { #category : #'instruction decoding' }
 SWDecoder >> jump: offset if: condition [
 
-	self jumperStack pushAt: oldPC period: scanner pc + offset size: self stack size.
 	self stack pop.
+	self jumperStack pushAt: oldPC period: scanner pc + offset .
 	
 	super jump: offset if: condition.
 
@@ -166,6 +159,40 @@ SWDecoder >> newFullClosure: lit with: args [
 		logger: self logger;
 		yourself
 
+
+]
+
+{ #category : #'instance creation' }
+SWDecoder >> newSenderOfJumper: node [
+	|operands sender|
+	operands := SWSlot new.
+	sender := SWSender new
+		selector: node selector;
+		operands: operands;
+		node: node;
+		yourself.
+	(#( #ifTrue:ifFalse: #ifFalse:ifTrue: #ifTrue: #ifFalse: #ifNil:ifNotNil: #ifNotNil:ifNil:) anySatisfy: [ :each | each = node selector ]) ifTrue: [
+		operands first << Boolean.
+		operands third << self stack pop.
+		operands second << self stack pop.
+		sender return
+			<< operands second;
+			<< operands third.
+		^ sender
+	].
+	(#(#ifNil: #ifNotNil:) anySatisfy: [ :each | each = node selector ]) ifTrue: [
+		operands first << UndefinedObject.
+		operands second << self stack pop.
+		sender return << operands second.
+		^ sender
+	].
+	(#(#and:) anySatisfy: [ :each | each = node selector ]) ifTrue: [
+		operands second << self stack pop.
+		operands first << self stack pop.
+		sender return << Boolean.
+		^ sender
+	].
+	self error; flag: #toImplement
 
 ]
 

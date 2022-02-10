@@ -57,15 +57,6 @@ SWStack >> popSlotForClosure: numArgs [
 ]
 
 { #category : #'as yet unclassified' }
-SWStack >> popSlotForJumper: num [
-	^ SWSlot new
-		payload: ((self pop: num + 1)
-			addFirst: (SWVariableTypeInfo new: Boolean);
-			yourself);
-		yourself
-]
-
-{ #category : #'as yet unclassified' }
 SWStack >> popSlotForSender: num [
 	^ SWSlot new
 		payload: (self pop: num + 1);
