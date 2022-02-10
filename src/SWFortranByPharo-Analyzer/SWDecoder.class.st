@@ -8,7 +8,7 @@ Class {
 		'jumperStack',
 		'pool',
 		'logger',
-		'debugMode'
+		'haltList'
 	],
 	#category : #'SWFortranByPharo-Analyzer-Analyzer'
 }
@@ -20,7 +20,7 @@ SWDecoder class >> poolClass [
 
 { #category : #private }
 SWDecoder >> addBytecode: description [
-	|item sender|
+	|item node operands sender|
 
 	self logger log: [ String streamContents: [ :s |
 		s << '[' print: oldPC; << '] '; << description
@@ -30,8 +30,12 @@ SWDecoder >> addBytecode: description [
 	(self jumperStack nextPeriodIs: scanner pc) ifFalse: [ ^ self  ]. 
 	"Below evaluates when ifTrue:ifFalse:."
 	item := self jumperStack pop.
-	sender := self newSenderOfJumper: (self method sourceNodeForPC: item startPC).
-
+	node := self method sourceNodeForPC: item startPC.
+	(self haltList includes: node selector) ifTrue: [ self halt ].
+	operands := self popOperandsFor: node.
+	sender := (self pool newSenderOf: node selector super: false with: operands)
+		node: node;
+		yourself.
 	self stack push: sender return.
 	self senders at: sender node put: sender.
 	
@@ -79,6 +83,23 @@ SWDecoder >> doPop [
 	self stack pop.
 	super doPop.
 
+]
+
+{ #category : #accessing }
+SWDecoder >> haltAt: selector [
+	self haltList add: selector
+]
+
+{ #category : #accessing }
+SWDecoder >> haltList [
+
+	^ haltList ifNil: [ haltList := Set newFrom: #( primitiveFailed subclassResponsibility) ]
+]
+
+{ #category : #accessing }
+SWDecoder >> haltList: anObject [
+
+	haltList := anObject
 ]
 
 { #category : #'instruction decoding' }
@@ -157,42 +178,9 @@ SWDecoder >> newFullClosure: lit with: args [
 		pool: self pool;
 		classInfo: self classInfo;
 		logger: self logger;
+		haltList: self haltList;
 		yourself
 
-
-]
-
-{ #category : #'instance creation' }
-SWDecoder >> newSenderOfJumper: node [
-	|operands sender|
-	operands := SWSlot new.
-	sender := SWSender new
-		selector: node selector;
-		operands: operands;
-		node: node;
-		yourself.
-	(#( #ifTrue:ifFalse: #ifFalse:ifTrue: #ifTrue: #ifFalse: #ifNil:ifNotNil: #ifNotNil:ifNil:) anySatisfy: [ :each | each = node selector ]) ifTrue: [
-		operands first << Boolean.
-		operands third << self stack pop.
-		operands second << self stack pop.
-		sender return
-			<< operands second;
-			<< operands third.
-		^ sender
-	].
-	(#(#ifNil: #ifNotNil:) anySatisfy: [ :each | each = node selector ]) ifTrue: [
-		operands first << UndefinedObject.
-		operands second << self stack pop.
-		sender return << operands second.
-		^ sender
-	].
-	(#(#and:) anySatisfy: [ :each | each = node selector ]) ifTrue: [
-		operands second << self stack pop.
-		operands first << self stack pop.
-		sender return << Boolean.
-		^ sender
-	].
-	self error; flag: #toImplement
 
 ]
 
@@ -245,6 +233,30 @@ SWDecoder >> popIntoTemporaryVariable: offset [
 	left << right.
 
 	super popIntoTemporaryVariable: offset.
+
+]
+
+{ #category : #'instance creation' }
+SWDecoder >> popOperandsFor: node [
+	|operands|
+	operands := SWSlot new.
+	(#( #ifTrue:ifFalse: #ifFalse:ifTrue: #ifTrue: #ifFalse: #ifNil:ifNotNil: #ifNotNil:ifNil:) anySatisfy: [ :each | each = node selector ]) ifTrue: [
+		operands first << Boolean.
+		operands third << self stack pop.
+		operands second << self stack pop.
+		^ operands
+	].
+	(#(#ifNil: #ifNotNil:) anySatisfy: [ :each | each = node selector ]) ifTrue: [
+		operands first << ProtoObject.
+		operands second << self stack pop.
+		^ operands
+	].
+	(#(#and: #or:) anySatisfy: [ :each | each = node selector ]) ifTrue: [
+		operands second << self stack pop.
+		operands first << self stack pop.
+		^ operands
+	].
+	self error; flag: #toImplement
 
 ]
 
@@ -368,22 +380,15 @@ SWDecoder >> pushTemporaryVariable:  offset [
 SWDecoder >> send: selector super: supered numArgs: numberArguments [
 	|operands sender|
 	self logger log: [ 'decode: ', selector ] withStack: self stack.
+	(self haltList includes: selector) ifTrue: [ self halt ].
 
 	operands := self stack popSlotForSender: numberArguments.
-selector = #beginsWith: ifTrue: [ self halt ].
-
 	sender := (self pool newSenderOf: selector super: supered with: operands)
 		node: (self method sourceNodeForPC: oldPC);
 		yourself.
 	self senders at: sender node put: sender.
 	self stack push: sender return.
-"
-	self error; flag: #toRewrite.
-	methodInfo := self pool getMethodTranspiler: selector supered: supered with: args.
 
-	self messages at: (self method sourceNodeForPC: oldPC) put: methodInfo.
-	self stack push: methodInfo return.
-"
 	"A special case for user specifying."
 	(selector = #declare:as: and: [ operands receiver value = SWType class ]) ifTrue: [|assoc|
 		assoc := (self method sourceNodeForPC: oldPC) evaluate.

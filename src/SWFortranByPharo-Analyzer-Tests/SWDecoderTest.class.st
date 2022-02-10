@@ -280,8 +280,25 @@ SWDecoderTest >> test_17 [
 ]
 
 { #category : #tests }
-SWDecoderTest >> test_jumper [
+SWDecoderTest >> test_SWShellEnvironemt [
+	|dec|
+	dec := SWDecoder new: [ SWShellEnvironment default ] with: { self class }.
+	dec logger enabled: true.
+	dec decode.
+	self assert: dec return value equals: SWShellEnvironment.
+]
 
+{ #category : #tests }
+SWDecoderTest >> test_SWShellEnvironemtLocalDirectory [
+	|dec|
+	dec := SWDecoder new: [ SWShellEnvironment default localDirectory ] with: { self class }.
+	dec logger enabled: true.
+	dec decode.
+	dec inspect.
+]
+
+{ #category : #tests }
+SWDecoderTest >> test_jumper [
 	self returnValueOf: [ false ifTrue: [ 123 ] ifFalse: [ 'false' ] ] withArguments: { self class } equals: SmallInteger.
 	self returnValueOf: [ (1=2) ifTrue: [ 123 ] ifFalse: [ 'false' ] ] withArguments: { self class } equals: SmallInteger.
 	self returnValueOf: [ false ifFalse: [ 123 ] ifTrue: [ 'false' ] ] withArguments: { self class } equals: SmallInteger.

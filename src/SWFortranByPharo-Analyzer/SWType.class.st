@@ -43,6 +43,16 @@ SWType class >> exactTypePriority [
 	^ 90
 ]
 
+{ #category : #initialization }
+SWType class >> initialize_selfClass: transpiler [
+	transpiler
+		defineMethodSender: #declare:as: as: [ :t :node |
+			t
+				preventStatementDelimiter;
+				preventNewline
+		]
+]
+
 { #category : #'private - utilities' }
 SWType class >> nameOfPriority: aPriority [
 	^ ((SWType class methodDict values select: [ :m |

@@ -28,7 +28,10 @@ SWShellTest class >> solveDependenciesUsing: transpiler [
 { #category : #building }
 SWShellTest class >> tryBuild [
 	<script>
-	(self build: false) inspect
+	|mt|
+	mt := self newModuleTranspiler.
+	mt payload haltAt: #localDirectory.
+	mt transpile inspect
 ]
 
 { #category : #tests }

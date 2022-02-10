@@ -261,6 +261,11 @@ SWClass >> getVariableInfoOf: aName ifPresent: aPresentBlock [
 
 ]
 
+{ #category : #testing }
+SWClass >> hasVariable: aName [
+	^ self slot detect: [ :each | each isNotNil and: [ each name = aName ] ]  ifFound: [ :dummy | true ] ifNone: [ false ]
+]
+
 { #category : #initialization }
 SWClass >> initialize: aClass [
 	|initializer|
@@ -324,24 +329,12 @@ SWClass >> initialize_BlockClosure [
 { #category : #initialization }
 SWClass >> initialize_Boolean [
 	self
-		declareMethodReturnsFirstOrSecondArgument: #ifTrue:ifFalse:" as: [ :newT |
-			newT
-				senderGenerator: [ :t :node | t putIfTrueIfFalse: node ];
-				yourself
-		]";
-		declareMethodReturnsFirstArgument: #ifTrue:" as: [ :newT |
-			newT
-				senderGenerator: [ :t :node | t putIfTrue: node ];
-				yourself 
-		]";
-		declareMethodReturnsFirstArgument: #ifFalse:" as: [ :newT |
-			newT
-				senderGenerator: [ :t :node | t putIfFalse: node ];
-				yourself
-		]";
-		declareMethodReturnsReceiver: #and:;
-		declareMethodReturnsReceiver: #or:
-
+		declareMethodReturnsFirstOrSecondArgument: #ifTrue:ifFalse:;
+		declareMethodReturnsFirstOrSecondArgument: #ifFalse:ifTrue:;
+		declareMethodReturnsFirstArgument: #ifTrue:;
+		declareMethodReturnsSecondArgument: #ifFalse:;
+		declareMethod: #and: asReturn: Boolean;
+		declareMethod: #or: asReturn: Boolean
 ]
 
 { #category : #initialization }
@@ -411,7 +404,6 @@ SWClass >> initialize_Object [
 	self
 		declareMethodAsCompareOperator: #=;
 		declareMethod: #error: asReturn: nil;
-		setBreakpointOn: #subclassResponsibility;
 		declareMethod: #printString asReturn: String;
 		declareMethod: #size asReturn: Integer;
 		declareMethod: #asString asReturn: String;
@@ -428,11 +420,13 @@ SWClass >> initialize_OrderedDictionary [
 { #category : #initialization }
 SWClass >> initialize_ProtoObject [
 	self
-		setBreakpointOn: #primitiveFailed;
 		declareMethodAsCompareOperator: #==;
 		declareMethodReturnsReceiversClass: #class;
+		declareMethodReturnsFirstArgument: #ifNil:;
+		declareMethodReturnsFirstArgument: #ifNotNil:;
 		declareMethodReturnsFirstOrSecondArgument: #ifNil:ifNotNil:;
-		declareMethodReturnsFirstArgument: #ifNil:
+		declareMethodReturnsFirstOrSecondArgument: #ifNotNil:ifNil:
+
 ]
 
 { #category : #initialization }
@@ -496,7 +490,8 @@ SWClass >> initialize_String [
 	self
 		declareMethodReturnsReceiver: #trimLeft:right:;
 		declareMethodReturnsReceiver: #asLowercase;
-		declareMethod: #asZnUrl asReturn: ZnUrl
+		declareMethod: #asZnUrl asReturn: ZnUrl;
+		declareMethod: #beginsWith: asReturn: Boolean
 ]
 
 { #category : #initialization }
@@ -540,6 +535,7 @@ SWClass >> newDecoderOf: aMethod with: args [
 		classInfo: self;
 		pool: self pool;
 		logger: self pool logger;
+		haltList: self pool owner haltList;
 		yourself.
 	self decoderInitializer at: aMethod selector ifPresent: [ :ini |
 		decoder := ini cull: decoder

@@ -5,10 +5,9 @@ Class {
 }
 
 { #category : #building }
-SWTestRunner class >> build: debugMode [
+SWTestRunner class >> build [
 	|module|
-	module := self moduleTranspilerClass newFrom: self.
-	debugMode == true ifTrue: [ module enableDebugMode ].
+	module := self newModuleTranspiler.
 	module transpile.
 	^ module
 ]
@@ -16,7 +15,7 @@ SWTestRunner class >> build: debugMode [
 { #category : #running }
 SWTestRunner class >> go [
 	|module result|
-	module := self build: false.
+	module := self build.
 	result := (SWPRofJS go: module).
 	(STON reader
 		on: result message readStream;
@@ -58,6 +57,16 @@ SWTestRunner class >> moduleTranspilerClass [
 { #category : #accessing }
 SWTestRunner class >> name [
 	^ super name
+]
+
+{ #category : #building }
+SWTestRunner class >> newModuleTranspiler [
+	|mt|
+	mt := self moduleTranspilerClass newFrom: self.
+	mt payload logger enabled: true.
+	^ mt
+		
+
 ]
 
 { #category : #suites }

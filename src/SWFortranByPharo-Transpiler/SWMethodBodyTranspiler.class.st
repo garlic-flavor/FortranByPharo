@@ -378,13 +378,11 @@ SWMethodBodyTranspiler >> putVariable: aVariableNode [
 	aVariableNode name = #self ifTrue: [
 		^ self putSelf
 	].
-	self getVariableInfoOf: aVariableNode name ifPresent: [ :vi |
-		(vi owner class inheritsFrom: SWClass) ifTrue: [
-			self
-				putSelf;
-				putClassAccessor;
-				put: '_'
-		]
+	(self classInfo isNotNil and: [ self classInfo hasVariable: aVariableNode name ]) ifTrue: [
+		self
+			putSelf;
+			putClassAccessor;
+			put: '_'
 	].
 	self put: aVariableNode name
 

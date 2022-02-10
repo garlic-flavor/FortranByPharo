@@ -165,9 +165,8 @@ SWCDTofJS >> initialize_SWStdClass [
 
 { #category : #initialization }
 SWCDTofJS >> initialize_String [
+	super initialize_String.
 	self
-		setBreakpointOn:  #beginsWith:
-"		
 		defineMethodSender: #beginsWith: as: [ :transpiler :aNode |
 			transpiler
 				<< aNode receiver;
@@ -175,7 +174,7 @@ SWCDTofJS >> initialize_String [
 				put: 'startsWith';
 				putArguments: aNode arguments
 		]
-"
+
 ]
 
 { #category : #'code generation' }

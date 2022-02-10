@@ -108,7 +108,7 @@ SWPool >> newSenderOf: aSelector super: supered with: args [
 { #category : #private }
 SWPool >> newUndefinedSenderOf: aSelector with: args [
 	self logger log: [ 'An unknown method detected: ', aSelector ].
-	self logger enabled  ifTrue: [ self halt ].
+	(self owner haltList includes: #unresolvedSelector)  ifTrue: [ self halt ].
 	^ self senderTranspilerClass new
 		selector: aSelector;
 		operands: args;
