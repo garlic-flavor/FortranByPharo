@@ -16,7 +16,8 @@ SWCDTofJS class >> methodDefinitionTranspilerClass [
 SWCDTofJS >> initialize_Behavior [
 	super initialize_Behavior.
 	self
-		defineMethodSender: #new as: [ :transpiler :aNode |
+		defineMethodSender: #new as: [ :transpiler :sender ||aNode|
+			aNode := sender node.
 			transpiler
 				put: '(new ';
 				<< aNode receiver;
@@ -29,14 +30,15 @@ SWCDTofJS >> initialize_Behavior [
 SWCDTofJS >> initialize_BlockClosure [
 	super initialize_BlockClosure.
 	self
-		defineMethodSender: #on:do: as: [ :transpiler :aNode | self put_on_do_: transpiler with: aNode ];
-		defineMethodSender: #ensure: as: [ :transpiler :aNode | self put_ensure_: transpiler with: aNode  ]
+		defineMethodSender: #on:do: as: [ :transpiler :sender | self put_on_do_: transpiler with: sender node ];
+		defineMethodSender: #ensure: as: [ :transpiler :sender | self put_ensure_: transpiler with: sender node  ]
 ]
 
 { #category : #initialization }
 SWCDTofJS >> initialize_Boolean [
 	super initialize_Boolean.
-	self defineMethodSender: #ifTrue:ifFalse: as: [ :transpiler :aNode|
+	self defineMethodSender: #ifTrue:ifFalse: as: [ :transpiler :sender | | aNode |
+		aNode := sender node.
 		aNode lastIsReturn ifTrue: [
 			transpiler
 				put: 'if(';
@@ -56,7 +58,8 @@ SWCDTofJS >> initialize_Boolean [
 				put: ')'
 		]
 	].
-	self defineMethodSender: #ifTrue: as: [ :transpiler :aNode |
+	self defineMethodSender: #ifTrue: as: [ :transpiler :sender | |aNode |
+		aNode := sender.
 		aNode isExpression ifTrue: [
 			transpiler
 				put: '(';
@@ -79,7 +82,8 @@ SWCDTofJS >> initialize_Boolean [
 SWCDTofJS >> initialize_Collection [
 	super initialize_Collection.
 	self
-		defineMethodSender: #inject:into: as: [ :transpiler :aNode |
+		defineMethodSender: #inject:into: as: [ :transpiler :sender | | aNode |
+			aNode := sender node.
 			transpiler
 				<< aNode receiver;
 				putClassAccessor;
@@ -95,12 +99,12 @@ SWCDTofJS >> initialize_Collection [
 SWCDTofJS >> initialize_Object [
 	super initialize_Object.
 	self
-		defineMethodSender: #yourself as: [ :transpiler :aNode |
-			transpiler << aNode receiver
+		defineMethodSender: #yourself as: [ :transpiler :sender |
+			transpiler << sender node receiver
 		];
-		defineMethodSender: #asString as: [ :transpiler :aNode |
+		defineMethodSender: #asString as: [ :transpiler :sender |
 			transpiler
-				<< aNode receiver;
+				<< sender node receiver;
 				putClassAccessor;
 				put: 'toString()'
 		]
@@ -109,9 +113,9 @@ SWCDTofJS >> initialize_Object [
 { #category : #initialization }
 SWCDTofJS >> initialize_PositionableStream [
 	self
-		defineMethodSender:  #upToEnd as: [ :transpiler :aNode |
+		defineMethodSender:  #upToEnd as: [ :transpiler :sender |
 			transpiler
-				<< aNode receiver;
+				<< sender node receiver;
 				putClassAccessor;
 				put: 'read()'
 		]
@@ -121,7 +125,8 @@ SWCDTofJS >> initialize_PositionableStream [
 SWCDTofJS >> initialize_ProtoObject [
 	super initialize_ProtoObject.
 	self
-		defineMethodSender: #ifNotNil: as: [ :transpiler :aNode |
+		defineMethodSender: #ifNotNil: as: [ :transpiler :sender ||aNode|
+			aNode := sender node.
 			transpiler
 				put: '((';
 				<< aNode receiver;
@@ -129,13 +134,18 @@ SWCDTofJS >> initialize_ProtoObject [
 				putBlockAsExpression: aNode arguments first;
 				put: ')'
 		];
-		defineMethodSender: #ifNil: as: [ :transpiler :aNode |
+		defineMethodSender: #ifNil: as: [ :transpiler :sender ||aNode|
+			aNode := sender node.
 			transpiler
 				put: '(function(_receiver_){ return (_receiver_ === null ) ? ';
 				putBlockAsExpression: aNode arguments first;
 				put: ' : _receiver_; })(';
 				<< aNode receiver;
 				put: ')'
+		];
+		defineMethodSender: #class as: [ :transpiler :sender |
+			transpiler
+				put: sender operands receiver value asString
 		]
 ]
 
@@ -143,14 +153,14 @@ SWCDTofJS >> initialize_ProtoObject [
 SWCDTofJS >> initialize_SWStdClass [
 	super initialize_SWStdClass.
 	self
-		defineMethodSender: #print: as: [ :transpiler :node |
+		defineMethodSender: #print: as: [ :transpiler :sender |
 			transpiler
 				put: 'console.log';
-				putArguments: node arguments
+				putArguments: sender node arguments
 		];
-		defineMethodSender: #import:from: as: [ :transpiler :node |
+		defineMethodSender: #import:from: as: [ :transpiler :sender  |
 			transpiler put: 'import {'.
-			node arguments first value do: [ :each |
+			sender node arguments first value do: [ :each |
 				transpiler put: each asString
 			] separatedBy: [
 				transpiler put: ', '
@@ -158,7 +168,7 @@ SWCDTofJS >> initialize_SWStdClass [
 			transpiler
 				put: '} from ';
 				putString: (String streamContents: [:s |
-					s << '../script/'; << node arguments second value; << '.mjs'
+					s << '../script/'; << sender node arguments second value; << '.mjs'
 				])
 		]
 ]
@@ -167,11 +177,11 @@ SWCDTofJS >> initialize_SWStdClass [
 SWCDTofJS >> initialize_String [
 	super initialize_String.
 	self
-		defineMethodSender: #beginsWith: as: [ :transpiler :aNode |
-			transpiler putSender: aNode with: 'startsWith'
+		defineMethodSender: #beginsWith: as: [ :transpiler :sender |
+			transpiler putSender: sender node with: 'startsWith'
 		];
-		defineMethodSender: #endsWith: as: [ :transpiler :aNode |
-			transpiler  putSender: aNode with: 'endsWith'
+		defineMethodSender: #endsWith: as: [ :transpiler :sender |
+			transpiler  putSender: sender node with: 'endsWith'
 		]
 
 ]

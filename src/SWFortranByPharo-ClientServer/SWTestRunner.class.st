@@ -76,11 +76,26 @@ SWTestRunner class >> runAllTests [
 
 { #category : #'code generation' }
 SWTestRunner class >> solveDependenciesUsing: transpiler [
- 	self methodDict select: [ :each | each selector beginsWith: 'test' ] thenDo: [ :each |
-		transpiler decode: each selector with: (SWSlot newFrom: { self })
-	].
 	transpiler
 		transpile: TestCase;
-		transpile: SWTestRunner
+		transpile: SWTestRunner;
+		decode: #setUp with: { self };
+		decode: #tearDown with: { self }.
+ 	self methodDict select: [ :each | each selector beginsWith: 'test' ] thenDo: [ :each |
+		transpiler decode: each selector with: { self }
+	]
 
+
+]
+
+{ #category : #running }
+SWTestRunner >> setUp [
+	super setUp.
+	
+	"Put here a common initialization logic for tests"
+]
+
+{ #category : #running }
+SWTestRunner >> tearDown [
+	super tearDown
 ]

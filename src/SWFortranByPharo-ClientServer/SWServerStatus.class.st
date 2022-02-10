@@ -42,20 +42,6 @@ SWServerStatus class >> fromSton: stonReader [
 	
 ]
 
-{ #category : #initialization }
-SWServerStatus class >> initializeInstanceSideTranspiler: transpiler [
-	transpiler
-		declareMethod: #stonOn: asReturn: STON
-]
-
-{ #category : #'code generation' }
-SWServerStatus class >> mjs_requirements: transpiler [
-	transpiler
-		putImportNative: 'PharoObject' from: 'Pharo.mjs';
-		putImportNative: 'STON' from: 'STON.mjs'
-
-]
-
 { #category : #constants }
 SWServerStatus class >> ok [
 	^ self new ok; yourself
@@ -66,14 +52,6 @@ SWServerStatus class >> okCode [
 	^ #ok
 ]
 
-{ #category : #'code generation' }
-SWServerStatus class >> rb_requirements [
-	^ {
-		SWStd.
-		'STON.rb'
-	}
-]
-
 { #category : #'instance creation' }
 SWServerStatus class >> readFrom: aSocket [
 	|res ret|
@@ -81,6 +59,12 @@ SWServerStatus class >> readFrom: aSocket [
 	ret := self fromSton: (STON reader on:  res readStream; yourself).
 	ret socket: aSocket.
 	^ ret
+]
+
+{ #category : #'code generation' }
+SWServerStatus class >> solveDependenciesUsing: transpiler [
+	transpiler
+		import: #( STON ) from: 'STON'
 ]
 
 { #category : #constants }

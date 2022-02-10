@@ -38,10 +38,10 @@ SWClassDefinitionTranspiler >> defineMethodSender: aName as: aGenerator [
 SWClassDefinitionTranspiler >> initialize_Number [
 	super initialize_Number.
 	self
-		defineMethodSender: #+ as: [ :transpiler :node | transpiler putOpBinary: node ];
-		defineMethodSender: #- as: [ :transpiler :node | transpiler putOpBinary: node ];
-		defineMethodSender: #* as: [ :transpiler :node | transpiler putOpBinary: node ];
-		defineMethodSender: #/ as: [ :transpiler :node | transpiler putOpBinary: node ]
+		defineMethodSender: #+ as: [ :transpiler :sender | transpiler putOpBinary: sender node ];
+		defineMethodSender: #- as: [ :transpiler :sender | transpiler putOpBinary: sender node ];
+		defineMethodSender: #* as: [ :transpiler :sender | transpiler putOpBinary: sender node ];
+		defineMethodSender: #/ as: [ :transpiler :sender | transpiler putOpBinary: sender node ]
 ]
 
 { #category : #initialization }

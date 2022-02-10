@@ -46,7 +46,7 @@ SWType class >> exactTypePriority [
 { #category : #initialization }
 SWType class >> initialize_selfClass: transpiler [
 	transpiler
-		defineMethodSender: #declare:as: as: [ :t :node |
+		defineMethodSender: #declare:as: as: [ :t :sender |
 			t
 				preventStatementDelimiter;
 				preventNewline

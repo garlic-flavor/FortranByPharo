@@ -270,6 +270,11 @@ SWMethodBodyTranspiler >> putNew: aNode [
 	^ self subclassResponsibility
 ]
 
+{ #category : #'as yet unclassified' }
+SWMethodBodyTranspiler >> putNil [
+	self subclassResponsibility 
+]
+
 { #category : #'code generation' }
 SWMethodBodyTranspiler >> putOpBinary: aNode [
 	self

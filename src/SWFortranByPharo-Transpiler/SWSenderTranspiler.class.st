@@ -14,14 +14,14 @@ Class {
 SWSenderTranspiler >> generator [
 
 	^ generator ifNil: [
-		generator := [ :transpiler :aNode |
+		generator := [ :transpiler :sender |
 			transpiler
 				withoutMessageNestDo: [
-					transpiler << aNode receiver
+					transpiler << sender node receiver
 				];
 				putClassAccessor;
 				put: (transpiler mangle: self);
-				putArguments: aNode arguments
+				putArguments: sender node arguments
 			"|transpilerSelector|
 
 			transpilerSelector := transpiler class mangleClass selectorForTranspilerOf: aNode selector.
@@ -43,5 +43,5 @@ SWSenderTranspiler >> generator: anObject [
 
 { #category : #'code generation' }
 SWSenderTranspiler >> transpileUsing: transpiler [
-	self generator cull: transpiler cull: self node
+	self generator cull: transpiler cull: self
 ]

@@ -195,6 +195,11 @@ SWMBTofJS >> putNew: aNode [
 		put: ')'
 ]
 
+{ #category : #'as yet unclassified' }
+SWMBTofJS >> putNil [
+	self put: 'null'
+]
+
 { #category : #'code generation' }
 SWMBTofJS >> putOpBinary: aNode [
 	super putOpBinary: (aNode selector = #= ifTrue: [

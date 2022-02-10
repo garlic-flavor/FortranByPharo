@@ -17,14 +17,14 @@ SWSTofJS >> generator [
 		receiverClass := self operands receiver value.
 		receiverClass = self method methodClass ifTrue: [ ^ ordinary ].
 		"For static method."
-		generator := [ :transpiler :aNode |
+		generator := [ :transpiler :sender |
 			transpiler
 				put: self method methodClass instanceSide name;
 				putClassAccessor;
 				put: (transpiler mangle: self);
 				putClassAccessor;
 				put: 'call';
-				putArguments: ({RBVariableNode named: receiverClass instanceSide name}, aNode arguments)
+				putArguments: ({RBVariableNode named: receiverClass instanceSide name}, sender node arguments)
 		]
 	]
 ]

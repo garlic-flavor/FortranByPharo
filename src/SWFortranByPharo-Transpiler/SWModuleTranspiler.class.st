@@ -38,7 +38,8 @@ SWModuleTranspiler >> contents [
 
 { #category : #'public API' }
 SWModuleTranspiler >> decode: aSelector with: args [
-	^ self pool newSenderOf: aSelector super: false with: args
+
+	^ self pool newSenderOf: aSelector super: false with: (SWSlot newFrom: args)
 ]
 
 { #category : #'public API' }

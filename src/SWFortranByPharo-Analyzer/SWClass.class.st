@@ -357,7 +357,8 @@ SWClass >> initialize_CharacterClass [
 SWClass >> initialize_Collection [
 	self
 		declareMethodReturnsSecondArgument: #detect:ifNone:;
-		declareMethodReturnsFirstArgument: #inject:into:
+		declareMethodReturnsFirstArgument: #inject:into:;
+		declareMethod: #anySatisfy: asReturn: Boolean
 ]
 
 { #category : #initialization }
@@ -374,6 +375,12 @@ SWClass >> initialize_Dictionary [
 		declareMethodReturnsSecondArgumentsElement: #at:ifAbsentPut:;
 		declareMethod: #includesKey: asReturn: Boolean;
 		declareMethodReturnsReceiver: #stonOn:
+]
+
+{ #category : #initialization }
+SWClass >> initialize_DictionaryClass [
+	self
+		declareMethodReturnsReceiversClass: #fromSton:
 ]
 
 { #category : #initialization }
@@ -412,7 +419,8 @@ SWClass >> initialize_Object [
 		declareMethod: #size asReturn: Integer;
 		declareMethod: #asString asReturn: String;
 		declareMethodReturnsFirstArgument: #at:put:;
-		declareMethodReturnsReceiver: #putOn:
+		declareMethodReturnsReceiver: #putOn:;
+		declareMethodReturnsReceiver: #assert:description:
 ]
 
 { #category : #initialization }
