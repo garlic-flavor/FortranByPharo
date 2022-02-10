@@ -317,6 +317,15 @@ SWMethodBodyTranspiler >> putSelfDefinition [
 	^ self subclassResponsibility 
 ]
 
+{ #category : #'as yet unclassified' }
+SWMethodBodyTranspiler >> putSender: aNode with: aSender [
+	self
+		<< aNode receiver;
+		putClassAccessor;
+		put: aSender;
+		putArguments: aNode arguments
+]
+
 { #category : #'code generation' }
 SWMethodBodyTranspiler >> putSequence: aSequence [
 	self withoutMessageNestDo: [

@@ -6,7 +6,9 @@ Class {
 	#superclass : #Object,
 	#instVars : [
 		'startPC',
-		'endPC'
+		'endPC',
+		'stackSize',
+		'stackTop'
 	],
 	#category : #'SWFortranByPharo-Analyzer-Slot'
 }
@@ -21,6 +23,30 @@ SWJumperItem >> endPC [
 SWJumperItem >> endPC: anObject [
 
 	endPC := anObject
+]
+
+{ #category : #accessing }
+SWJumperItem >> stackSize [
+
+	^ stackSize
+]
+
+{ #category : #accessing }
+SWJumperItem >> stackSize: anObject [
+
+	stackSize := anObject
+]
+
+{ #category : #accessing }
+SWJumperItem >> stackTop [
+
+	^ stackTop
+]
+
+{ #category : #accessing }
+SWJumperItem >> stackTop: anObject [
+
+	stackTop := anObject
 ]
 
 { #category : #accessing }

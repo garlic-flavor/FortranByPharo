@@ -30,7 +30,6 @@ SWShellTest class >> tryBuild [
 	<script>
 	|mt|
 	mt := self newModuleTranspiler.
-	mt payload haltAt: #localDirectory.
 	mt transpile inspect
 ]
 

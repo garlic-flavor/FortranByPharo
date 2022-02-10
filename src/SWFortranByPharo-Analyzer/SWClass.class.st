@@ -213,6 +213,10 @@ SWClass >> decoderInitializer: anObject [
 SWClass >> defineMethodBody: selector as: generator [
 ]
 
+{ #category : #'public API' }
+SWClass >> defineMethodSender: aSelector as: anInitializer [
+]
+
 { #category : #api }
 SWClass >> getSenderOf: aMethod with: args [
 	|sender decoder|
@@ -491,7 +495,9 @@ SWClass >> initialize_String [
 		declareMethodReturnsReceiver: #trimLeft:right:;
 		declareMethodReturnsReceiver: #asLowercase;
 		declareMethod: #asZnUrl asReturn: ZnUrl;
-		declareMethod: #beginsWith: asReturn: Boolean
+		declareMethod: #beginsWith: asReturn: Boolean;
+		declareMethod: #endsWith: asReturn: Boolean;
+		declareMethodReturnsReceiver: #printOn:
 ]
 
 { #category : #initialization }
@@ -499,6 +505,12 @@ SWClass >> initialize_StringClass [
 	self
 		declareMethodReturnsReceiversInstance: #crlf;
 		declareMethodReturnsReceiversInstance: #with:
+]
+
+{ #category : #initialization }
+SWClass >> initialize_TestAsserter [
+	self
+		declareMethodReturnsReceiver: #assert:description:
 ]
 
 { #category : #initialization }

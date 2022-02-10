@@ -168,11 +168,10 @@ SWCDTofJS >> initialize_String [
 	super initialize_String.
 	self
 		defineMethodSender: #beginsWith: as: [ :transpiler :aNode |
-			transpiler
-				<< aNode receiver;
-				putClassAccessor;
-				put: 'startsWith';
-				putArguments: aNode arguments
+			transpiler putSender: aNode with: 'startsWith'
+		];
+		defineMethodSender: #endsWith: as: [ :transpiler :aNode |
+			transpiler  putSender: aNode with: 'endsWith'
 		]
 
 ]

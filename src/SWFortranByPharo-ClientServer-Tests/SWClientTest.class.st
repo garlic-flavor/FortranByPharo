@@ -5,7 +5,7 @@ Class {
 		'client',
 		'server'
 	],
-	#category : #'SWFortranByPharo-ClientServer-Tests'
+	#category : #'SWFortranByPharo-ClientServer-Tests-Client'
 }
 
 { #category : #running }

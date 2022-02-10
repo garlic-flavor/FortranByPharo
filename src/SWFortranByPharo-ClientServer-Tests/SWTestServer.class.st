@@ -1,7 +1,7 @@
 Class {
 	#name : #SWTestServer,
 	#superclass : #Object,
-	#category : #'SWFortranByPharo-ClientServer-Tests'
+	#category : #'SWFortranByPharo-ClientServer-Tests-Client'
 }
 
 { #category : #accessing }

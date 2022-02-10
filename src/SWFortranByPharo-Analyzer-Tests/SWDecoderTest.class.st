@@ -294,20 +294,32 @@ SWDecoderTest >> test_SWShellEnvironemtLocalDirectory [
 	dec := SWDecoder new: [ SWShellEnvironment default localDirectory ] with: { self class }.
 	dec logger enabled: true.
 	dec decode.
-	dec inspect.
+	self assert: dec return value equals: FileLocator
+]
+
+{ #category : #tests }
+SWDecoderTest >> test_ifTrue [
+	|dec|
+	dec := SWDecoder new: [ SWShellEnvironmentTest new testExeFileExtension ] with: { self class }.
+	dec logger enabled: true.
+	dec decode.
+	self assert: dec return value equals: SWShellEnvironmentTest.
 ]
 
 { #category : #tests }
 SWDecoderTest >> test_jumper [
+"
 	self returnValueOf: [ false ifTrue: [ 123 ] ifFalse: [ 'false' ] ] withArguments: { self class } equals: SmallInteger.
 	self returnValueOf: [ (1=2) ifTrue: [ 123 ] ifFalse: [ 'false' ] ] withArguments: { self class } equals: SmallInteger.
 	self returnValueOf: [ false ifFalse: [ 123 ] ifTrue: [ 'false' ] ] withArguments: { self class } equals: SmallInteger.
 	self returnValueOf: [ false ifTrue: [ 123 ] ] withArguments: { self class } equals: SmallInteger.
 	self returnValueOf: [ (1=2) ifTrue: [ 123 ] ] withArguments: { self class } equals: SmallInteger.
 	self returnValueOf: [ false ifFalse: [ 'false string' ] ] withArguments: { self class } equals: ByteString.
+"
 	self returnValueOf: [ |val | val ifNil: [ val := 123 ] ] withArguments: { self class } equals: SmallInteger.
+"
 	self returnValueOf: [ |val | val ifNotNil: [ val := 123 ] ] withArguments: { self class } equals: SmallInteger.
 	self returnValueOf: [ |val | val ifNil: [ val := 123 ] ifNotNil: [ 'not nil' ] ] withArguments: { self class } equals: SmallInteger.
 	self returnValueOf: [ |val | val ifNotNil: [ val := 123 ] ifNil: [ 'not nil' ] ] withArguments: { self class } equals: SmallInteger.
-
+"
 ]

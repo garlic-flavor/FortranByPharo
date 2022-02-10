@@ -4,7 +4,7 @@ A SWShellEnvironmentTest is a test class for testing the behavior of SWShellEnvi
 Class {
 	#name : #SWShellEnvironmentTest,
 	#superclass : #SWTestRunner,
-	#category : #'SWFortranByPharo-ClientServer-Tests'
+	#category : #'SWFortranByPharo-ClientServer-Tests-Shell'
 }
 
 { #category : #running }
@@ -28,7 +28,7 @@ SWShellEnvironmentTest class >> solveDependenciesUsing: transpiler [
 { #category : #building }
 SWShellEnvironmentTest class >> tryBuild [
 	<script>
-	super build inspect
+	self build inspect
 ]
 
 { #category : #test }
