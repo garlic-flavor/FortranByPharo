@@ -276,7 +276,7 @@ SWDecoderTest >> test_16 [
 
 { #category : #tests }
 SWDecoderTest >> test_17 [
-	self returnValueOfMy: #_17_test_ensure withArguments: {  } equals: SmallInteger
+	self returnValueOfMy: #_17_test_ensure withArguments: {  } equals: SmallFloat64
 ]
 
 { #category : #tests }
@@ -308,18 +308,26 @@ SWDecoderTest >> test_ifTrue [
 
 { #category : #tests }
 SWDecoderTest >> test_jumper [
-"
-	self returnValueOf: [ false ifTrue: [ 123 ] ifFalse: [ 'false' ] ] withArguments: { self class } equals: SmallInteger.
-	self returnValueOf: [ (1=2) ifTrue: [ 123 ] ifFalse: [ 'false' ] ] withArguments: { self class } equals: SmallInteger.
-	self returnValueOf: [ false ifFalse: [ 123 ] ifTrue: [ 'false' ] ] withArguments: { self class } equals: SmallInteger.
+	self returnValueOf: [ false ifTrue: [ 123 ] ifFalse: [ 'false' ] ] withArguments: { self class } equals: ByteString.
+	self returnValueOf: [ (1=2) ifTrue: [ 123 ] ifFalse: [ 'false' ] ] withArguments: { self class } equals: ByteString.
+	self returnValueOf: [ false ifFalse: [ 123 ] ifTrue: [ 'false' ] ] withArguments: { self class } equals: ByteString.
 	self returnValueOf: [ false ifTrue: [ 123 ] ] withArguments: { self class } equals: SmallInteger.
 	self returnValueOf: [ (1=2) ifTrue: [ 123 ] ] withArguments: { self class } equals: SmallInteger.
 	self returnValueOf: [ false ifFalse: [ 'false string' ] ] withArguments: { self class } equals: ByteString.
-"
 	self returnValueOf: [ |val | val ifNil: [ val := 123 ] ] withArguments: { self class } equals: SmallInteger.
-"
 	self returnValueOf: [ |val | val ifNotNil: [ val := 123 ] ] withArguments: { self class } equals: SmallInteger.
-	self returnValueOf: [ |val | val ifNil: [ val := 123 ] ifNotNil: [ 'not nil' ] ] withArguments: { self class } equals: SmallInteger.
-	self returnValueOf: [ |val | val ifNotNil: [ val := 123 ] ifNil: [ 'not nil' ] ] withArguments: { self class } equals: SmallInteger.
-"
+	self returnValueOf: [ |val | val ifNil: [ val := 123 ] ifNotNil: [ 'not nil' ] ] withArguments: { self class } equals: ByteString.
+	self returnValueOf: [ |val | val ifNotNil: [ val := 123 ] ifNil: [ 'not nil' ] ] withArguments: { self class } equals: ByteString.
+
+]
+
+{ #category : #tests }
+SWDecoderTest >> test_jumper2 [
+	self returnValueOf: [
+		|path|
+		path := 123.
+		path = 234 ifFalse: [ self error ].
+		path
+	] withArguments: { self class } equals: SmallInteger.
+
 ]

@@ -331,14 +331,14 @@ SWClass >> initialize_BlockClosure [
 ]
 
 { #category : #initialization }
-SWClass >> initialize_Boolean [
+SWClass >> initialize_Boolean [ 
 	self
-		declareMethodReturnsFirstOrSecondArgument: #ifTrue:ifFalse:;
-		declareMethodReturnsFirstOrSecondArgument: #ifFalse:ifTrue:;
 		declareMethodReturnsFirstArgument: #ifTrue:;
-		declareMethodReturnsSecondArgument: #ifFalse:;
-		declareMethod: #and: asReturn: Boolean;
-		declareMethod: #or: asReturn: Boolean
+ 		declareMethodReturnsFirstArgument: #ifFalse:;
+		declareMethodReturnsFirstArgument: #ifTrue:ifFalse:;
+		declareMethodReturnsFirstArgument: #ifFalse:ifTrue:;
+		declareMethodReturnsFirstArgument: #and:;
+		declareMethodReturnsFirstArgument: #or:
 ]
 
 { #category : #initialization }
@@ -436,9 +436,8 @@ SWClass >> initialize_ProtoObject [
 		declareMethodReturnsReceiversClass: #class;
 		declareMethodReturnsFirstArgument: #ifNil:;
 		declareMethodReturnsFirstArgument: #ifNotNil:;
-		declareMethodReturnsFirstOrSecondArgument: #ifNil:ifNotNil:;
-		declareMethodReturnsFirstOrSecondArgument: #ifNotNil:ifNil:
-
+		declareMethodReturnsFirstArgument: #ifNil:ifNotNil;
+		declareMethodReturnsFirstArgument: #ifNotNil:ifNil:
 ]
 
 { #category : #initialization }

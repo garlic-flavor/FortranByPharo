@@ -156,7 +156,6 @@ SWCompiledCode >> method: aCompiledMethod [
 			name: var name;
 			stackPos: idx
 	].
-
 	^ super method: aCompiledMethod
 ]
 

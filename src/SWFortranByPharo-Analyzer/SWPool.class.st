@@ -96,13 +96,6 @@ SWPool >> newSenderOf: aSelector super: supered with: args [
 		(self getClassTranspiler: method methodClass)
 			getSenderOf: method with: args
 	]
-"		
-	callee := SWCalleeInfo new: (method ifNotNil: [ method ] ifNil: [ aSelector ]) with: args.
-	methodClass := (method ifNotNil: [ method methodClass ] ifNil: [ UndefinedObject ] ).
-	^ (self getClassTranspiler: methodClass)
-		getMethodTranspiler: callee
-"
-
 ]
 
 { #category : #private }

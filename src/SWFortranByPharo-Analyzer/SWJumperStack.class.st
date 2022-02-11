@@ -39,11 +39,3 @@ SWJumperStack >> pop [
 SWJumperStack >> push: aJumperItem [
 	self payload push: aJumperItem
 ]
-
-{ #category : #modifying }
-SWJumperStack >> update: aPeriod [
-	self payload push: ((self pop)
-			endPC: aPeriod;
-			yourself)
-
-]

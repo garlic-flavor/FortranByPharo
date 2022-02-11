@@ -74,7 +74,24 @@ SWCDTofJS >> initialize_Boolean [
 				put: ')';
 				putBlock: (aNode arguments at: 1)
 		]
-	]
+	].
+	self defineMethodSender: #ifFalse: as: [ :transpiler :sender | |aNode |
+		aNode := sender node.
+		aNode isExpression ifTrue: [
+			transpiler
+				put: '(';
+				<< aNode receiver;
+				put: ' ? ';
+				put: 'null : ';
+				putBlockAsExpression: (aNode arguments at: 1)
+		] ifFalse: [
+			transpiler
+				put: 'if( !';
+				<< aNode receiver;
+				put: ')';
+				putBlock: (aNode arguments at: 1)
+		]
+	].
 
 ]
 
@@ -107,6 +124,15 @@ SWCDTofJS >> initialize_Object [
 				<< sender node receiver;
 				putClassAccessor;
 				put: 'toString()'
+		];
+		defineMethodSender: #at:put: as: [ :transpiler :sender ||node|
+			node := sender node.
+			transpiler
+				<< node receiver;
+				put: '[';
+				<< node arguments first;
+				put: '] = ';
+				<< node arguments second
 		]
 ]
 
@@ -174,6 +200,12 @@ SWCDTofJS >> initialize_SWStdClass [
 ]
 
 { #category : #initialization }
+SWCDTofJS >> initialize_Stream [
+	self
+		defineMethodSender: #<< as: [ :transpiler :sender | transpiler putSender: sender node with: #write ]
+]
+
+{ #category : #initialization }
 SWCDTofJS >> initialize_String [
 	super initialize_String.
 	self
@@ -184,6 +216,24 @@ SWCDTofJS >> initialize_String [
 			transpiler  putSender: sender node with: 'endsWith'
 		]
 
+]
+
+{ #category : #initialization }
+SWCDTofJS >> initialize_ThreadSafeTranscript [
+
+	self
+		defineMethodSender: #<< as: [ :transpiler :sender |
+			transpiler putSender: sender node with: #write
+		]
+]
+
+{ #category : #initialization }
+SWCDTofJS >> initialize_TranscriptClass [
+	self halt.
+	self
+		defineMethodSender: #<< as: [ :transpiler :sender |
+			transpiler putSender: sender node with: #write
+		]
 ]
 
 { #category : #'code generation' }

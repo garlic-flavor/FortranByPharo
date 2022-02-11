@@ -16,6 +16,14 @@ SWClassDefinitionTranspiler class >> methodDefinitionTranspilerClass [
 	^ self subclassResponsibility 
 ]
 
+{ #category : #api }
+SWClassDefinitionTranspiler >> declareMethodAsCompareOperator: aName [
+	super declareMethodAsCompareOperator: aName.
+	self defineMethodSender: aName as: [ :transpiler :sender |
+		transpiler putOpBinary: sender node
+	]
+]
+
 { #category : #'public API' }
 SWClassDefinitionTranspiler >> defineMethodBody: aName as: anInitializer [
 	self addDecoderInitializer: aName with: [ :decoder |

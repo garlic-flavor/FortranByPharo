@@ -15,21 +15,20 @@ Class {
 
 { #category : #accessing }
 SWServer class >> build [
-	|module|
-	module := SWMTofJS newFrom: self.
-	self addInitializerTo: module pool.
-"
-	module enableDebugMode.
-"
-	module transpile.
-	^ module
+	^ self moduleTranspiler
+		transpile;
+		yourself
 
 ]
 
 { #category : #accessing }
 SWServer class >> buildThenInspect [
 	<script>
-	self build contents inspect
+	|module|
+	module := self moduleTranspiler.
+	module logger enabled: true.
+	module transpile.
+	module contents inspect.
 
 ]
 
@@ -123,6 +122,12 @@ SWServer class >> main [
 		import: #(ZnServer ZnWebSocketDelegate SWWebSocketDelegate ZnResponse ZnEntity ZnStatusLine ZnHeaders) from: 'ZnServer'.
 
 	self new startOn: 50000
+]
+
+{ #category : #accessing }
+SWServer class >> moduleTranspiler [
+	^ SWMTofJS newFrom: self.
+
 ]
 
 { #category : #accessing }
@@ -248,38 +253,13 @@ SWServer >> head: target [
 	^ target exists ifTrue: [
 		(ZnResponse statusLine: ZnStatusLine ok)
 			headers: (ZnHeaders defaultResponseHeaders
-				at: #'Content-Location' put: (target relativeTo: FileLocator imageDirectory) fullName;
+				at: #'Content-Location' put: (target relativeTo: FileLocator localDirectory) fullName;
 				at: #'Last-Modified' put: target changeTime asString;
 				yourself);
 			yourself
 	] ifFalse: [
 		ZnResponse notFound: (self class relPathOf: target) fullName asZnUrl
 	]
-]
-
-{ #category : #initialization }
-SWServer >> initialize [
-	super initialize.
-
-]
-
-{ #category : #executing }
-SWServer >> make: target by: method with: msg on: socket [
-	|type|
-	self flag: #ToRemove.
-	type := (msg at: #type ifAbsent: ['']).
-	(type beginsWith: 'f') ifTrue: [
-		|sources result|
-		sources := (msg at: #sources ifAbsent: [{}]) collect: [ :each | self class filePathOf: each ].
-		result := self env fortranCompilerAdapterClass perform: method with: sources with: target.
-		socket sendResponseOk: {
-			'status' -> 'succeeded'.
-			'stdout' -> result.
-			'Location' -> target rel fullName.
-		}
-	].
-	self error: 'no implementation'
-
 ]
 
 { #category : #'as yet unclassified' }
@@ -311,7 +291,7 @@ SWServer >> put: target contents: contents [
 	].
 	res := ZnResponse ok: (ZnEntity text: '').
 	res headers
-		at: #'Content-Location' put: (target relativeTo: FileLocator imageDirectory) fullName;
+		at: #'Content-Location' put: (target relativeTo: FileLocator localDirectory) fullName;
 		at: #'Last-Modified' put: target changeTime asString.
 	^ res
 ]

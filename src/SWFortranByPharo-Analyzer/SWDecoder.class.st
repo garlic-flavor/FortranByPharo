@@ -20,7 +20,7 @@ SWDecoder class >> poolClass [
 
 { #category : #private }
 SWDecoder >> addBytecode: description [
-	|item node operands sender|
+	|item node sender|
 
 	self logger log: [ String streamContents: [ :s |
 		s << '[' print: oldPC; << '] '; << description
@@ -32,11 +32,9 @@ SWDecoder >> addBytecode: description [
 	item := self jumperStack pop.
 	node := self method sourceNodeForPC: item startPC.
 	(self haltList includes: node selector) ifTrue: [ self halt ].
-	operands := self popOperandsOf: item.
-	sender := (self pool newSenderOf: node selector super: false with: operands)
-		node: node;
-		yourself.
-	self stack push: sender return.
+	self stack top << item route1.
+	sender := self pool newSenderOf: node selector super: false with: (SWSlot newFrom: { item condition. self stack top }).
+	sender node: node.
 	self senders at: sender node put: sender.
 	
 ]
@@ -104,7 +102,13 @@ SWDecoder >> haltList: anObject [
 
 { #category : #'instruction decoding' }
 SWDecoder >> jump: offset [
-	self jumperStack update: scanner pc + offset.
+	(self jumperStack nextPeriodIs: scanner pc) ifTrue: [|item|
+		item := self jumperStack pop.
+		item endPC: scanner pc + offset.
+		item route1: self stack top.
+		self stack: item initialStack.
+		self jumperStack push: item.
+	].
 	super jump: offset.
 	
 ]
@@ -115,8 +119,8 @@ SWDecoder >> jump: offset if: condition [
 	self jumperStack push: (SWJumperItem new
 		startPC: oldPC;
 		endPC: scanner pc + offset;
-		stackTop: self stack pop;
-		stackSize: self stack size;
+		condition: self stack pop;
+		initialStack: self stack copy;
 		yourself).
 
 	super jump: offset if: condition.
@@ -237,51 +241,6 @@ SWDecoder >> popIntoTemporaryVariable: offset [
 	left << right.
 
 	super popIntoTemporaryVariable: offset.
-
-]
-
-{ #category : #'instance creation' }
-SWDecoder >> popOperandsFor: node andInitialStackSize: size [
-	|operands|
-	operands := SWSlot new.
-	self halt.
-	(#( #ifTrue:ifFalse: #ifFalse:ifTrue: #ifNil:ifNotNil: #ifNotNil:ifNil:) anySatisfy: [ :each | each = node selector ]) ifTrue: [
-		operands third << self stack pop.
-		operands second << self stack pop.
-		operands first << self stack pop.
-		^ operands
-	].
-	(#(#ifTrue: #ifFalse:) anySatisfy: [ :each | each = node selector ]) ifTrue: [
-	].
-	(#(#ifNil: #ifNotNil:) anySatisfy: [ :each | each = node selector ]) ifTrue: [
-		operands second << self stack pop.
-		operands first << self stack pop.
-		^ operands
-	].
-	(#(#and: #or:) anySatisfy: [ :each | each = node selector ]) ifTrue: [
-		operands second << self stack pop.
-		operands first << self stack pop.
-		^ operands
-	].
-	self error; flag: #toImplement
-
-]
-
-{ #category : #'as yet unclassified' }
-SWDecoder >> popOperandsOf: item [
-	|dif operands|
-	operands := SWSlot newFrom: { item stackTop }.
-	dif := self stack size - item stackSize.
-	dif = 2 ifTrue: [ 
-		operands third << self stack pop.
-		operands second << self stack pop.
-		^ operands
-	].
-	dif < 2 ifTrue: [
-		operands second << self stack pop.
-		^ operands
-	].
-	self error; flag: #toImplement
 
 ]
 

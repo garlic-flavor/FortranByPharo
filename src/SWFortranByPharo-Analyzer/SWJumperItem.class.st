@@ -7,11 +7,24 @@ Class {
 	#instVars : [
 		'startPC',
 		'endPC',
-		'stackSize',
-		'stackTop'
+		'condition',
+		'initialStack',
+		'route1'
 	],
 	#category : #'SWFortranByPharo-Analyzer-Slot'
 }
+
+{ #category : #accessing }
+SWJumperItem >> condition [
+
+	^ condition
+]
+
+{ #category : #accessing }
+SWJumperItem >> condition: anObject [
+
+	condition := anObject
+]
 
 { #category : #accessing }
 SWJumperItem >> endPC [
@@ -26,27 +39,27 @@ SWJumperItem >> endPC: anObject [
 ]
 
 { #category : #accessing }
-SWJumperItem >> stackSize [
+SWJumperItem >> initialStack [
 
-	^ stackSize
+	^ initialStack
 ]
 
 { #category : #accessing }
-SWJumperItem >> stackSize: anObject [
+SWJumperItem >> initialStack: anObject [
 
-	stackSize := anObject
+	initialStack := anObject
 ]
 
 { #category : #accessing }
-SWJumperItem >> stackTop [
+SWJumperItem >> route1 [
 
-	^ stackTop
+	^ route1 ifNil: [ route1 := SWVariableTypeInfo new ]
 ]
 
 { #category : #accessing }
-SWJumperItem >> stackTop: anObject [
+SWJumperItem >> route1: anObject [
 
-	stackTop := anObject
+	route1 := anObject
 ]
 
 { #category : #accessing }

@@ -1,26 +1,23 @@
-"
-A SWServerTest is a test class for testing the behavior of SWServer
-"
 Class {
-	#name : #SWServerTest,
+	#name : #SWServerNodeTest,
 	#superclass : #TestCase,
 	#category : #'SWFortranByPharo-ClientServer-Tests-Server'
 }
 
 { #category : #running }
-SWServerTest >> setUp [
+SWServerNodeTest >> setUp [
 	super setUp.
-	SWServer start
+
 ]
 
 { #category : #running }
-SWServerTest >> tearDown [
+SWServerNodeTest >> tearDown [
 	SWServer stop.
-	super tearDown.
+
 ]
 
 { #category : #test }
-SWServerTest >> testCompileWithOn [
+SWServerNodeTest >> testCompileWithOn [
 	|res|
 	client sendRequestPost: 'native/helloworld.o' with: {
 		'action' -> 'compile'.
@@ -34,7 +31,7 @@ SWServerTest >> testCompileWithOn [
 ]
 
 { #category : #test }
-SWServerTest >> testExecWith [
+SWServerNodeTest >> testExecWith [
 	|res message|
 	message := 'Hello, world!'.
 	res := SWClient new exec: 'echo' with: { message }.
@@ -44,13 +41,13 @@ SWServerTest >> testExecWith [
 ]
 
 { #category : #test }
-SWServerTest >> testFilePathOf [
+SWServerNodeTest >> testFilePathOf [
 
 	self assert: (SWServer filePathOf: '/ruby') basename equals: 'ruby'
 ]
 
 { #category : #test }
-SWServerTest >> testGetWithOn [
+SWServerNodeTest >> testGetWithOn [
 	|res|
 	res := client ensureSendMessage: (SWServerInstruction new
 		get;
@@ -61,7 +58,7 @@ SWServerTest >> testGetWithOn [
 ]
 
 { #category : #tests }
-SWServerTest >> testHeadWithOn [
+SWServerNodeTest >> testHeadWithOn [
 	|res|
 	client sendRequestHead: 'src/native/helloworld.f90'.
 	res := client readResponseHaltOnFailure.
@@ -71,7 +68,7 @@ SWServerTest >> testHeadWithOn [
 ]
 
 { #category : #test }
-SWServerTest >> testLinkWithOn [
+SWServerNodeTest >> testLinkWithOn [
 	|res|
 	client sendRequestPost: 'helloworld.out' with: {
 		'action' -> 'link'.
@@ -85,7 +82,7 @@ SWServerTest >> testLinkWithOn [
 ]
 
 { #category : #test }
-SWServerTest >> testPostWithOn [
+SWServerNodeTest >> testPostWithOn [
 	|res|
 	client sendRequestPost: 'src/native/helloworld.f90' with: { 'action' -> 'cat' }.
 	res := client readResponse.
@@ -95,7 +92,7 @@ SWServerTest >> testPostWithOn [
 ]
 
 { #category : #test }
-SWServerTest >> testPutContents [
+SWServerNodeTest >> testPutContents [
 	|res|
 	res := SWClient new put: 'test.txt' contents: 'Hello, world!'.
 	self assert: (DateAndTime readFrom: res readStream) asDate equals: Date today

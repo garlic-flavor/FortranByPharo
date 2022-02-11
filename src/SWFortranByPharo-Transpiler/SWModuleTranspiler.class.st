@@ -42,14 +42,14 @@ SWModuleTranspiler >> decode: aSelector with: args [
 	^ self pool newSenderOf: aSelector super: false with: (SWSlot newFrom: args)
 ]
 
-{ #category : #'public API' }
-SWModuleTranspiler >> enableDebugMode [
-	self payload logger enabled: true
-]
-
 { #category : #accessing }
 SWModuleTranspiler >> filename [
 	^ String streamContents: [ :s | self payload putFilenameOn: s ]
+]
+
+{ #category : #accessing }
+SWModuleTranspiler >> haltAt: sender [
+	self payload haltAt: sender
 ]
 
 { #category : #'public API' }
@@ -58,6 +58,11 @@ SWModuleTranspiler >> import: anArray from: basename [
 		putImport: anArray from: basename;
 		putStatementDelimiter;
 		cr
+]
+
+{ #category : #accessing }
+SWModuleTranspiler >> logger [
+	^ self payload logger
 ]
 
 { #category : #accessing }
