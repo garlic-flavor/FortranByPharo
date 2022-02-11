@@ -32,7 +32,7 @@ export class Transcript {};
 Transcript.show_ = function(msg) {
   console.log(msg);
 };
-Transcript.write_ = function(msg) {
+Transcript.write = function(msg) {
   process.stdout.write(msg);
 };
 Transcript.cr = function(msg) {
@@ -174,11 +174,6 @@ String.crlf = function() { return '\r\n'; };
 String.prototype.readStream = function() {
   return new stream.ReadableStream(this);
 };
-String.streamContents_ = function(aBlock) {
-  var s = new stream.WritableStream();
-  aBlock(s);
-  return s.toString();
-};
 String.prototype.trimLeft_ = function(aBlock) {
   for(var i = 0; i < this.length; i++) {
     if (!aBlock(this.charAt(i))) {
@@ -189,6 +184,13 @@ String.prototype.trimLeft_ = function(aBlock) {
 };
 String.prototype.asString = function() {
   return this;
+};
+
+var SequenceableCollection = {};
+SequenceableCollection.streamContents_ = function(aBlock) {
+  var s = new stream.WritableStream();
+  aBlock(s);
+  return s.toString();
 };
 
 //-----------------------------------------------------------------------------
@@ -271,6 +273,7 @@ export class FileLocator {
   static localDirectory() {
     return new FileLocator(process.cwd());
   }
+
 }
 
 
@@ -291,7 +294,7 @@ export class SWFile {
   position_(p) {
   }
 
-  write_(contents) {
+  write(contents) {
     fs.writeFileSync(this._path, contents);
   }
 
@@ -327,7 +330,7 @@ if (process.env.NODE_ENV == 'test') {
   fl2.ensureCreateDirectory();
   fl2.writeStreamDo_(function(io) {
     console.log(io._path);
-    io.write_('Hello, World\n');
+    io.write('Hello, World\n');
   });
   console.log(fl.children());
 }
