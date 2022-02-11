@@ -33,7 +33,7 @@ SWServerStatusTest class >> tryBuild [
 	<script>
 	|mt|
 	mt := self newModuleTranspiler.
-	mt payload haltAt: #toString.
+	mt payload haltAt: #class.
 	mt transpile inspect.
 ]
 

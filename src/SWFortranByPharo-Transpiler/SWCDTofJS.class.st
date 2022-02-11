@@ -59,7 +59,7 @@ SWCDTofJS >> initialize_Boolean [
 		]
 	].
 	self defineMethodSender: #ifTrue: as: [ :transpiler :sender | |aNode |
-		aNode := sender.
+		aNode := sender node.
 		aNode isExpression ifTrue: [
 			transpiler
 				put: '(';
