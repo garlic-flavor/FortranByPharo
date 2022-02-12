@@ -64,6 +64,7 @@ SWServerStatus class >> readFrom: aSocket [
 { #category : #'code generation' }
 SWServerStatus class >> solveDependenciesUsing: transpiler [
 	transpiler
+		import: #(SequenceableCollection) from: 'Pharo';
 		import: #( STON ) from: 'STON'
 ]
 

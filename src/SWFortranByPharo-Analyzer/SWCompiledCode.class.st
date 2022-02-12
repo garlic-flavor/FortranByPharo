@@ -87,6 +87,7 @@ SWCompiledCode >> cblock: aCompiledBlock [
 			name: name;
 			stackPos: idx
 	].
+
 	method := aCompiledBlock
 
 ]

@@ -151,7 +151,9 @@ SWServer class >> relPathOf: path [
 { #category : #'as yet unclassified' }
 SWServer class >> solveDependenciesUsing: transpiler [
 	transpiler
-		transpile: SWShellEnvironment
+		transpile: SWShell;
+		transpile: SWShellEnvironment;
+		transpile: SWServerStatus
 ]
 
 { #category : #accessing }

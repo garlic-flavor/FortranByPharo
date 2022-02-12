@@ -133,6 +133,12 @@ SWCDTofJS >> initialize_Object [
 				<< node arguments first;
 				put: '] = ';
 				<< node arguments second
+		];
+		defineMethodSender: #isArray as: [ :transpiler :sender |
+			transpiler
+				put: 'Array.isArray(';
+				<< sender node receiver;
+				put: ')'
 		]
 ]
 

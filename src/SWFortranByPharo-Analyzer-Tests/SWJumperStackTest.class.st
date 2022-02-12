@@ -8,9 +8,7 @@ Class {
 SWJumperStackTest >> testBasics [
 	|js|
 	js := SWJumperStack new.
-	js pushAt: 123 period: 234 size: 99.
+	js push: (SWJumperItem new startPC: 123; endPC: 234; yourself).
 	self assert: (js nextPeriodIs: 234).
-	js update: 345.
-	self assert: (js nextPeriodIs: 345).
-	self assert: js pop stackSize equals: 99
+
 ]

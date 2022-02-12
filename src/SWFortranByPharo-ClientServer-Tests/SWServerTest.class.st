@@ -3,7 +3,7 @@ A SWServerTest is a test class for testing the behavior of SWServer
 "
 Class {
 	#name : #SWServerTest,
-	#superclass : #TestCase,
+	#superclass : #SWServerNodeTest,
 	#category : #'SWFortranByPharo-ClientServer-Tests-Server'
 }
 
@@ -96,7 +96,5 @@ SWServerTest >> testPostWithOn [
 
 { #category : #test }
 SWServerTest >> testPutContents [
-	|res|
-	res := SWClient new put: 'test.txt' contents: 'Hello, world!'.
-	self assert: (DateAndTime readFrom: res readStream) asDate equals: Date today
+	super testPutContents
 ]

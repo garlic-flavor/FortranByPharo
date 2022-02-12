@@ -53,6 +53,15 @@ SWClassDefinitionTranspiler >> initialize_Number [
 ]
 
 { #category : #initialization }
+SWClassDefinitionTranspiler >> initialize_ProtoObject [
+	super initialize_ProtoObject.
+	self
+		defineMethodSender: #flag: as: [ :transpiler :sender |
+			transpiler preventStatementDelimiter; preventNewline
+		]
+]
+
+{ #category : #initialization }
 SWClassDefinitionTranspiler >> initialize_TestCaseClass [
 	super initialize_TestCaseClass.
 	self

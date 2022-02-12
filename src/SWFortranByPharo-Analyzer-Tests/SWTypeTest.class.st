@@ -40,10 +40,7 @@ SWTypeTest >> testLessThanLessThan [
 	type1 << type2.
 	self assert: type1 value equals: String.
 	self assert: type1 priority equals: SWType exactTypePriority.
-	type2 := SWTypeGroup new: ByteString with: SWType userSpecifyingPriority.
-	type1 << type2.
-	self assert: type1 value equals: ByteString.
-	self assert: type1 priority equals: SWType userSpecifyingPriority.
+
 ]
 
 { #category : #tests }
