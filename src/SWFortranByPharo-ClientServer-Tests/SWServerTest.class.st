@@ -35,12 +35,7 @@ SWServerTest >> testCompileWithOn [
 
 { #category : #test }
 SWServerTest >> testExecWith [
-	|res message|
-	message := 'Hello, world!'.
-	res := SWClient new exec: 'echo' with: { message }.
-	self assert: res code equals: 'ok'.
-	self assert: res message trimRight equals: message.
-
+	super testExecWith
 ]
 
 { #category : #test }

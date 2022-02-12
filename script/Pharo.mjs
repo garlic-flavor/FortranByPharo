@@ -186,12 +186,13 @@ String.prototype.asString = function() {
   return this;
 };
 
-var SequenceableCollection = {};
-SequenceableCollection.streamContents_ = function(aBlock) {
-  var s = new stream.WritableStream();
-  aBlock(s);
-  return s.toString();
-};
+export class SequenceableCollection {
+  static streamContents_(aBlock) {
+    var s = new stream.WritableStream();
+    aBlock(s);
+    return s.toString();
+  }
+}
 
 //-----------------------------------------------------------------------------
 Error.prototype.getMessage = function() {

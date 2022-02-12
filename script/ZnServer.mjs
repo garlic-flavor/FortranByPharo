@@ -83,7 +83,7 @@ export class ZnWebSocketDelegate {
     var r = null;
     if (typeof handler === 'function') {
       r = handler(new ZnRequest(req));
-    } else if (handler instanceof ZnDefaultDelegate) {
+    } else if (handler instanceof ZnWebSocketDelegate) {
       r = handler.request(req, res);
     }
     if(r) {
@@ -92,7 +92,7 @@ export class ZnWebSocketDelegate {
   }
   upgrade(req, sock, head) {
     var handler = this.getHandlerFor(req);
-    if (handler instanceof ZnDefaultDelegate) {
+    if (handler instanceof ZnWebSocketDelegate) {
       handler.upgrade(req, sock, head);
     }
   }
