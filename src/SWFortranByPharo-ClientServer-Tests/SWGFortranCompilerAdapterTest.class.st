@@ -3,7 +3,6 @@ Class {
 	#superclass : #TestCase,
 	#instVars : [
 		'gf',
-		'fm',
 		'source'
 	],
 	#category : #'SWFortranByPharo-ClientServer-Tests'
