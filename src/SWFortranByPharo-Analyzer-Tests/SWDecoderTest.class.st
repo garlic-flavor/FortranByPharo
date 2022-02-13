@@ -5,12 +5,6 @@ Class {
 }
 
 { #category : #'tests - source' }
-SWDecoderTest >> _01_return_constant [
-
-	^ 345
-]
-
-{ #category : #'tests - source' }
 SWDecoderTest >> _02_call_wellknown_message: arg1 [
 
 	| tmp1 |
@@ -106,12 +100,39 @@ SWDecoderTest >> _17_test_ensure [
 ]
 
 { #category : #'private - utility' }
+SWDecoderTest >> decode: method withArguments: arg2 [
+	|dec|
+	dec := SWDecoder new: method with: ({method methodClass}, arg2).
+	dec logger enabled: true.
+	dec decode.
+	^ dec
+
+]
+
+{ #category : #'as yet unclassified' }
+SWDecoderTest >> decodeNo: no withArguments: args [
+	^ self decode: (SWTestProgram getMy: no) withArguments: args
+]
+
+{ #category : #'private - utility' }
 SWDecoderTest >> inspectMy: arg1 withArguments: arg2 [
 	|dec|
 	dec := SWDecoder new: self class>>arg1 with: ({self class}, arg2).
 	dec logger enabled: true.
 	dec decode; inspect
 
+]
+
+{ #category : #'as yet unclassified' }
+SWDecoderTest >> inspectNo: no withArguments: args [
+	(self decode: (SWTestProgram getMy: no) withArguments: args) inspect
+]
+
+{ #category : #'as yet unclassified' }
+SWDecoderTest >> returnTypeOfNo: no withArguments: args equals: aType [
+	|dec|
+	dec := self decode: (SWTestProgram getMy: no) withArguments: args.
+	self assert: dec return value equals: aType
 ]
 
 { #category : #'private - utility' }
@@ -136,7 +157,7 @@ SWDecoderTest >> returnValueOfMy: arg1 withArguments: arg2 equals: arg3 [
 SWDecoderTest >> test_01 [
 
 	self
-		returnValueOfMy: #_01_return_constant
+		returnTypeOfNo: 1
 		withArguments: {  }
 		equals: SmallInteger
 ]
@@ -211,7 +232,7 @@ SWDecoderTest >> test_08 [
 SWDecoderTest >> test_09_access_to_instance_variables [
 	|sa|
 	sa := SWDecoder new: [|satp|
-		satp := SWDecoderTestProgram new.
+		satp := SWTestProgram new.
 		satp var1: 999.
 		satp var1
 	].

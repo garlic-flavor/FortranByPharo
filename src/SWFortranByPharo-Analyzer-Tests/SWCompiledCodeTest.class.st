@@ -7,30 +7,26 @@ Class {
 	#category : #'SWFortranByPharo-Analyzer-Tests-Analyzer'
 }
 
-{ #category : #'as yet unclassified' }
-SWCompiledCodeTest >> _01_return_value [
-	^ 123
-]
-
-{ #category : #'as yet unclassified' }
-SWCompiledCodeTest >> _02_has_arguments: arg [
-	^ arg
-]
-
 { #category : #tests }
-SWCompiledCodeTest >> testBasics [
+SWCompiledCodeTest >> test_01 [
 	|cc|
-	cc := SWCompiledCode new: self class>>#_01_return_value with: { self class }.
+	cc := SWCompiledCode new: (SWTestProgram getMy: 1)  with: { self class }.
 	self assert: cc stack receiver value equals: self class.
 	
 	self assert: cc isDecoded not.
 	cc markAsDecoded.
 	self assert: cc isDecoded.
-	self assert: cc methodClass equals: self class.
+	self assert: cc methodClass equals: SWTestProgram.
 	self assert: cc receiverClass equals: self class.
 	self assert: cc return value equals: UndefinedObject.
-	
-	cc := SWCompiledCode new: self class>>#_02_has_arguments: with: { self class. String }.
+
+]
+
+{ #category : #tests }
+SWCompiledCodeTest >> test_02 [
+	|cc|
+
+	cc := SWCompiledCode new: (SWTestProgram getMy: 2) with: { self class. String }.
 	self assert: cc arguments size equals: 1.
 	self assert: cc arguments first value equals: String.
 	self assert: cc locals size equals: 0.
