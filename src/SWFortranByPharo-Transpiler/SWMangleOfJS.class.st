@@ -7,8 +7,8 @@ Class {
 	#category : #'SWFortranByPharo-Transpiler-JS'
 }
 
-{ #category : #api }
-SWMangleOfJS class >> methodNameOf: selector with: args [
-	^ self safeSelectorNameOf: selector
+{ #category : #'private - code generation' }
+SWMangleOfJS class >> mangle: sender [
+	^ self safeSelectorNameOf: sender selector
 
 ]

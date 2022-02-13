@@ -9,27 +9,7 @@ Class {
 
 { #category : #'as yet unclassified' }
 SWMangle class >> mangle: aSender [
-
-	^ self methodNameOf: aSender selector with: aSender operands.
-
-]
-
-{ #category : #api }
-SWMangle class >> methodNameOf: method with: args [
-	self halt; flag: #toRewrite.
-	^ String streamContents: [ :s ||owner|
-		owner := (method methodClass).
-		owner isClassSide ifTrue: [ 
-			s << owner soleInstance name; << 'C'
-		] ifFalse: [
-			s << owner name; << '_'
-		].
-		s
-			<< (self safeSelectorNameOf: method selector);
-			<< (args collect: [ :v |
-				self typeNameOf: v type value
-			])
-	]
+	^ self subclassResponsibility
 ]
 
 { #category : #api }

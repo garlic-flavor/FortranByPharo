@@ -26,3 +26,28 @@ SWMBTofF90 class >> methodDefinitionTranspilerClass [
 SWMBTofF90 class >> senderTranspilerClass [
 	^ SWSTofF90
 ]
+
+{ #category : #'code generation' }
+SWMBTofF90 >> putCascade: aRBCascadeNode [
+
+	(self trySimpleCascade: aRBCascadeNode) ifTrue: [ ^ self ].
+
+	self halt; flag: #toImplement.
+
+]
+
+{ #category : #'code generation' }
+SWMBTofF90 >> trySimpleCascade: aRBCascadeNode [
+
+	aRBCascadeNode receiver class = RBVariableNode ifFalse: [ ^ false ].
+	aRBCascadeNode isExpression ifFalse: [
+		aRBCascadeNode messages do: [ :each |
+			self putStatement: each
+		].
+		self
+			preventStatementDelimiter;
+			preventNewline
+	].
+	^ true
+
+]

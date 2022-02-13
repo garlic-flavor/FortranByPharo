@@ -9,9 +9,9 @@ SWMBTofF90Test >> test_01 [
 	|transpiler result|
 	transpiler := (self transpile_program: #_01_call_Transcript).
 	result := transpiler stream contents.
-	self assert: result equals: 'Transcript.show_("Hello, good-bye!");
-Transcript.cr();
-Transcript.cr();
+	self assert: result equals: 'print *, "Hello, good-bye!";
+print *, '''';
+print *, '''';
 '
 ]
 
