@@ -268,7 +268,7 @@ SWServer >> head: target [
 { #category : #'as yet unclassified' }
 SWServer >> manage: request [
 	|target|
-	target := request uri queryAt: #target ifAbsent: [ '' ].
+	target := (request uri queryAt: #target ifAbsent: [ '' ]) trimLeft: [ :c | c = $/ ].
 	(request method = #HEAD) ifTrue: [ 
 		^ self head: target
 	].

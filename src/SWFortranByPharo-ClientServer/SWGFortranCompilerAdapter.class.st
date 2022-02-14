@@ -7,11 +7,10 @@ Class {
 	#instVars : [
 		'env',
 		'src',
-		'obj',
 		'exe',
 		'basename',
+		'rootDir',
 		'srcDir',
-		'objDir',
 		'exeDir',
 		'contents'
 	],
@@ -19,8 +18,8 @@ Class {
 }
 
 { #category : #compiling }
-SWGFortranCompilerAdapter class >> compileFortranFiles: srcs to: obj [
-	^ SWShell execute: self compilerName arguments: (self compilingOptionsFor: srcs to: obj).
+SWGFortranCompilerAdapter class >> compile: srcs to: exe [
+	^ SWShell execute: self compilerName arguments: (self compilingOptionsFor: srcs to: exe).
 	
 ]
 
@@ -30,19 +29,10 @@ SWGFortranCompilerAdapter class >> compilerName [
 ]
 
 { #category : #private }
-SWGFortranCompilerAdapter class >> compilingOptionsFor: srcs to: obj [
-	^ (srcs collect: [:each | {'-c'. each fullName}]) flattened, { '-o'. obj fullName}
+SWGFortranCompilerAdapter class >> compilingOptionsFor: srcs to: exe [
+	^ (srcs collect: [ :each | (SWShell filePathOf: each) fullName ]), { '-o'. (SWShell filePathOf: exe) fullName }
+	
 
-]
-
-{ #category : #execution }
-SWGFortranCompilerAdapter class >> linkObjs: objs to: exe [
-	^ SWShell execute: self compilerName arguments: (self linkingOptionsFor: objs to: exe)
-]
-
-{ #category : #private }
-SWGFortranCompilerAdapter class >> linkingOptionsFor: srcs to: exe [
-	^ (srcs collect: [:one | one fullName]), { '-o'. exe fullName }
 ]
 
 { #category : #querying }
@@ -68,8 +58,8 @@ SWGFortranCompilerAdapter class >> regexOfVersionDetection [
 ]
 
 { #category : #execution }
-SWGFortranCompilerAdapter class >> runExe: exe [
-	^ SWShell execute: exe fullName arguments: #()
+SWGFortranCompilerAdapter class >> run: exe [
+	^ SWShell execute: (SWShell filePathOf: exe) fullName arguments: #()
 ]
 
 { #category : #accessing }
@@ -82,6 +72,11 @@ SWGFortranCompilerAdapter >> basename [
 SWGFortranCompilerAdapter >> basename: anObject [
 
 	basename := anObject
+]
+
+{ #category : #actions }
+SWGFortranCompilerAdapter >> compile [
+	^ self class compile: { self src } to: self exe
 ]
 
 { #category : #accessing }
@@ -111,7 +106,7 @@ SWGFortranCompilerAdapter >> env: anObject [
 { #category : #accessing }
 SWGFortranCompilerAdapter >> exe [
 
-	^ exe
+	^ exe ifNil: [ exe := ((Path from: self rootDir) / self exeDir / self basename, self env exeFileExtension) fullName ]
 ]
 
 { #category : #accessing }
@@ -123,7 +118,7 @@ SWGFortranCompilerAdapter >> exe: anObject [
 { #category : #accessing }
 SWGFortranCompilerAdapter >> exeDir [
 
-	^ exeDir ifNil: [ exeDir := 'cache/bin' ]
+	^ exeDir ifNil: [ exeDir := 'bin' ]
 ]
 
 { #category : #accessing }
@@ -132,34 +127,32 @@ SWGFortranCompilerAdapter >> exeDir: anObject [
 	exeDir := anObject
 ]
 
-{ #category : #accessing }
-SWGFortranCompilerAdapter >> obj [
-
-	^ obj
+{ #category : #actions }
+SWGFortranCompilerAdapter >> put [
+	^ SWShell put: self src contents: self contents
 ]
 
 { #category : #accessing }
-SWGFortranCompilerAdapter >> obj: anObject [
+SWGFortranCompilerAdapter >> rootDir [
 
-	obj := anObject
+	^ rootDir ifNil: [ rootDir := 'cache' ]
 ]
 
 { #category : #accessing }
-SWGFortranCompilerAdapter >> objDir [
+SWGFortranCompilerAdapter >> rootDir: anObject [
 
-	^ objDir ifNil: [ objDir := 'cache/obj' ]
+	rootDir := anObject
 ]
 
-{ #category : #accessing }
-SWGFortranCompilerAdapter >> objDir: anObject [
-
-	objDir := anObject
+{ #category : #actions }
+SWGFortranCompilerAdapter >> run [
+	^ self class run: self exe
 ]
 
 { #category : #accessing }
 SWGFortranCompilerAdapter >> src [
 
-	^ src
+	^ src ifNil: [ src := ((Path from: self rootDir) / self srcDir / self basename , 'f90' ) fullName ]
 ]
 
 { #category : #accessing }
@@ -171,7 +164,7 @@ SWGFortranCompilerAdapter >> src: anObject [
 { #category : #accessing }
 SWGFortranCompilerAdapter >> srcDir [
 
-	^ srcDir ifNil: [ srcDir := 'cache/src' ]
+	^ srcDir ifNil: [ srcDir := 'src' ]
 ]
 
 { #category : #accessing }

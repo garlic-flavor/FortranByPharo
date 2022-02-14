@@ -46,10 +46,11 @@ SWShell class >> executeProcess: process [
 { #category : #converting }
 SWShell class >> filePathOf: aName [
 	|path|
-	path := SWShellEnvironment default localDirectory joinPath: (aName asString trimLeft: [ :c | c = $/ ]).
+	path := SWShellEnvironment default localDirectory / aName.
 	(SWShellEnvironment default localDirectory contains: path) ifFalse: [
 		self error: aName, ' is in out of the local directory.'
 	].
+	path parent ensureCreateDirectory.
 	^ path
 
 ]

@@ -42,7 +42,7 @@ SWServerNodeTest >> testExecWith [
 
 { #category : #test }
 SWServerNodeTest >> testFilePathOf [
-
+	self error; flag: #toRemove.
 	self assert: (SWServer filePathOf: '/ruby') basename equals: 'ruby'
 ]
 
