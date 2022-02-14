@@ -20,23 +20,14 @@ SWDecoder class >> poolClass [
 
 { #category : #private }
 SWDecoder >> addBytecode: description [
-	|item node sender|
 
 	self logger log: [ String streamContents: [ :s |
 		s << '[' print: oldPC; << '] '; << description
 	] ] withStack: self stack.
 	super addBytecode: description.
 
-	(self jumperStack nextPeriodIs: scanner pc) ifFalse: [ ^ self  ]. 
-	"Below evaluates when ifTrue:ifFalse:."
-	item := self jumperStack pop.
-	node := self method sourceNodeForPC: item startPC.
-	(self haltList includes: node selector) ifTrue: [ self halt ].
-	self stack top << item route1.
-	sender := self pool newSenderOf: node selector super: false with: (SWSlot newFrom: { item condition. self stack top }).
-	sender node: node.
-	self senders at: sender node put: sender.
-	
+	self solveJumper
+
 ]
 
 { #category : #'instruction decoding' }
@@ -385,6 +376,23 @@ SWDecoder >> send: selector super: supered numArgs: numberArguments [
 	].
 	super send: selector super: supered numArgs: numberArguments.
 
+]
+
+{ #category : #'as yet unclassified' }
+SWDecoder >> solveJumper [
+	|item node sender|
+	(self jumperStack nextPeriodIs: scanner pc) ifFalse: [ ^ self  ]. 
+	"Below evaluates when ifTrue:ifFalse:."
+	item := self jumperStack pop.
+	node := self method sourceNodeForPC: item startPC.
+	(self haltList includes: node selector) ifTrue: [ self halt ].
+	self stack top << item route1.
+	sender := self pool newSenderOf: node selector super: false with: (SWSlot newFrom: { item condition. self stack top }).
+	sender node: node.
+	self senders at: sender node put: sender.
+	
+	self solveJumper
+	
 ]
 
 { #category : #'instruction decoding' }

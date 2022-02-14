@@ -60,37 +60,19 @@ SWCDTofJS >> initialize_Boolean [
 	].
 	self defineMethodSender: #ifTrue: as: [ :transpiler :sender | |aNode |
 		aNode := sender node.
-		aNode isExpression ifTrue: [
-			transpiler
-				put: '(';
-				<< aNode receiver;
-				put: ' ? ';
-				putBlockAsExpression: (aNode arguments at: 1);
-				put: ' : null)'
-		] ifFalse: [
-			transpiler
-				put: 'if(';
-				<< aNode receiver;
-				put: ')';
-				putBlock: (aNode arguments at: 1)
-		]
+		transpiler
+			put: 'if(';
+			<< aNode receiver;
+			put: ')';
+			putBlock: (aNode arguments at: 1)
 	].
 	self defineMethodSender: #ifFalse: as: [ :transpiler :sender | |aNode |
 		aNode := sender node.
-		aNode isExpression ifTrue: [
-			transpiler
-				put: '(';
-				<< aNode receiver;
-				put: ' ? ';
-				put: 'null : ';
-				putBlockAsExpression: (aNode arguments at: 1)
-		] ifFalse: [
-			transpiler
-				put: 'if( !';
-				<< aNode receiver;
-				put: ')';
-				putBlock: (aNode arguments at: 1)
-		]
+		transpiler
+			put: 'if( !';
+			<< aNode receiver;
+			put: ')';
+			putBlock: (aNode arguments at: 1)
 	].
 
 ]

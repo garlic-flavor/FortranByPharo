@@ -390,6 +390,12 @@ SWClass >> initialize_Exception [
 ]
 
 { #category : #initialization }
+SWClass >> initialize_IntervalClass [
+	self
+		setBreakpointOn: #new
+]
+
+{ #category : #initialization }
 SWClass >> initialize_Magnitude [
 	self
 		declareMethodAsCompareOperator: #>=;
@@ -419,6 +425,7 @@ SWClass >> initialize_Object [
 		declareMethod: #size asReturn: Integer;
 		declareMethod: #asString asReturn: String;
 		declareMethodReturnsFirstArgument: #at:put:;
+		declareMethod: #at: asReturn: Object;
 		declareMethodReturnsReceiver: #putOn:;
 		declareMethodReturnsReceiver: #assert:description:
 ]
@@ -427,6 +434,21 @@ SWClass >> initialize_Object [
 SWClass >> initialize_OrderedDictionary [
 	self
 		declareMethodReturnsReceiver: #initialize:
+]
+
+{ #category : #initialization }
+SWClass >> initialize_Path [
+	self
+		declareMethodReturnsReceiver: #/;
+		declareMethod: #basename asReturn: String;
+		declareMethodReturnsReceiver: #withName:extension:;
+		declareMethod: #pathString asReturn: String
+]
+
+{ #category : #initialization }
+SWClass >> initialize_PathClass [
+	self
+		declareMethodReturnsReceiversInstance: #from:
 ]
 
 { #category : #initialization }
@@ -443,7 +465,8 @@ SWClass >> initialize_ProtoObject [
 { #category : #initialization }
 SWClass >> initialize_STONClass [
 	self
-		declareMethod: #jsonWriter asReturn: STONWriter
+		declareMethod: #jsonWriter asReturn: STONWriter;
+		declareMethod: #fromString: asReturn: Object
 ]
 
 { #category : #initialization }

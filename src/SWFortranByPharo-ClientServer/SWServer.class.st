@@ -198,8 +198,7 @@ SWServer >> env: anObject [
 
 { #category : #execution }
 SWServer >> execute: webSocket [
-	|target args result|
-	[ 
+	[ |target args result|
 		target := webSocket uri queryAt: #target.
 		args := webSocket uri queryAt: #args ifAbsent: [ '' ].
 		args isArray ifFalse: [ args := { args } ].
@@ -325,13 +324,12 @@ SWServer >> manage: request [
 
 { #category : #'as yet unclassified' }
 SWServer >> post: target options: opts [
-	opts at: #action ifPresent: [ :action |
-		action = #go ifTrue: [
-			opts at: #type ifPresent: [ :type |
-				type = #f90 ifTrue: [
-					^ self goF90: target options: opts
-				]
-			]
+	|action type|
+	action := opts at: 'action'.
+	type := opts at: 'type'.
+	action = #go ifTrue: [
+		type = #f90 ifTrue: [
+			^ self goF90: target options: opts
 		]
 	].
 	self error: 'no implementation.'
