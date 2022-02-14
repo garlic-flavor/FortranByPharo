@@ -39,12 +39,6 @@ SWServerTest >> testExecWith [
 ]
 
 { #category : #test }
-SWServerTest >> testFilePathOf [
-self error; flag: #toRemove.
-	self assert: (SWServer filePathOf: '/ruby') basename equals: 'ruby'
-]
-
-{ #category : #test }
 SWServerTest >> testGetWithOn [
 	|res|
 	res := client ensureSendMessage: (SWServerInstruction new
@@ -53,6 +47,11 @@ SWServerTest >> testGetWithOn [
 		toString).
 	res inspect.
 
+]
+
+{ #category : #tests }
+SWServerTest >> testGoF90 [
+	super testGoF90
 ]
 
 { #category : #tests }
@@ -92,4 +91,9 @@ SWServerTest >> testPostWithOn [
 { #category : #test }
 SWServerTest >> testPutContents [
 	super testPutContents
+]
+
+{ #category : #tests }
+SWServerTest >> testPutTypeContents [
+	super testPutTypeContents
 ]

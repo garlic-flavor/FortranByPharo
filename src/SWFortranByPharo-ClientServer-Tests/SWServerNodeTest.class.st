@@ -41,12 +41,6 @@ SWServerNodeTest >> testExecWith [
 ]
 
 { #category : #test }
-SWServerNodeTest >> testFilePathOf [
-	self error; flag: #toRemove.
-	self assert: (SWServer filePathOf: '/ruby') basename equals: 'ruby'
-]
-
-{ #category : #test }
 SWServerNodeTest >> testGetWithOn [
 	|res|
 	res := client ensureSendMessage: (SWServerInstruction new
@@ -55,6 +49,13 @@ SWServerNodeTest >> testGetWithOn [
 		toString).
 	res inspect.
 
+]
+
+{ #category : #tests }
+SWServerNodeTest >> testGoF90 [
+	|res|
+	res := SWClient new goF90: 'test'.
+	self assert: res entity string trimBoth equals: 'Hello, world!'
 ]
 
 { #category : #tests }
@@ -95,5 +96,15 @@ SWServerNodeTest >> testPostWithOn [
 SWServerNodeTest >> testPutContents [
 	|res|
 	res := SWClient new put: 'test.txt' contents: 'Hello, world!'.
+	self assert: (DateAndTime readFrom: res readStream) asDate equals: Date today
+]
+
+{ #category : #test }
+SWServerNodeTest >> testPutTypeContents [
+	|res|
+	res := SWClient new put: 'test' type: 'f90' contents: ('program hello
+    print *, ''Hello, world!''
+end program hello
+' copyReplaceAll: String cr with: String crlf).
 	self assert: (DateAndTime readFrom: res readStream) asDate equals: Date today
 ]

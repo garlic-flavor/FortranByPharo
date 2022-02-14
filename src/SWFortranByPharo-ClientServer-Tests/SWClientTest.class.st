@@ -59,6 +59,27 @@ SWClientTest >> testHead [
 ]
 
 { #category : #tests }
+SWClientTest >> testPost [
+	|dict|
+	dict := Dictionary newFrom: { 
+		#type -> 'f90'.
+		#action -> 'go'.
+		#sources -> { 'hello.f90'. 'standard.dylib' }.
+		#options -> {}.
+		#out -> 'a.out'
+	}.
+	(ZnClient new
+		http;
+		host: 'localhost';
+		port: 50000;
+		addPathSegment: 'manage';
+		enforceHttpSuccess: true;
+		contents: (STONJSON toString: dict);
+		post;
+		response) inspect.
+]
+
+{ #category : #tests }
 SWClientTest >> testPut [
 
 	| tmp1 |

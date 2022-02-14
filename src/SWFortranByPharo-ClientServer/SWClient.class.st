@@ -49,6 +49,14 @@ SWClient >> get: target [
 
 ]
 
+{ #category : #'as yet unclassified' }
+SWClient >> goF90: target [
+	^ self post: target with: (Dictionary newFrom: {
+		'action' -> 'go'.
+		'type' -> 'f90'
+	})
+]
+
 { #category : #requesting }
 SWClient >> head: target [
 	"I am a HEAD of HTTP."
@@ -92,6 +100,20 @@ SWClient >> port: anObject [
 	port := anObject
 ]
 
+{ #category : #'private - requesting' }
+SWClient >> post: target with: options [
+	^ ZnClient new
+		http;
+		host: self host;
+		port: self port;
+		addPathSegment: 'manage';
+		queryAt: 'target' put: target;
+		contents: (STONJSON toString: options);
+		enforceHttpSuccess: true;
+		post;
+		response.
+]
+
 { #category : #requesting }
 SWClient >> put: target contents: contents [
 	"I am a PUT of HTTP."
@@ -100,9 +122,25 @@ SWClient >> put: target contents: contents [
 		host: self host;
 		port: self port;
 		addPathSegment: 'manage';
-		queryAt: #target put: target;
+		queryAt: 'target' put: target;
 		contents: contents;
 		enforceHttpSuccess: true;
 		put;
-		response) headers at: #'Last-Modified'
+		response) headers at: 'Last-Modified'
+]
+
+{ #category : #requesting }
+SWClient >> put: target type: type contents: contents [
+	"I am a PUT of HTTP."
+	^ (ZnClient new
+		http;
+		host: self host;
+		port: self port;
+		addPathSegment: 'manage';
+		queryAt: 'target' put: target;
+		queryAt: 'type' put: type;
+		contents: contents;
+		enforceHttpSuccess: true;
+		put;
+		response) headers at: 'Last-Modified'
 ]
