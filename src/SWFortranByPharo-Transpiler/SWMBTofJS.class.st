@@ -105,7 +105,7 @@ SWMBTofJS >> putClosure: aBlock [
 { #category : #streaming }
 SWMBTofJS >> putFilenameOn: aStream [
 	aStream << 'cache/'.
-	super putFilenameOn: aStream.
+	super putBasenameOn: aStream.
 	aStream << '.mjs'
 ]
 

@@ -31,6 +31,11 @@ SWModuleTranspiler class >> newFrom: aClass [
 ]
 
 { #category : #accessing }
+SWModuleTranspiler >> basename [
+	^ String streamContents: [ :s | self payload putBasenameOn: s ]
+]
+
+{ #category : #accessing }
 SWModuleTranspiler >> contents [
 	self payload isDecoded ifFalse: [ self transpile ].
 	^ self stream contents
@@ -84,18 +89,18 @@ SWModuleTranspiler >> pool [
 
 { #category : #private }
 SWModuleTranspiler >> solveDependencies [
-	|solver tClass|
+	self solveDependencies: self payload receiverClass
+
+]
+
+{ #category : #private }
+SWModuleTranspiler >> solveDependencies: aClass [
+	|tClass solver|
 	solver := #solveDependenciesUsing:.
-	tClass := self payload receiverClass instanceSide.
+	tClass := aClass instanceSide.
 	(tClass respondsTo: solver) ifTrue: [
 		tClass perform: solver with: self
-	].
-
-	self transpile: tClass.
-"
-	self pool detect: [ :each | each targetClass = tClass ] ifFound: [ :t |
-		self transpile: tClass.
-	]"
+	]
 ]
 
 { #category : #accessing }
@@ -107,21 +112,23 @@ SWModuleTranspiler >> stream [
 SWModuleTranspiler >> transpile [
 	self pool addInitializerIn: self payload receiverClass.
 	self payload decode.
-	self solveDependencies.
-	self payload transpile.
+	self transpile: self payload receiverClass.
+	self transpilePayload
 
 ]
 
 { #category : #'public API' }
 SWModuleTranspiler >> transpile: aClass [
-	|ct solver|
+	|ct|
 	ct := (self payload pool getClassTranspiler: aClass instanceSide).
 	ct isTranspiled ifTrue: [ ^ self ].
 	ct markAsTranspiled.
-	solver := #solveDependenciesUsing:.
-	(aClass instanceSide respondsTo: solver) ifTrue: [
-		aClass perform: solver with: self
-	].
+	self solveDependencies: aClass.
 	ct transpile.
 
+]
+
+{ #category : #'as yet unclassified' }
+SWModuleTranspiler >> transpilePayload [
+	self payload transpile
 ]

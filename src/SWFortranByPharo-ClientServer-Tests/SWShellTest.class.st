@@ -40,3 +40,9 @@ SWShellTest >> testExecution [
 	res := SWShell execute: 'gfortran' arguments: #('--version').
 	self assert: [res beginsWith: 'GNU Fortran'].
 ]
+
+{ #category : #tests }
+SWShellTest >> testFilePathOf [
+
+	self assert: (SWShell filePathOf: '/ruby') basename equals: 'ruby'
+]

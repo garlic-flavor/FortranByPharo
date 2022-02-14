@@ -43,6 +43,17 @@ SWShell class >> executeProcess: process [
 
 ]
 
+{ #category : #converting }
+SWShell class >> filePathOf: aName [
+	|path|
+	path := SWShellEnvironment default localDirectory joinPath: (aName asString trimLeft: [ :c | c = $/ ]).
+	(SWShellEnvironment default localDirectory contains: path) ifFalse: [
+		self error: aName, ' is in out of the local directory.'
+	].
+	^ path
+
+]
+
 { #category : #initialization }
 SWShell class >> initialize_OSEnvironmentClass: transpiler [
 	transpiler
@@ -57,6 +68,7 @@ SWShell class >> initialize_OSSUnixSubprocess: transpiler [
 
 { #category : #execution }
 SWShell class >> ls: path [
+	self error; flag: #toRemove.
 	^ Dictionary new
 		at: #isDirectory put: path isDirectory;
 		at: #basename put: path basename;
@@ -78,6 +90,7 @@ SWShell class >> ls: path [
 
 { #category : #execution }
 SWShell class >> lsr: path [
+	self error; flag: #toRemove.
 	^ Dictionary new
 		at: #isDirectory put: path isDirectory;
 		at: #basename put: path basename;
@@ -90,6 +103,21 @@ SWShell class >> lsr: path [
 		yourself.
 
 
+]
+
+{ #category : #requesting }
+SWShell class >> put: target contents: contents [
+	|file|
+	file := self filePathOf: target.
+	file parent ensureCreateDirectory.
+	file writeStreamDo: [ :writer |
+		SWType declare: #writer as: BinaryFileStream.
+		writer 
+			position: 0;
+			truncate;
+			<< contents.
+	].
+	^ file
 ]
 
 { #category : #'as yet unclassified' }

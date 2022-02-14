@@ -154,6 +154,13 @@ SWMethodBodyTranspiler >> putAssignTo: key with: value [
 
 ]
 
+{ #category : #streaming }
+SWMethodBodyTranspiler >> putBasenameOn: aStream [
+	aStream
+		<< self receiverClass instanceSide name;
+		<< self selector asCamelCase
+]
+
 { #category : #'code generation' }
 SWMethodBodyTranspiler >> putBlock: aBlockNode [
 
@@ -213,9 +220,7 @@ SWMethodBodyTranspiler >> putCode: code with: anAssociationArray [
 
 { #category : #streaming }
 SWMethodBodyTranspiler >> putFilenameOn: aStream [
-	aStream
-		<< self receiverClass instanceSide name;
-		<< self selector asCamelCase
+	^ self subclassResponsibility 
 ]
 
 { #category : #'code generation' }

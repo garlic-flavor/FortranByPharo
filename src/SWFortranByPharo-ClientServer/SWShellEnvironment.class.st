@@ -8,7 +8,8 @@ Class {
 		'exeFileExtension',
 		'objFileExtension',
 		'fortranCompilerAdapterClass',
-		'localDirectory'
+		'localDirectory',
+		'packageName'
 	],
 	#classInstVars : [
 		'default'
@@ -85,6 +86,12 @@ SWShellEnvironment class >> newMacDefault [
 		yourself.
 ]
 
+{ #category : #initialization }
+SWShellEnvironment class >> resetDefault [
+	<script>
+	default := nil
+]
+
 { #category : #'as yet unclassified' }
 SWShellEnvironment class >> solveDependenciesUsing: transpiler [
 	transpiler
@@ -119,9 +126,9 @@ SWShellEnvironment >> fortranCompilerAdapterClass: anObject [
 { #category : #origins }
 SWShellEnvironment >> localDirectory [
 	^ localDirectory ifNil: [
-		localDirectory := ((IceRepository repositories select: [ :each |
-			each name = #FortranByPharo
-		]) first location)
+		localDirectory := ((IceRepository repositories detect: [ :each |
+			each name = self packageName
+		]) location)
 	]
 ]
 
@@ -135,4 +142,17 @@ SWShellEnvironment >> objFileExtension [
 SWShellEnvironment >> objFileExtension: anObject [
 
 	objFileExtension := anObject
+]
+
+{ #category : #accessing }
+SWShellEnvironment >> packageName [
+
+	^ packageName ifNil: [ packageName := 'FortranByPharo' ]
+]
+
+{ #category : #accessing }
+SWShellEnvironment >> packageName: anObject [
+
+	packageName := anObject.
+	localDirectory := nil
 ]

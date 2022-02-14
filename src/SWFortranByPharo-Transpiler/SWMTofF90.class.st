@@ -11,3 +11,19 @@ Class {
 SWMTofF90 class >> methodBodyTranspilerClass [
 	^ SWMBTofF90
 ]
+
+{ #category : #'as yet unclassified' }
+SWMTofF90 >> transpilePayload [
+
+	self stream
+		put: 'program ';
+		put: self basename;
+		putLine;
+		incIndent.
+	super transpilePayload.
+	self stream
+		decIndent;
+		put: 'end program ';
+		put: self basename;
+		putLine
+]

@@ -40,6 +40,7 @@ SWServer class >> default [
 { #category : #converting }
 SWServer class >> filePathOf: aName [
 	|path|
+self error; flag: #toRemove.
 	path := SWShellEnvironment default localDirectory joinPath: (aName asString trimLeft: [ :c | c = $/ ]).
 	(SWShellEnvironment default localDirectory contains: path) ifFalse: [
 		self error: aName, ' is in out of the local directory.'
@@ -267,7 +268,7 @@ SWServer >> head: target [
 { #category : #'as yet unclassified' }
 SWServer >> manage: request [
 	|target|
-	target := self class filePathOf: (request uri queryAt: #target ifAbsent: [ '' ]).
+	target := request uri queryAt: #target ifAbsent: [ '' ].
 	(request method = #HEAD) ifTrue: [ 
 		^ self head: target
 	].
@@ -282,20 +283,14 @@ SWServer >> manage: request [
 
 { #category : #requesting }
 SWServer >> put: target contents: contents [
-	|res|
-	target parent ensureCreateDirectory.
-	target writeStreamDo: [ :writer |
-		SWType declare: #writer as: BinaryFileStream.
-		writer 
-			position: 0;
-			truncate;
-			<< contents.
-	].
+	|res file|
+	file := SWShell put: target contents: contents.
 	res := ZnResponse ok: (ZnEntity text: '').
 	res headers
-		at: #'Content-Location' put: (target relativeTo: FileLocator localDirectory) fullName;
-		at: #'Last-Modified' put: target changeTime asString.
+		at: #'Content-Location' put: (file relativeTo: FileLocator localDirectory) fullName;
+		at: #'Last-Modified' put: file changeTime asString.
 	^ res
+
 ]
 
 { #category : #public }
