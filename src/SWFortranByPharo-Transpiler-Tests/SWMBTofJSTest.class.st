@@ -1,76 +1,13 @@
 Class {
 	#name : #SWMBTofJSTest,
-	#superclass : #TestCase,
+	#superclass : #SWMethodBodyTranspilerTest,
 	#category : #'SWFortranByPharo-Transpiler-Tests-JS'
 }
 
-{ #category : #'tests - source' }
-SWMBTofJSTest >> _01_call_Transcript [
-
-	Transcript
-		show: 'Hello, good-bye!';
-		cr;
-		cr
-]
-
-{ #category : #'tests - source' }
-SWMBTofJSTest >> _02_call_SWStd_print [
-
-	SWStd print: 'Hello, World!'
-]
-
-{ #category : #'tests - source' }
-SWMBTofJSTest >> _03_user_specified_variable_type [
-
-	| tmp1 |
-	SWType declare: #tmp1 as: Integer.
-	tmp1 := 3.14159265358979.
-
-	^ tmp1 * 2.23620679
-]
-
-{ #category : #'as yet unclassified' }
-SWMBTofJSTest >> _04_ifTrueifFalse [
-	^ true ifTrue: [ 123 ] ifFalse: [ 'hoge' ]
-	
-]
-
-{ #category : #'as yet unclassified' }
-SWMBTofJSTest >> _05_ifTrue [
-	^ true ifTrue: [ 123 ]
-	
-]
-
-{ #category : #'as yet unclassified' }
-SWMBTofJSTest >> _06_cascading: uri [
-	^ (SWServerStatus new
-		failed;
-		message: 'hogehoge';
-		uri: uri;
-		yourself) toString
-
-]
-
-{ #category : #'as yet unclassified' }
-SWMBTofJSTest >> _07_opBinaries: a [
-	^ a + 100 * 200 - 300 / 400
-]
-
-{ #category : #'as yet unclassified' }
-SWMBTofJSTest >> _08_try_catch [
-	^ [  
-		Transcript show: 'hello'; cr
-	] on: Exception do: [ :e |
-		Transcript
-			show: 'error!';
-			show: e asString
-	]
-]
-
 { #category : #tests }
-SWMBTofJSTest >> test_01 [
+SWMBTofJSTest >> test_01_Transcript [
 	|transpiler result|
-	transpiler := (self transpile_program: #_01_call_Transcript).
+	transpiler := self transpileNo: 39 withArguments: { }.
 	result := transpiler stream contents.
 	self assert: result equals: 'Transcript.show_("Hello, good-bye!");
 Transcript.cr();
@@ -79,51 +16,39 @@ Transcript.cr();
 ]
 
 { #category : #tests }
-SWMBTofJSTest >> test_01_analyze [
-	self
-		assert: (SWDecoder new: self class>>#_01_call_Transcript with: { self class }) decode return value
-		equals: self class
-]
-
-{ #category : #tests }
-SWMBTofJSTest >> test_02 [
+SWMBTofJSTest >> test_02_SWStd_print [
 
 	|transpiler result|
-	transpiler := (self transpile_program: #_02_call_SWStd_print).
+	transpiler := self transpileNo: 28 withArguments: {}.
 	result := transpiler stream contents.
-	self assert: result equals: 'console.log("Hello, World!");
+	self assert: result equals: 'return console.log("hoge!");
 '
 ]
 
 { #category : #tests }
-SWMBTofJSTest >> test_03_analyze [
-	self
-		assert: (SWDecoder new: self class>>#_03_user_specified_variable_type with: { self class }) decode return value
-		equals: Integer
-]
-
-{ #category : #tests }
-SWMBTofJSTest >> test_04 [
+SWMBTofJSTest >> test_04_ifTrue_ifFalse_expression [
 	|transpiler result|
-	transpiler := (self transpile_program: #_04_ifTrueifFalse).
+	transpiler := self transpileNo: 06 withArguments: { Boolean }.
 	result := transpiler stream contents.
-	self assert: result equals: 'return (true ? 123 : "hoge");
+	self assert: result equals: 'return (needle ? 123 : "False");
 '
 ]
 
 { #category : #tests }
-SWMBTofJSTest >> test_05 [
+SWMBTofJSTest >> test_05_ifTrue [
 	|transpiler result|
-	transpiler := (self transpile_program: #_05_ifTrue).
+	transpiler := self transpileNo: 11 withArguments: { Boolean }.
 	result := transpiler stream contents.
-	self assert: result equals: 'return (true ? 123 : null);
+	self assert: result equals: 'if(needle){
+    123;
+}
 '
 ]
 
 { #category : #tests }
-SWMBTofJSTest >> test_06 [
+SWMBTofJSTest >> test_06_cascading [
 	|transpiler result|
-	transpiler := (self transpile_program: #_06_cascading: with: String).
+	transpiler := self transpileNo: 41 withArguments: { String }.
 	result := transpiler stream contents.
 	self assert: result equals: 'return (function(_receiver_) {
     _receiver_.failed();
@@ -135,9 +60,9 @@ SWMBTofJSTest >> test_06 [
 ]
 
 { #category : #tests }
-SWMBTofJSTest >> test_07 [
+SWMBTofJSTest >> test_07_opBinaries [
 	|transpiler result|
-	transpiler := (self transpile_program: #_07_opBinaries: with: Integer).
+	transpiler := self transpileNo: 42 withArguments: { Integer }.
 	result := transpiler stream contents.
 	self assert: result equals: 'return (((a + 100) * 200) - 300) / 400;
 '
@@ -145,38 +70,21 @@ SWMBTofJSTest >> test_07 [
 ]
 
 { #category : #tests }
-SWMBTofJSTest >> test_08 [
+SWMBTofJSTest >> test_08_try_catch [
 	|transpiler result|
-	transpiler := (self transpile_program: #_08_try_catch with: #()).
+	transpiler := self transpileNo: 34 withArguments: {  }.
 	result := transpiler stream contents.
 
 	self assert: result equals: 'return (function(){try {
-    return (Transcript.show_("hello"), Transcript.cr());
-} catch(e) {
-    return (Transcript.show_("error!"), Transcript.show_(e.toString()));
+    return 1 + 2;
+} catch {
+    return self.error();
 }})();
 '
 
 ]
 
-{ #category : #utilities }
-SWMBTofJSTest >> transpile_program: selector [
-	|transpiler|
-	transpiler := SWMBTofJS new: self class>>selector with: { self class }.
-	transpiler logger enabled: true.
-	transpiler stream newline: String cr.
-	transpiler decode; transpile.
-	^ transpiler
-
-]
-
-{ #category : #utilities }
-SWMBTofJSTest >> transpile_program: selector with: arg1 [
-	|transpiler|
-	transpiler := SWMBTofJS new: self class>>selector with: { self class. arg1 }.
-	transpiler logger enabled: true.
-	transpiler stream newline: String cr.
-	transpiler decode; transpile.
-	^ transpiler
-
+{ #category : #accessing }
+SWMBTofJSTest >> transpilerClass [
+	^ SWMBTofJS
 ]

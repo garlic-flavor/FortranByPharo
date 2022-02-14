@@ -282,6 +282,40 @@ SWTestProgram >> _38_ensure_shortcircuit [
 	^ 'false'
 ]
 
+{ #category : #'tests - source' }
+SWTestProgram >> _39_call_Transcript [
+
+	Transcript
+		show: 'Hello, good-bye!';
+		cr;
+		cr
+]
+
+{ #category : #'as yet unclassified' }
+SWTestProgram >> _40_user_specified_variable_type [
+
+	| tmp1 |
+	SWType declare: #tmp1 as: Integer.
+	tmp1 := 3.14159265358979.
+
+	^ tmp1 * 2.23620679
+]
+
+{ #category : #'tests - source' }
+SWTestProgram >> _41_cascading: uri [
+	^ (SWServerStatus new
+		failed;
+		message: 'hogehoge';
+		uri: uri;
+		yourself) toString
+
+]
+
+{ #category : #'as yet unclassified' }
+SWTestProgram >> _42_opBinaries: a [
+	^ a + 100 * 200 - 300 / 400
+]
+
 { #category : #accessing }
 SWTestProgram >> var1 [
 

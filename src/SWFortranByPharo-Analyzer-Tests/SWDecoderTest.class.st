@@ -5,76 +5,10 @@ Class {
 }
 
 { #category : #'tests - source' }
-SWDecoderTest >> _02_call_wellknown_message: arg1 [
-
-	| tmp1 |
-	tmp1 := 123.
-	^ arg1 + tmp1
-]
-
-{ #category : #'tests - source' }
-SWDecoderTest >> _03_ifTrue_ifFalse: arg1 [
-
-	| tmp1 |
-	^ arg1 = 5
-		  ifTrue: [ 
-			  tmp1 := 100.
-			  tmp1 + 300 ]
-		  ifFalse: [ 200 + 300 ]
-]
-
-{ #category : #'tests - source' }
-SWDecoderTest >> _04_recursive_message_call: arg1 [
-
-	^ 0 < arg1
-		  ifTrue: [ arg1 + (self _04_recursive_message_call: arg1 - 1) ]
-		  ifFalse: [ 0 ]
-]
-
-{ #category : #tests }
-SWDecoderTest >> _05_local_variables [
-
-	| tmp1 tmp2 tmp3 tmp4 tmp5 tmp6 tmp7 tmp8 tmp9 |
-
-	^ tmp9 := 123
-]
-
-{ #category : #'tests - source' }
-SWDecoderTest >> _06_method_call [
-	^ SWStd print: 'hoge!'
-]
-
-{ #category : #'tests - source' }
-SWDecoderTest >> _08_ZnServer [
+SWDecoderTest >> _08_ZnServerClass_default [
 
 	ZnServer startDefaultOn: 50000.
 	^ ZnServer default
-]
-
-{ #category : #tests }
-SWDecoderTest >> _10_new: arg1 [
-	|loc1 loc2|
-	loc1 := Dictionary new.
-	loc2 := Set new.
-	^ loc2
-]
-
-{ #category : #'as yet unclassified' }
-SWDecoderTest >> _12_try_catch [
-
-	[  
-		Transcript show: 'hello'; cr
-	] on: Exception do: [
-		Transcript show: 'error!'
-	]
-]
-
-{ #category : #'as yet unclassified' }
-SWDecoderTest >> _13_return_literal [
-	|dict url|
-	dict := Dictionary new.
-	dict at: 'fuga' put: (url ifNil: [ 'hoge' ]).
-	^ dict
 ]
 
 { #category : #'as yet unclassified' }
@@ -82,28 +16,12 @@ SWDecoderTest >> _14_TestCase [
 	^ TestCase selector: 'hoge'
 ]
 
-{ #category : #'as yet unclassified' }
-SWDecoderTest >> _15_test_ifNil [
-	|val|
-	^ val ifNil: [ val := 100 ]
-]
-
-{ #category : #'as yet unclassified' }
-SWDecoderTest >> _17_test_ensure [
-	^ [ 
-		123 = 234 ifTrue: [ 
-			123
-		] ifFalse: [
-			2.2362
-		]
-	] ensure: [ 'hoge' ]
-]
-
 { #category : #'private - utility' }
 SWDecoderTest >> decode: method withArguments: arg2 [
 	|dec|
-	dec := SWDecoder new: method with: ({method methodClass}, arg2).
+	dec := SWDecoder new: method with: arg2.
 	dec logger enabled: true.
+	dec classInfo: (dec pool getClassTranspiler: method methodClass).
 	dec decode.
 	^ dec
 
@@ -111,16 +29,7 @@ SWDecoderTest >> decode: method withArguments: arg2 [
 
 { #category : #'as yet unclassified' }
 SWDecoderTest >> decodeNo: no withArguments: args [
-	^ self decode: (SWTestProgram getMy: no) withArguments: args
-]
-
-{ #category : #'private - utility' }
-SWDecoderTest >> inspectMy: arg1 withArguments: arg2 [
-	|dec|
-	dec := SWDecoder new: self class>>arg1 with: ({self class}, arg2).
-	dec logger enabled: true.
-	dec decode; inspect
-
+	^ self decode: (SWTestProgram getMy: no) withArguments: ({SWTestProgram}, args)
 ]
 
 { #category : #'as yet unclassified' }
@@ -131,7 +40,7 @@ SWDecoderTest >> inspectNo: no withArguments: args [
 { #category : #'as yet unclassified' }
 SWDecoderTest >> returnTypeOfNo: no withArguments: args equals: aType [
 	|dec|
-	dec := self decode: (SWTestProgram getMy: no) withArguments: args.
+	dec := self decodeNo: no withArguments: args.
 	self assert: dec return value equals: aType
 ]
 
@@ -154,60 +63,51 @@ SWDecoderTest >> returnValueOfMy: arg1 withArguments: arg2 equals: arg3 [
 ]
 
 { #category : #tests }
-SWDecoderTest >> test_01 [
+SWDecoderTest >> test_01_return_constant [
 
 	self
-		returnTypeOfNo: 1
-		withArguments: {  }
-		equals: SmallInteger
+		returnTypeOfNo: 1 withArguments: {  } equals: SmallInteger
 ]
 
 { #category : #tests }
-SWDecoderTest >> test_02 [
+SWDecoderTest >> test_02_call_wellknown_method [
 
 	self
-		returnValueOfMy: #_02_call_wellknown_message:
-		withArguments: { Integer }
-		equals: Integer;
-		returnValueOfMy: #_02_call_wellknown_message:
-		withArguments: { Float }
-		equals: Float
+		returnTypeOfNo: 4 withArguments: { Integer } equals: Integer;
+		returnTypeOfNo: 4 withArguments: { Float } equals: Float
 ]
 
 { #category : #tests }
-SWDecoderTest >> test_03 [
+SWDecoderTest >> test_03_jumpers [
 
 	self
-		returnValueOfMy: #_03_ifTrue_ifFalse:
-		withArguments: { Integer }
-		equals: SmallInteger
+		returnTypeOfNo: 6 withArguments: { Boolean } equals: ByteString;
+		returnTypeOfNo: 7 withArguments: { Boolean } equals: SmallInteger;
+		returnTypeOfNo: 9 withArguments: { Boolean } equals: ByteString;
+		returnTypeOfNo: 12 withArguments: { Boolean } equals: SmallInteger;
+		returnTypeOfNo: 14 withArguments: { Boolean } equals: SmallInteger;
+		returnTypeOfNo: 16 withArguments: { UndefinedObject } equals: ByteString;
+		returnTypeOfNo: 20 withArguments: { UndefinedObject } equals: SmallInteger;
+		returnTypeOfNo: 24 withArguments: { UndefinedObject } equals: SmallInteger;
+		returnTypeOfNo: 26 withArguments: { UndefinedObject } equals: SmallInteger
 ]
 
 { #category : #tests }
-SWDecoderTest >> test_04 [
+SWDecoderTest >> test_04_recursive_messge_call [
 
-	self
-		returnValueOfMy: #_04_recursive_message_call:
-		withArguments: { SmallInteger }
-		equals: SmallInteger
+	self returnTypeOfNo: 30 withArguments: { SmallInteger } equals: SmallInteger
 ]
 
 { #category : #tests }
-SWDecoderTest >> test_05 [
+SWDecoderTest >> test_05_local_variables [
 
-	self
-		returnValueOfMy: #_05_local_variables
-		withArguments: {  }
-		equals: SmallInteger
+	self returnTypeOfNo: 29 withArguments: {  } equals: SmallInteger
 ]
 
 { #category : #tests }
-SWDecoderTest >> test_06 [
+SWDecoderTest >> test_06_method_call [
 
-	self
-		returnValueOfMy: #_06_method_call
-		withArguments: {  }
-		equals: SWStd class
+	self returnTypeOfNo: 28 withArguments: {  } equals: SWStd class
 ]
 
 { #category : #tests }
@@ -217,9 +117,9 @@ SWDecoderTest >> test_07_decode_closure [
 ]
 
 { #category : #tests }
-SWDecoderTest >> test_08 [
+SWDecoderTest >> test_08_ZnSerever_class_default [
 	|sa|
-	sa := SWDecoder new: self class>>#_08_ZnServer with: { self class }.
+	sa := SWDecoder new: self class>>#_08_ZnServerClass_default with: { self class }.
 	sa pool addInitializerIn: SWServer.
 "
 	sa logger enabled: true.
@@ -242,12 +142,12 @@ SWDecoderTest >> test_09_access_to_instance_variables [
 
 { #category : #tests }
 SWDecoderTest >> test_10_new [
-	self returnValueOfMy: #_10_new: withArguments: { Integer } equals: Set
+	self returnTypeOfNo: 31 withArguments: { Integer } equals: Set
 
 ]
 
 { #category : #tests }
-SWDecoderTest >> test_11_ZnServer [
+SWDecoderTest >> test_11_ZnServer_startOn [
 	|sa|
 	sa := SWDecoder new: SWServer>>#startOn: with: { SWServer. SmallInteger }.
 	sa pool addInitializerIn: SWServer.
@@ -260,31 +160,22 @@ SWDecoderTest >> test_11_ZnServer [
 ]
 
 { #category : #tests }
-SWDecoderTest >> test_12 [
-	self returnValueOfMy: #_12_try_catch withArguments: {  } equals: self class
+SWDecoderTest >> test_12_try_catch [
+	self returnTypeOfNo: 33 withArguments: {  } equals: SWTestProgram
 ]
 
 { #category : #tests }
-SWDecoderTest >> test_13 [
-	self returnValueOfMy: #_13_return_literal withArguments: {  } equals: Dictionary
+SWDecoderTest >> test_13_return_literal [
+	self returnTypeOfNo: 32 withArguments: {  } equals: Dictionary
 ]
 
 { #category : #tests }
-SWDecoderTest >> test_14 [
+SWDecoderTest >> test_14_TestCase_selector [
 	self returnValueOfMy: #_14_TestCase withArguments: {  } equals: TestCase
 ]
 
 { #category : #tests }
-SWDecoderTest >> test_15 [
-"
-	self returnValueOfMy: #_15_test_ifNil withArguments: {  } equals: SmallInteger
-"
-	self returnValueOfMy: #_15_test_ifNil withArguments: {  } equals: SmallInteger
-
-]
-
-{ #category : #tests }
-SWDecoderTest >> test_16 [
+SWDecoderTest >> test_15_SWShell_class_executeProcess [
 	|dec|
 	dec := SWDecoder new: SWShell class>>#executeProcess: with: { SWShell class. OSSUnixSubprocess }.
 	dec pool addInitializerIn: SWShell.
@@ -296,8 +187,19 @@ SWDecoderTest >> test_16 [
 ]
 
 { #category : #tests }
-SWDecoderTest >> test_17 [
-	self returnValueOfMy: #_17_test_ensure withArguments: {  } equals: SmallFloat64
+SWDecoderTest >> test_16_ensure [
+	self returnTypeOfNo: 37 withArguments: {  } equals: SmallInteger
+]
+
+{ #category : #tests }
+SWDecoderTest >> test_17_Transcript [
+	self returnTypeOfNo: 39 withArguments: {  } equals: SWTestProgram
+]
+
+{ #category : #tests }
+SWDecoderTest >> test_18_user_specified_type [
+	self returnTypeOfNo: 40 withArguments: {  } equals: Integer
+
 ]
 
 { #category : #tests }
@@ -325,21 +227,6 @@ SWDecoderTest >> test_ifTrue [
 	dec logger enabled: true.
 	dec decode.
 	self assert: dec return value equals: SWShellEnvironmentTest.
-]
-
-{ #category : #tests }
-SWDecoderTest >> test_jumper [
-	self returnValueOf: [ false ifTrue: [ 123 ] ifFalse: [ 'false' ] ] withArguments: { self class } equals: ByteString.
-	self returnValueOf: [ (1=2) ifTrue: [ 123 ] ifFalse: [ 'false' ] ] withArguments: { self class } equals: ByteString.
-	self returnValueOf: [ false ifFalse: [ 123 ] ifTrue: [ 'false' ] ] withArguments: { self class } equals: ByteString.
-	self returnValueOf: [ false ifTrue: [ 123 ] ] withArguments: { self class } equals: SmallInteger.
-	self returnValueOf: [ (1=2) ifTrue: [ 123 ] ] withArguments: { self class } equals: SmallInteger.
-	self returnValueOf: [ false ifFalse: [ 'false string' ] ] withArguments: { self class } equals: ByteString.
-	self returnValueOf: [ |val | val ifNil: [ val := 123 ] ] withArguments: { self class } equals: SmallInteger.
-	self returnValueOf: [ |val | val ifNotNil: [ val := 123 ] ] withArguments: { self class } equals: SmallInteger.
-	self returnValueOf: [ |val | val ifNil: [ val := 123 ] ifNotNil: [ 'not nil' ] ] withArguments: { self class } equals: ByteString.
-	self returnValueOf: [ |val | val ifNotNil: [ val := 123 ] ifNil: [ 'not nil' ] ] withArguments: { self class } equals: ByteString.
-
 ]
 
 { #category : #tests }
