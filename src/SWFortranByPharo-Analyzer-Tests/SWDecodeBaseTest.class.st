@@ -2,13 +2,13 @@
 A SWCompiledCodeTest is a test class for testing the behavior of SWCompiledCode
 "
 Class {
-	#name : #SWCompiledCodeTest,
+	#name : #SWDecodeBaseTest,
 	#superclass : #TestCase,
 	#category : #'SWFortranByPharo-Analyzer-Tests-Analyzer'
 }
 
 { #category : #tests }
-SWCompiledCodeTest >> test_01 [
+SWDecodeBaseTest >> test_01 [
 	|cc|
 	cc := SWDecoderBase new: (SWTestProgram getMy: 1)  with: { self class }.
 	self assert: cc stack receiver value equals: self class.
@@ -23,7 +23,7 @@ SWCompiledCodeTest >> test_01 [
 ]
 
 { #category : #tests }
-SWCompiledCodeTest >> test_02 [
+SWDecodeBaseTest >> test_02 [
 	|cc|
 
 	cc := SWDecoderBase new: (SWTestProgram getMy: 2) with: { self class. String }.

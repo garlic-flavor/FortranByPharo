@@ -27,7 +27,7 @@ SWSlot class >> newFrom: anArray [
 
 { #category : #comparing }
 SWSlot >> = right [
-	^ self payload = right payload
+	^ self value = right value
 ]
 
 { #category : #'instance creation' }
@@ -151,4 +151,9 @@ SWSlot >> third [
 { #category : #accessing }
 SWSlot >> top [
 	^ self payload last
+]
+
+{ #category : #accessing }
+SWSlot >> value [
+	^ payload
 ]

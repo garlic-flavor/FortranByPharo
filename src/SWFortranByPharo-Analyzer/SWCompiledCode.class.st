@@ -10,18 +10,42 @@ Class {
 	#category : #'SWFortranByPharo-Analyzer-Analyzer'
 }
 
-{ #category : #'as yet unclassified' }
-SWCompiledCode >> decodable [
+{ #category : #'instance creation' }
+SWCompiledCode class >> new: compiledCode [
+	compiledCode class = CompiledMethod ifTrue: [
+		^ SWCompiledMethod new
+			payload: compiledCode;
+			yourself.
+	]
+]
+
+{ #category : #accessing }
+SWCompiledCode >> argNames [
 	^ self subclassResponsibility 
 ]
 
 { #category : #accessing }
-SWCompiledCode >> method [
+SWCompiledCode >> code [
+	^ self subclassResponsibility 
+]
+
+{ #category : #accessing }
+SWCompiledCode >> declaringNames [
+	^ self subclassResponsibility 
+]
+
+{ #category : #tests }
+SWCompiledCode >> isDecodable [
 	^ self subclassResponsibility 
 ]
 
 { #category : #accessing }
 SWCompiledCode >> numArgs [
+	^ self subclassResponsibility 
+]
+
+{ #category : #accessing }
+SWCompiledCode >> numLocals [
 	^ self subclassResponsibility 
 ]
 
@@ -49,5 +73,10 @@ SWCompiledCode >> selector [
 
 { #category : #accessing }
 SWCompiledCode >> sourceNode [
+	^ self subclassResponsibility 
+]
+
+{ #category : #accessing }
+SWCompiledCode >> tempNames [
 	^ self subclassResponsibility 
 ]
