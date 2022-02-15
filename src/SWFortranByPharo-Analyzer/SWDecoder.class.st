@@ -3,7 +3,7 @@ SWStackAnalyzer forks decode process of SymbolicBytecodeBuilder to emulate stack
 "
 Class {
 	#name : #SWDecoder,
-	#superclass : #SWCompiledCode,
+	#superclass : #SWDecoderBase,
 	#instVars : [
 		'jumperStack',
 		'pool',
@@ -95,7 +95,7 @@ SWDecoder >> jump: offset [
 	(self jumperStack nextPeriodIs: scanner pc) ifTrue: [|item|
 		item := self jumperStack pop.
 		item endPC: scanner pc + offset.
-		item route1: self stack top.
+		item route1: self stack.
 		self stack: item initialStack.
 		self jumperStack push: item.
 	].
@@ -153,7 +153,7 @@ SWDecoder >> methodReturnReceiver [
 
 { #category : #'instruction decoding' }
 SWDecoder >> methodReturnTop [
-	self return << self stack top.
+	self return << self stack pop.
 	super methodReturnTop.
 
 ]
@@ -373,6 +373,9 @@ SWDecoder >> solveJumper [
 	item := self jumperStack pop.
 	node := self method sourceNodeForPC: item startPC.
 	(self haltList includes: node selector) ifTrue: [ self halt ].
+	item hasRoute1 ifFalse: [
+		self stack: item initialStack
+	].
 	self stack top << item route1.
 	sender := self pool newSenderOf: node selector super: false with: (SWSlot newFrom: { item condition. self stack top }).
 	sender node: node.

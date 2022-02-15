@@ -38,7 +38,11 @@ SWMBTofJS >> putBlock: aBlock [
 	self
 		put: '{';
 		cr;
-		incIndent;
+		incIndent.
+	aBlock temporaries do: [ :each |
+		self putVariableDeclarationOf: each name
+	].
+	self 
 		withoutMessageNestDo: [
 			self putSequence: aBlock body
 		];
@@ -188,16 +192,17 @@ SWMBTofJS >> putNil [
 
 { #category : #enumerating }
 SWMBTofJS >> putOnDo: aNode [ 
-	aNode isExpression ifTrue: [	|decoder|
-		self error; flag: #toImplement.
-		decoder := self senders at: aNode receiver.
-		decoder method hasMethodReturn ifTrue: [
-		]
+	|receiver|
+	receiver := aNode receiver.
+	aNode isExpression ifTrue: [	
+		self halt; flag: #toImplement.
+		receiver := receiver copy.
+		receiver body addReturn.
 	].
 
 	self
 		put: 'try';
-		<< aNode receiver;
+		<< receiver;
 		put: 'catch'.
 	aNode arguments second arguments ifNotEmpty: [
 		self putArguments: aNode arguments second arguments
@@ -285,10 +290,10 @@ SWMBTofJS >> putSelfDefinition [
 ]
 
 { #category : #'code generation' }
-SWMBTofJS >> putVariableDeclarationOf: aVariableInfo [
+SWMBTofJS >> putVariableDeclarationOf: aVariableName [
 	self
 		put: 'var ';
-		put: aVariableInfo name;
+		put: aVariableName;
 		put: ' = null;';
 		cr
 

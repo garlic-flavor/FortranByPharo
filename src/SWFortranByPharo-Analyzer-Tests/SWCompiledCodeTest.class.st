@@ -10,7 +10,7 @@ Class {
 { #category : #tests }
 SWCompiledCodeTest >> test_01 [
 	|cc|
-	cc := SWCompiledCode new: (SWTestProgram getMy: 1)  with: { self class }.
+	cc := SWDecoderBase new: (SWTestProgram getMy: 1)  with: { self class }.
 	self assert: cc stack receiver value equals: self class.
 	
 	self assert: cc isDecoded not.
@@ -26,7 +26,7 @@ SWCompiledCodeTest >> test_01 [
 SWCompiledCodeTest >> test_02 [
 	|cc|
 
-	cc := SWCompiledCode new: (SWTestProgram getMy: 2) with: { self class. String }.
+	cc := SWDecoderBase new: (SWTestProgram getMy: 2) with: { self class. String }.
 	self assert: cc arguments size equals: 1.
 	self assert: cc arguments first value equals: String.
 	self assert: cc locals size equals: 0.

@@ -326,6 +326,29 @@ SWTestProgram >> _43_closure_local_variable [
 	]
 ]
 
+{ #category : #'as yet unclassified' }
+SWTestProgram >> _44_ifTrue_and_local_variable [
+	|outervar|
+	outervar := true.
+	outervar ifTrue: [|inner| 
+		inner := 234.
+		^ inner
+	].
+	^ outervar
+]
+
+{ #category : #'as yet unclassified' }
+SWTestProgram >> _45_locals: arg1 [
+	|outer1|
+	outer1 = true.
+	outer1 ifTrue: [|inner|
+		inner := 234.
+	] ifFalse: [ |inner inner2|
+		inner := 345.
+		inner2 := 'hello'
+	]
+]
+
 { #category : #accessing }
 SWTestProgram >> var1 [
 

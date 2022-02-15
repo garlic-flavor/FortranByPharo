@@ -74,7 +74,7 @@ SWMBTofJSTest >> test_08_try_catch [
 	|transpiler result|
 	transpiler := self transpileNo: 34 withArguments: {  }.
 	result := transpiler stream contents.
-
+self halt.
 	self assert: result equals: 'return (function(){try {
     return 1 + 2;
 } catch {
@@ -88,6 +88,22 @@ SWMBTofJSTest >> test_08_try_catch [
 SWMBTofJSTest >> test_09_closure_local_variable [
 	|transpiler result|
 	transpiler := self transpileNo: 43 withArguments: {  }.
+	result := transpiler stream contents.
+	result inspect.
+]
+
+{ #category : #tests }
+SWMBTofJSTest >> test_10_ifTrue_and_local_variable [
+	|transpiler result|
+	transpiler := self transpileNo: 44 withArguments: {  }.
+	result := transpiler stream contents.
+	result inspect.
+]
+
+{ #category : #tests }
+SWMBTofJSTest >> test_11_locals [
+	|transpiler result|
+	transpiler := self transpileNo: 45 withArguments: { Boolean }.
 	result := transpiler stream contents.
 	result inspect.
 ]

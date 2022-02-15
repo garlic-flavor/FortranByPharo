@@ -55,7 +55,7 @@ SWMethodBodyTranspiler >> generator [
 	^ generator ifNil: [ generator := [ :transpiler | |m|
 		m := transpiler method.
 
-		transpiler locals do: [ :each | self putVariableDeclarationOf: each ].
+		transpiler locals do: [ :each | self putVariableDeclarationOf: each name ].
 		(transpiler classInfo isNotNil and: [ m methodClass isInstanceSide ]) ifTrue: [
 			self putSelfDefinition
 		].
@@ -104,21 +104,21 @@ SWMethodBodyTranspiler >> messageNest: anObject [
 SWMethodBodyTranspiler >> newFullClosure: lit with: operands [
 	^ (super newFullClosure: lit with: operands)
 		stream: self stream;
-		generator: [ :transpiler | |m|
-			m := transpiler method.
+		generator: [ :transpiler | |node|
+			node := transpiler method sourceNode.
+			transpiler putBlock: node				
+"
 			transpiler
 				put: '{';
 				incIndent;
 				cr.
-			transpiler locals do: [ :each | self putVariableDeclarationOf: each ].
-			(transpiler classInfo isNotNil and: [ m methodClass isInstanceSide ]) ifTrue: [
-				self putSelfDefinition
-			].
+			transpiler locals do: [ :each | self putVariableDeclarationOf: each name ].
 			transpiler putSequence: m sourceNode body.
 			transpiler
 				decIndent;
 				put: '}';
 				preventStatementDelimiter 
+"
 		];
 		yourself
 ]
@@ -380,13 +380,13 @@ SWMethodBodyTranspiler >> putSequence: aSequence [
 SWMethodBodyTranspiler >> putSequenceWithReturn: aSequence [
 	self withoutMessageNestDo: [
 		aSequence statements doWithIndex: [ :each :index |
-			(index < aSequence statements size or: [ each class = RBReturnNode ]) ifTrue: [
-				self putStatement: each
-			] ifFalse: [
+			((aSequence isLast: each) and: [ each class ~= RBReturnNode ]) ifTrue: [
 				self
 					putReturn: each;
 					putStatementDelimiter;
 					cr
+			] ifFalse: [
+				self putStatement: each
 			]
 		]
 	]

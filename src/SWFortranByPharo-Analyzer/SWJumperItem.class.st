@@ -38,6 +38,11 @@ SWJumperItem >> endPC: anObject [
 	endPC := anObject
 ]
 
+{ #category : #testing }
+SWJumperItem >> hasRoute1 [
+	^ route1 isNotNil
+]
+
 { #category : #accessing }
 SWJumperItem >> initialStack [
 
@@ -53,7 +58,7 @@ SWJumperItem >> initialStack: anObject [
 { #category : #accessing }
 SWJumperItem >> route1 [
 
-	^ route1 ifNil: [ route1 := SWVariableTypeInfo new ]
+	^ route1
 ]
 
 { #category : #accessing }

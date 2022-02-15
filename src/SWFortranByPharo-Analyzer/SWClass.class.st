@@ -642,9 +642,7 @@ SWClass >> slot [
 	^ slot ifNil: [
 		slot := SWSlot new.
 		self targetClass slots do: [ :ids |
-			(slot at: ids index)
-				name: ids name;
-				stackPos: ids index
+			(slot at: ids index) name: ids name
 		].
 		slot
 	]

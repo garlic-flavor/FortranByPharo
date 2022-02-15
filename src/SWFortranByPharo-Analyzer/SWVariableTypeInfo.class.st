@@ -6,7 +6,6 @@ Class {
 	#name : #SWVariableTypeInfo,
 	#superclass : #Object,
 	#instVars : [
-		'stackPos',
 		'name',
 		'type',
 		'properties',
@@ -126,10 +125,6 @@ SWVariableTypeInfo >> property: propName [
 { #category : #streaming }
 SWVariableTypeInfo >> putOn: aStream [
 	aStream
-		<< $[;
-		<< (stackPos ifNil: [ $- ] ifNotNil: [ stackPos asString ]);
-		<< $];
-		space;
 		<< name asString;
 		space;
 		<< $<;
@@ -146,18 +141,6 @@ SWVariableTypeInfo >> putOn: aStream [
 { #category : #removing }
 SWVariableTypeInfo >> removeProperty: propName [
 	properties remove: propName ifAbsent: [  ].
-]
-
-{ #category : #accessing }
-SWVariableTypeInfo >> stackPos [
-
-	^ stackPos
-]
-
-{ #category : #accessing }
-SWVariableTypeInfo >> stackPos: anObject [
-
-	stackPos := anObject
 ]
 
 { #category : #accessing }

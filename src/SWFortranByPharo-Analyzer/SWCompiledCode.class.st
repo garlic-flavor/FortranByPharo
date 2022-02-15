@@ -1,266 +1,53 @@
 "
-SWCompiledCodeInfo has informations about Pharo's method to transpile.
-
-
+SWCompiledCode wraps CompiledMethod, CompiledBlock and PseudoBlock.
 "
 Class {
 	#name : #SWCompiledCode,
-	#superclass : #SymbolicBytecodeBuilder,
+	#superclass : #Object,
 	#instVars : [
-		'stack',
-		'return',
-		'classInfo',
-		'numTemps',
-		'senders',
-		'logger'
+		'payload'
 	],
 	#category : #'SWFortranByPharo-Analyzer-Analyzer'
 }
 
-{ #category : #accessing }
-SWCompiledCode class >> classTranspilerClass [
-
-	^ SWClass
-]
-
-{ #category : #'instance creation' }
-SWCompiledCode class >> new: aMethod [
-	aMethod isBlock ifTrue: [
-		^ self new
-			block: aMethod;
-			yourself
-	].
-	aMethod class = CompiledBlock ifTrue: [
-		^ self new
-			cblock: aMethod;
-			yourself
-	].
-	aMethod class = CompiledMethod ifTrue: [
-		^ self new
-			method: aMethod;
-			yourself
-	].
-	self error
-
-]
-
-{ #category : #'instance creation' }
-SWCompiledCode class >> new: aMethod with: anArrayOfVariableTypeInfoOrTypes [
-	^ (self new: aMethod)
-		types: anArrayOfVariableTypeInfoOrTypes;
-		yourself
-
-]
-
 { #category : #'as yet unclassified' }
-SWCompiledCode class >> senderTranspilerClass [
-	^ SWSender
-]
-
-{ #category : #adding }
-SWCompiledCode >> addLocalNames: aNode [
-
+SWCompiledCode >> decodable [
+	^ self subclassResponsibility 
 ]
 
 { #category : #accessing }
-SWCompiledCode >> arguments [
-	^ self stack copyFrom: 1 to: self method numArgs
+SWCompiledCode >> method [
+	^ self subclassResponsibility 
 ]
 
 { #category : #accessing }
-SWCompiledCode >> block: aFullClosure [
-
-	aFullClosure argumentNames doWithIndex: [ :name :idx |
-		(self stack at: idx)
-			name: name;
-			stackPos: idx
-	].
-	aFullClosure tempNames doWithIndex: [ :name :idx |
-		(self stack at: idx + aFullClosure numArgs)
-			name: name;
-			stackPos: idx + aFullClosure numArgs
-	].
-	method := aFullClosure compiledBlock
-
-
+SWCompiledCode >> numArgs [
+	^ self subclassResponsibility 
 ]
 
 { #category : #accessing }
-SWCompiledCode >> cblock: aCompiledBlock [
-	
-	aCompiledBlock argumentNames doWithIndex: [ :name :idx |
-		(self stack at: idx)
-			name: name;
-			stackPos: idx
-	].
-
-	aCompiledBlock sourceNode temporaryNames doWithIndex: [ :name :idx |
-		(self stack at: aCompiledBlock numArgs + idx)
-			stackPos: aCompiledBlock numArgs;
-			name: name
-	].
-
-	method := aCompiledBlock
-
+SWCompiledCode >> numTemps [
+	^ self subclassResponsibility 
 ]
 
 { #category : #accessing }
-SWCompiledCode >> classInfo [
-	"This is a SWClass"
-	^ classInfo
+SWCompiledCode >> payload [
+
+	^ payload
 ]
 
 { #category : #accessing }
-SWCompiledCode >> classInfo: anObject [
+SWCompiledCode >> payload: anObject [
 
-	classInfo := anObject
-]
-
-{ #category : #api }
-SWCompiledCode >> decode [
-	self isDecoded ifTrue: [ ^self ].
-	self logger log: 'decoding start' withStack: self stack.
-	super decode.
-
-]
-
-{ #category : #accessing }
-SWCompiledCode >> getVariableInfoOf: aName [
-	"This searches a SWVariableTypeInfo by its name."
-	^ self stack detect: [ :vi |
-		vi name = aName
-	] ifNone: [
-		self classInfo getVariableInfoOf: aName
-	]
-]
-
-{ #category : #accessing }
-SWCompiledCode >> getVariableInfoOf: aName ifPresent: aPresentBlock [
-	"This searches a SWVariableTypeInfo by its name."
-	^ self stack detect: [ :vi |
-		vi name = aName
-	] ifFound: [ :vi |
-		aPresentBlock cull: vi
-	] ifNone: [
-		self classInfo ifNotNil: [ self classInfo getVariableInfoOf: aName ifPresent: aPresentBlock ].
-		nil
-	]
-]
-
-{ #category : #testing }
-SWCompiledCode >> isDecoded [
-	^ oldPC isNotNil
-]
-
-{ #category : #accessing }
-SWCompiledCode >> locals [
-	"This returns local variables excluding its arguments."
-	^ self stack copyFrom: self method numArgs + 1 to: self method numTemps
-]
-
-{ #category : #accessing }
-SWCompiledCode >> logger [
-
-	^ logger ifNil: [ logger := SWLogger new ]
-]
-
-{ #category : #accessing }
-SWCompiledCode >> logger: anObject [
-
-	logger := anObject
-]
-
-{ #category : #modifying }
-SWCompiledCode >> markAsDecoded [
-	oldPC := 9999
-]
-
-{ #category : #accessing }
-SWCompiledCode >> method: aCompiledMethod [
-	aCompiledMethod temporaryVariables doWithIndex: [ :var :idx |
-		(self stack at: idx)
-			name: var name;
-			stackPos: idx
-	].
-	^ super method: aCompiledMethod
-]
-
-{ #category : #accessing }
-SWCompiledCode >> methodClass [
-	^ method class = CompiledMethod ifTrue: [ method methodClass ] ifFalse: [ nil ]
-]
-
-{ #category : #printing }
-SWCompiledCode >> printOn: aStream [
-	self putOn: aStream
-]
-
-{ #category : #streaming }
-SWCompiledCode >> putOn: aStream [
-	aStream << self selector
-]
-
-{ #category : #accessing }
-SWCompiledCode >> receiverClass [
-	^ (self stack at: 0) value
-]
-
-{ #category : #accessing }
-SWCompiledCode >> return [
-	"The return type of this method."
-	^ return ifNil: [ return := SWVariableTypeInfo new ]
-]
-
-{ #category : #accessing }
-SWCompiledCode >> return: anObject [
-
-	return := anObject
+	payload := anObject
 ]
 
 { #category : #accessing }
 SWCompiledCode >> selector [
-	method class = CompiledMethod ifTrue: [
-		^ method selector
-	].
-
-	^ #closure
+	^ self subclassResponsibility 
 ]
 
 { #category : #accessing }
-SWCompiledCode >> senders [
-
-	^ senders ifNil: [ senders := OrderedDictionary new ]
-]
-
-{ #category : #accessing }
-SWCompiledCode >> senders: anObject [
-
-	senders := anObject
-]
-
-{ #category : #accessing }
-SWCompiledCode >> stack [
-	"The stack at 0 corresponds to a receiver."
-	^ stack ifNil: [
-		stack := SWStack new.
-		(stack at: 0)
-			name: 'self';
-			priority: SWType receiverTypePriority;
-			stackPos: 0.
-		stack
-	]
-]
-
-{ #category : #accessing }
-SWCompiledCode >> stack: anObject [
-
-	stack := anObject
-]
-
-{ #category : #accessing }
-SWCompiledCode >> types: anArray [
-	"anArray is 'operands'. So, the first element of anArray is a type of receiver."
-	anArray doWithIndex: [ :type :idx |
-		(self stack at: idx - 1) << type
-	]
+SWCompiledCode >> sourceNode [
+	^ self subclassResponsibility 
 ]

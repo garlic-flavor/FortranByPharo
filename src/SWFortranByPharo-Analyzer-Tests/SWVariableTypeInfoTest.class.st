@@ -47,15 +47,14 @@ SWVariableTypeInfoTest >> testPutOn [
 	|vi|
 	vi := (SWVariableTypeInfo new: SmallInteger)
 		name: 'hogehoge';
-		stackPos: 3
 		yourself.
-	self putOnOf: vi mustMatchesWith: '\[3\] hogehoge <SmallInteger\:exactType>'.
+	self putOnOf: vi mustMatchesWith: 'hogehoge <SmallInteger\:exactType>'.
 	
 	vi := (SWVariableTypeInfo new: [SmallInteger])
 		yourself.
-	self putOnOf: vi mustMatchesWith: '\[-\] nil <lazy\:unknownMethod>'.
+	self putOnOf: vi mustMatchesWith: 'nil <lazy\:unknownMethod>'.
 	
 	vi := SWVariableTypeInfo new.
-	self putOnOf: vi mustMatchesWith: '\[-\] nil <nil\:default>'.
+	self putOnOf: vi mustMatchesWith: 'nil <nil\:default>'.
 
 ]
