@@ -30,7 +30,7 @@ SWCDTofJS >> initialize_Behavior [
 SWCDTofJS >> initialize_BlockClosure [
 	super initialize_BlockClosure.
 	self
-		defineMethodSender: #on:do: as: [ :transpiler :sender | self put_on_do_: transpiler with: sender node ];
+		defineMethodSender: #on:do: as: [ :transpiler :sender | transpiler putOnDo: sender node ];
 		defineMethodSender: #ensure: as: [ :transpiler :sender | self put_ensure_: transpiler with: sender node  ]
 ]
 
@@ -265,6 +265,7 @@ SWCDTofJS >> put_ensure_: transpiler with: aNode [
 
 { #category : #'as yet unclassified' }
 SWCDTofJS >> put_on_do_: transpiler with: aNode [ 
+self error; flag: #toRemove.
 	aNode isExpression ifTrue: [
 		transpiler put: '(function(){'
 	].

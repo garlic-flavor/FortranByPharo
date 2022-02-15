@@ -88,20 +88,6 @@ SWMBTofJS >> putCascade: aRBCascadeNode [
 	
 ]
 
-{ #category : #'code generation' }
-SWMBTofJS >> putClosure: aBlock [
-	self
-		put: 'function';
-		putArguments: aBlock arguments;
-		put: '{';
-		cr;
-		incIndent;
-		putSequenceWithReturn: aBlock body;
-		decIndent;
-		put: '}'
-
-]
-
 { #category : #streaming }
 SWMBTofJS >> putFilenameOn: aStream [
 	aStream << 'cache/'.
@@ -198,6 +184,59 @@ SWMBTofJS >> putNew: aNode [
 { #category : #'as yet unclassified' }
 SWMBTofJS >> putNil [
 	self put: 'null'
+]
+
+{ #category : #enumerating }
+SWMBTofJS >> putOnDo: aNode [ 
+	aNode isExpression ifTrue: [	|decoder|
+		self error; flag: #toImplement.
+		decoder := self senders at: aNode receiver.
+		decoder method hasMethodReturn ifTrue: [
+		]
+	].
+
+	self
+		put: 'try';
+		<< aNode receiver;
+		put: 'catch'.
+	aNode arguments second arguments ifNotEmpty: [
+		self putArguments: aNode arguments second arguments
+	].
+	self
+		<< aNode arguments second		
+"
+	aNode isExpression ifTrue: [
+		transpiler put: '(function(){'
+	].
+	transpiler
+		put: 'try {'; cr;
+		incIndent.
+	aNode isExpression ifTrue: [
+		transpiler putSequenceWithReturn: aNode receiver
+	] ifFalse: [
+		transpiler putSequence: aNode receiver
+	].
+	transpiler
+		decIndent;
+		put: '} catch'.
+	(aNode arguments at: 2) arguments ifNotEmpty: [
+		transpiler putArguments: (aNode arguments at: 2) arguments
+	].
+	transpiler
+		put: ' {'; cr;
+		incIndent.
+	aNode isExpression ifTrue: [
+		transpiler putSequenceWithReturn: (aNode arguments at: 2)
+	] ifFalse: [
+		transpiler putSequence: (aNode arguments at: 2)
+	].
+	transpiler
+		decIndent;
+		put: '}'.
+	aNode isExpression ifTrue: [
+		transpiler put: '})()'
+	]
+"
 ]
 
 { #category : #'code generation' }

@@ -84,6 +84,14 @@ SWMBTofJSTest >> test_08_try_catch [
 
 ]
 
+{ #category : #tests }
+SWMBTofJSTest >> test_09_closure_local_variable [
+	|transpiler result|
+	transpiler := self transpileNo: 43 withArguments: {  }.
+	result := transpiler stream contents.
+	result inspect.
+]
+
 { #category : #accessing }
 SWMBTofJSTest >> transpilerClass [
 	^ SWMBTofJS

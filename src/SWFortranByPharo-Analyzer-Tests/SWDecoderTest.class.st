@@ -19,6 +19,7 @@ SWDecoderTest >> _14_TestCase [
 { #category : #'private - utility' }
 SWDecoderTest >> decode: method withArguments: arg2 [
 	|dec|
+
 	dec := SWDecoder new: method with: arg2.
 	dec logger enabled: true.
 	dec classInfo: (dec pool getClassTranspiler: method methodClass).
@@ -34,7 +35,7 @@ SWDecoderTest >> decodeNo: no withArguments: args [
 
 { #category : #'as yet unclassified' }
 SWDecoderTest >> inspectNo: no withArguments: args [
-	(self decode: (SWTestProgram getMy: no) withArguments: args) inspect
+	(self decodeNo: no withArguments: args) inspect
 ]
 
 { #category : #'as yet unclassified' }
@@ -203,7 +204,7 @@ SWDecoderTest >> test_18_user_specified_type [
 ]
 
 { #category : #tests }
-SWDecoderTest >> test_SWShellEnvironemt [
+SWDecoderTest >> test_19_SWShellEnvironemt [
 	|dec|
 	dec := SWDecoder new: [ SWShellEnvironment default ] with: { self class }.
 	dec logger enabled: true.
@@ -212,7 +213,7 @@ SWDecoderTest >> test_SWShellEnvironemt [
 ]
 
 { #category : #tests }
-SWDecoderTest >> test_SWShellEnvironemtLocalDirectory [
+SWDecoderTest >> test_20_SWShellEnvironemtLocalDirectory [
 	|dec|
 	dec := SWDecoder new: [ SWShellEnvironment default localDirectory ] with: { self class }.
 	dec logger enabled: true.
@@ -221,7 +222,7 @@ SWDecoderTest >> test_SWShellEnvironemtLocalDirectory [
 ]
 
 { #category : #tests }
-SWDecoderTest >> test_ifTrue [
+SWDecoderTest >> test_21_ifTrue [
 	|dec|
 	dec := SWDecoder new: [ SWShellEnvironmentTest new testExeFileExtension ] with: { self class }.
 	dec logger enabled: true.
@@ -230,7 +231,7 @@ SWDecoderTest >> test_ifTrue [
 ]
 
 { #category : #tests }
-SWDecoderTest >> test_jumper2 [
+SWDecoderTest >> test_22_jumper2 [
 	self returnValueOf: [
 		|path|
 		path := 123.
@@ -238,4 +239,9 @@ SWDecoderTest >> test_jumper2 [
 		path
 	] withArguments: { self class } equals: SmallInteger.
 
+]
+
+{ #category : #tests }
+SWDecoderTest >> test_23_closure_local_variable [
+	self inspectNo: 43 withArguments: {  }
 ]

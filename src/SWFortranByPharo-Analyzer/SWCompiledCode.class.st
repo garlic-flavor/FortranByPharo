@@ -11,7 +11,8 @@ Class {
 		'return',
 		'classInfo',
 		'numTemps',
-		'senders'
+		'senders',
+		'logger'
 	],
 	#category : #'SWFortranByPharo-Analyzer-Analyzer'
 }
@@ -56,6 +57,11 @@ SWCompiledCode class >> senderTranspilerClass [
 	^ SWSender
 ]
 
+{ #category : #adding }
+SWCompiledCode >> addLocalNames: aNode [
+
+]
+
 { #category : #accessing }
 SWCompiledCode >> arguments [
 	^ self stack copyFrom: 1 to: self method numArgs
@@ -88,6 +94,12 @@ SWCompiledCode >> cblock: aCompiledBlock [
 			stackPos: idx
 	].
 
+	aCompiledBlock sourceNode temporaryNames doWithIndex: [ :name :idx |
+		(self stack at: aCompiledBlock numArgs + idx)
+			stackPos: aCompiledBlock numArgs;
+			name: name
+	].
+
 	method := aCompiledBlock
 
 ]
@@ -107,6 +119,7 @@ SWCompiledCode >> classInfo: anObject [
 { #category : #api }
 SWCompiledCode >> decode [
 	self isDecoded ifTrue: [ ^self ].
+	self logger log: 'decoding start' withStack: self stack.
 	super decode.
 
 ]
@@ -143,6 +156,18 @@ SWCompiledCode >> isDecoded [
 SWCompiledCode >> locals [
 	"This returns local variables excluding its arguments."
 	^ self stack copyFrom: self method numArgs + 1 to: self method numTemps
+]
+
+{ #category : #accessing }
+SWCompiledCode >> logger [
+
+	^ logger ifNil: [ logger := SWLogger new ]
+]
+
+{ #category : #accessing }
+SWCompiledCode >> logger: anObject [
+
+	logger := anObject
 ]
 
 { #category : #modifying }

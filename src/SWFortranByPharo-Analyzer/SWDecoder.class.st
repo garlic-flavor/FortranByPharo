@@ -7,7 +7,6 @@ Class {
 	#instVars : [
 		'jumperStack',
 		'pool',
-		'logger',
 		'haltList'
 	],
 	#category : #'SWFortranByPharo-Analyzer-Analyzer'
@@ -128,18 +127,6 @@ SWDecoder >> jumperStack [
 SWDecoder >> jumperStack: anObject [
 
 	jumperStack := anObject
-]
-
-{ #category : #accessing }
-SWDecoder >> logger [
-
-	^ logger ifNil: [ logger := SWLogger new ]
-]
-
-{ #category : #accessing }
-SWDecoder >> logger: anObject [
-
-	logger := anObject
 ]
 
 { #category : #private }
@@ -285,23 +272,23 @@ SWDecoder >> pushConstant: obj [
 
 { #category : #'instruction decoding' }
 SWDecoder >> pushFullClosure: lit numCopied: numCopied receiverOnStack: rcvr ignoreOuterContext: ignore [
-	|mi ret|
+	|decoder ret|
 
 	rcvr ifTrue: [ self error ].
 	ignore ifTrue: [ self error ].
 
 	"I only interest in type information on the stack.
 	So, I decode a closure before invoking. it's ok."
-	mi := self newFullClosure: lit with: (self stack popSlotForClosure: numCopied).
 	self logger log: 'decode closure' withStack: self stack.
-	mi decode.
+	decoder := self newFullClosure: lit with: (self stack popSlotForClosure: numCopied).
+	decoder decode.
 	ret := (SWContainerType new: BlockClosure)
-		elementType: mi return value;
+		elementType: decoder return value;
 		yourself.
 	lit hasMethodReturn ifTrue: [
 		self return << ret
 	].
-	self senders addAll: mi senders.
+	self senders at: decoder method sourceNode put: decoder.
 	self stack push: (SWVariableTypeInfo new: ret).
 
 	super pushFullClosure: lit numCopied: numCopied  receiverOnStack: rcvr ignoreOuterContext: ignore 

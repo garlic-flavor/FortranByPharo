@@ -100,6 +100,29 @@ SWMethodBodyTranspiler >> messageNest: anObject [
 	messageNest := anObject
 ]
 
+{ #category : #'instance creation' }
+SWMethodBodyTranspiler >> newFullClosure: lit with: operands [
+	^ (super newFullClosure: lit with: operands)
+		stream: self stream;
+		generator: [ :transpiler | |m|
+			m := transpiler method.
+			transpiler
+				put: '{';
+				incIndent;
+				cr.
+			transpiler locals do: [ :each | self putVariableDeclarationOf: each ].
+			(transpiler classInfo isNotNil and: [ m methodClass isInstanceSide ]) ifTrue: [
+				self putSelfDefinition
+			].
+			transpiler putSequence: m sourceNode body.
+			transpiler
+				decIndent;
+				put: '}';
+				preventStatementDelimiter 
+		];
+		yourself
+]
+
 { #category : #'code generation - protected' }
 SWMethodBodyTranspiler >> preventNewline [
 	self stream preventNewline
@@ -191,6 +214,14 @@ SWMethodBodyTranspiler >> putCharacter: c [
 { #category : #'code generation' }
 SWMethodBodyTranspiler >> putClassAccessor [
 	self put: '.'
+]
+
+{ #category : #'code generation' }
+SWMethodBodyTranspiler >> putClosure: aNode [
+	|tran|
+	tran := self senders at: aNode.
+	tran transpile.
+
 ]
 
 { #category : #'code generation' }
@@ -414,11 +445,8 @@ SWMethodBodyTranspiler >> putVariableDeclarationOf: aVariableInfo [
 
 { #category : #accessing }
 SWMethodBodyTranspiler >> stream [
+	^ stream ifNil: [ stream := SWTranspilerStream new ]
 
-	^ stream ifNil: [
-		stream := SWTranspilerStream new
-			yourself
-	]
 ]
 
 { #category : #accessing }

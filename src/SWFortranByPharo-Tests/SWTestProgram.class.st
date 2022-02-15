@@ -316,6 +316,16 @@ SWTestProgram >> _42_opBinaries: a [
 	^ a + 100 * 200 - 300 / 400
 ]
 
+{ #category : #'as yet unclassified' }
+SWTestProgram >> _43_closure_local_variable [
+
+	[ |hoge|
+		hoge := 123.
+	] on: Exception do: [ 
+		self error.
+	]
+]
+
 { #category : #accessing }
 SWTestProgram >> var1 [
 
