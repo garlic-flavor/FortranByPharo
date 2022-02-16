@@ -7,6 +7,14 @@ Class {
 	#category : #'SWFortranByPharo-Analyzer-Analyzer'
 }
 
+{ #category : #'instance creation' }
+SWCompiledMethod class >> new: code with: operands [
+	^ self new
+		payload: code;
+		operands: operands;
+		yourself
+]
+
 { #category : #'as yet unclassified' }
 SWCompiledMethod >> argNames [
 	^ payload argumentNames
@@ -28,8 +36,18 @@ SWCompiledMethod >> isDecodable [
 ]
 
 { #category : #accessing }
+SWCompiledMethod >> methodClass [
+	^ self payload methodClass
+]
+
+{ #category : #accessing }
 SWCompiledMethod >> numArgs [
 	^ payload numArgs
+]
+
+{ #category : #'as yet unclassified' }
+SWCompiledMethod >> numHiddenArgs [
+	^ 1
 ]
 
 { #category : #'as yet unclassified' }

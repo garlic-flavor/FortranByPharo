@@ -1,5 +1,5 @@
 Class {
-	#name : #SWStackTest,
+	#name : #SWStackOldTest,
 	#superclass : #TestCase,
 	#instVars : [
 		'stack'
@@ -8,7 +8,7 @@ Class {
 }
 
 { #category : #initialization }
-SWStackTest >> setUp [
+SWStackOldTest >> setUp [
 
 	| tmp2 |
 	super setUp.
@@ -22,7 +22,7 @@ SWStackTest >> setUp [
 ]
 
 { #category : #tests }
-SWStackTest >> testAt [
+SWStackOldTest >> testAt [
 
 	self
 		assert: (stack at: 0) equals: 1;
@@ -33,7 +33,7 @@ SWStackTest >> testAt [
 ]
 
 { #category : #tests }
-SWStackTest >> testPop [
+SWStackOldTest >> testPop [
 
 	stack pop.
 	self
@@ -42,20 +42,20 @@ SWStackTest >> testPop [
 ]
 
 { #category : #tests }
-SWStackTest >> testPush [
+SWStackOldTest >> testPush [
 
 	stack push: 5.
 	self assert: stack asArray equals: { 1. 2. 3. 4. 5 }
 ]
 
 { #category : #tests }
-SWStackTest >> testSize [
+SWStackOldTest >> testSize [
 
 	self assert: stack size equals: 4
 ]
 
 { #category : #tests }
-SWStackTest >> testTop [
+SWStackOldTest >> testTop [
 
 	self assert: stack top equals: 4
 ]

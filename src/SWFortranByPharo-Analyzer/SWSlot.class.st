@@ -12,6 +12,13 @@ SWSlot class >> elementClass [
 	^ SWVariableTypeInfo
 ]
 
+{ #category : #adding }
+SWSlot >> addAll: anArray [
+	anArray do: [ :each |
+		self push: each
+	]
+]
+
 { #category : #'instance creation' }
 SWSlot >> allocate: size [
 	[ self size < size ] whileTrue: [
@@ -21,7 +28,8 @@ SWSlot >> allocate: size [
 
 { #category : #accessing }
 SWSlot >> at: index [
-	^ self at: index ifAbsentPut: [ self class elementClass new ].
+	self allocate: index.
+	^ super at: index
 ]
 
 { #category : #copying }
@@ -42,7 +50,8 @@ SWSlot >> pop: itemsCount [
 
 { #category : #adding }
 SWSlot >> push: anObject [
-	^ self addLast: anObject.
+	^ (self addLast: self class elementClass new) << anObject
+
 ]
 
 { #category : #streaming }

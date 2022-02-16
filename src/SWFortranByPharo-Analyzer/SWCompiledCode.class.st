@@ -1,5 +1,9 @@
 "
 SWCompiledCode wraps CompiledMethod, CompiledBlock and PseudoBlock.
+
+- 1 <= numHiddenArgs.
+- numArgs <= numTemps <= numLocals.
+- declaringNames size = numTemps - numArgs.
 "
 Class {
 	#name : #SWCompiledCode,
@@ -12,15 +16,6 @@ Class {
 	#category : #'SWFortranByPharo-Analyzer-Analyzer'
 }
 
-{ #category : #'instance creation' }
-SWCompiledCode class >> new: compiledCode [
-	compiledCode class = CompiledMethod ifTrue: [
-		^ SWCompiledMethod new
-			payload: compiledCode;
-			yourself.
-	]
-]
-
 { #category : #accessing }
 SWCompiledCode >> argNames [
 	^ self subclassResponsibility 
@@ -28,12 +23,31 @@ SWCompiledCode >> argNames [
 
 { #category : #accessing }
 SWCompiledCode >> arguments [
-	^ self slot copyFrom: 2 to: self numArgs + 1
+	^ self slot copyFrom: self numHiddenArgs + 1 to: self numHiddenArgs + self numArgs
+]
+
+{ #category : #accessing }
+SWCompiledCode >> atOffset: anOffset [
+	^ self slot at: anOffset + self numHiddenArgs + 1
 ]
 
 { #category : #accessing }
 SWCompiledCode >> code [
-	^ self subclassResponsibility 
+	^ self payload
+]
+
+{ #category : #copying }
+SWCompiledCode >> copySlotForFullClosure: numCopied [
+	^ (SWSlot new: numCopied + self numHiddenArgs)
+		addLast: self hiddenArgs;
+		addLast: (self copyTop: numCopied);
+		yourself
+
+]
+
+{ #category : #copying }
+SWCompiledCode >> copyTop: num [
+	^ self slot copyFrom: self slot size - num + 1 to: self slot size.
 ]
 
 { #category : #accessing }
@@ -41,9 +55,19 @@ SWCompiledCode >> declaringNames [
 	^ self subclassResponsibility 
 ]
 
-{ #category : #'as yet unclassified' }
+{ #category : #accessing }
+SWCompiledCode >> declarings [
+	^ self slot copyFrom: self numHiddenArgs + self numArgs + 1 to: self numHiddenArgs + self numTemps
+]
+
+{ #category : #enumerating }
 SWCompiledCode >> getVariableNameOf: aName ifFound: aFoundBlock ifNone: aNoneBlock [
 	^ self slot detect: [ :each | each name = aName ] ifFound: aFoundBlock ifNone: aNoneBlock
+]
+
+{ #category : #accessing }
+SWCompiledCode >> hiddenArgs [
+	^ self slot copyFrom: 1 to: self numHiddenArgs
 ]
 
 { #category : #tests }
@@ -53,7 +77,7 @@ SWCompiledCode >> isDecodable [
 
 { #category : #accessing }
 SWCompiledCode >> locals [
-	^ self slot copyFrom: 2 to: self numLocals + 1
+	^ self slot copyFrom: self numHiddenArgs + 1  to: self numHiddenArgs + self numLocals
 ]
 
 { #category : #accessing }
@@ -64,6 +88,11 @@ SWCompiledCode >> methodClass [
 { #category : #accessing }
 SWCompiledCode >> numArgs [
 	^ self subclassResponsibility 
+]
+
+{ #category : #accessing }
+SWCompiledCode >> numHiddenArgs [
+	^ self subclassResponsibility
 ]
 
 { #category : #accessing }
@@ -97,14 +126,34 @@ SWCompiledCode >> payload: anObject [
 	payload := anObject
 ]
 
+{ #category : #removing }
+SWCompiledCode >> pop [
+	^ self slot pop
+]
+
 { #category : #printing }
 SWCompiledCode >> printOn: aStream [
 	^ self putOn: aStream
 ]
 
+{ #category : #adding }
+SWCompiledCode >> push: anObject [
+	^ self slot push: anObject
+]
+
 { #category : #streaming }
 SWCompiledCode >> putOn: aStream [
 	aStream << self selector
+]
+
+{ #category : #accessing }
+SWCompiledCode >> receiver [
+	^ self slot receiver
+]
+
+{ #category : #accessing }
+SWCompiledCode >> receiverClass [
+	^ self slot receiver value
 ]
 
 { #category : #accessing }

@@ -352,15 +352,13 @@ SWTestProgram >> _45_locals: arg1 [
 { #category : #'as yet unclassified' }
 SWTestProgram >> _46_locals2: arg1 [
 	|outer1|
-	outer1 = true.
-	[ |inner1|
+	outer1 := true.
+	[ :arg2| |inner1|
 		outer1 ifTrue: [|inner2|
 			inner1 := 'hoge'.
 			inner2 := 234.
 		].
-	] on: Exception do: [ |inner3|
-		self error
-	]
+	] value: 345.
 ]
 
 { #category : #accessing }

@@ -14,7 +14,7 @@ Class {
 SWSlotTest >> setUp [
 	super setUp.
 	
-	slot := SWSlotOld new.
+	slot := SWSlot new.
 ]
 
 { #category : #test }
@@ -54,18 +54,57 @@ SWSlotTest >> testCopyFromTo [
 { #category : #test }
 SWSlotTest >> testEqualsSign [
 	|s1 s2|
-	s1 := SWSlotOld new.
-	(s1 at: 1)
-		<< Integer.
+	s1 := SWSlot new.
+	(s1 at: 1) << Integer.
 	(s1 at: 2)
 		<< String;
 		priority: SWType userSpecifyingPriority.
 
-	s2 := SWSlotOld new.
-	(s2 at: 1)	
-		<< Integer.
-	(s2 at: 2)
-		<< String.
+	s2 := SWSlot new.
+	(s2 at: 1) << Integer.
+	(s2 at: 2) << String.
 	self assert: s1 equals:  s2
 
+]
+
+{ #category : #tests }
+SWSlotTest >> testNewFrom [
+	slot := SWSlot newFrom: { String. SmallInteger. Dictionary }.
+	self assert: slot size equals: 3.
+	self assert: slot first equals: String.
+	self assert: slot second equals: SmallInteger.
+	self assert: slot third equals: Dictionary.
+
+]
+
+{ #category : #tests }
+SWSlotTest >> testPop [
+	(slot at: 1) << String.
+	(slot at: 2) << Float.
+	(slot at:3) << SmallInteger.
+	self assert: slot pop equals: SmallInteger.
+	self assert: slot size equals: 2.
+	self assert: (slot pop: 2) equals: { String. Float}
+
+]
+
+{ #category : #tests }
+SWSlotTest >> testPush [
+	slot push: (SWVariableTypeInfo new: SmallInteger).
+	self assert: slot size equals: 1.
+	self assert: slot pop equals: SmallInteger.
+]
+
+{ #category : #tests }
+SWSlotTest >> testReceiver [
+	slot receiver << SmallInteger.
+	self assert: slot size equals: 1.
+	self assert: slot receiver equals: SmallInteger.
+
+]
+
+{ #category : #tests }
+SWSlotTest >> testTop [
+	slot push: SmallInteger.
+	self assert: slot top equals: SmallInteger.
 ]
