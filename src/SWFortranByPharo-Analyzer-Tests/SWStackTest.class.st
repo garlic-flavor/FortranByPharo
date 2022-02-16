@@ -12,7 +12,7 @@ SWStackTest >> setUp [
 
 	| tmp2 |
 	super setUp.
-	tmp2 := SWStack new.
+	tmp2 := SWStackOld new.
 	tmp2
 		push: 1;
 		push: 2;

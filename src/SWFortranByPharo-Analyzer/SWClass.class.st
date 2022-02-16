@@ -640,7 +640,7 @@ SWClass >> slot [
 	In Pharo object, a member variable has its own 'offset' represented by its #stackPos."
 
 	^ slot ifNil: [
-		slot := SWSlot new.
+		slot := SWSlotOld new.
 		self targetClass slots do: [ :ids |
 			(slot at: ids index) name: ids name
 		].

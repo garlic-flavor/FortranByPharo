@@ -380,7 +380,7 @@ SWDecoder >> solveJumper [
 
 
 	self stack top << item route1.
-	sender := self pool newSenderOf: node selector super: false with: (SWSlot newFrom: { item condition. self stack top }).
+	sender := self pool newSenderOf: node selector super: false with: (SWSlotOld newFrom: { item condition. self stack top }).
 	sender node: node.
 	self senders at: sender node put: sender.
 	

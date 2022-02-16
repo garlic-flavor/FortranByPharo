@@ -65,7 +65,7 @@ SWSender >> node: anObject [
 { #category : #accessing }
 SWSender >> operands [
 
-	^ operands ifNil: [ operands := SWSlot new ]
+	^ operands ifNil: [ operands := SWSlotOld new ]
 ]
 
 { #category : #accessing }

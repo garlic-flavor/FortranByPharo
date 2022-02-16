@@ -4,13 +4,13 @@ index 0 indicates the recevier.
 index 1 indicates the first argument of the method.
 "
 Class {
-	#name : #SWStack,
-	#superclass : #SWSlot,
+	#name : #SWStackOld,
+	#superclass : #SWSlotOld,
 	#category : #'SWFortranByPharo-Analyzer-Slot'
 }
 
 { #category : #accessing }
-SWStack >> at: index [
+SWStackOld >> at: index [
 	"index is 1 based.".
 	"index 0 responds special to receiver."
 	^ super at: index + 1
@@ -18,7 +18,7 @@ SWStack >> at: index [
 ]
 
 { #category : #accessing }
-SWStack >> atOffset: offset [
+SWStackOld >> atOffset: offset [
 	"offset is  0 based.".
 	"offset 0 responds to the first argument."
 	^ super atOffset: offset + 1
@@ -26,18 +26,18 @@ SWStack >> atOffset: offset [
 ]
 
 { #category : #copying }
-SWStack >> copyFrom: start to: end [
+SWStackOld >> copyFrom: start to: end [
 	^ super copyFrom: start + 1 to: end + 1
 
 ]
 
 { #category : #removing }
-SWStack >> pop [
+SWStackOld >> pop [
 	^ self payload removeLast.
 ]
 
 { #category : #removing }
-SWStack >> pop: itemsCount [
+SWStackOld >> pop: itemsCount [
 	|arr|
 	arr := self payload copyFrom: self payload size - itemsCount + 1 to: self payload size.
 	itemsCount timesRepeat: [ self pop ].
@@ -45,30 +45,30 @@ SWStack >> pop: itemsCount [
 ]
 
 { #category : #'as yet unclassified' }
-SWStack >> popSlotForClosure: numArgs [
+SWStackOld >> popSlotForClosure: numArgs [
 	|args|
 	args := OrderedCollection new: numArgs + 1.
 	args add: self receiver.
 	args addAll: (self pop: numArgs).
-	^ SWSlot new
+	^ SWSlotOld new
 		payload: args;
 		yourself
 	
 ]
 
 { #category : #'as yet unclassified' }
-SWStack >> popSlotForSender: num [
-	^ SWSlot new
+SWStackOld >> popSlotForSender: num [
+	^ SWSlotOld new
 		payload: (self pop: num + 1);
 		yourself
 ]
 
 { #category : #adding }
-SWStack >> push: anObject [
+SWStackOld >> push: anObject [
 	^ self payload addLast: anObject.
 ]
 
 { #category : #accessing }
-SWStack >> receiver [
+SWStackOld >> receiver [
 	^ self at: 0
 ]

@@ -252,7 +252,7 @@ SWDecoderBase >> senders: anObject [
 SWDecoderBase >> stack [
 	"The stack at 0 corresponds to a receiver."
 	^ stack ifNil: [
-		stack := SWStack new.
+		stack := SWStackOld new.
 		(stack at: 0)
 			name: 'self';
 			priority: SWType receiverTypePriority.

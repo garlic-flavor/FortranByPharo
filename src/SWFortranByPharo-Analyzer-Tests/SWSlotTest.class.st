@@ -14,7 +14,7 @@ Class {
 SWSlotTest >> setUp [
 	super setUp.
 	
-	slot := SWSlot new.
+	slot := SWSlotOld new.
 ]
 
 { #category : #test }
@@ -54,14 +54,14 @@ SWSlotTest >> testCopyFromTo [
 { #category : #test }
 SWSlotTest >> testEqualsSign [
 	|s1 s2|
-	s1 := SWSlot new.
+	s1 := SWSlotOld new.
 	(s1 at: 1)
 		<< Integer.
 	(s1 at: 2)
 		<< String;
 		priority: SWType userSpecifyingPriority.
 
-	s2 := SWSlot new.
+	s2 := SWSlotOld new.
 	(s2 at: 1)	
 		<< Integer.
 	(s2 at: 2)
