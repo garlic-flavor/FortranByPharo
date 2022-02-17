@@ -60,6 +60,11 @@ SWCompiledCode >> declarings [
 	^ self slot copyFrom: self numHiddenArgs + self numArgs + 1 to: self numHiddenArgs + self numTemps
 ]
 
+{ #category : #'as yet unclassified' }
+SWCompiledCode >> dup [
+	^ self push: self top
+]
+
 { #category : #enumerating }
 SWCompiledCode >> getVariableNameOf: aName ifFound: aFoundBlock ifNone: aNoneBlock [
 	^ self slot detect: [ :each | each name = aName ] ifFound: aFoundBlock ifNone: aNoneBlock
@@ -111,7 +116,8 @@ SWCompiledCode >> operands: operands [
 
 	operands doWithIndex: [ :each :idx |
 		(self slot at: idx) << each
-	]
+	].
+	self receiver priority: SWType receiverTypePriority 
 ]
 
 { #category : #accessing }
@@ -201,4 +207,9 @@ SWCompiledCode >> sourceNode [
 { #category : #accessing }
 SWCompiledCode >> tempNames [
 	^ self subclassResponsibility 
+]
+
+{ #category : #accessing }
+SWCompiledCode >> top [
+	^ self slot last
 ]

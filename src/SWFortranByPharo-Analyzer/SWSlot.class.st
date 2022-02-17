@@ -56,7 +56,7 @@ SWSlot >> push [
 
 { #category : #adding }
 SWSlot >> push: anObject [
-	^ self push << anObject
+	^ self addLast: anObject
 
 ]
 
