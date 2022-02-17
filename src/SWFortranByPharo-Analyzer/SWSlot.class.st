@@ -49,8 +49,14 @@ SWSlot >> pop: itemsCount [
 ]
 
 { #category : #adding }
+SWSlot >> push [
+	^ self addLast: self class elementClass new
+
+]
+
+{ #category : #adding }
 SWSlot >> push: anObject [
-	^ (self addLast: self class elementClass new) << anObject
+	^ self push << anObject
 
 ]
 
