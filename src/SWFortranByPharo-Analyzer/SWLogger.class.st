@@ -56,7 +56,7 @@ SWLogger >> log: msg withStack: aStack [
 	self enabled ifFalse: [ ^ self ].
 	self payload add: (SWLog new
 		message: msg value;
-		stack: aStack copy;
+		stack: aStack deepCopy;
 		context: thisContext sender copy;
 		yourself).
 

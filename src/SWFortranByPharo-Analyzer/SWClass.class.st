@@ -219,7 +219,7 @@ SWClass >> defineMethodSender: aSelector as: anInitializer [
 
 { #category : #api }
 SWClass >> getSenderOf: aMethod with: args [
-	|sender decoder|
+	|sender code|
 
 	sender := self senderTranspilerClass new
 		selector: aMethod selector;
@@ -229,18 +229,18 @@ SWClass >> getSenderOf: aMethod with: args [
 	self methods associationAt: sender ifPresent: [ :assoc | ^ assoc key copy ].
 	self senderInitializer at: sender selector ifPresent: [ :gen ||newS|
 		newS := gen value: sender.
-		decoder := self newDecoderOf: aMethod with: args.
+		code := SWCompiledMethod new: aMethod with: args.
 		newS hasReturn ifFalse: [
-			decoder decode.
-			newS return: decoder return.
+			(self newDecoderOf: code) decode.
+			newS return: code return.
 		].
-		self methods at: newS put: decoder.
+		self methods at: newS put: code.
 		^ newS copy
 	].
-	decoder := self newDecoderOf: aMethod with: args.
-	self methods at: sender put: decoder.
-	decoder decode.
-	sender return: decoder return.
+	code := SWCompiledMethod new: aMethod with: args.
+	self methods at: sender put: code.
+	(self newDecoderOf: code) decode.
+	sender return: code return.
 	^ sender copy
 
 ]
@@ -571,9 +571,24 @@ SWClass >> methods: anObject [
 ]
 
 { #category : #private }
+SWClass >> newDecoderOf: aCompiledCode [
+	|decoder|
+	decoder := (self transpilerClass new: aCompiledCode)
+		classInfo: self;
+		pool: self pool;
+		logger: self pool logger;
+		haltList: self pool owner haltList;
+		yourself.
+	self decoderInitializer at: aCompiledCode selector ifPresent: [ :ini |
+		decoder := ini cull: decoder
+	].
+	^ decoder
+]
+
+{ #category : #private }
 SWClass >> newDecoderOf: aMethod with: args [
 	|decoder|
-	decoder := (self transpilerClass new: aMethod with: args)
+	decoder := (self transpilerClass new: (SWCompiledMethod new: aMethod with: args))
 		classInfo: self;
 		pool: self pool;
 		logger: self pool logger;

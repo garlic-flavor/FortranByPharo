@@ -15,14 +15,14 @@ SWSlot class >> elementClass [
 { #category : #adding }
 SWSlot >> addAll: anArray [
 	anArray do: [ :each |
-		self push: each
+		self push << each
 	]
 ]
 
 { #category : #'instance creation' }
 SWSlot >> allocate: size [
 	[ self size < size ] whileTrue: [
-		self addLast: self class elementClass new
+		self push
 	]
 ]
 
@@ -30,6 +30,11 @@ SWSlot >> allocate: size [
 SWSlot >> at: index [
 	self allocate: index.
 	^ super at: index
+]
+
+{ #category : #accessing }
+SWSlot >> atOffset: offset [
+	^ self at: offset + 1
 ]
 
 { #category : #copying }
@@ -58,22 +63,6 @@ SWSlot >> push [
 SWSlot >> push: anObject [
 	^ self addLast: anObject
 
-]
-
-{ #category : #streaming }
-SWSlot >> putOn: aStream [
-	aStream << '('.
-	self do: [ :each |
-		aStream << each value asString
-	] separatedBy: [
-		aStream << ', '
-	].
-	aStream << ')'
-]
-
-{ #category : #accessing }
-SWSlot >> receiver [
-	^ self at: 1
 ]
 
 { #category : #accessing }

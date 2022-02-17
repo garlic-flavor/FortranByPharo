@@ -14,7 +14,7 @@ SWCompiledBlockTest >> setUp [
 	super setUp.
 	
 	compiledMethod := SWTestProgram>>#_46_locals2:.
-	cc := SWCompiledBlockDripper dripFrom: compiledMethod with: {SWTestProgram. Dictionary }.
+	cc := SWCompiledBlockDripper dripFrom: compiledMethod receiver: SWTestProgram args: { Dictionary }.
 	compiledBlock := cc payload.
 	"Put here a common initialization logic for tests"
 ]
@@ -25,8 +25,23 @@ SWCompiledBlockTest >> testArgNames [
 ]
 
 { #category : #tests }
+SWCompiledBlockTest >> testAtOffset [
+	self assert: (cc slot atOffset: 1) name equals: 'inner1'
+]
+
+{ #category : #tests }
 SWCompiledBlockTest >> testDeclaringNames [
 	self assertCollection: cc declaringNames hasSameElements: #(inner1)
+]
+
+{ #category : #tests }
+SWCompiledBlockTest >> testGetVariableNameOfIfFoundIfNone [
+	self assert: (cc getVariableNameOf: 'arg2' ifFound: [:each | true ] ifNone: [ false ])
+]
+
+{ #category : #tests }
+SWCompiledBlockTest >> testInitialSize [
+	self assert: cc initialSize equals: 4.
 ]
 
 { #category : #tests }
@@ -40,7 +55,7 @@ SWCompiledBlockTest >> testMethodClass [
 ]
 
 { #category : #tests }
-SWCompiledBlockTest >> testNew [
+SWCompiledBlockTest >> testNewReceiverArgs [
 	self assert: cc class equals: SWCompiledBlock.
 	self assert: cc payload class equals: CompiledBlock.
 ]
@@ -51,18 +66,9 @@ SWCompiledBlockTest >> testNumArgs [
 ]
 
 { #category : #tests }
-SWCompiledBlockTest >> testNumHiddenArgs [
-	self assert: cc numHiddenArgs equals: 2
-]
-
-{ #category : #tests }
-SWCompiledBlockTest >> testNumLocals [
-	self assert: cc numLocals equals: 4
-]
-
-{ #category : #tests }
 SWCompiledBlockTest >> testNumTemps [
-	self assert: cc numTemps equals: 2
+	self assert: cc numTemps equals: 2.
+
 ]
 
 { #category : #accessing }
@@ -72,7 +78,8 @@ SWCompiledBlockTest >> testSelector [
 
 { #category : #tests }
 SWCompiledBlockTest >> testSlot [
-	self assert: cc slot size equals: 5.
+	self assert: cc slot size equals: 4.
+
 ]
 
 { #category : #tests }

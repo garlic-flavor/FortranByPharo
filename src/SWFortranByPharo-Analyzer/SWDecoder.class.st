@@ -6,7 +6,6 @@ Class {
 	#superclass : #SymbolicBytecodeBuilder,
 	#instVars : [
 		'code',
-		'senders',
 		'pool',
 		'classInfo',
 		'jumperStack',
@@ -16,9 +15,26 @@ Class {
 	#category : #'SWFortranByPharo-Analyzer-Analyzer'
 }
 
+{ #category : #'instance creation' }
+SWDecoder class >> classTranspilerClass [
+	^ SWClass
+]
+
+{ #category : #'instance creation' }
+SWDecoder class >> new: aCompiledCode [
+	^ self new
+		code: aCompiledCode;
+		yourself
+]
+
 { #category : #'as yet unclassified' }
 SWDecoder class >> poolClass [
 	^ SWPool
+]
+
+{ #category : #accessing }
+SWDecoder class >> senderTranspilerClass [
+	^ SWSender
 ]
 
 { #category : #private }
@@ -31,6 +47,11 @@ SWDecoder >> addBytecode: description [
 
 	self solveJumper
 
+]
+
+{ #category : #private }
+SWDecoder >> atOffset: offset [
+	^ self code slot atOffset: self code numHiddenArgs + offset
 ]
 
 { #category : #'instruction decoding' }
@@ -74,15 +95,17 @@ SWDecoder >> code [
 { #category : #accessing }
 SWDecoder >> code: anObject [
 
-	code := anObject
+	code := anObject.
+	method := code code.
 ]
 
 { #category : #api }
 SWDecoder >> decode [
 	self code isDecodable ifFalse: [ ^ self ].
 	self isDecoded ifTrue: [ ^self ].
-	self logger log: 'decoding start' withStack: self code stack.
+	self logger log: 'decoding start' withStack: self code slot.
 	super decode.
+	^ code
 
 ]
 
@@ -96,19 +119,19 @@ SWDecoder >> directedSuperSend: selector numArgs: numberArguments [
 
 { #category : #'instruction decoding' }
 SWDecoder >> doDup [
-	self code dup.
+	self code slot push: self code slot top.
 	super doDup.
 
 ]
 
 { #category : #'instruction decoding' }
 SWDecoder >> doPop [
-	self code pop.
+	self pop.
 	super doPop.
 
 ]
 
-{ #category : #accessing }
+{ #category : #adding }
 SWDecoder >> haltAt: selector [
 	self haltList add: selector
 ]
@@ -132,12 +155,12 @@ SWDecoder >> isDecoded [
 
 { #category : #'instruction decoding' }
 SWDecoder >> jump: offset [
-	self halt; flag: #toImplement.
+
 	(self jumperStack nextPeriodIs: scanner pc) ifTrue: [|item|
 		item := self jumperStack pop.
 		item endPC: scanner pc + offset.
-		item route1: self stack.
-		self stack: item initialStack.
+		item route1: self code slot.
+		self code slot: item initialStack.
 		self jumperStack push: item.
 	].
 	super jump: offset.
@@ -147,13 +170,11 @@ SWDecoder >> jump: offset [
 { #category : #'instruction decoding' }
 SWDecoder >> jump: offset if: condition [
 
-	self halt; flag: #toImplement.
-
 	self jumperStack push: (SWJumperItem new
 		startPC: oldPC;
 		endPC: scanner pc + offset;
-		condition: self stack pop;
-		initialStack: self stack copy;
+		condition: self pop;
+		initialStack: self code slot copy;
 		yourself).
 
 	super jump: offset if: condition.
@@ -204,9 +225,22 @@ SWDecoder >> methodReturnReceiver [
 
 { #category : #'instruction decoding' }
 SWDecoder >> methodReturnTop [
-	self code return << self code pop.
+	self code return << self pop.
 	super methodReturnTop.
 
+]
+
+{ #category : #private }
+SWDecoder >> newFullClosure: lit numCopied: num [
+	self halt; flag: #toImplement.
+"
+	^ (self class new: lit with: args)
+		pool: self pool;
+		classInfo: self classInfo;
+		logger: self logger;
+		haltList: self haltList;
+		yourself
+"
 ]
 
 { #category : #private }
@@ -239,6 +273,11 @@ SWDecoder >> pool: anObject [
 
 ]
 
+{ #category : #private }
+SWDecoder >> pop [
+	^ self code slot pop
+]
+
 { #category : #'instruction decoding' }
 SWDecoder >> popIntoLiteralVariable: anAssociation [
 
@@ -265,8 +304,8 @@ SWDecoder >> popIntoRemoteTemp: remoteTempIndex inVectorAt: tempVectorIndex [
 SWDecoder >> popIntoTemporaryVariable: offset [
 	|left right|
 
-	left := self code atOffset: offset.
-	right := self code pop.
+	left := self atOffset: offset.
+	right := self pop.
 
 	left << right.
 
@@ -274,9 +313,25 @@ SWDecoder >> popIntoTemporaryVariable: offset [
 
 ]
 
+{ #category : #private }
+SWDecoder >> popSlotForSender: num [
+	^ SWSlot newFrom: ((self code slot pop: num + 1) collect: [ :each | each value ])
+
+]
+
 { #category : #printing }
 SWDecoder >> printOn: aStream [
 	self putOn: aStream
+]
+
+{ #category : #private }
+SWDecoder >> push [
+	^ self code slot push
+]
+
+{ #category : #private }
+SWDecoder >> push: anObject [
+	^ self code slot push: anObject
 ]
 
 { #category : #'instruction decoding' }
@@ -321,7 +376,7 @@ SWDecoder >> pushConsArrayWithElements: numElements [
 
 { #category : #'instruction decoding' }
 SWDecoder >> pushConstant: obj [
-	self code push << obj class.
+	self push << obj class.
 
 	super pushConstant: obj.
 
@@ -338,8 +393,8 @@ SWDecoder >> pushFullClosure: lit numCopied: numCopied receiverOnStack: rcvr ign
 
 	"I only interest in type information on the stack.
 	So, I decode a closure before invoking. it's ok."
-	self logger log: 'decode closure' withStack: self stack.
-	decoder := self newFullClosure: lit with: (self stack popSlotForClosure: numCopied).
+	self logger log: 'decode closure' withStack: self code slot.
+	decoder := self newFullClosure: lit with: numCopied
 	decoder decode.
 	ret := (SWContainerType new: BlockClosure)
 		elementType: decoder return value;
@@ -355,7 +410,7 @@ SWDecoder >> pushFullClosure: lit numCopied: numCopied receiverOnStack: rcvr ign
 
 { #category : #'instruction decoding' }
 SWDecoder >> pushLiteralVariable: anAssociation [
-	self code push << anAssociation value class.
+	self push << anAssociation value class.
 
 	super pushLiteralVariable: anAssociation.
 
@@ -371,7 +426,7 @@ SWDecoder >> pushNewArrayOfSize: numElements [
 
 { #category : #'instruction decoding' }
 SWDecoder >> pushReceiver [
-	self code push: self code receiver.
+	self push: self code slot receiver.
 
 	super pushReceiver.
 
@@ -379,7 +434,7 @@ SWDecoder >> pushReceiver [
 
 { #category : #'instruction decoding' }
 SWDecoder >> pushReceiverVariable: offset [
-	self code push: (self classInfo getVariableInfoAtOffset: offset).
+	self push: (self classInfo getVariableInfoAtOffset: offset).
 	super pushReceiverVariable: offset
 ]
 
@@ -392,37 +447,37 @@ SWDecoder >> pushRemoteTemp: remoteTempIndex inVectorAt: tempVectorIndex [
 
 { #category : #'instruction decoding' }
 SWDecoder >> pushTemporaryVariable:  offset [
-	self code push: (self code atOffset: offset).
+	self push: (self atOffset: offset).
 	super pushTemporaryVariable: offset.
 
 ]
 
 { #category : #streaming }
 SWDecoder >> putOn: aStream [
-	aStream << self selector
+	aStream << self code selector
 ]
 
 { #category : #'instruction decoding' }
 SWDecoder >> send: selector super: supered numArgs: numberArguments [
 	|operands sender|
-	self halt; flag: #toImplement.
-	self logger log: [ 'decode: ', selector ] withStack: self stack.
+	self logger log: [ 'decode: ', selector ] withStack: self code slot.
 	(self haltList includes: selector) ifTrue: [ self halt ].
 
-	operands := self stack popSlotForSender: numberArguments.
+	operands := self popSlotForSender: numberArguments.
 	sender := (self pool newSenderOf: selector super: supered with: operands)
 		node: (self method sourceNodeForPC: oldPC);
 		yourself.
-	self senders at: sender node put: sender.
-	self stack push: sender return.
+	self code senders at: sender node put: sender.
+	self push: sender return.
 
 	"A special case for user specifying."
 	(selector = #declare:as: and: [ operands receiver value = SWType class ]) ifTrue: [|assoc|
+		self halt; flag: #toImplement.
 		assoc := (self method sourceNodeForPC: oldPC) evaluate.
 		(assoc key = #return ifTrue: [
-			self return
+			self code return
 		] ifFalse: [
-			(self getVariableInfoOf: assoc key) 
+			self code getVariableInfoOf: assoc key
 		])
 			<<  assoc value
 	].
@@ -430,37 +485,44 @@ SWDecoder >> send: selector super: supered numArgs: numberArguments [
 
 ]
 
-{ #category : #accessing }
-SWDecoder >> senders [
-
-	^ senders ifNil: [ senders := OrderedDictionary new ]
-]
-
-{ #category : #accessing }
-SWDecoder >> senders: anObject [
-
-	senders := anObject
-]
-
 { #category : #private }
 SWDecoder >> solveJumper [
 	|item node sender|
-	self halt; flag: #toImplement.
 	(self jumperStack nextPeriodIs: scanner pc) ifFalse: [ ^ self  ]. 
 	"Below evaluates when ifTrue:ifFalse:."
+
 	item := self jumperStack pop.
 	node := self method sourceNodeForPC: item startPC.
 	(self haltList includes: node selector) ifTrue: [ self halt ].
-	item hasRoute1 ifFalse: [
-		self stack: item initialStack
+	item hasRoute1 ifTrue: [
+		self code senders at: node arguments first put: (SWPseudoBlock new
+			payload: node arguments first;
+			numHiddenArgs: self code numHiddenArgs + self code numTemps;
+			slot: item route1;
+			senders: self code senders;
+			return: item route1 top;
+			yourself).
+		self code senders at: node arguments second put: (SWPseudoBlock new
+			payload: node arguments second;
+			numHiddenArgs: self code numHiddenArgs + self code numTemps;
+			slot: self code slot copy;
+			senders: self code senders;
+			return: self top;
+			yourself).
+		self top << item route1 top
+	] ifFalse: [
+		self code senders at: node arguments first put: (SWPseudoBlock new
+			payload: node arguments first;
+			numHiddenArgs: self code numHiddenArgs + self code numTemps;
+			slot: self code slot;
+			senders: self code senders;
+			return: self top;
+			yourself).
 	].
 
-
-
-	self stack top << item route1.
-	sender := self pool newSenderOf: node selector super: false with: (SWSlotOld newFrom: { item condition. self stack top }).
+	sender := self pool newSenderOf: node selector super: false with: (SWSlot newFrom: { item condition. self top }).
 	sender node: node.
-	self senders at: sender node put: sender.
+	self code senders at: node put: sender.
 	
 	self solveJumper
 	
@@ -477,7 +539,7 @@ self halt; flag: #toImplement.
 
 { #category : #'instruction decoding' }
 SWDecoder >> storeIntoReceiverVariable: offset [
-	(self classInfo getVariableInfoAtOffset: offset) << self code top.
+	(self classInfo getVariableInfoAtOffset: offset) << self top.
 	super storeIntoReceiverVariable: offset
 ]
 
@@ -490,11 +552,16 @@ SWDecoder >> storeIntoRemoteTemp: remoteTempIndex inVectorAt: tempVectorIndex [
 { #category : #'instruction decoding' }
 SWDecoder >> storeIntoTemporaryVariable: offset [
 	|left right|
-	left := self code atOffset: offset.
-	right := self code top.
+	left := self atOffset: offset.
+	right := self top.
 	left << right.
 
 	super storeIntoTemporaryVariable: offset
+]
+
+{ #category : #private }
+SWDecoder >> top [
+	^ self code slot top
 ]
 
 { #category : #'instruction decoding' }

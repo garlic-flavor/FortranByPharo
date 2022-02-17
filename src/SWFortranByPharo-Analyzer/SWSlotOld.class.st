@@ -51,7 +51,6 @@ SWSlotOld >> at: index [
 SWSlotOld >> atOffset: offset [
 	"offset is  0 based.".
 	"offset 0 responds to the first argument."
-	self error; flag: #toRemove.
 	^ self payload at: (offset + 1) ifAbsentPut: [ SWVariableTypeInfo new ].
 ]
 

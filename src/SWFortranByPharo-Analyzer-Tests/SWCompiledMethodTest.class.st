@@ -12,8 +12,8 @@ Class {
 SWCompiledMethodTest >> setUp [
 	super setUp.
 	compiledMethod := SWTestProgram >>#_45_locals:.
-	cc := SWCompiledMethod new: compiledMethod with: { SWTestProgram. Dictionary }
-	"Put here a common initialization logic for tests"
+	cc := SWCompiledMethod new: compiledMethod receiver: SWTestProgram args: { Dictionary }
+
 ]
 
 { #category : #tests }
@@ -25,11 +25,12 @@ SWCompiledMethodTest >> testArgNames [
 SWCompiledMethodTest >> testArguments [
 	self assert: cc arguments size equals: 1.
 	self assert: cc arguments first equals: Dictionary.
+
 ]
 
 { #category : #tests }
 SWCompiledMethodTest >> testAtOffset [
-	self assert: (cc atOffset: 0) equals: Dictionary
+	self assert: (cc slot atOffset: 0) equals: Dictionary
 ]
 
 { #category : #tests }
@@ -49,13 +50,13 @@ SWCompiledMethodTest >> testGetVariableNameOfIfFoundIfNone [
 ]
 
 { #category : #tests }
-SWCompiledMethodTest >> testIsDecodable [
-	self assert: cc isDecodable
+SWCompiledMethodTest >> testInitialSize [
+	self assert: cc initialSize equals: 4
 ]
 
 { #category : #tests }
-SWCompiledMethodTest >> testLocals [
-	self assert: cc locals size equals: 4.
+SWCompiledMethodTest >> testIsDecodable [
+	self assert: cc isDecodable
 ]
 
 { #category : #tests }
@@ -64,18 +65,16 @@ SWCompiledMethodTest >> testMethodClass [
 ]
 
 { #category : #tests }
-SWCompiledMethodTest >> testNewWith [
-	self assert: cc class equals: SWCompiledMethod
+SWCompiledMethodTest >> testNewReceiverArgs [
+	self assert: cc class equals: SWCompiledMethod.
+	self assert: cc slot size equals: 4.
+	self assert: cc slot first value equals: Dictionary.
+
 ]
 
 { #category : #tests }
 SWCompiledMethodTest >> testNumArgs [
 	self assert: cc numArgs equals: 1
-]
-
-{ #category : #tests }
-SWCompiledMethodTest >> testNumLocals [
-	self assert: cc numLocals equals: 4.
 ]
 
 { #category : #tests }

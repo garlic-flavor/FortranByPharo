@@ -11,10 +11,21 @@ Class {
 	#instVars : [
 		'payload',
 		'slot',
-		'return'
+		'receiver',
+		'return',
+		'senders'
 	],
 	#category : #'SWFortranByPharo-Analyzer-Analyzer'
 }
+
+{ #category : #'instance creation' }
+SWCompiledCode class >> new: code receiver: receiver args: args [
+	^ self new
+		payload: code;
+		receiver: receiver;
+		arguments: args;
+		yourself
+]
 
 { #category : #accessing }
 SWCompiledCode >> argNames [
@@ -23,31 +34,16 @@ SWCompiledCode >> argNames [
 
 { #category : #accessing }
 SWCompiledCode >> arguments [
-	^ self slot copyFrom: self numHiddenArgs + 1 to: self numHiddenArgs + self numArgs
+	^ self slot copyFrom: 1 to: self numArgs
 ]
 
 { #category : #accessing }
-SWCompiledCode >> atOffset: anOffset [
-	^ self slot at: anOffset + self numHiddenArgs + 1
-]
+SWCompiledCode >> arguments: arguments [
 
-{ #category : #accessing }
-SWCompiledCode >> code [
-	^ self payload
-]
+	arguments doWithIndex: [ :each :idx |
+		(self slot at: idx) << each
+	]
 
-{ #category : #copying }
-SWCompiledCode >> copySlotForFullClosure: numCopied [
-	^ (SWSlot new: numCopied + self numHiddenArgs)
-		addLast: self hiddenArgs;
-		addLast: (self copyTop: numCopied);
-		yourself
-
-]
-
-{ #category : #copying }
-SWCompiledCode >> copyTop: num [
-	^ self slot copyFrom: self slot size - num + 1 to: self slot size.
 ]
 
 { #category : #accessing }
@@ -57,12 +53,7 @@ SWCompiledCode >> declaringNames [
 
 { #category : #accessing }
 SWCompiledCode >> declarings [
-	^ self slot copyFrom: self numHiddenArgs + self numArgs + 1 to: self numHiddenArgs + self numTemps
-]
-
-{ #category : #'as yet unclassified' }
-SWCompiledCode >> dup [
-	^ self push: self top
+	^ self slot copyFrom: self numArgs + 1 to: self numTemps
 ]
 
 { #category : #enumerating }
@@ -71,18 +62,13 @@ SWCompiledCode >> getVariableNameOf: aName ifFound: aFoundBlock ifNone: aNoneBlo
 ]
 
 { #category : #accessing }
-SWCompiledCode >> hiddenArgs [
-	^ self slot copyFrom: 1 to: self numHiddenArgs
+SWCompiledCode >> initialSize [
+	^ self subclassResponsibility 
 ]
 
 { #category : #tests }
 SWCompiledCode >> isDecodable [
 	^ self subclassResponsibility 
-]
-
-{ #category : #accessing }
-SWCompiledCode >> locals [
-	^ self slot copyFrom: self numHiddenArgs + 1  to: self numHiddenArgs + self numLocals
 ]
 
 { #category : #accessing }
@@ -96,28 +82,8 @@ SWCompiledCode >> numArgs [
 ]
 
 { #category : #accessing }
-SWCompiledCode >> numHiddenArgs [
-	^ self subclassResponsibility
-]
-
-{ #category : #accessing }
-SWCompiledCode >> numLocals [
-	^ self subclassResponsibility 
-]
-
-{ #category : #accessing }
 SWCompiledCode >> numTemps [
 	^ self subclassResponsibility 
-]
-
-{ #category : #accessing }
-SWCompiledCode >> operands: operands [
-	"The first element of operands is a type of receiver."
-
-	operands doWithIndex: [ :each :idx |
-		(self slot at: idx) << each
-	].
-	self receiver priority: SWType receiverTypePriority 
 ]
 
 { #category : #accessing }
@@ -132,19 +98,9 @@ SWCompiledCode >> payload: anObject [
 	payload := anObject
 ]
 
-{ #category : #removing }
-SWCompiledCode >> pop [
-	^ self slot pop
-]
-
 { #category : #printing }
 SWCompiledCode >> printOn: aStream [
 	^ self putOn: aStream
-]
-
-{ #category : #adding }
-SWCompiledCode >> push: anObject [
-	^ self slot push: anObject
 ]
 
 { #category : #streaming }
@@ -154,12 +110,22 @@ SWCompiledCode >> putOn: aStream [
 
 { #category : #accessing }
 SWCompiledCode >> receiver [
-	^ self slot receiver
+	^ receiver ifNil: [
+		receiver := SWVariableTypeInfo new
+			priority: SWType receiverTypePriority;
+			yourself
+	]
+]
+
+{ #category : #accessing }
+SWCompiledCode >> receiver: anObject [
+
+	receiver := anObject
 ]
 
 { #category : #accessing }
 SWCompiledCode >> receiverClass [
-	^ self slot receiver value
+	^ receiver value
 ]
 
 { #category : #accessing }
@@ -180,14 +146,25 @@ SWCompiledCode >> selector [
 ]
 
 { #category : #accessing }
+SWCompiledCode >> senders [
+
+	^ senders ifNil: [ senders := OrderedDictionary new ]
+]
+
+{ #category : #accessing }
+SWCompiledCode >> senders: anObject [
+
+	senders := anObject
+]
+
+{ #category : #accessing }
 SWCompiledCode >> slot [
 
 	^ slot ifNil: [
 		slot := SWSlot new.
-		slot allocate: self numLocals + 1.
-		slot first name: 'self'.
+		slot allocate: self initialSize.
 		self tempNames doWithIndex: [ :each :idx |
-			(slot at: idx + 1) name: each
+			(slot at: idx) name: each
 		].
 		slot
 	]
@@ -207,9 +184,4 @@ SWCompiledCode >> sourceNode [
 { #category : #accessing }
 SWCompiledCode >> tempNames [
 	^ self subclassResponsibility 
-]
-
-{ #category : #accessing }
-SWCompiledCode >> top [
-	^ self slot last
 ]

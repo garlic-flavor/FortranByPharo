@@ -10,14 +10,6 @@ Class {
 	#category : #'SWFortranByPharo-Analyzer-Analyzer'
 }
 
-{ #category : #'instance creation' }
-SWCompiledBlock class >> new: aCompiledBlock stack: aStack [
-	^ self new
-		payload: aCompiledBlock;
-		slot: aStack;
-		yourself
-]
-
 { #category : #accessing }
 SWCompiledBlock >> argNames [
 	^ payload argumentNames
@@ -26,6 +18,12 @@ SWCompiledBlock >> argNames [
 { #category : #accessing }
 SWCompiledBlock >> declaringNames [
 	^ self payload sourceNode temporaryNames
+]
+
+{ #category : #accessing }
+SWCompiledBlock >> initialSize [
+	^ self payload numTemps
+
 ]
 
 { #category : #testing }
@@ -45,17 +43,6 @@ SWCompiledBlock >> numArgs [
 ]
 
 { #category : #accessing }
-SWCompiledBlock >> numHiddenArgs [
-	^ numHiddenArgs
-]
-
-{ #category : #accessing }
-SWCompiledBlock >> numLocals [
-	^ self payload numTemps
-
-]
-
-{ #category : #accessing }
 SWCompiledBlock >> numTemps [
 	^ self payload numArgs + self payload sourceNode temporaries size
 
@@ -64,16 +51,6 @@ SWCompiledBlock >> numTemps [
 { #category : #accessing }
 SWCompiledBlock >> selector [
 	^ 'closure'
-]
-
-{ #category : #accessing }
-SWCompiledBlock >> slot: anObject [
-	super slot: anObject.
-	numHiddenArgs := anObject size.
-	self tempNames do: [ :each |
-		(self slot push) name: each
-	].
-	self slot allocate: numHiddenArgs + self numLocals - self numArgs.
 ]
 
 { #category : #accessing }

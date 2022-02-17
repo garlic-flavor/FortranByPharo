@@ -54,6 +54,12 @@ SWPseudoBlock >> numHiddenArgs [
 ]
 
 { #category : #accessing }
+SWPseudoBlock >> numHiddenArgs: num [
+	numHiddenArgs := num
+	
+]
+
+{ #category : #accessing }
 SWPseudoBlock >> numLocals [
 	^ self payload temporaries size
 ]
@@ -71,9 +77,8 @@ SWPseudoBlock >> selector [
 { #category : #accessing }
 SWPseudoBlock >> slot: anObject [
 	super slot: anObject.
-	numHiddenArgs := anObject size.
-	self tempNames do: [ :each |
-		(self slot push) name: each
+	self tempNames doWithIndex: [ :each :idx|
+		(self slot at: self numHiddenArgs + idx) name: each
 	].
 ]
 

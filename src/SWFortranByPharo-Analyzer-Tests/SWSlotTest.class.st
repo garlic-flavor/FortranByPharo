@@ -93,18 +93,14 @@ SWSlotTest >> testPush [
 	slot push: (SWVariableTypeInfo new: SmallInteger).
 	self assert: slot size equals: 1.
 	self assert: slot pop equals: SmallInteger.
-]
 
-{ #category : #tests }
-SWSlotTest >> testReceiver [
-	slot receiver << SmallInteger.
+	slot push << String.
 	self assert: slot size equals: 1.
-	self assert: slot receiver equals: SmallInteger.
-
+	self assert: slot pop equals: String
 ]
 
 { #category : #tests }
 SWSlotTest >> testTop [
-	slot push: SmallInteger.
+	slot push << SmallInteger.
 	self assert: slot top equals: SmallInteger.
 ]

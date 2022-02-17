@@ -20,7 +20,7 @@ SWDecoderTest >> _14_TestCase [
 SWDecoderTest >> decode: method withArguments: arg2 [
 	|dec|
 
-	dec := SWDecoder new: method with: arg2.
+	dec := SWDecoder new: (SWCompiledMethod new: method with: arg2).
 	dec logger enabled: true.
 	dec classInfo: (dec pool getClassTranspiler: method methodClass).
 	dec decode.
@@ -34,6 +34,14 @@ SWDecoderTest >> decodeNo: no withArguments: args [
 ]
 
 { #category : #'as yet unclassified' }
+SWDecoderTest >> i_returnTypeOfNo: no withArguments: args equals: aType [
+	|dec|
+	dec := self decodeNo: no withArguments: args.
+	self assert: dec code return value equals: aType.
+	dec inspect
+]
+
+{ #category : #'as yet unclassified' }
 SWDecoderTest >> inspectNo: no withArguments: args [
 	(self decodeNo: no withArguments: args) inspect
 ]
@@ -42,25 +50,7 @@ SWDecoderTest >> inspectNo: no withArguments: args [
 SWDecoderTest >> returnTypeOfNo: no withArguments: args equals: aType [
 	|dec|
 	dec := self decodeNo: no withArguments: args.
-	self assert: dec return value equals: aType
-]
-
-{ #category : #'private - utility' }
-SWDecoderTest >> returnValueOf: arg1 withArguments: arg2 equals: arg3 [
-	|analyzer|
-	analyzer := SWDecoder new: arg1 with: arg2.
-	analyzer logger enabled: true.
-	analyzer decode.
-	self
-		assert: analyzer return value
-		equals: arg3
-]
-
-{ #category : #'private - utility' }
-SWDecoderTest >> returnValueOfMy: arg1 withArguments: arg2 equals: arg3 [
-
-	self returnValueOf: self class>>arg1 withArguments: ({ self class }, arg2) equals: arg3
-
+	self assert: dec code return value equals: aType
 ]
 
 { #category : #tests }
@@ -76,6 +66,7 @@ SWDecoderTest >> test_02_call_wellknown_method [
 	self
 		returnTypeOfNo: 4 withArguments: { Integer } equals: Integer;
 		returnTypeOfNo: 4 withArguments: { Float } equals: Float
+
 ]
 
 { #category : #tests }
@@ -91,6 +82,7 @@ SWDecoderTest >> test_03_jumpers [
 		returnTypeOfNo: 20 withArguments: { UndefinedObject } equals: SmallInteger;
 		returnTypeOfNo: 24 withArguments: { UndefinedObject } equals: SmallInteger;
 		returnTypeOfNo: 26 withArguments: { UndefinedObject } equals: SmallInteger
+
 ]
 
 { #category : #tests }
@@ -244,4 +236,9 @@ SWDecoderTest >> test_22_jumper2 [
 { #category : #tests }
 SWDecoderTest >> test_23_closure_local_variable [
 	self inspectNo: 43 withArguments: {  }
+]
+
+{ #category : #tests }
+SWDecoderTest >> test_24_closure [
+	self i_returnTypeOfNo: 46 withArguments: { SmallInteger } equals: SmallInteger
 ]
