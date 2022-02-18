@@ -15,7 +15,7 @@ Class {
 SWCompiledBlockDripper class >> dripFrom: aCompiledMethod receiver: receiver args: args [
 	^ self new
 		method: aCompiledMethod;
-		cm: (SWCompiledMethod new: aCompiledMethod receiver: receiver args: args);
+		cm: (SWCompiledMethod new: aCompiledMethod receiver: receiver with: args);
 		decode;
 		cc
 ]
@@ -40,7 +40,7 @@ SWCompiledBlockDripper >> cm: anObject [
 { #category : #'instruction decoding' }
 SWCompiledBlockDripper >> pushFullClosure: lit numCopied: numCopied receiverOnStack: rcvr ignoreOuterContext: ignore [
 
-	cc := cc ifNil: [SWCompiledBlock new: lit  receiver: cm receiver args: (self cm slot  pop: numCopied) ].
+	cc := cc ifNil: [SWCompiledBlock new: lit  receiver: cm receiver with: (self cm slot  pop: numCopied) ].
 	
 	^ super pushFullClosure: lit numCopied: numCopied receiverOnStack: rcvr ignoreOuterContext: ignore
 ]

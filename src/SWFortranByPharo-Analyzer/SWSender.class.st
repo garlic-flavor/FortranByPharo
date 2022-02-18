@@ -7,7 +7,8 @@ Class {
 	#instVars : [
 		'selector',
 		'return',
-		'operands',
+		'receiver',
+		'arguments',
 		'node',
 		'method'
 	],
@@ -17,24 +18,31 @@ Class {
 { #category : #comparing }
 SWSender >> = right [
 	self selector = right selector ifFalse: [ ^ false ].
-	^ self operands = right operands
+	self receiver = right receiver ifFalse: [ ^ false ].
+	^ self arguments = right arguments
 ]
 
-{ #category : #testing }
-SWSender >> hasReturn [
-	^ return isNotNil
+{ #category : #accessing }
+SWSender >> arguments [
+
+	^ arguments
+]
+
+{ #category : #accessing }
+SWSender >> arguments: anObject [
+
+	arguments := anObject
 ]
 
 { #category : #comparing }
 SWSender >> hash [
 	"The hash depends on this method and its operands."
 	|args buf|
-	args := self operands.
-	buf := OrderedCollection new: self operands size + 1.
+	args := self arguments.
+	buf := OrderedCollection new: args size + 2.
 	buf add: self selector.
-	buf addAll: (self operands collect: [ :one |
-		one
-	]).
+	buf add: self receiver.
+	buf addAll: args.
 	^ buf hash
 ]
 
@@ -62,18 +70,6 @@ SWSender >> node: anObject [
 	node := anObject
 ]
 
-{ #category : #accessing }
-SWSender >> operands [
-
-	^ operands ifNil: [ operands := SWSlotOld new ]
-]
-
-{ #category : #accessing }
-SWSender >> operands: anObject [
-
-	operands := anObject
-]
-
 { #category : #printing }
 SWSender >> printOn: aStream [
 	self putOn: aStream
@@ -83,13 +79,25 @@ SWSender >> printOn: aStream [
 SWSender >> putOn: aStream [
 	aStream
 		<< self selector;
-		<< self operands
+		<< self arguments
+]
+
+{ #category : #accessing }
+SWSender >> receiver [
+
+	^ receiver
+]
+
+{ #category : #accessing }
+SWSender >> receiver: anObject [
+
+	receiver := anObject
 ]
 
 { #category : #accessing }
 SWSender >> return [
 
-	^ return ifNil: [ return := SWVariableTypeInfo new ]
+	^ return
 ]
 
 { #category : #accessing }
@@ -112,6 +120,5 @@ SWSender >> selector: anObject [
 
 { #category : #accessing }
 SWSender >> specifyReturnTypeAs: aType [
-	self return
-		<< aType
+	return := SWVariableTypeInfo new: aType
 ]

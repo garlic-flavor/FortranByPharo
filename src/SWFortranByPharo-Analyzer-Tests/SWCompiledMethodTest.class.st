@@ -12,7 +12,7 @@ Class {
 SWCompiledMethodTest >> setUp [
 	super setUp.
 	compiledMethod := SWTestProgram >>#_45_locals:.
-	cc := SWCompiledMethod new: compiledMethod receiver: SWTestProgram args: { Dictionary }
+	cc := SWCompiledMethod new: compiledMethod receiver: SWTestProgram with: { Dictionary }
 
 ]
 

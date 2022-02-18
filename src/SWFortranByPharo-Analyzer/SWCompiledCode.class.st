@@ -19,7 +19,7 @@ Class {
 }
 
 { #category : #'instance creation' }
-SWCompiledCode class >> new: code receiver: receiver args: args [
+SWCompiledCode class >> new: code receiver: receiver with: args [
 	^ self new
 		payload: code;
 		receiver: receiver;

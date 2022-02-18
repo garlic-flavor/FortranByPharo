@@ -50,15 +50,7 @@ SWClass >> addSenderInitializer: aName with: initializer [
 { #category : #accessing }
 SWClass >> classSide [
 
-	^ classSide ifNil: [
-		classSide := self class new
-			pool: self pool;
-			targetClass: self targetClass classSide;
-			yourself.
-		classSide
-			readyInitializers;
-			yourself
-	]
+	^ classSide
 ]
 
 { #category : #accessing }
@@ -209,39 +201,41 @@ SWClass >> decoderInitializer: anObject [
 	decoderInitializer := anObject
 ]
 
-{ #category : #'public API' }
+{ #category : #api }
 SWClass >> defineMethodBody: selector as: generator [
 ]
 
-{ #category : #'public API' }
+{ #category : #api }
 SWClass >> defineMethodSender: aSelector as: anInitializer [
 ]
 
 { #category : #api }
-SWClass >> getSenderOf: aMethod with: args [
+SWClass >> getSenderOf: aMethod receiver: receiver with: args [
 	|sender code|
 
 	sender := self senderTranspilerClass new
 		selector: aMethod selector;
 		method: aMethod;
-		operands: args;
+		receiver: receiver;
+		arguments: args;
 		yourself.
 	self methods associationAt: sender ifPresent: [ :assoc | ^ assoc key copy ].
-	self senderInitializer at: sender selector ifPresent: [ :gen ||newS|
+
+	code := SWCompiledMethod new: aMethod receiver: receiver with: args.
+	^ self senderInitializer at: sender selector ifPresent: [ :gen ||newS|
 		newS := gen value: sender.
-		code := SWCompiledMethod new: aMethod with: args.
-		newS hasReturn ifFalse: [
+		self methods at: newS put: code.
+		newS return ifNil: [
 			(self newDecoderOf: code) decode.
 			newS return: code return.
 		].
-		self methods at: newS put: code.
-		^ newS copy
-	].
-	code := SWCompiledMethod new: aMethod with: args.
-	self methods at: sender put: code.
-	(self newDecoderOf: code) decode.
-	sender return: code return.
-	^ sender copy
+		newS copy
+	] ifAbsent: [
+		self methods at: sender put: code.
+		(self newDecoderOf: code) decode.
+		sender return: code return.
+		sender copy
+	]
 
 ]
 
@@ -267,295 +261,8 @@ SWClass >> getVariableInfoOf: aName ifPresent: aPresentBlock [
 
 { #category : #testing }
 SWClass >> hasVariable: aName [
+self error; flag: #toRemove.
 	^ self slot detect: [ :each | each isNotNil and: [ each name = aName ] ]  ifFound: [ :dummy | true ] ifNone: [ false ]
-]
-
-{ #category : #initialization }
-SWClass >> initialize: aClass [
-	|initializer|
-
-	aClass ifNil: [ ^ self ].
-	self initialize: aClass superclass.
-
-	initializer := (String streamContents: [ :s |
-		s
-			<< 'initialize_';
-			<< aClass instanceSide name;
-			<< (aClass isClassSide ifTrue: [ 'Class' ] ifFalse: [ '' ])
-	]) asSymbol.
-
-	(self respondsTo: initializer) ifTrue: [
-		self perform: initializer
-	].
-
-]
-
-{ #category : #initialization }
-SWClass >> initialize_AbstractBinaryFileStream [
-	self
-		declareMethodReturnsReceiver: #position:
-]
-
-{ #category : #initialization }
-SWClass >> initialize_AbstractFileReference [
-	self
-		declareMethodReturnsReceiver: #joinPath:;
-		declareMethod: #contains: asReturn: Boolean;
-		declareMethod: #exists asReturn: Boolean;
-		declareMethodReturnsReceiver: #resolve;
-		declareMethodReturnsReceiver: #relativeTo:;
-		declareMethod: #fullName asReturn: String;
-		declareMethod: #contents asReturn: String;
-		declareMethodReturnsReceiver: #parent;
-		declareMethodReturnsFirstArgumentsElement: #writeStreamDo:
-]
-
-{ #category : #initialization }
-SWClass >> initialize_Behavior [
-	self
-		declareMethodReturnsReceiversInstance: #basicNew:;
-		declareMethodReturnsReceiversInstance: #basicNew
-]
-
-{ #category : #initialization }
-SWClass >> initialize_BinaryFileStream [
-	self
-		declareMethodReturnsReceiver: #truncate:
-]
-
-{ #category : #initialization }
-SWClass >> initialize_BlockClosure [
-	self
-		declareMethodReturnsReceiversElement: #on:do:;
-		declareMethodReturnsReceiversElement: #ensure:
-]
-
-{ #category : #initialization }
-SWClass >> initialize_Boolean [ 
-	self
-		declareMethodReturnsFirstArgument: #ifTrue:;
- 		declareMethodReturnsFirstArgument: #ifFalse:;
-		declareMethodReturnsFirstArgument: #ifTrue:ifFalse:;
-		declareMethodReturnsFirstArgument: #ifFalse:ifTrue:;
-		declareMethodReturnsFirstArgument: #and:;
-		declareMethodReturnsFirstArgument: #or:
-]
-
-{ #category : #initialization }
-SWClass >> initialize_Character [
-	self
-		declareMethod: #asInteger asReturn: Integer
-]
-
-{ #category : #initialization }
-SWClass >> initialize_CharacterClass [
-	self
-		declareMethodReturnsReceiversInstance: #value:
-]
-
-{ #category : #initialization }
-SWClass >> initialize_Collection [
-	self
-		declareMethodReturnsSecondArgument: #detect:ifNone:;
-		declareMethodReturnsFirstArgument: #inject:into:;
-		declareMethod: #anySatisfy: asReturn: Boolean
-]
-
-{ #category : #initialization }
-SWClass >> initialize_DateAndTimeClass [
-	self
-		declareMethodReturnsReceiversClass: #now
-]
-
-{ #category : #initialization }
-SWClass >> initialize_Dictionary [
-	self
-		declareMethodReturnsSecondArgument: #at:put:;
-		declareMethodReturnsSecondArgumentsElement: #at:ifAbsent:;
-		declareMethodReturnsSecondArgumentsElement: #at:ifAbsentPut:;
-		declareMethod: #includesKey: asReturn: Boolean;
-		declareMethodReturnsReceiver: #stonOn:
-]
-
-{ #category : #initialization }
-SWClass >> initialize_DictionaryClass [
-	self
-		declareMethodReturnsReceiversClass: #fromSton:
-]
-
-{ #category : #initialization }
-SWClass >> initialize_Exception [
-	self
-		declareMethodReturnsReceiver: #signal
-]
-
-{ #category : #initialization }
-SWClass >> initialize_IntervalClass [
-	self
-		setBreakpointOn: #new
-]
-
-{ #category : #initialization }
-SWClass >> initialize_Magnitude [
-	self
-		declareMethodAsCompareOperator: #>=;
-		declareMethodAsCompareOperator: #<=;
-		declareMethodAsCompareOperator: #>;
-		declareMethodAsCompareOperator: #<";
-		defineMethodAsCompareOperator: #="
-
-]
-
-{ #category : #initialization }
-SWClass >> initialize_Number [
-	self
-		declareMethodAsBinaryOperator: #+;
-		declareMethodAsBinaryOperator: #-;
-		declareMethodAsBinaryOperator: #*;
-		declareMethodAsBinaryOperator: #/
-		
-]
-
-{ #category : #initialization }
-SWClass >> initialize_Object [
-	self
-		declareMethodAsCompareOperator: #=;
-		declareMethod: #error: asReturn: nil;
-		declareMethod: #printString asReturn: String;
-		declareMethod: #size asReturn: Integer;
-		declareMethod: #asString asReturn: String;
-		declareMethodReturnsFirstArgument: #at:put:;
-		declareMethod: #at: asReturn: Object;
-		declareMethodReturnsReceiver: #putOn:;
-		declareMethodReturnsReceiver: #assert:description:
-]
-
-{ #category : #initialization }
-SWClass >> initialize_OrderedDictionary [
-	self
-		declareMethodReturnsReceiver: #initialize:
-]
-
-{ #category : #initialization }
-SWClass >> initialize_Path [
-	self
-		declareMethodReturnsReceiver: #/;
-		declareMethod: #basename asReturn: String;
-		declareMethodReturnsReceiver: #withName:extension:;
-		declareMethod: #pathString asReturn: String
-]
-
-{ #category : #initialization }
-SWClass >> initialize_PathClass [
-	self
-		declareMethodReturnsReceiversInstance: #from:
-]
-
-{ #category : #initialization }
-SWClass >> initialize_ProtoObject [
-	self
-		declareMethodAsCompareOperator: #==;
-		declareMethodReturnsReceiversClass: #class;
-		declareMethodReturnsFirstArgument: #ifNil:;
-		declareMethodReturnsFirstArgument: #ifNotNil:;
-		declareMethodReturnsFirstArgument: #ifNil:ifNotNil;
-		declareMethodReturnsFirstArgument: #ifNotNil:ifNil:
-]
-
-{ #category : #initialization }
-SWClass >> initialize_STONClass [
-	self
-		declareMethod: #jsonWriter asReturn: STONWriter;
-		declareMethod: #fromString: asReturn: Object
-]
-
-{ #category : #initialization }
-SWClass >> initialize_SWStdClass [
-	self
-		setBreakpointOn: #haltOnDecoding
-]
-
-{ #category : #initialization }
-SWClass >> initialize_SWTypeClass [
-	self
-		declareMethod: #declare:as: asReturn: Association
-]
-
-{ #category : #initialization }
-SWClass >> initialize_Semaphore [
-	self
-		declareMethodReturnsReceiver: #wait;
-		declareMethodReturnsReceiver: #signal
-]
-
-{ #category : #initialization }
-SWClass >> initialize_SequenceableCollection [
-	self
-		declareMethodReturnsReceiver: #,;
-		declareMethodReturnsReceiver: #collect:;
-		declareMethod: #indexOf:startingAt:ifAbsent: asReturn: Integer
-]
-
-{ #category : #initialization }
-SWClass >> initialize_SequenceableCollectionClass [
-	self
-		declareMethodReturnsReceiversInstance: #streamContents:
-
-]
-
-{ #category : #initialization }
-SWClass >> initialize_Set [
-	self
-		declareMethodReturnsFirstOrSecondArgument: #remove:ifAbsent:;
-		declareMethodReturnsFirstArgument: #add:;
-		declareMethod: #includes: asReturn: Boolean
-]
-
-{ #category : #initialization }
-SWClass >> initialize_SmallDictionary [
-	self
-		declareMethodReturnsSecondArgument: #at:put:;
-		declareMethodReturnsSecondArgument: #at:ifAbsent:;
-		declareMethod: #includesKey: asReturn: Boolean
-]
-
-{ #category : #initialization }
-SWClass >> initialize_String [
-	self
-		declareMethodReturnsReceiver: #trimLeft:right:;
-		declareMethodReturnsReceiver: #asLowercase;
-		declareMethod: #asZnUrl asReturn: ZnUrl;
-		declareMethod: #beginsWith: asReturn: Boolean;
-		declareMethod: #endsWith: asReturn: Boolean;
-		declareMethodReturnsReceiver: #printOn:
-]
-
-{ #category : #initialization }
-SWClass >> initialize_StringClass [
-	self
-		declareMethodReturnsReceiversInstance: #crlf;
-		declareMethodReturnsReceiversInstance: #with:
-]
-
-{ #category : #initialization }
-SWClass >> initialize_TestAsserter [
-	self
-		declareMethodReturnsReceiver: #assert:description:
-]
-
-{ #category : #initialization }
-SWClass >> initialize_TestCaseClass [
-	self
-		declareMethod: #allTestSelectors asReturn: OrderedCollection
-]
-
-{ #category : #initialization }
-SWClass >> initialize_ThreadSafeTranscript [
-	self
-		declareMethodReturnsFirstArgument: #nextPutAll:;
-		declareMethodReturnsFirstArgument: #nextPut:;
-		declareMethodReturnsReceiver: #endEntry;
-		declareMethodReturnsFirstArgument: #critical:
 ]
 
 { #category : #accessing }
@@ -585,21 +292,6 @@ SWClass >> newDecoderOf: aCompiledCode [
 	^ decoder
 ]
 
-{ #category : #private }
-SWClass >> newDecoderOf: aMethod with: args [
-	|decoder|
-	decoder := (self transpilerClass new: (SWCompiledMethod new: aMethod with: args))
-		classInfo: self;
-		pool: self pool;
-		logger: self pool logger;
-		haltList: self pool owner haltList;
-		yourself.
-	self decoderInitializer at: aMethod selector ifPresent: [ :ini |
-		decoder := ini cull: decoder
-	].
-	^ decoder
-]
-
 { #category : #accessing }
 SWClass >> pool [
 	"A SWPool object"
@@ -615,13 +307,6 @@ SWClass >> pool: anObject [
 { #category : #streaming }
 SWClass >> putOn: aStream [
 	aStream << self targetClass name
-]
-
-{ #category : #'as yet unclassified' }
-SWClass >> readyInitializers [
-	self initialize: self targetClass.
-	self pool addInitializerIn: self targetClass
-
 ]
 
 { #category : #accessing }
@@ -655,7 +340,7 @@ SWClass >> slot [
 	In Pharo object, a member variable has its own 'offset' represented by its #stackPos."
 
 	^ slot ifNil: [
-		slot := SWSlotOld new.
+		slot := SWSlot new.
 		self targetClass slots do: [ :ids |
 			(slot at: ids index) name: ids name
 		].

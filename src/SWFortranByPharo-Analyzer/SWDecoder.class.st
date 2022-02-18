@@ -51,7 +51,7 @@ SWDecoder >> addBytecode: description [
 
 { #category : #private }
 SWDecoder >> atOffset: offset [
-	^ self code slot atOffset: self code numHiddenArgs + offset
+	^ self code slot atOffset: offset
 ]
 
 { #category : #'instruction decoding' }
@@ -96,7 +96,7 @@ SWDecoder >> code [
 SWDecoder >> code: anObject [
 
 	code := anObject.
-	method := code code.
+	method := code payload.
 ]
 
 { #category : #api }
@@ -205,7 +205,7 @@ SWDecoder >> logger: anObject [
 	logger := anObject
 ]
 
-{ #category : #modifying }
+{ #category : #api }
 SWDecoder >> markAsDecoded [
 	oldPC := 9999
 ]
@@ -464,7 +464,7 @@ SWDecoder >> send: selector super: supered numArgs: numberArguments [
 	(self haltList includes: selector) ifTrue: [ self halt ].
 
 	operands := self popSlotForSender: numberArguments.
-	sender := (self pool newSenderOf: selector super: supered with: operands)
+	sender := (self pool newSenderOf: selector super: supered receiver: self code receiver with: operands)
 		node: (self method sourceNodeForPC: oldPC);
 		yourself.
 	self code senders at: sender node put: sender.
@@ -520,7 +520,7 @@ SWDecoder >> solveJumper [
 			yourself).
 	].
 
-	sender := self pool newSenderOf: node selector super: false with: (SWSlot newFrom: { item condition. self top }).
+	sender := self pool newSenderOf: node selector super: false receiver: item condition with: (SWSlot newFrom: { self top }).
 	sender node: node.
 	self code senders at: node put: sender.
 	

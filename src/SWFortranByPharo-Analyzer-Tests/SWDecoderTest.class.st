@@ -17,10 +17,10 @@ SWDecoderTest >> _14_TestCase [
 ]
 
 { #category : #'private - utility' }
-SWDecoderTest >> decode: method withArguments: arg2 [
+SWDecoderTest >> decode: method receiver: receiver args: arg2 [
 	|dec|
 
-	dec := SWDecoder new: (SWCompiledMethod new: method with: arg2).
+	dec := SWDecoder new: (SWCompiledMethod new: method receiver: receiver with: arg2).
 	dec logger enabled: true.
 	dec classInfo: (dec pool getClassTranspiler: method methodClass).
 	dec decode.
@@ -30,7 +30,7 @@ SWDecoderTest >> decode: method withArguments: arg2 [
 
 { #category : #'as yet unclassified' }
 SWDecoderTest >> decodeNo: no withArguments: args [
-	^ self decode: (SWTestProgram getMy: no) withArguments: ({SWTestProgram}, args)
+	^ self decode: (SWTestProgram getMy: no) receiver: SWTestProgram args: args
 ]
 
 { #category : #'as yet unclassified' }
