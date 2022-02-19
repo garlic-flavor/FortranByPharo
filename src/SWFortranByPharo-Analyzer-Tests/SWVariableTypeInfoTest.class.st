@@ -21,7 +21,7 @@ SWVariableTypeInfoTest >> putOnOf: anObject mustMatchesWith: exp [
 SWVariableTypeInfoTest >> testBasics [
 
 	|vi|
-	vi := SWVariableTypeInfo new: SmallInteger.
+	vi := SWVariableType new: SmallInteger.
 	self assert: vi value equals: SmallInteger.
 	self assert: vi priority equals: SWType exactTypePriority.
 ]
@@ -30,13 +30,13 @@ SWVariableTypeInfoTest >> testBasics [
 SWVariableTypeInfoTest >> testLessThanLessThan [
 
 	|v1 v2|
-	v1 := SWVariableTypeInfo new: [ SmallInteger ].
-	v2 := SWVariableTypeInfo new: String.
+	v1 := SWVariableType new: [ SmallInteger ].
+	v2 := SWVariableType new: String.
 	v2 << v1.
 	self assert: v2 value equals: String.
 	self assert: v1 priority equals: SWType unknownMethodPriority.
 
-	v1 << (SWVariableTypeInfo new: Number with: SWType userSpecifyingPriority).
+	v1 << (SWVariableType new: Number with: SWType userSpecifyingPriority).
 	self assert: v1 value equals: Number.
 	self assert: v1 priority equals: SWType userSpecifyingPriority.
 ]
@@ -45,16 +45,16 @@ SWVariableTypeInfoTest >> testLessThanLessThan [
 SWVariableTypeInfoTest >> testPutOn [
 
 	|vi|
-	vi := (SWVariableTypeInfo new: SmallInteger)
+	vi := (SWVariableType new: SmallInteger)
 		name: 'hogehoge';
 		yourself.
 	self putOnOf: vi mustMatchesWith: 'hogehoge <SmallInteger\:exactType>'.
 	
-	vi := (SWVariableTypeInfo new: [SmallInteger])
+	vi := (SWVariableType new: [SmallInteger])
 		yourself.
 	self putOnOf: vi mustMatchesWith: 'nil <lazy\:unknownMethod>'.
 	
-	vi := SWVariableTypeInfo new.
+	vi := SWVariableType new.
 	self putOnOf: vi mustMatchesWith: 'nil <nil\:default>'.
 
 ]

@@ -90,7 +90,7 @@ SWSlotTest >> testPop [
 
 { #category : #tests }
 SWSlotTest >> testPush [
-	slot push: (SWVariableTypeInfo new: SmallInteger).
+	slot push: (SWVariableType new: SmallInteger).
 	self assert: slot size equals: 1.
 	self assert: slot pop equals: SmallInteger.
 

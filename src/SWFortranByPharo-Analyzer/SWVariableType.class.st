@@ -3,7 +3,7 @@ I have an information about a variable.
 about, its type, const or not, and other properties.
 "
 Class {
-	#name : #SWVariableTypeInfo,
+	#name : #SWVariableType,
 	#superclass : #Object,
 	#instVars : [
 		'name',
@@ -15,12 +15,12 @@ Class {
 }
 
 { #category : #'instance creation' }
-SWVariableTypeInfo class >> new: aType [
+SWVariableType class >> new: aType [
 	^ self new: aType with: nil 
 ]
 
 { #category : #'instance creation' }
-SWVariableTypeInfo class >> new: aType with: aPriority [
+SWVariableType class >> new: aType with: aPriority [
 	^ self new
 		<< aType;
 		priority: aPriority;
@@ -29,8 +29,8 @@ SWVariableTypeInfo class >> new: aType with: aPriority [
 ]
 
 { #category : #'accumulator ops' }
-SWVariableTypeInfo >> << rightObject [
-	(rightObject class includesBehavior: SWVariableTypeInfo) ifTrue: [
+SWVariableType >> << rightObject [
+	(rightObject class includesBehavior: SWVariableType) ifTrue: [
 		self priority < rightObject priority ifFalse: [ ^ rightObject ].
 		self type: rightObject type.
 		self properties addAll: rightObject properties.
@@ -51,79 +51,79 @@ SWVariableTypeInfo >> << rightObject [
 ]
 
 { #category : #comparing }
-SWVariableTypeInfo >> = right [
+SWVariableType >> = right [
 	^ self value = right value
 ]
 
 { #category : #adding }
-SWVariableTypeInfo >> addProperty: aProp [
+SWVariableType >> addProperty: aProp [
 	self properties add: aProp
 ]
 
 { #category : #accessing }
-SWVariableTypeInfo >> assignCounter [
+SWVariableType >> assignCounter [
 
 	^ assignCounter ifNil: [ assignCounter := OrderedCollection new ]
 ]
 
 { #category : #testing }
-SWVariableTypeInfo >> hasProperty: aProperty [
+SWVariableType >> hasProperty: aProperty [
 	^ self properties includes: aProperty
 ]
 
 { #category : #comparing }
-SWVariableTypeInfo >> hash [
+SWVariableType >> hash [
 	^ self type hash
 ]
 
 { #category : #accessing }
-SWVariableTypeInfo >> name [
+SWVariableType >> name [
 	^ name
 ]
 
 { #category : #accessing }
-SWVariableTypeInfo >> name: aName [
+SWVariableType >> name: aName [
 	name := aName
 ]
 
 { #category : #printing }
-SWVariableTypeInfo >> printOn: aStream [
+SWVariableType >> printOn: aStream [
 
 	^ self putOn: aStream
 ]
 
 { #category : #accessing }
-SWVariableTypeInfo >> priority [
+SWVariableType >> priority [
 
 	^ self type priority
 
 ]
 
 { #category : #accessing }
-SWVariableTypeInfo >> priority: anObject [
+SWVariableType >> priority: anObject [
 
 	^ self type priority: anObject.
 ]
 
 { #category : #accessing }
-SWVariableTypeInfo >> properties [
+SWVariableType >> properties [
 
 	^ properties ifNil: [ properties := Set new ]
 ]
 
 { #category : #accessing }
-SWVariableTypeInfo >> properties: anObject [
+SWVariableType >> properties: anObject [
 
 	properties := anObject
 ]
 
 { #category : #accessing }
-SWVariableTypeInfo >> property: propName [
+SWVariableType >> property: propName [
 	^ self properties at: propName ifAbsent: nil
 ]
 
 { #category : #streaming }
-SWVariableTypeInfo >> putOn: aStream [
+SWVariableType >> putOn: aStream [
 	aStream
 		<< name asString;
 		space;
@@ -139,24 +139,24 @@ SWVariableTypeInfo >> putOn: aStream [
 ]
 
 { #category : #removing }
-SWVariableTypeInfo >> removeProperty: propName [
+SWVariableType >> removeProperty: propName [
 	properties remove: propName ifAbsent: [  ].
 ]
 
 { #category : #accessing }
-SWVariableTypeInfo >> type [
+SWVariableType >> type [
 
 	^ type ifNil: [ type := SWType new ]
 ]
 
 { #category : #accessing }
-SWVariableTypeInfo >> type: anObject [
+SWVariableType >> type: anObject [
 
 	type := anObject
 
 ]
 
 { #category : #accessing }
-SWVariableTypeInfo >> value [
+SWVariableType >> value [
 	^ self type value
 ]

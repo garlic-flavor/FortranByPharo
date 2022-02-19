@@ -1,93 +1,93 @@
 Class {
-	#name : #SWCompiledBlockTest,
+	#name : #SWCompiledBlockTestOld,
 	#superclass : #TestCase,
 	#instVars : [
 		'compiledMethod',
 		'compiledBlock',
 		'cc'
 	],
-	#category : #'SWFortranByPharo-Analyzer-Tests-Analyzer'
+	#category : #'SWFortranByPharo-Analyzer-Tests-Olds'
 }
 
 { #category : #running }
-SWCompiledBlockTest >> setUp [
+SWCompiledBlockTestOld >> setUp [
 	super setUp.
 	
 	compiledMethod := SWTestProgram>>#_46_locals2:.
-	cc := SWCompiledBlockDripper dripFrom: compiledMethod receiver: SWTestProgram args: { Dictionary }.
+	cc := SWCompiledBlockDripperOld dripFrom: compiledMethod receiver: SWTestProgram args: { Dictionary }.
 	compiledBlock := cc payload.
 	"Put here a common initialization logic for tests"
 ]
 
 { #category : #tests }
-SWCompiledBlockTest >> testArgNames [
+SWCompiledBlockTestOld >> testArgNames [
 	self assert: cc argNames equals: {  'arg2' }
 ]
 
 { #category : #tests }
-SWCompiledBlockTest >> testAtOffset [
+SWCompiledBlockTestOld >> testAtOffset [
 	self assert: (cc slot atOffset: 1) name equals: 'inner1'
 ]
 
 { #category : #tests }
-SWCompiledBlockTest >> testDeclaringNames [
+SWCompiledBlockTestOld >> testDeclaringNames [
 	self assertCollection: cc declaringNames hasSameElements: #(inner1)
 ]
 
 { #category : #tests }
-SWCompiledBlockTest >> testGetVariableNameOfIfFoundIfNone [
+SWCompiledBlockTestOld >> testGetVariableNameOfIfFoundIfNone [
 	self assert: (cc getVariableNameOf: 'arg2' ifFound: [:each | true ] ifNone: [ false ])
 ]
 
 { #category : #tests }
-SWCompiledBlockTest >> testInitialSize [
+SWCompiledBlockTestOld >> testInitialSize [
 	self assert: cc initialSize equals: 4.
 ]
 
 { #category : #tests }
-SWCompiledBlockTest >> testIsDecodable [
+SWCompiledBlockTestOld >> testIsDecodable [
 	self assert: cc isDecodable
 ]
 
 { #category : #tests }
-SWCompiledBlockTest >> testMethodClass [
+SWCompiledBlockTestOld >> testMethodClass [
 	self assert: cc methodClass equals: nil
 ]
 
 { #category : #tests }
-SWCompiledBlockTest >> testNewReceiverArgs [
-	self assert: cc class equals: SWCompiledBlock.
+SWCompiledBlockTestOld >> testNewReceiverArgs [
+	self assert: cc class equals: SWCompiledBlockOld.
 	self assert: cc payload class equals: CompiledBlock.
 ]
 
 { #category : #tests }
-SWCompiledBlockTest >> testNumArgs [
+SWCompiledBlockTestOld >> testNumArgs [
 	self assert: cc numArgs equals: 1
 ]
 
 { #category : #tests }
-SWCompiledBlockTest >> testNumTemps [
+SWCompiledBlockTestOld >> testNumTemps [
 	self assert: cc numTemps equals: 2.
 
 ]
 
 { #category : #accessing }
-SWCompiledBlockTest >> testSelector [
+SWCompiledBlockTestOld >> testSelector [
 	self assert: cc selector equals: 'closure'
 ]
 
 { #category : #tests }
-SWCompiledBlockTest >> testSlot [
+SWCompiledBlockTestOld >> testSlot [
 	self assert: cc slot size equals: 4.
 
 ]
 
 { #category : #tests }
-SWCompiledBlockTest >> testSourceNode [
+SWCompiledBlockTestOld >> testSourceNode [
 	self assert: cc sourceNode equals: compiledBlock sourceNode
 ]
 
 { #category : #tests }
-SWCompiledBlockTest >> testTempNames [
+SWCompiledBlockTestOld >> testTempNames [
 	self assertCollection: cc tempNames hasSameElements: { 'arg2'. 'inner1' }
 ]

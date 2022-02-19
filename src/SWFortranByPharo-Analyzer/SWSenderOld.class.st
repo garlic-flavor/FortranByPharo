@@ -2,7 +2,7 @@
 SWSender is a parent of SWSenderTranspiler.
 "
 Class {
-	#name : #SWSender,
+	#name : #SWSenderOld,
 	#superclass : #Object,
 	#instVars : [
 		'selector',
@@ -12,30 +12,30 @@ Class {
 		'node',
 		'method'
 	],
-	#category : #'SWFortranByPharo-Analyzer-Analyzer'
+	#category : #'SWFortranByPharo-Analyzer-Olds'
 }
 
 { #category : #comparing }
-SWSender >> = right [
+SWSenderOld >> = right [
 	self selector = right selector ifFalse: [ ^ false ].
 	self receiver = right receiver ifFalse: [ ^ false ].
 	^ self arguments = right arguments
 ]
 
 { #category : #accessing }
-SWSender >> arguments [
+SWSenderOld >> arguments [
 
 	^ arguments
 ]
 
 { #category : #accessing }
-SWSender >> arguments: anObject [
+SWSenderOld >> arguments: anObject [
 
 	arguments := anObject
 ]
 
 { #category : #comparing }
-SWSender >> hash [
+SWSenderOld >> hash [
 	"The hash depends on this method and its operands."
 	|args buf|
 	args := self arguments.
@@ -47,78 +47,78 @@ SWSender >> hash [
 ]
 
 { #category : #accessing }
-SWSender >> method [
+SWSenderOld >> method [
 
 	^ method
 ]
 
 { #category : #accessing }
-SWSender >> method: anObject [
+SWSenderOld >> method: anObject [
 
 	method := anObject
 ]
 
 { #category : #accessing }
-SWSender >> node [
+SWSenderOld >> node [
 
 	^ node
 ]
 
 { #category : #accessing }
-SWSender >> node: anObject [
+SWSenderOld >> node: anObject [
 
 	node := anObject
 ]
 
 { #category : #printing }
-SWSender >> printOn: aStream [
+SWSenderOld >> printOn: aStream [
 	self putOn: aStream
 ]
 
 { #category : #streaming }
-SWSender >> putOn: aStream [
+SWSenderOld >> putOn: aStream [
 	aStream
 		<< self selector;
 		<< self arguments
 ]
 
 { #category : #accessing }
-SWSender >> receiver [
+SWSenderOld >> receiver [
 
 	^ receiver
 ]
 
 { #category : #accessing }
-SWSender >> receiver: anObject [
+SWSenderOld >> receiver: anObject [
 
 	receiver := anObject
 ]
 
 { #category : #accessing }
-SWSender >> return [
+SWSenderOld >> return [
 
 	^ return
 ]
 
 { #category : #accessing }
-SWSender >> return: anObject [
+SWSenderOld >> return: anObject [
 
 	return := anObject
 ]
 
 { #category : #accessing }
-SWSender >> selector [
+SWSenderOld >> selector [
 
 	^ selector
 ]
 
 { #category : #accessing }
-SWSender >> selector: anObject [
+SWSenderOld >> selector: anObject [
 
 	selector := anObject
 ]
 
 { #category : #accessing }
-SWSender >> specifyReturnTypeAs: aType [
-	return := SWVariableTypeInfo new: aType
+SWSenderOld >> specifyReturnTypeAs: aType [
+	return := SWVariableType new: aType
 ]

@@ -2,16 +2,16 @@
 An Impoementation of SWCompilerCode for Jumpers (like ifTrue:ifFalse:).
 "
 Class {
-	#name : #SWPseudoBlock,
-	#superclass : #SWCompiledCode,
+	#name : #SWPseudoBlockOld,
+	#superclass : #SWCompiledCodeOld,
 	#instVars : [
 		'numHiddenArgs'
 	],
-	#category : #'SWFortranByPharo-Analyzer-Analyzer'
+	#category : #'SWFortranByPharo-Analyzer-Olds'
 }
 
 { #category : #'instance creation' }
-SWPseudoBlock class >> new: aNode stack: aStack [
+SWPseudoBlockOld class >> new: aNode stack: aStack [
 	^ self new
 		payload: aNode;
 		slot: aStack;
@@ -19,63 +19,63 @@ SWPseudoBlock class >> new: aNode stack: aStack [
 ]
 
 { #category : #accessing }
-SWPseudoBlock >> argNames [
+SWPseudoBlockOld >> argNames [
 	^ #()
 ]
 
 { #category : #accessing }
-SWPseudoBlock >> code [
+SWPseudoBlockOld >> code [
 	^ nil
 ]
 
 { #category : #accessing }
-SWPseudoBlock >> declaringNames [
+SWPseudoBlockOld >> declaringNames [
 	^ self payload temporaryNames
 ]
 
 { #category : #testing }
-SWPseudoBlock >> isDecodable [
+SWPseudoBlockOld >> isDecodable [
 	^ false
 ]
 
 { #category : #accessing }
-SWPseudoBlock >> methodClass [
+SWPseudoBlockOld >> methodClass [
 	^ nil
 ]
 
 { #category : #accessing }
-SWPseudoBlock >> numArgs [
+SWPseudoBlockOld >> numArgs [
 	^ 0
 ]
 
 { #category : #accessing }
-SWPseudoBlock >> numHiddenArgs [
+SWPseudoBlockOld >> numHiddenArgs [
 	^ numHiddenArgs
 ]
 
 { #category : #accessing }
-SWPseudoBlock >> numHiddenArgs: num [
+SWPseudoBlockOld >> numHiddenArgs: num [
 	numHiddenArgs := num
 	
 ]
 
 { #category : #accessing }
-SWPseudoBlock >> numLocals [
+SWPseudoBlockOld >> numLocals [
 	^ self payload temporaries size
 ]
 
 { #category : #accessing }
-SWPseudoBlock >> numTemps [
+SWPseudoBlockOld >> numTemps [
 	^ self payload temporaries size
 ]
 
 { #category : #accessing }
-SWPseudoBlock >> selector [
+SWPseudoBlockOld >> selector [
 	^ self payload selector
 ]
 
 { #category : #accessing }
-SWPseudoBlock >> slot: anObject [
+SWPseudoBlockOld >> slot: anObject [
 	super slot: anObject.
 	self tempNames doWithIndex: [ :each :idx|
 		(self slot at: self numHiddenArgs + idx) name: each
@@ -83,11 +83,11 @@ SWPseudoBlock >> slot: anObject [
 ]
 
 { #category : #accessing }
-SWPseudoBlock >> sourceNode [
+SWPseudoBlockOld >> sourceNode [
 	^ self payload
 ]
 
 { #category : #'source code management' }
-SWPseudoBlock >> tempNames [
+SWPseudoBlockOld >> tempNames [
 	^ self payload temporaryNames
 ]

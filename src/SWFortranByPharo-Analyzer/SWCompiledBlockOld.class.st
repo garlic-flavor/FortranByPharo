@@ -2,64 +2,64 @@
 An implementation of SWCompiledCode for CompiledCode.
 "
 Class {
-	#name : #SWCompiledBlock,
-	#superclass : #SWCompiledCode,
+	#name : #SWCompiledBlockOld,
+	#superclass : #SWCompiledCodeOld,
 	#instVars : [
 		'numHiddenArgs'
 	],
-	#category : #'SWFortranByPharo-Analyzer-Analyzer'
+	#category : #'SWFortranByPharo-Analyzer-Olds'
 }
 
 { #category : #accessing }
-SWCompiledBlock >> argNames [
+SWCompiledBlockOld >> argNames [
 	^ payload argumentNames
 ]
 
 { #category : #accessing }
-SWCompiledBlock >> declaringNames [
+SWCompiledBlockOld >> declaringNames [
 	^ self payload sourceNode temporaryNames
 ]
 
 { #category : #accessing }
-SWCompiledBlock >> initialSize [
+SWCompiledBlockOld >> initialSize [
 	^ self payload numTemps
 
 ]
 
 { #category : #testing }
-SWCompiledBlock >> isDecodable [
+SWCompiledBlockOld >> isDecodable [
 	^ true
 ]
 
 { #category : #accessing }
-SWCompiledBlock >> methodClass [
+SWCompiledBlockOld >> methodClass [
 	^ nil
 ]
 
 { #category : #accessing }
-SWCompiledBlock >> numArgs [
+SWCompiledBlockOld >> numArgs [
 	^ self payload numArgs
 
 ]
 
 { #category : #accessing }
-SWCompiledBlock >> numTemps [
+SWCompiledBlockOld >> numTemps [
 	^ self payload numArgs + self payload sourceNode temporaries size
 
 ]
 
 { #category : #accessing }
-SWCompiledBlock >> selector [
+SWCompiledBlockOld >> selector [
 	^ 'closure'
 ]
 
 { #category : #accessing }
-SWCompiledBlock >> sourceNode [
+SWCompiledBlockOld >> sourceNode [
 	^ self payload sourceNode
 ]
 
 { #category : #'source code management' }
-SWCompiledBlock >> tempNames [
+SWCompiledBlockOld >> tempNames [
 	^ self payload argumentNames, self payload sourceNode temporaryNames
 
 ]

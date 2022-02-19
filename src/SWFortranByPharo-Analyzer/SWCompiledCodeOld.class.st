@@ -6,7 +6,7 @@ SWCompiledCode wraps CompiledMethod, CompiledBlock and PseudoBlock.
 - declaringNames size = numTemps - numArgs.
 "
 Class {
-	#name : #SWCompiledCode,
+	#name : #SWCompiledCodeOld,
 	#superclass : #Object,
 	#instVars : [
 		'payload',
@@ -15,11 +15,11 @@ Class {
 		'return',
 		'senders'
 	],
-	#category : #'SWFortranByPharo-Analyzer-Analyzer'
+	#category : #'SWFortranByPharo-Analyzer-Olds'
 }
 
 { #category : #'instance creation' }
-SWCompiledCode class >> new: code receiver: receiver with: args [
+SWCompiledCodeOld class >> new: code receiver: receiver with: args [
 	^ self new
 		payload: code;
 		receiver: receiver;
@@ -28,17 +28,17 @@ SWCompiledCode class >> new: code receiver: receiver with: args [
 ]
 
 { #category : #accessing }
-SWCompiledCode >> argNames [
+SWCompiledCodeOld >> argNames [
 	^ self subclassResponsibility 
 ]
 
 { #category : #accessing }
-SWCompiledCode >> arguments [
+SWCompiledCodeOld >> arguments [
 	^ self slot copyFrom: 1 to: self numArgs
 ]
 
 { #category : #accessing }
-SWCompiledCode >> arguments: arguments [
+SWCompiledCodeOld >> arguments: arguments [
 
 	arguments doWithIndex: [ :each :idx |
 		(self slot at: idx) << each
@@ -47,118 +47,118 @@ SWCompiledCode >> arguments: arguments [
 ]
 
 { #category : #accessing }
-SWCompiledCode >> declaringNames [
+SWCompiledCodeOld >> declaringNames [
 	^ self subclassResponsibility 
 ]
 
 { #category : #accessing }
-SWCompiledCode >> declarings [
+SWCompiledCodeOld >> declarings [
 	^ self slot copyFrom: self numArgs + 1 to: self numTemps
 ]
 
 { #category : #enumerating }
-SWCompiledCode >> getVariableNameOf: aName ifFound: aFoundBlock ifNone: aNoneBlock [
+SWCompiledCodeOld >> getVariableNameOf: aName ifFound: aFoundBlock ifNone: aNoneBlock [
 	^ self slot detect: [ :each | each name = aName ] ifFound: aFoundBlock ifNone: aNoneBlock
 ]
 
 { #category : #accessing }
-SWCompiledCode >> initialSize [
+SWCompiledCodeOld >> initialSize [
 	^ self subclassResponsibility 
 ]
 
 { #category : #tests }
-SWCompiledCode >> isDecodable [
+SWCompiledCodeOld >> isDecodable [
 	^ self subclassResponsibility 
 ]
 
 { #category : #accessing }
-SWCompiledCode >> methodClass [
+SWCompiledCodeOld >> methodClass [
 	^ self subclassResponsibility 
 ]
 
 { #category : #accessing }
-SWCompiledCode >> numArgs [
+SWCompiledCodeOld >> numArgs [
 	^ self subclassResponsibility 
 ]
 
 { #category : #accessing }
-SWCompiledCode >> numTemps [
+SWCompiledCodeOld >> numTemps [
 	^ self subclassResponsibility 
 ]
 
 { #category : #accessing }
-SWCompiledCode >> payload [
+SWCompiledCodeOld >> payload [
 
 	^ payload
 ]
 
 { #category : #accessing }
-SWCompiledCode >> payload: anObject [
+SWCompiledCodeOld >> payload: anObject [
 
 	payload := anObject
 ]
 
 { #category : #printing }
-SWCompiledCode >> printOn: aStream [
+SWCompiledCodeOld >> printOn: aStream [
 	^ self putOn: aStream
 ]
 
 { #category : #streaming }
-SWCompiledCode >> putOn: aStream [
+SWCompiledCodeOld >> putOn: aStream [
 	aStream << self selector
 ]
 
 { #category : #accessing }
-SWCompiledCode >> receiver [
+SWCompiledCodeOld >> receiver [
 	^ receiver ifNil: [
-		receiver := SWVariableTypeInfo new
+		receiver := SWVariableType new
 			priority: SWType receiverTypePriority;
 			yourself
 	]
 ]
 
 { #category : #accessing }
-SWCompiledCode >> receiver: anObject [
+SWCompiledCodeOld >> receiver: anObject [
 
 	receiver := anObject
 ]
 
 { #category : #accessing }
-SWCompiledCode >> receiverClass [
+SWCompiledCodeOld >> receiverClass [
 	^ receiver value
 ]
 
 { #category : #accessing }
-SWCompiledCode >> return [
+SWCompiledCodeOld >> return [
 
-	^ return ifNil: [ return := SWVariableTypeInfo new ]
+	^ return ifNil: [ return := SWVariableType new ]
 ]
 
 { #category : #accessing }
-SWCompiledCode >> return: anObject [
+SWCompiledCodeOld >> return: anObject [
 
 	return := anObject
 ]
 
 { #category : #accessing }
-SWCompiledCode >> selector [
+SWCompiledCodeOld >> selector [
 	^ self subclassResponsibility 
 ]
 
 { #category : #accessing }
-SWCompiledCode >> senders [
+SWCompiledCodeOld >> senders [
 
 	^ senders ifNil: [ senders := OrderedDictionary new ]
 ]
 
 { #category : #accessing }
-SWCompiledCode >> senders: anObject [
+SWCompiledCodeOld >> senders: anObject [
 
 	senders := anObject
 ]
 
 { #category : #accessing }
-SWCompiledCode >> slot [
+SWCompiledCodeOld >> slot [
 
 	^ slot ifNil: [
 		slot := SWSlot new.
@@ -171,17 +171,17 @@ SWCompiledCode >> slot [
 ]
 
 { #category : #accessing }
-SWCompiledCode >> slot: anObject [
+SWCompiledCodeOld >> slot: anObject [
 
 	slot := anObject
 ]
 
 { #category : #accessing }
-SWCompiledCode >> sourceNode [
+SWCompiledCodeOld >> sourceNode [
 	^ self subclassResponsibility 
 ]
 
 { #category : #accessing }
-SWCompiledCode >> tempNames [
+SWCompiledCodeOld >> tempNames [
 	^ self subclassResponsibility 
 ]

@@ -1,108 +1,108 @@
 Class {
-	#name : #SWCompiledMethodTest,
+	#name : #SWCompiledMethodTestOld,
 	#superclass : #TestCase,
 	#instVars : [
 		'compiledMethod',
 		'cc'
 	],
-	#category : #'SWFortranByPharo-Analyzer-Tests-Analyzer'
+	#category : #'SWFortranByPharo-Analyzer-Tests-Olds'
 }
 
 { #category : #running }
-SWCompiledMethodTest >> setUp [
+SWCompiledMethodTestOld >> setUp [
 	super setUp.
 	compiledMethod := SWTestProgram >>#_45_locals:.
-	cc := SWCompiledMethod new: compiledMethod receiver: SWTestProgram with: { Dictionary }
+	cc := SWCompiledMethodOld new: compiledMethod receiver: SWTestProgram with: { Dictionary }
 
 ]
 
 { #category : #tests }
-SWCompiledMethodTest >> testArgNames [
+SWCompiledMethodTestOld >> testArgNames [
 	self assert: cc argNames equals: { 'arg1' }
 ]
 
 { #category : #tests }
-SWCompiledMethodTest >> testArguments [
+SWCompiledMethodTestOld >> testArguments [
 	self assert: cc arguments size equals: 1.
 	self assert: cc arguments first equals: Dictionary.
 
 ]
 
 { #category : #tests }
-SWCompiledMethodTest >> testAtOffset [
+SWCompiledMethodTestOld >> testAtOffset [
 	self assert: (cc slot atOffset: 0) equals: Dictionary
 ]
 
 { #category : #tests }
-SWCompiledMethodTest >> testDeclaringNames [
+SWCompiledMethodTestOld >> testDeclaringNames [
 	self assert: cc declaringNames equals: { 'outer1' }
 ]
 
 { #category : #tests }
-SWCompiledMethodTest >> testDeclarings [
+SWCompiledMethodTestOld >> testDeclarings [
 	self assert: cc declarings size equals: 1.
 	self assert: cc declarings first name equals: 'outer1'.
 ]
 
 { #category : #'as yet unclassified' }
-SWCompiledMethodTest >> testGetVariableNameOfIfFoundIfNone [
+SWCompiledMethodTestOld >> testGetVariableNameOfIfFoundIfNone [
 	self assert: (cc getVariableNameOf: 'arg1' ifFound: [ :each | each ] ifNone: [ false ]) equals: Dictionary
 ]
 
 { #category : #tests }
-SWCompiledMethodTest >> testInitialSize [
+SWCompiledMethodTestOld >> testInitialSize [
 	self assert: cc initialSize equals: 4
 ]
 
 { #category : #tests }
-SWCompiledMethodTest >> testIsDecodable [
+SWCompiledMethodTestOld >> testIsDecodable [
 	self assert: cc isDecodable
 ]
 
 { #category : #tests }
-SWCompiledMethodTest >> testMethodClass [
+SWCompiledMethodTestOld >> testMethodClass [
 	self assert: cc methodClass equals: SWTestProgram.
 ]
 
 { #category : #tests }
-SWCompiledMethodTest >> testNewReceiverArgs [
-	self assert: cc class equals: SWCompiledMethod.
+SWCompiledMethodTestOld >> testNewReceiverArgs [
+	self assert: cc class equals: SWCompiledMethodOld.
 	self assert: cc slot size equals: 4.
 	self assert: cc slot first value equals: Dictionary.
 
 ]
 
 { #category : #tests }
-SWCompiledMethodTest >> testNumArgs [
+SWCompiledMethodTestOld >> testNumArgs [
 	self assert: cc numArgs equals: 1
 ]
 
 { #category : #tests }
-SWCompiledMethodTest >> testNumTemps [
+SWCompiledMethodTestOld >> testNumTemps [
 	self assert: cc numTemps equals: 2
 ]
 
 { #category : #tests }
-SWCompiledMethodTest >> testReceiver [
+SWCompiledMethodTestOld >> testReceiver [
 	self assert: cc receiver equals: SWTestProgram
 ]
 
 { #category : #tests }
-SWCompiledMethodTest >> testReceiverClass [
+SWCompiledMethodTestOld >> testReceiverClass [
 	self assert: cc receiverClass equals: SWTestProgram
 ]
 
 { #category : #accessing }
-SWCompiledMethodTest >> testSelector [
+SWCompiledMethodTestOld >> testSelector [
 	self assert: cc selector equals: compiledMethod selector
 ]
 
 { #category : #tests }
-SWCompiledMethodTest >> testSourceNode [
+SWCompiledMethodTestOld >> testSourceNode [
 	self assert: cc sourceNode equals: compiledMethod sourceNode
 ]
 
 { #category : #tests }
-SWCompiledMethodTest >> testTempNames [
+SWCompiledMethodTestOld >> testTempNames [
 	self assert: cc tempNames equals: { 'arg1'. 'outer1' }
 ]

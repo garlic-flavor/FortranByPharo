@@ -2,62 +2,62 @@
 An implementation of SWCompiledCode for CompiledMethod.
 "
 Class {
-	#name : #SWCompiledMethod,
-	#superclass : #SWCompiledCode,
-	#category : #'SWFortranByPharo-Analyzer-Analyzer'
+	#name : #SWCompiledMethodOld,
+	#superclass : #SWCompiledCodeOld,
+	#category : #'SWFortranByPharo-Analyzer-Olds'
 }
 
 { #category : #accessing }
-SWCompiledMethod >> argNames [
+SWCompiledMethodOld >> argNames [
 	^ payload argumentNames
 ]
 
 { #category : #accessing }
-SWCompiledMethod >> declaringNames [
+SWCompiledMethodOld >> declaringNames [
 	^ self tempNames copyFrom: (self numArgs + 1) to: self numTemps
 ]
 
 { #category : #accessing }
-SWCompiledMethod >> initialSize [
+SWCompiledMethodOld >> initialSize [
 	^ payload method numTemps
 ]
 
 { #category : #testing }
-SWCompiledMethod >> isDecodable [
+SWCompiledMethodOld >> isDecodable [
 	^ true
 ]
 
 { #category : #accessing }
-SWCompiledMethod >> methodClass [
+SWCompiledMethodOld >> methodClass [
 	^ self payload methodClass
 ]
 
 { #category : #accessing }
-SWCompiledMethod >> numArgs [
+SWCompiledMethodOld >> numArgs [
 	^ payload numArgs
 ]
 
 { #category : #accessing }
-SWCompiledMethod >> numLocals [
+SWCompiledMethodOld >> numLocals [
 	^ payload method numTemps
 ]
 
 { #category : #accessing }
-SWCompiledMethod >> numTemps [
+SWCompiledMethodOld >> numTemps [
 	^ payload tempNames size
 ]
 
 { #category : #accessing }
-SWCompiledMethod >> selector [
+SWCompiledMethodOld >> selector [
 	^ payload selector
 ]
 
 { #category : #accessing }
-SWCompiledMethod >> sourceNode [
+SWCompiledMethodOld >> sourceNode [
 	^ payload sourceNode
 ]
 
 { #category : #'source code management' }
-SWCompiledMethod >> tempNames [
+SWCompiledMethodOld >> tempNames [
 	^ payload tempNames
 ]

@@ -12,7 +12,7 @@ Class {
 
 { #category : #accessing }
 SWSlotOld class >> elementClass [
-	^ SWVariableTypeInfo
+	^ SWVariableType
 ]
 
 { #category : #'instance creation' }
@@ -51,7 +51,7 @@ SWSlotOld >> at: index [
 SWSlotOld >> atOffset: offset [
 	"offset is  0 based.".
 	"offset 0 responds to the first argument."
-	^ self payload at: (offset + 1) ifAbsentPut: [ SWVariableTypeInfo new ].
+	^ self payload at: (offset + 1) ifAbsentPut: [ SWVariableType new ].
 ]
 
 { #category : #enumerating }

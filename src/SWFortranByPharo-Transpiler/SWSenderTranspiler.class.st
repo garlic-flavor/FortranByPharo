@@ -3,7 +3,7 @@ SWSenderTranspiler transpile a message sender expression.
 "
 Class {
 	#name : #SWSenderTranspiler,
-	#superclass : #SWSender,
+	#superclass : #SWSenderOld,
 	#instVars : [
 		'generator'
 	],
@@ -42,6 +42,6 @@ SWSenderTranspiler >> generator: anObject [
 ]
 
 { #category : #'code generation' }
-SWSenderTranspiler >> transpileUsing: transpiler [
+SWSenderTranspiler >> traverseUsing: transpiler [
 	self generator cull: transpiler cull: self
 ]

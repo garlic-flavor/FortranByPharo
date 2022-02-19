@@ -3,7 +3,7 @@ I transpile a method of Pharo class.
 "
 Class {
 	#name : #SWMethodBodyTranspiler,
-	#superclass : #SWDecoder,
+	#superclass : #SWDecoderOld,
 	#instVars : [
 		'stream',
 		'messageNest',
@@ -29,7 +29,7 @@ SWMethodBodyTranspiler class >> senderTranspilerClass [
 
 { #category : #'code generation' }
 SWMethodBodyTranspiler >> << anObject [
-	anObject transpileUsing: self
+	anObject traverseUsing: self
 
 ]
 

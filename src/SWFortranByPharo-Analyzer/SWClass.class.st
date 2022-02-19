@@ -120,7 +120,7 @@ SWClass >> declareMethodReturnsFirstArgumentsElement: aName [
 SWClass >> declareMethodReturnsFirstOrSecondArgument: aName [
 	self addSenderInitializer: aName with: [ :aSender |
 		aSender
-			return: ((SWVariableTypeInfo new)
+			return: ((SWVariableType new)
 				<< aSender operands second;
 				<< aSender operands third;
 				yourself);
@@ -221,7 +221,7 @@ SWClass >> getSenderOf: aMethod receiver: receiver with: args [
 		yourself.
 	self methods associationAt: sender ifPresent: [ :assoc | ^ assoc key copy ].
 
-	code := SWCompiledMethod new: aMethod receiver: receiver with: args.
+	code := SWCompiledMethodOld new: aMethod receiver: receiver with: args.
 	^ self senderInitializer at: sender selector ifPresent: [ :gen ||newS|
 		newS := gen value: sender.
 		self methods at: newS put: code.

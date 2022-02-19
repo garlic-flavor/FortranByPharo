@@ -35,7 +35,7 @@ SWTestProgram >> _02_has_arguments: arg [
 
 { #category : #'tests - source' }
 SWTestProgram >> _03_return_self [
-	^ self
+
 ]
 
 { #category : #'tests - source' }

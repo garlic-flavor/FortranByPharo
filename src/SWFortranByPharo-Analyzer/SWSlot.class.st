@@ -9,7 +9,7 @@ Class {
 
 { #category : #accessing }
 SWSlot class >> elementClass [
-	^ SWVariableTypeInfo
+	^ SWVariableType
 ]
 
 { #category : #adding }
