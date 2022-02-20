@@ -1,7 +1,7 @@
 Extension { #name : #Symbol }
 
 { #category : #'*SWFortranByPharo-Analyzer' }
-Symbol >> traverseUsing: transpiler [
+Symbol >> dispatchTo: transpiler [
 	^ transpiler putSymbol: self
 
 ]

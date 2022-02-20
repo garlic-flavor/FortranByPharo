@@ -1,6 +1,6 @@
 Extension { #name : #RBMessageNode }
 
 { #category : #'*SWFortranByPharo-Analyzer' }
-RBMessageNode >> traverseUsing: transpiler [
+RBMessageNode >> dispatchTo: transpiler [
 	^ transpiler atMessage: self
 ]

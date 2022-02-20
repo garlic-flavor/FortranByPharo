@@ -13,10 +13,18 @@ Class {
 
 { #category : #utils }
 SWPool class >> search: selector in: aClass [
-	aClass ifNil: [ ^ nil ].
+	^ self search: selector in: aClass ifFound: [ :detected | detected ] ifNone: [ self error: (selector, ' is not found in ', aClass asString) ]
 
-	^ aClass methodDict at: selector ifAbsent: [
-			self search: selector in: aClass superclass
+]
+
+{ #category : #utils }
+SWPool class >> search: selector in: aClass ifFound: foundBlock ifNone: noneBlock [
+	aClass ifNil: [ ^ noneBlock value ].
+
+	^ aClass methodDict at: selector ifPresent: [ :detected |
+			foundBlock value: detected
+	] ifAbsent: [
+			self search: selector in: aClass superclass ifFound: foundBlock ifNone: noneBlock
 	]
 
 ]
@@ -50,6 +58,12 @@ SWPool >> classTranspilerClass [
 	^ self owner class classTranspilerClass
 ]
 
+{ #category : #accessing }
+SWPool >> decoderClass [
+
+	^ self owner class
+]
+
 { #category : #enumerating }
 SWPool >> detect: aNeedle ifFound: aBlock [
 self halt; flag: #toRemove.
@@ -62,11 +76,28 @@ SWPool >> getClassTranspiler: aClass [
 		newCT := self newClassTranspiler: aClass.
 		aClass isClassSide ifTrue: [
 			(self getClassTranspiler: aClass instanceSide)
-				classSide: newCT
 		].
 		newCT
 	]
 
+]
+
+{ #category : #'as yet unclassified' }
+SWPool >> getResult: aSelector with: operands [
+	^ self class search: aSelector in: operands first value ifFound: [ :method |
+		(self getClassTranspiler: method methodClass)
+			getResult: aSelector with: operands
+	] ifNone: [
+		self logger log: [ 'An unknown method detected: ', aSelector ].
+		(self haltList includes: #unresolvedSelector)  ifTrue: [ self halt ].
+		UndefinedObject
+	].
+
+]
+
+{ #category : #'private - accessing' }
+SWPool >> haltList [
+	^ self owner haltList
 ]
 
 { #category : #private }
@@ -382,6 +413,7 @@ SWPool >> newClassTranspiler: target [
 { #category : #api }
 SWPool >> newSenderOf: aSelector super: supered receiver: receiver with: args [
 	|method|
+self error; flag: #toRemove.
 	method := self class search: aSelector
 		in: (supered ifTrue: [ receiver value superclass ] ifFalse: [ receiver value ]).
 	^ method ifNil: [ 
@@ -394,6 +426,7 @@ SWPool >> newSenderOf: aSelector super: supered receiver: receiver with: args [
 
 { #category : #private }
 SWPool >> newUndefinedSenderOf: aSelector receiver: receiver with: args [
+	self error; flag: #toRemove.
 	self logger log: [ 'An unknown method detected: ', aSelector ].
 	(self owner haltList includes: #unresolvedSelector)  ifTrue: [ self halt ].
 	^ self senderTranspilerClass new
@@ -437,16 +470,4 @@ SWPool >> printOn: aStream [
 { #category : #streaming }
 SWPool >> putOn: aStream [
 	aStream << $#; << (self hash % 16rFFFF) printStringHex
-]
-
-{ #category : #accessing }
-SWPool >> senderTranspilerClass [
-
-	^ self owner class senderTranspilerClass
-]
-
-{ #category : #accessing }
-SWPool >> transpilerClass [
-
-	^ self owner class
 ]

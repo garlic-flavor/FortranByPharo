@@ -1,6 +1,6 @@
 Extension { #name : #String }
 
 { #category : #'*SWFortranByPharo-Analyzer' }
-String >> traverseUsing: transpiler [
+String >> dispatchTo: transpiler [
 	transpiler putString: self
 ]

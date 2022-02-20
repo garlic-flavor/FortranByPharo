@@ -17,6 +17,11 @@ Class {
 	#category : #'SWFortranByPharo-Analyzer-Analyzer'
 }
 
+{ #category : #accessing }
+SWDecoder class >> classTranspilerClass [
+	^ SWClass
+]
+
 { #category : #'instance creation' }
 SWDecoder class >> new: aNode with: operands [
 	^ self new
@@ -35,7 +40,11 @@ SWDecoder >> add: aName as: aType [
 { #category : #accessing }
 SWDecoder >> atAssignTo: aLValue with: aRValue [
 
-	self result << self children first result
+	self result << self children first result.
+	self slot detect: [ :each | each name = aLValue name ] ifFound: [ :var |
+		var << self result.		
+	].
+
 ]
 
 { #category : #accessing }
@@ -46,21 +55,30 @@ SWDecoder >> atInteger: anInteger [
 
 { #category : #accessing }
 SWDecoder >> atMessage: aMessageNode [
-	self halt.
+	self result << self pool getResult: aMessageNode selector with: (self children collect: [ :each | each result ])
+		
 ]
 
 { #category : #accessing }
 SWDecoder >> atMethod: traverser [
-	self methodResult << self result
+	self children ifNotEmpty: [ 
+		self methodResult << (self result << self children last result)
+	]
 ]
 
 { #category : #accessing }
 SWDecoder >> atReturn: aReturnNode [
-	self methodResult << self result
+	self children ifNotEmpty: [
+		self methodResult << (self result << self children last result)
+	]
+		
 ]
 
 { #category : #accessing }
 SWDecoder >> atSequence: aSequenceNode [
+	self children ifNotEmpty: [
+		self result << self children last result
+	]
 ]
 
 { #category : #accessing }
@@ -87,17 +105,14 @@ SWDecoder >> decode [
 	methodResult  ifNil: [ methodResult := SWVariableType new: self slot first value with: SWType receiverTypePriority ].
 	self children: (OrderedCollection new: self node children size).
 	self node children do: [ :child |
-		self children addLast: (self decodeChildDecoderWith: child)
+		self children addLast: (self decodeChildWith: child)
 	].
-	self children isNotEmpty ifTrue: [
-		self result << self children last result
-	].
-	self node traverseUsing: self.
+	self node dispatchTo: self.
 
 ]
 
 { #category : #'as yet unclassified' }
-SWDecoder >> decodeChildDecoderWith: aNode [
+SWDecoder >> decodeChildWith: aNode [
 	^ self copy
 		node: aNode;
 		slot: self slot copy;
@@ -155,7 +170,12 @@ SWDecoder >> node: anObject [
 
 { #category : #'as yet unclassified' }
 SWDecoder >> operands: operands [
-	(self node argumentNames copyWithFirst: 'self') with: operands do: [ :name :type |
+	|receiver|
+	receiver := operands removeFirst value.
+	self add: 'self' as: receiver.
+	self add: 'super' as: receiver superclass.
+	
+	self node argumentNames  with: operands do: [ :name :type |
 		self add: name as: type
 	].
 	self node temporaries do: [ :each |

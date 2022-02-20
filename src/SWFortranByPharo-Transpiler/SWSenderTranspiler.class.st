@@ -10,6 +10,11 @@ Class {
 	#category : #'SWFortranByPharo-Transpiler-Common'
 }
 
+{ #category : #'code generation' }
+SWSenderTranspiler >> dispatchTo: transpiler [
+	self generator cull: transpiler cull: self
+]
+
 { #category : #accessing }
 SWSenderTranspiler >> generator [
 
@@ -39,9 +44,4 @@ SWSenderTranspiler >> generator [
 SWSenderTranspiler >> generator: anObject [
 
 	generator := anObject
-]
-
-{ #category : #'code generation' }
-SWSenderTranspiler >> traverseUsing: transpiler [
-	self generator cull: transpiler cull: self
 ]

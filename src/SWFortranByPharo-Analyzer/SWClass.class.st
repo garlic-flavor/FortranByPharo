@@ -12,17 +12,16 @@ Class {
 	#instVars : [
 		'targetClass',
 		'pool',
-		'classSide',
 		'slot',
 		'methods',
-		'senderInitializer',
-		'decoderInitializer'
+		'definedResults'
 	],
 	#category : #'SWFortranByPharo-Analyzer-Analyzer'
 }
 
 { #category : #adding }
 SWClass >> addDecoderInitializer: aName with: anInitializer [
+	self error; flag: #toRemove.
 	self decoderInitializer at: aName ifPresent: [ :ini |
 		self decoderInitializer at: aName put: [ :decoder |
 			ini cull: decoder.
@@ -36,6 +35,7 @@ SWClass >> addDecoderInitializer: aName with: anInitializer [
 
 { #category : #adding }
 SWClass >> addSenderInitializer: aName with: initializer [
+	self error; flag: #toRemove.
 	self senderInitializer at: aName ifPresent: [ :ini |
 		self senderInitializer at: aName put: [ :aSender |
 			ini cull: aSender.
@@ -47,26 +47,16 @@ SWClass >> addSenderInitializer: aName with: initializer [
 	]
 ]
 
-{ #category : #accessing }
-SWClass >> classSide [
-
-	^ classSide
-]
-
-{ #category : #accessing }
-SWClass >> classSide: anObject [
-
-	classSide := anObject
-]
-
 { #category : #api }
 SWClass >> declareMethod: aName as: initializer [
+	self error; flag: #toRemove.
 	self addSenderInitializer: aName with: initializer
 
 ]
 
 { #category : #api }
 SWClass >> declareMethod: aName asReturn: rType [
+	self error; flag: #toRemove.
 	self addSenderInitializer: aName with: [ :aSender |
 		aSender
 			specifyReturnTypeAs: rType;
@@ -77,6 +67,7 @@ SWClass >> declareMethod: aName asReturn: rType [
 
 { #category : #api }
 SWClass >> declareMethodAsBinaryOperator: aName [
+	self error; flag: #toRemove.
 
 	self addSenderInitializer: aName with: [ :aSender |
 		aSender
@@ -88,6 +79,7 @@ SWClass >> declareMethodAsBinaryOperator: aName [
 
 { #category : #api }
 SWClass >> declareMethodAsCompareOperator: aName [
+	self error; flag: #toRemove.
 	self addSenderInitializer: aName with: [ :aSender |
 		aSender
 			specifyReturnTypeAs: Boolean;
@@ -98,6 +90,7 @@ SWClass >> declareMethodAsCompareOperator: aName [
 
 { #category : #api }
 SWClass >> declareMethodReturnsFirstArgument: aName [
+	self error; flag: #toRemove.
 	self addSenderInitializer: aName with: [ :aSender |
 		aSender
 			specifyReturnTypeAs: aSender operands second;
@@ -108,6 +101,7 @@ SWClass >> declareMethodReturnsFirstArgument: aName [
 
 { #category : #api }
 SWClass >> declareMethodReturnsFirstArgumentsElement: aName [
+	self error; flag: #toRemove.
 	self addSenderInitializer: aName with: [ :aSender |
 		aSender
 			return: aSender operands second type elementType;
@@ -118,6 +112,7 @@ SWClass >> declareMethodReturnsFirstArgumentsElement: aName [
 
 { #category : #api }
 SWClass >> declareMethodReturnsFirstOrSecondArgument: aName [
+	self error; flag: #toRemove.
 	self addSenderInitializer: aName with: [ :aSender |
 		aSender
 			return: ((SWVariableType new)
@@ -131,6 +126,7 @@ SWClass >> declareMethodReturnsFirstOrSecondArgument: aName [
 
 { #category : #api }
 SWClass >> declareMethodReturnsReceiver: aName [
+	self error; flag: #toRemove.
 	self addSenderInitializer: aName with: [ :aSender |
 		aSender
 			return: aSender operands receiver;
@@ -141,6 +137,7 @@ SWClass >> declareMethodReturnsReceiver: aName [
 
 { #category : #api }
 SWClass >> declareMethodReturnsReceiversClass: aName [
+	self error; flag: #toRemove.
 	self addSenderInitializer: aName with: [ :aSender |
 		aSender
 			specifyReturnTypeAs: aSender operands receiver value classSide;
@@ -151,6 +148,7 @@ SWClass >> declareMethodReturnsReceiversClass: aName [
 
 { #category : #api }
 SWClass >> declareMethodReturnsReceiversElement: aName [
+	self error; flag: #toRemove.
 	self addSenderInitializer: aName with: [ :aSender |
 		aSender
 			return: aSender operands receiver type elementType;
@@ -161,6 +159,7 @@ SWClass >> declareMethodReturnsReceiversElement: aName [
 
 { #category : #api }
 SWClass >> declareMethodReturnsReceiversInstance: aName [
+	self error; flag: #toRemove.
 	self addSenderInitializer: aName with: [:aSender |
 		aSender
 			specifyReturnTypeAs: aSender operands receiver value instanceSide;
@@ -171,6 +170,7 @@ SWClass >> declareMethodReturnsReceiversInstance: aName [
 
 { #category : #api }
 SWClass >> declareMethodReturnsSecondArgument: aName [
+	self error; flag: #toRemove.
 	self addSenderInitializer: aName with: [ :aSender |
 		aSender
 			return: aSender operands third;
@@ -181,6 +181,7 @@ SWClass >> declareMethodReturnsSecondArgument: aName [
 
 { #category : #api }
 SWClass >> declareMethodReturnsSecondArgumentsElement: aName [
+	self error; flag: #toRemove.
 	self addSenderInitializer: aName with: [ :aSender |
 		aSender
 			return: aSender operands third type elementType;
@@ -191,28 +192,50 @@ SWClass >> declareMethodReturnsSecondArgumentsElement: aName [
 
 { #category : #accessing }
 SWClass >> decoderInitializer [
-
+	self error; flag: #toRemove.
+"
 	^ decoderInitializer ifNil: [ decoderInitializer := Dictionary new ]
+"
 ]
 
 { #category : #accessing }
 SWClass >> decoderInitializer: anObject [
-
+	self error; flag: #toRemove.
+"
 	decoderInitializer := anObject
+"
 ]
 
 { #category : #api }
 SWClass >> defineMethodBody: selector as: generator [
+	self error; flag: #toRemove.
+
 ]
 
 { #category : #api }
 SWClass >> defineMethodSender: aSelector as: anInitializer [
+	self error; flag: #toRemove.
+
+]
+
+{ #category : #'as yet unclassified' }
+SWClass >> getResult: aSelector with: operands [
+	|sender|
+	sender := SWSender new
+		selector: aSelector;
+		operands: operands;
+		yourself.
+	^ self methods at: sender ifAbsent: [
+		
+		self halt
+	]
+
 ]
 
 { #category : #api }
 SWClass >> getSenderOf: aMethod receiver: receiver with: args [
 	|sender code|
-
+self error; flag: #toRemove.
 	sender := self senderTranspilerClass new
 		selector: aMethod selector;
 		method: aMethod;
@@ -242,12 +265,14 @@ SWClass >> getSenderOf: aMethod receiver: receiver with: args [
 { #category : #api }
 SWClass >> getVariableInfoAtOffset: offset [
 	"Return SWVariableInfo in slots at 0 based offset."
+self error; flag: #toRemove.
 	^ self slot atOffset: offset.
 ]
 
 { #category : #api }
 SWClass >> getVariableInfoOf: aName [
 	"Return SWVariableInfo searched by its name."
+self error; flag: #toRemove.
 	^ self slot detect: [ :each | each isNotNil and: [ each name = aName ] ]
 
 ]
@@ -255,6 +280,7 @@ SWClass >> getVariableInfoOf: aName [
 { #category : #api }
 SWClass >> getVariableInfoOf: aName ifPresent: aPresentBlock [
 	"Return SWVariableInfo searched by its name."
+self error; flag: #toRemove.
 	^ self slot detect: [ :each | each isNotNil and: [ each name = aName ] ] ifFound: aPresentBlock
 
 ]
@@ -280,6 +306,7 @@ SWClass >> methods: anObject [
 { #category : #private }
 SWClass >> newDecoderOf: aCompiledCode [
 	|decoder|
+self halt; flag: #toRewrite.
 	decoder := (self transpilerClass new: aCompiledCode)
 		classInfo: self;
 		pool: self pool;
@@ -311,34 +338,40 @@ SWClass >> putOn: aStream [
 
 { #category : #accessing }
 SWClass >> senderInitializer [
-
+	self error; flag: #toRemove.
+"
 	^ senderInitializer ifNil: [ senderInitializer := Dictionary new ]
+"
 ]
 
 { #category : #accessing }
 SWClass >> senderInitializer: anObject [
-
+	self error; flag: #toRemove.
+"
 	senderInitializer := anObject
+"
 ]
 
 { #category : #accessing }
 SWClass >> senderTranspilerClass [
+"
 	^ self pool senderTranspilerClass 
+"
 ]
 
 { #category : #api }
 SWClass >> setBreakpointOn: aName [
+	self error; flag: #toRemove.
+"
 	self senderInitializer at: aName put: [ :aCallee |
 		self halt
 	]
-
+"
 ]
 
 { #category : #accessing }
 SWClass >> slot [
-	"A slot consists of member variables.
-	In Pharo object, a member variable has its own 'offset' represented by its #stackPos."
-
+	self halt; flag: #toRewrite.
 	^ slot ifNil: [
 		slot := SWSlot new.
 		self targetClass slots do: [ :ids |
@@ -368,6 +401,7 @@ SWClass >> targetClass: anObject [
 
 { #category : #accessing }
 SWClass >> transpilerClass [
+	self error; flag: #toRemove.
 
 	^ self pool transpilerClass
 ]

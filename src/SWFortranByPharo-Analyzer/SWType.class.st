@@ -100,18 +100,19 @@ SWType class >> userSpecifyingPriority [
 
 { #category : #'accumulator ops' }
 SWType >> << rightType [
-	rightType ifNil: [ ^ self ].
+	rightType ifNil: [ ^ rightType ].
 	(rightType class includesBehavior: SWType) ifTrue: [
-		rightType priority <= self priority ifTrue: [ ^ self ].
+		rightType priority <= self priority ifTrue: [ ^ rightType ].
 
 		self payload: rightType payload.
 		self priority: rightType priority.
 	] ifFalse: [
-		rightType = UndefinedObject ifTrue: [  ^ self ].
+		rightType = UndefinedObject ifTrue: [  ^ rightType ].
 
 		self payload: rightType.
 		self priority: nil.
-	]
+	].
+	^ rightType
 
 ]
 

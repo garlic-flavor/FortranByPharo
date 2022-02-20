@@ -1,7 +1,7 @@
 Extension { #name : #FullBlockClosure }
 
 { #category : #'*SWFortranByPharo-Analyzer' }
-FullBlockClosure >> traverseUsing: transpiler [
-	^ self sourceNode traverseUsing: transpiler.
+FullBlockClosure >> dispatchTo: transpiler [
+	^ self sourceNode dispatchTo: transpiler.
 
 ]

@@ -1,6 +1,6 @@
 Extension { #name : #Float }
 
 { #category : #'*SWFortranByPharo-Analyzer' }
-Float >> traverseUsing: transpiler [
+Float >> dispatchTo: transpiler [
 	^ transpiler putFloat: self
 ]

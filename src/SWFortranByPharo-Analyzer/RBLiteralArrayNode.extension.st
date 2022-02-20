@@ -1,6 +1,6 @@
 Extension { #name : #RBLiteralArrayNode }
 
 { #category : #'*SWFortranByPharo-Analyzer' }
-RBLiteralArrayNode >> traverseUsing: transpiler [
-	^ self children traverseUsing: transpiler
+RBLiteralArrayNode >> dispatchTo: transpiler [
+	^ self children dispatchTo: transpiler
 ]

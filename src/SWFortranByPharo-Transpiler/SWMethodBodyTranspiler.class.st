@@ -29,7 +29,7 @@ SWMethodBodyTranspiler class >> senderTranspilerClass [
 
 { #category : #'code generation' }
 SWMethodBodyTranspiler >> << anObject [
-	anObject traverseUsing: self
+	anObject dispatchTo: self
 
 ]
 

@@ -1,7 +1,7 @@
 Extension { #name : #RBReturnNode }
 
 { #category : #'*SWFortranByPharo-Analyzer' }
-RBReturnNode >> traverseUsing: transpiler [
+RBReturnNode >> dispatchTo: transpiler [
 	^ transpiler atReturn: self
 		
 ]

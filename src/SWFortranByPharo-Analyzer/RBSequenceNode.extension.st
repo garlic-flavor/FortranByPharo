@@ -1,6 +1,6 @@
 Extension { #name : #RBSequenceNode }
 
 { #category : #'*SWFortranByPharo-Analyzer' }
-RBSequenceNode >> traverseUsing: traverser [
+RBSequenceNode >> dispatchTo: traverser [
 	traverser atSequence: self
 ]
