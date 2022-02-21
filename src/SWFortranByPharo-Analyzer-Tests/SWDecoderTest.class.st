@@ -36,3 +36,8 @@ SWDecoderTest >> test_03_return_self [
 SWDecoderTest >> test_04_call_wellknown_message [
 	self resultOfNo: 4 with: { Float } equals: Float
 ]
+
+{ #category : #tests }
+SWDecoderTest >> test_05_ifTrue_ifFalse [
+	self resultOfNo: 5 with: { Boolean } equals: SmallInteger
+]

@@ -90,11 +90,8 @@ SWClass >> declareMethodAsCompareOperator: aName [
 
 { #category : #api }
 SWClass >> declareMethodReturnsFirstArgument: aName [
-	self error; flag: #toRemove.
-	self addSenderInitializer: aName with: [ :aSender |
-		aSender
-			specifyReturnTypeAs: aSender operands second;
-			yourself
+	self addPredefined: aName with: [ :operator |
+		operator second
 	]
 
 ]
@@ -112,13 +109,10 @@ SWClass >> declareMethodReturnsFirstArgumentsElement: aName [
 
 { #category : #api }
 SWClass >> declareMethodReturnsFirstOrSecondArgument: aName [
-	self error; flag: #toRemove.
-	self addSenderInitializer: aName with: [ :aSender |
-		aSender
-			return: ((SWVariableType new)
-				<< aSender operands second;
-				<< aSender operands third;
-				yourself);
+	self addPredefined: aName with: [ :operands |
+		SWVariableType new
+			<< operands second;
+			<< operands third;
 			yourself
 	]
 

@@ -156,11 +156,15 @@ SWPool >> initialize_BlockClosure: ct [
 SWPool >> initialize_Boolean: ct [
 	ct
 		declareMethodReturnsFirstArgument: #ifTrue:;
+"
  		declareMethodReturnsFirstArgument: #ifFalse:;
-		declareMethodReturnsFirstArgument: #ifTrue:ifFalse:;
+"
+		declareMethodReturnsFirstOrSecondArgument: #ifTrue:ifFalse:;
+"
 		declareMethodReturnsFirstArgument: #ifFalse:ifTrue:;
 		declareMethodReturnsFirstArgument: #and:;
 		declareMethodReturnsFirstArgument: #or:
+" yourself
 ]
 
 { #category : #initialization }

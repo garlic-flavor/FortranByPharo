@@ -48,6 +48,14 @@ SWDecoder >> atAssignTo: aLValue with: aRValue [
 ]
 
 { #category : #accessing }
+SWDecoder >> atClosure: aBlockNode [
+	self children ifNotEmpty: [
+		self result << self children last result
+	]
+
+]
+
+{ #category : #accessing }
 SWDecoder >> atInteger: anInteger [
 	self result << anInteger class
 
@@ -79,6 +87,11 @@ SWDecoder >> atSequence: aSequenceNode [
 	self children ifNotEmpty: [
 		self result << self children last result
 	]
+]
+
+{ #category : #accessing }
+SWDecoder >> atString: aString [
+	self result << aString class
 ]
 
 { #category : #accessing }
