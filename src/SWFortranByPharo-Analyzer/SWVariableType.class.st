@@ -66,6 +66,11 @@ SWVariableType >> assignCounter [
 	^ assignCounter ifNil: [ assignCounter := OrderedCollection new ]
 ]
 
+{ #category : #accessing }
+SWVariableType >> elementType [
+	^ self type elementType
+]
+
 { #category : #testing }
 SWVariableType >> hasProperty: aProperty [
 	^ self properties includes: aProperty

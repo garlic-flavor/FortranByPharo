@@ -54,7 +54,9 @@ SWDecoder >> atCascade: aCascadeNode [
 
 { #category : #accessing }
 SWDecoder >> atClosure: aBlockNode [
-	self resultIsLastChildsResult
+	self result << ((SWContainerType new: BlockClosure)
+		elementType: self children last result;
+		yourself)
 
 ]
 
@@ -73,6 +75,11 @@ SWDecoder >> atMessage: aMessageNode [
 { #category : #accessing }
 SWDecoder >> atMethod: traverser [
 	self methodResult << (SWVariableType new: self slot first value with: SWType receiverTypePriority)
+]
+
+{ #category : #accessing }
+SWDecoder >> atPragma: aPragmaNode [
+	(self haltList includes: #pragma) ifTrue: [ self halt ]
 ]
 
 { #category : #accessing }
@@ -239,6 +246,7 @@ SWDecoder >> resultIsLastChildsResult [
 		self result << self children last result
 	].
 	^ self result
+
 ]
 
 { #category : #accessing }

@@ -9,6 +9,7 @@ SWDecoderTest >> decodeNo: no with: args [
 	^ (SWDecoder new: (SWTestProgram getMy: no) sourceNode with: (args copyWithFirst: SWTestProgram))
 		enableLogging;
 		haltAt: #unresolvedSelector;
+		haltAt: #pragma;
 		decode;
 		yourself
 ]
@@ -96,5 +97,35 @@ SWDecoderTest >> test_27_ifNotNil_shortcircuit [
 { #category : #tests }
 SWDecoderTest >> test_28_method_call [
 	self resultOfNo: 28 with: { } equals: SWStd class
+
+]
+
+{ #category : #tests }
+SWDecoderTest >> test_29_local_variables [
+	self resultOfNo: 29 with: { } equals: SmallInteger
+
+]
+
+{ #category : #tests }
+SWDecoderTest >> test_30_recursive_message_call [
+	self resultOfNo: 30 with: { SmallInteger } equals: SmallInteger
+
+]
+
+{ #category : #tests }
+SWDecoderTest >> test_31_new [
+	self resultOfNo: 31 with: { SmallInteger } equals: Set
+
+]
+
+{ #category : #tests }
+SWDecoderTest >> test_32_return_literal [
+	self resultOfNo: 32 with: {  } equals: Dictionary
+
+]
+
+{ #category : #tests }
+SWDecoderTest >> test_33_try_catch [
+	self resultOfNo: 33 with: {  } equals: SWTestProgram
 
 ]

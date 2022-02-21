@@ -135,10 +135,9 @@ SWPool >> initialize_AbstractFileReference: ct [
 { #category : #initialization }
 SWPool >> initialize_Behavior: ct [
 	ct
-"
 		declareMethodReturnsReceiversInstance: #basicNew:;
 		declareMethodReturnsReceiversInstance: #basicNew
-" yourself
+
 ]
 
 { #category : #initialization }
@@ -157,10 +156,10 @@ SWPool >> initialize_BlockClosure: ct [
 { #category : #initialization }
 SWPool >> initialize_Boolean: ct [
 	ct
-		declareMethodReturnsFirstArgument: #ifTrue:;
- 		declareMethodReturnsFirstArgument: #ifFalse:;
-		declareMethodReturnsFirstOrSecondArgument: #ifTrue:ifFalse:;
-		declareMethodReturnsFirstOrSecondArgument: #ifFalse:ifTrue:;
+		declareMethodReturnsFirstArgumentsElement: #ifTrue:;
+ 		declareMethodReturnsFirstArgumentsElement: #ifFalse:;
+		declareMethodReturnsFirstOrSecondArgumentsElement: #ifTrue:ifFalse:;
+		declareMethodReturnsFirstOrSecondArgumentsElement: #ifFalse:ifTrue:;
 "
 		declareMethodReturnsFirstArgument: #and:;
 		declareMethodReturnsFirstArgument: #or:
@@ -197,8 +196,8 @@ SWPool >> initialize_DateAndTimeClass: ct [
 SWPool >> initialize_Dictionary: ct [
 	ct
 		declareMethodReturnsSecondArgument: #at:put:;
-		declareMethodReturnsSecondArgumentsElement: #at:ifAbsent:;
-		declareMethodReturnsSecondArgumentsElement: #at:ifAbsentPut:;
+		declareMethodReturnsSecondArgument: #at:ifAbsent:;
+		declareMethodReturnsSecondArgument: #at:ifAbsentPut:;
 		declareMethod: #includesKey: asReturn: Boolean;
 		declareMethodReturnsReceiver: #stonOn:
 ]
@@ -236,19 +235,19 @@ SWPool >> initialize_Magnitude: ct [
 SWPool >> initialize_Number: ct [
 	ct
 		declareMethodAsBinaryOperator: #+;
-"
 		declareMethodAsBinaryOperator: #-;
 		declareMethodAsBinaryOperator: #*;
 		declareMethodAsBinaryOperator: #/
-" yourself
+
 ]
 
 { #category : #initialization }
 SWPool >> initialize_Object: ct [
 	ct
 		declareMethodAsCompareOperator: #=;
-"
+		declareMethod: #error asReturn: nil;
 		declareMethod: #error: asReturn: nil;
+"
 		declareMethod: #printString asReturn: String;
 		declareMethod: #size asReturn: Integer;
 		declareMethod: #asString asReturn: String;
@@ -287,10 +286,10 @@ SWPool >> initialize_ProtoObject: ct [
 "
 		declareMethodReturnsReceiversClass: #class;
 "
-		declareMethodReturnsReceiverOrFirstArgument: #ifNil:;
-		declareMethodReturnsReceiverOrFirstArgument: #ifNotNil:;
-		declareMethodReturnsFirstOrSecondArgument: #ifNil:ifNotNil:;
-		declareMethodReturnsFirstOrSecondArgument: #ifNotNil:ifNil:
+		declareMethodReturnsReceiverOrFirstArgumentsElement: #ifNil:;
+		declareMethodReturnsReceiverOrFirstArgumentsElement: #ifNotNil:;
+		declareMethodReturnsFirstOrSecondArgumentsElement: #ifNil:ifNotNil:;
+		declareMethodReturnsFirstOrSecondArgumentsElement: #ifNotNil:ifNil:
 ]
 
 { #category : #initialization }

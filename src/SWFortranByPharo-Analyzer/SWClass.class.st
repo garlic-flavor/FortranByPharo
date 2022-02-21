@@ -95,11 +95,8 @@ SWClass >> declareMethodReturnsFirstArgument: aName [
 
 { #category : #api }
 SWClass >> declareMethodReturnsFirstArgumentsElement: aName [
-	self error; flag: #toRemove.
-	self addSenderInitializer: aName with: [ :aSender |
-		aSender
-			return: aSender operands second type elementType;
-			yourself
+	self addPredefined: aName with: [ :operands |
+		operands second elementType
 	]
 
 ]
@@ -110,6 +107,17 @@ SWClass >> declareMethodReturnsFirstOrSecondArgument: aName [
 		SWVariableType new
 			<< operands second;
 			<< operands third;
+			yourself
+	]
+
+]
+
+{ #category : #api }
+SWClass >> declareMethodReturnsFirstOrSecondArgumentsElement: aName [
+	self addPredefined: aName with: [ :operands |
+		SWVariableType new
+			<< operands second elementType;
+			<< operands third elementType;
 			yourself
 	]
 
@@ -135,6 +143,17 @@ SWClass >> declareMethodReturnsReceiverOrFirstArgument: aName [
 ]
 
 { #category : #api }
+SWClass >> declareMethodReturnsReceiverOrFirstArgumentsElement: aName [
+	self addPredefined: aName with: [ :operands |
+		SWVariableType new
+			<< operands first;
+			<< operands second elementType;
+			yourself
+	]
+
+]
+
+{ #category : #api }
 SWClass >> declareMethodReturnsReceiversClass: aName [
 	self error; flag: #toRemove.
 	self addSenderInitializer: aName with: [ :aSender |
@@ -147,11 +166,8 @@ SWClass >> declareMethodReturnsReceiversClass: aName [
 
 { #category : #api }
 SWClass >> declareMethodReturnsReceiversElement: aName [
-	self error; flag: #toRemove.
-	self addSenderInitializer: aName with: [ :aSender |
-		aSender
-			return: aSender operands receiver type elementType;
-			yourself
+	self addPredefined: aName with: [ :operands |
+		operands first elementType
 	]
 
 ]
