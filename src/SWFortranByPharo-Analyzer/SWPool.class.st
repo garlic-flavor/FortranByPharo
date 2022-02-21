@@ -250,7 +250,9 @@ SWPool >> initialize_Object: ct [
 "
 		declareMethod: #printString asReturn: String;
 		declareMethod: #size asReturn: Integer;
+"
 		declareMethod: #asString asReturn: String;
+"
 		declareMethodReturnsFirstArgument: #at:put:;
 		declareMethod: #at: asReturn: Object;
 		declareMethodReturnsReceiver: #putOn:;
@@ -283,9 +285,7 @@ SWPool >> initialize_PathClass: ct [
 SWPool >> initialize_ProtoObject: ct [
 	ct
 		declareMethodAsCompareOperator: #==;
-"
 		declareMethodReturnsReceiversClass: #class;
-"
 		declareMethodReturnsReceiverOrFirstArgumentsElement: #ifNil:;
 		declareMethodReturnsReceiverOrFirstArgumentsElement: #ifNotNil:;
 		declareMethodReturnsFirstOrSecondArgumentsElement: #ifNil:ifNotNil:;

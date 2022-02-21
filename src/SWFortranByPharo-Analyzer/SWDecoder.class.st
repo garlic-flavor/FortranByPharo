@@ -39,7 +39,7 @@ SWDecoder >> add: aName as: aType [
 
 { #category : #accessing }
 SWDecoder >> atAssignTo: aLValue with: aRValue [
-
+	self decodeChildren.
 	self result << self children first result.
 	self slot detect: [ :each | each name = aLValue name ] ifFound: [ :var |
 		var << self result.		
@@ -50,13 +50,24 @@ SWDecoder >> atAssignTo: aLValue with: aRValue [
 { #category : #accessing }
 SWDecoder >> atCascade: aCascadeNode [
 	self resultIsLastChildsResult
+
 ]
 
 { #category : #accessing }
 SWDecoder >> atClosure: aBlockNode [
-	self result << ((SWContainerType new: BlockClosure)
-		elementType: self children last result;
-		yourself)
+	|outerScope res|
+	outerScope := self slot copy.
+	aBlockNode argumentNames do: [ :name |
+		self add: name as: nil
+	].
+	aBlockNode temporaries do: [ :temp |
+		self add: temp name as: nil
+	].
+	res := ((SWContainerType new: BlockClosure)
+		elementType: self decodeChildren;
+		yourself).
+	self result << res.
+	self slot: outerScope
 
 ]
 
@@ -73,20 +84,24 @@ SWDecoder >> atInteger: anInteger [
 
 { #category : #accessing }
 SWDecoder >> atMessage: aMessageNode [
-
+	self decodeChildren.
 	(aMessageNode selector = #declare:as: and: [ self children first result = SWType class ])ifTrue: [|name type|
 		"A special case for type specification by source code."
-		name := aMessageNode children second value.
-		type := Smalltalk globals at: aMessageNode children third name.
+		name := aMessageNode children second evaluate.
+		type := aMessageNode children third evaluate.
 		slot detect: [ :each | each name = name ] ifFound: [ :found | found << type ].
+		self result << SWType.
 	] ifFalse: [
+		(self haltList includes: aMessageNode selector) ifTrue: [ self halt ].
 		self result << (self pool getResult: aMessageNode selector with: (self children collect: [ :each | each result ])).
 	]
 ]
 
 { #category : #accessing }
 SWDecoder >> atMethod: traverser [
+	self decodeChildren.
 	self methodResult << (SWVariableType new: self slot first value with: SWType receiverTypePriority)
+
 ]
 
 { #category : #accessing }
@@ -96,7 +111,7 @@ SWDecoder >> atPragma: aPragmaNode [
 
 { #category : #accessing }
 SWDecoder >> atReturn: aReturnNode [
-	self methodResult << (self resultIsLastChildsResult)
+	self methodResult << self decodeChildren
 
 ]
 
@@ -120,8 +135,10 @@ SWDecoder >> atSymbol: aByteSymbol [
 SWDecoder >> atVariable: aVariableNode [
 	self result << (self slot detect: [ :each | each name = aVariableNode name ] ifNone: [
 		self logger log: [ 'Access to global: ', aVariableNode name ].
-		(Smalltalk globals at: aVariableNode name) class
-	])
+		(self haltList includes: #globalAccess) ifTrue: [ self halt ].
+		aVariableNode evaluate class
+	]).
+
 ]
 
 { #category : #accessing }
@@ -139,10 +156,6 @@ SWDecoder >> children: anObject [
 { #category : #api }
 SWDecoder >> decode [
 	methodResult ifNil: [ methodResult := SWVariableType new ].
-	self children: (OrderedCollection new: self node children size).
-	self node children do: [ :child |
-		self children addLast: (self decodeChildWith: child)
-	].
 	self node dispatchTo: self.
 	^ methodResult
 ]
@@ -156,6 +169,15 @@ SWDecoder >> decodeChildWith: aNode [
 		yourself.
 ]
 
+{ #category : #'as yet unclassified' }
+SWDecoder >> decodeChildren [
+	self children: (OrderedCollection new: self node children size).
+	self node children do: [ :child |
+		self children addLast: (self decodeChildWith: child)
+	].
+	^ self children ifNotEmpty: [ self children last result ] ifEmpty: [ nil ]
+]
+
 { #category : #initialization }
 SWDecoder >> enableLogging [
 	self logger enabled: true
@@ -164,6 +186,21 @@ SWDecoder >> enableLogging [
 { #category : #accessing }
 SWDecoder >> haltAt: aSymbol [
 	self haltList add: aSymbol
+]
+
+{ #category : #'as yet unclassified' }
+SWDecoder >> haltAtGlobalAccess [
+	self haltAt: #globalAccess
+]
+
+{ #category : #'as yet unclassified' }
+SWDecoder >> haltAtPragma [
+	self haltAt: #pragma
+]
+
+{ #category : #'as yet unclassified' }
+SWDecoder >> haltAtUnresolvedSelector [
+	self haltAt: #unresolvedSelector
 ]
 
 { #category : #accessing }
@@ -220,13 +257,13 @@ SWDecoder >> operands: operands [
 	receiver := operands first value.
 	self add: 'self' as: receiver.
 	self add: 'super' as: receiver superclass.
-	
 	self node argumentNames  with: (operands copyFrom: 2 to: (operands size)) do: [ :name :type |
 		self add: name as: type
 	].
 	self node temporaries do: [ :each |
 		self add: each name as: nil
-	]
+	].
+
 ]
 
 { #category : #accessing }
@@ -259,11 +296,9 @@ SWDecoder >> result: anObject [
 
 { #category : #'as yet unclassified' }
 SWDecoder >> resultIsLastChildsResult [
-	self children ifNotEmpty: [
-		self result << self children last result
-	].
-	^ self result
-
+	self decodeChildren ifNotNil: [ :res |
+		self result << res
+	]
 ]
 
 { #category : #accessing }

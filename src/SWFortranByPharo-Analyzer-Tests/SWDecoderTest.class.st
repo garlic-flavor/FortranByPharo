@@ -1,15 +1,19 @@
 Class {
 	#name : #SWDecoderTest,
 	#superclass : #TestCase,
+	#instVars : [
+		'decoder'
+	],
 	#category : #'SWFortranByPharo-Analyzer-Tests-Analyzer'
 }
 
 { #category : #'as yet unclassified' }
 SWDecoderTest >> decodeNo: no with: args [
-	^ (SWDecoder new: (SWTestProgram getMy: no) sourceNode with: (args copyWithFirst: SWTestProgram))
+	^ decoder
+		node: (SWTestProgram getMy: no) sourceNode;
+		operands: (args copyWithFirst: SWTestProgram);
 		enableLogging;
-		haltAt: #unresolvedSelector;
-		haltAt: #pragma;
+		haltAtUnresolvedSelector;
 		decode;
 		yourself
 ]
@@ -20,6 +24,13 @@ SWDecoderTest >> resultOfNo: no with: args equals: type [
 	decoder := self decodeNo: no with: args.
 	self assert: decoder methodResult value equals: type
 
+]
+
+{ #category : #running }
+SWDecoderTest >> setUp [
+	super setUp.
+	decoder := SWDecoder new
+	"Put here a common initialization logic for tests"
 ]
 
 { #category : #tests }
@@ -85,7 +96,13 @@ SWDecoderTest >> test_18_ifNil_ifNotNil_expression [
 { #category : #tests }
 SWDecoderTest >> test_22_ifNil_expression [
 	self resultOfNo: 22 with: { UndefinedObject } equals: SmallInteger.
+
+]
+
+{ #category : #tests }
+SWDecoderTest >> test_22_ifNil_expression2 [
 	self resultOfNo: 22 with: { String } equals: String
+
 ]
 
 { #category : #tests }
@@ -157,5 +174,11 @@ SWDecoderTest >> test_39_call_Transceipt [
 { #category : #tests }
 SWDecoderTest >> test_40_user_specified_variable_type [
 	self resultOfNo: 40 with: {  } equals: Integer
+
+]
+
+{ #category : #tests }
+SWDecoderTest >> test_41_cascading [
+	self resultOfNo: 41 with: { String } equals: String
 
 ]

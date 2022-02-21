@@ -155,11 +155,8 @@ SWClass >> declareMethodReturnsReceiverOrFirstArgumentsElement: aName [
 
 { #category : #api }
 SWClass >> declareMethodReturnsReceiversClass: aName [
-	self error; flag: #toRemove.
-	self addSenderInitializer: aName with: [ :aSender |
-		aSender
-			specifyReturnTypeAs: aSender operands receiver value classSide;
-			yourself
+	self addPredefined: aName with: [ :operands |
+		operands first value classSide
 	]
 
 ]
