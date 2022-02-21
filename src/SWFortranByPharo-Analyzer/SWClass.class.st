@@ -62,11 +62,8 @@ SWClass >> declareMethod: aName as: initializer [
 
 { #category : #api }
 SWClass >> declareMethod: aName asReturn: rType [
-	self error; flag: #toRemove.
-	self addSenderInitializer: aName with: [ :aSender |
-		aSender
-			specifyReturnTypeAs: rType;
-			yourself
+	self addPredefined: aName with: [ :operands |
+		rType
 	]
 
 ]
@@ -120,10 +117,18 @@ SWClass >> declareMethodReturnsFirstOrSecondArgument: aName [
 
 { #category : #api }
 SWClass >> declareMethodReturnsReceiver: aName [
-	self error; flag: #toRemove.
-	self addSenderInitializer: aName with: [ :aSender |
-		aSender
-			return: aSender operands receiver;
+	self addPredefined: aName with: [ :operands |
+		operands first
+	]
+
+]
+
+{ #category : #api }
+SWClass >> declareMethodReturnsReceiverOrFirstArgument: aName [
+	self addPredefined: aName with: [ :operands |
+		SWVariableType new
+			<< operands first;
+			<< operands second;
 			yourself
 	]
 
@@ -153,22 +158,16 @@ SWClass >> declareMethodReturnsReceiversElement: aName [
 
 { #category : #api }
 SWClass >> declareMethodReturnsReceiversInstance: aName [
-	self error; flag: #toRemove.
-	self addSenderInitializer: aName with: [:aSender |
-		aSender
-			specifyReturnTypeAs: aSender operands receiver value instanceSide;
-			yourself
+	self addPredefined: aName with: [:operands |
+		operands first value instanceSide
 	]
 
 ]
 
 { #category : #api }
 SWClass >> declareMethodReturnsSecondArgument: aName [
-	self error; flag: #toRemove.
-	self addSenderInitializer: aName with: [ :aSender |
-		aSender
-			return: aSender operands third;
-			yourself
+	self addPredefined: aName with: [ :operands |
+		operands third
 	]
 
 ]
@@ -182,6 +181,11 @@ SWClass >> declareMethodReturnsSecondArgumentsElement: aName [
 			yourself
 	]
 
+]
+
+{ #category : #multipart }
+SWClass >> decoderClass [
+	^ self pool decoderClass
 ]
 
 { #category : #accessing }
@@ -213,17 +217,27 @@ SWClass >> defineMethodSender: aSelector as: anInitializer [
 ]
 
 { #category : #'as yet unclassified' }
-SWClass >> getResult: aSelector with: operands [
+SWClass >> getResult: method with: operands [
 	|sender|
 	sender := SWSender new
-		selector: aSelector;
+		method: method;
 		operands: operands;
 		yourself.
 	^ self methods at: sender ifAbsent: [
-		self predefined at: aSelector ifPresent: [ :pre |
+		self predefined at: method selector ifPresent: [ :pre |
 			self methods at: sender put: (pre cull: operands)
-		] ifAbsent: [
-			self halt
+		] ifAbsent: [ |result|
+			result := SWVariableType new.
+			self methods at: sender put: result.
+			self decoderClass new
+				logger: self logger;
+				haltList: self haltList;
+				pool: self pool;
+				node: method sourceNode;
+				slot: self slot copy;
+				operands: operands;
+				methodResult: result;
+				decode
 		]
 	]
 
@@ -282,10 +296,20 @@ self error; flag: #toRemove.
 
 ]
 
+{ #category : #'private - accessing' }
+SWClass >> haltList [
+	^ self pool haltList
+]
+
 { #category : #testing }
 SWClass >> hasVariable: aName [
 self error; flag: #toRemove.
 	^ self slot detect: [ :each | each isNotNil and: [ each name = aName ] ]  ifFound: [ :dummy | true ] ifNone: [ false ]
+]
+
+{ #category : #accessing }
+SWClass >> logger [
+	^ self pool logger
 ]
 
 { #category : #accessing }
@@ -370,21 +394,18 @@ SWClass >> senderTranspilerClass [
 
 { #category : #api }
 SWClass >> setBreakpointOn: aName [
-	self error; flag: #toRemove.
-"
-	self senderInitializer at: aName put: [ :aCallee |
-		self halt
+	self addPredefined: aName with: [ :operands |
+		self halt.
 	]
-"
+
 ]
 
 { #category : #accessing }
 SWClass >> slot [
-	self halt; flag: #toRewrite.
 	^ slot ifNil: [
 		slot := SWSlot new.
 		self targetClass slots do: [ :ids |
-			(slot at: ids index) name: ids name
+			slot push name: ids name
 		].
 		slot
 	]

@@ -5,7 +5,7 @@ Class {
 	#name : #SWSender,
 	#superclass : #Object,
 	#instVars : [
-		'selector',
+		'method',
 		'operands'
 	],
 	#category : #'SWFortranByPharo-Analyzer-Analyzer'
@@ -13,12 +13,24 @@ Class {
 
 { #category : #comparing }
 SWSender >> = right [
-	^ self selector = right selector and: [ self operands = right operands ]
+	^ self method = right method and: [ self operands = right operands ]
 ]
 
 { #category : #comparing }
 SWSender >> hash [
-	^ (operands copyWith: selector) hash
+	^ (operands copyWith: method) hash
+]
+
+{ #category : #accessing }
+SWSender >> method [
+
+	^ method
+]
+
+{ #category : #accessing }
+SWSender >> method: anObject [
+
+	method := anObject
 ]
 
 { #category : #accessing }
@@ -31,17 +43,4 @@ SWSender >> operands [
 SWSender >> operands: anObject [
 
 	operands := anObject
-]
-
-{ #category : #accessing }
-SWSender >> selector [
-
-	^ selector
-]
-
-{ #category : #accessing }
-SWSender >> selector: anObject [
-
-	selector := anObject
-
 ]

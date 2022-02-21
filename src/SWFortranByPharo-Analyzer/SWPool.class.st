@@ -86,7 +86,7 @@ SWPool >> getClassTranspiler: aClass [
 SWPool >> getResult: aSelector with: operands [
 	^ self class search: aSelector in: operands first value ifFound: [ :method |
 		(self getClassTranspiler: method methodClass)
-			getResult: aSelector with: operands.
+			getResult: method with: operands.
 	] ifNone: [
 		self logger log: [ 'An unknown method detected: ', aSelector ].
 		(self haltList includes: #unresolvedSelector)  ifTrue: [ self halt ].
@@ -135,8 +135,10 @@ SWPool >> initialize_AbstractFileReference: ct [
 { #category : #initialization }
 SWPool >> initialize_Behavior: ct [
 	ct
+"
 		declareMethodReturnsReceiversInstance: #basicNew:;
 		declareMethodReturnsReceiversInstance: #basicNew
+" yourself
 ]
 
 { #category : #initialization }
@@ -156,12 +158,10 @@ SWPool >> initialize_BlockClosure: ct [
 SWPool >> initialize_Boolean: ct [
 	ct
 		declareMethodReturnsFirstArgument: #ifTrue:;
-"
  		declareMethodReturnsFirstArgument: #ifFalse:;
-"
 		declareMethodReturnsFirstOrSecondArgument: #ifTrue:ifFalse:;
+		declareMethodReturnsFirstOrSecondArgument: #ifFalse:ifTrue:;
 "
-		declareMethodReturnsFirstArgument: #ifFalse:ifTrue:;
 		declareMethodReturnsFirstArgument: #and:;
 		declareMethodReturnsFirstArgument: #or:
 " yourself
@@ -286,11 +286,11 @@ SWPool >> initialize_ProtoObject: ct [
 		declareMethodAsCompareOperator: #==;
 "
 		declareMethodReturnsReceiversClass: #class;
-		declareMethodReturnsFirstArgument: #ifNil:;
-		declareMethodReturnsFirstArgument: #ifNotNil:;
-		declareMethodReturnsFirstArgument: #ifNil:ifNotNil;
-		declareMethodReturnsFirstArgument: #ifNotNil:ifNil:
-" yourself
+"
+		declareMethodReturnsReceiverOrFirstArgument: #ifNil:;
+		declareMethodReturnsReceiverOrFirstArgument: #ifNotNil:;
+		declareMethodReturnsFirstOrSecondArgument: #ifNil:ifNotNil:;
+		declareMethodReturnsFirstOrSecondArgument: #ifNotNil:ifNil:
 ]
 
 { #category : #initialization }

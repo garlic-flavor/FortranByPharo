@@ -48,10 +48,13 @@ SWDecoder >> atAssignTo: aLValue with: aRValue [
 ]
 
 { #category : #accessing }
+SWDecoder >> atCascade: aCascadeNode [
+	self resultIsLastChildsResult
+]
+
+{ #category : #accessing }
 SWDecoder >> atClosure: aBlockNode [
-	self children ifNotEmpty: [
-		self result << self children last result
-	]
+	self resultIsLastChildsResult
 
 ]
 
@@ -69,24 +72,19 @@ SWDecoder >> atMessage: aMessageNode [
 
 { #category : #accessing }
 SWDecoder >> atMethod: traverser [
-	self children ifNotEmpty: [ 
-		self methodResult << (self result << self children last result)
-	]
+	self methodResult << (SWVariableType new: self slot first value with: SWType receiverTypePriority)
 ]
 
 { #category : #accessing }
 SWDecoder >> atReturn: aReturnNode [
-	self children ifNotEmpty: [
-		self methodResult << (self result << self children last result)
-	]
-		
+	self methodResult << (self resultIsLastChildsResult)
+
 ]
 
 { #category : #accessing }
 SWDecoder >> atSequence: aSequenceNode [
-	self children ifNotEmpty: [
-		self result << self children last result
-	]
+	self resultIsLastChildsResult
+
 ]
 
 { #category : #accessing }
@@ -97,7 +95,8 @@ SWDecoder >> atString: aString [
 { #category : #accessing }
 SWDecoder >> atVariable: aVariableNode [
 	self result << (self slot detect: [ :each | each name = aVariableNode name ] ifNone: [
-		Smalltalk globals at: aVariableNode name
+		self logger log: [ 'Access to global: ', aVariableNode name ].
+		(Smalltalk globals at: aVariableNode name) class
 	])
 ]
 
@@ -115,13 +114,13 @@ SWDecoder >> children: anObject [
 
 { #category : #api }
 SWDecoder >> decode [
-	methodResult  ifNil: [ methodResult := SWVariableType new: self slot first value with: SWType receiverTypePriority ].
+	methodResult ifNil: [ methodResult := SWVariableType new ].
 	self children: (OrderedCollection new: self node children size).
 	self node children do: [ :child |
 		self children addLast: (self decodeChildWith: child)
 	].
 	self node dispatchTo: self.
-
+	^ methodResult
 ]
 
 { #category : #'as yet unclassified' }
@@ -131,6 +130,16 @@ SWDecoder >> decodeChildWith: aNode [
 		slot: self slot copy;
 		decode;
 		yourself.
+]
+
+{ #category : #initialization }
+SWDecoder >> enableLogging [
+	self logger enabled: true
+]
+
+{ #category : #accessing }
+SWDecoder >> haltAt: aSymbol [
+	self haltList add: aSymbol
 ]
 
 { #category : #accessing }
@@ -222,6 +231,14 @@ SWDecoder >> result [
 SWDecoder >> result: anObject [
 
 	result := anObject
+]
+
+{ #category : #'as yet unclassified' }
+SWDecoder >> resultIsLastChildsResult [
+	self children ifNotEmpty: [
+		self result << self children last result
+	].
+	^ self result
 ]
 
 { #category : #accessing }
