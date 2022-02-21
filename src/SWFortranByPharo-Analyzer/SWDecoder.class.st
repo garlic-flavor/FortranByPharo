@@ -61,6 +61,11 @@ SWDecoder >> atClosure: aBlockNode [
 ]
 
 { #category : #accessing }
+SWDecoder >> atFloat: aFloat [
+	self result << aFloat class
+]
+
+{ #category : #accessing }
 SWDecoder >> atInteger: anInteger [
 	self result << anInteger class
 
@@ -68,8 +73,15 @@ SWDecoder >> atInteger: anInteger [
 
 { #category : #accessing }
 SWDecoder >> atMessage: aMessageNode [
-	self result << (self pool getResult: aMessageNode selector with: (self children collect: [ :each | each result ])).
-		
+
+	(aMessageNode selector = #declare:as: and: [ self children first result = SWType class ])ifTrue: [|name type|
+		"A special case for type specification by source code."
+		name := aMessageNode children second value.
+		type := Smalltalk globals at: aMessageNode children third name.
+		slot detect: [ :each | each name = name ] ifFound: [ :found | found << type ].
+	] ifFalse: [
+		self result << (self pool getResult: aMessageNode selector with: (self children collect: [ :each | each result ])).
+	]
 ]
 
 { #category : #accessing }
@@ -97,6 +109,11 @@ SWDecoder >> atSequence: aSequenceNode [
 { #category : #accessing }
 SWDecoder >> atString: aString [
 	self result << aString class
+]
+
+{ #category : #accessing }
+SWDecoder >> atSymbol: aByteSymbol [
+	self result << aByteSymbol class
 ]
 
 { #category : #accessing }

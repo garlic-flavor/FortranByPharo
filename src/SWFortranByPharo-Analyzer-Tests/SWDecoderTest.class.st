@@ -129,3 +129,33 @@ SWDecoderTest >> test_33_try_catch [
 	self resultOfNo: 33 with: {  } equals: SWTestProgram
 
 ]
+
+{ #category : #tests }
+SWDecoderTest >> test_34_try_catch_expression [
+	self resultOfNo: 34 with: {  } equals: SmallInteger
+
+]
+
+{ #category : #tests }
+SWDecoderTest >> test_37_try_catch_expression [
+	self resultOfNo: 37 with: {  } equals: SmallInteger
+
+]
+
+{ #category : #tests }
+SWDecoderTest >> test_38_try_catch_shortcircuit [
+	self resultOfNo: 38 with: {  } equals: SmallInteger
+
+]
+
+{ #category : #tests }
+SWDecoderTest >> test_39_call_Transceipt [
+	self resultOfNo: 39 with: {  } equals: SWTestProgram
+
+]
+
+{ #category : #tests }
+SWDecoderTest >> test_40_user_specified_variable_type [
+	self resultOfNo: 40 with: {  } equals: Integer
+
+]

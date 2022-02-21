@@ -27,10 +27,6 @@ SWType class >> calcPriorityOf: aClass [
 { #category : #api }
 SWType class >> declare: aName as: aType [
 
-	^ aName -> (self new
-		<< aType;
-		priority: self userSpecifyingPriority;
-		yourself)
 ]
 
 { #category : #constants }
@@ -45,12 +41,14 @@ SWType class >> exactTypePriority [
 
 { #category : #initialization }
 SWType class >> initialize_selfClass: transpiler [
+"
 	transpiler
 		defineMethodSender: #declare:as: as: [ :t :sender |
 			t
 				preventStatementDelimiter;
 				preventNewline
 		]
+"
 ]
 
 { #category : #'private - utilities' }
