@@ -30,6 +30,11 @@ SWDecoder class >> new: aNode with: operands [
 		yourself
 ]
 
+{ #category : #'as yet unclassified' }
+SWDecoder class >> poolClass [
+	^ SWPool
+]
+
 { #category : #adding }
 SWDecoder >> add: aName as: aType [
 	self slot addLast: ((SWVariableType new: aType)
@@ -161,6 +166,7 @@ SWDecoder >> children: anObject [
 { #category : #api }
 SWDecoder >> decode [
 	methodResult ifNil: [ methodResult := SWVariableType new ].
+	self pool.
 	self node dispatchTo: self.
 	^ methodResult
 ]
@@ -275,7 +281,7 @@ SWDecoder >> operands: operands [
 SWDecoder >> pool [
 
 	^ pool ifNil: [
-		pool := SWPool new
+		pool := self class poolClass new
 			owner: self;
 			yourself
 	]

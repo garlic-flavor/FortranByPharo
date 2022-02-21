@@ -212,3 +212,9 @@ SWDecoderTest >> test_46_locals2 [
 	self resultOfNo: 46 with: { String } equals: SmallInteger
 
 ]
+
+{ #category : #tests }
+SWDecoderTest >> test_47_access_to_instance_variable [
+	self resultOfNo: 47 with: {  } equals: SmallInteger
+
+]

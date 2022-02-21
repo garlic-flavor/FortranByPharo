@@ -361,6 +361,15 @@ SWTestProgram >> _46_locals2: arg1 [
 	] value: 345.
 ]
 
+{ #category : #'as yet unclassified' }
+SWTestProgram >> _47_access_to_instance_variables [
+	|satp|
+	satp := SWTestProgram new.
+	satp var1: 999.
+	^ satp var1
+	
+]
+
 { #category : #accessing }
 SWTestProgram >> var1 [
 
