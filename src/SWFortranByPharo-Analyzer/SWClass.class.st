@@ -14,7 +14,7 @@ Class {
 		'pool',
 		'slot',
 		'methods',
-		'definedResults'
+		'predefined'
 	],
 	#category : #'SWFortranByPharo-Analyzer-Analyzer'
 }
@@ -31,6 +31,12 @@ SWClass >> addDecoderInitializer: aName with: anInitializer [
 	] ifAbsentPut: [
 		anInitializer
 	]
+]
+
+{ #category : #adding }
+SWClass >> addPredefined: aName with: initializer [
+	self predefined at: aName put: initializer.
+
 ]
 
 { #category : #adding }
@@ -67,23 +73,17 @@ SWClass >> declareMethod: aName asReturn: rType [
 
 { #category : #api }
 SWClass >> declareMethodAsBinaryOperator: aName [
-	self error; flag: #toRemove.
 
-	self addSenderInitializer: aName with: [ :aSender |
-		aSender
-			return: aSender operands receiver;
-			yourself
+	self addPredefined: aName with: [ :operands |
+		operands first
 	]
 
 ]
 
 { #category : #api }
 SWClass >> declareMethodAsCompareOperator: aName [
-	self error; flag: #toRemove.
-	self addSenderInitializer: aName with: [ :aSender |
-		aSender
-			specifyReturnTypeAs: Boolean;
-			yourself
+	self addPredefined: aName with: [ :operands |
+		Boolean
 	]
 
 ]
@@ -226,8 +226,11 @@ SWClass >> getResult: aSelector with: operands [
 		operands: operands;
 		yourself.
 	^ self methods at: sender ifAbsent: [
-		
-		self halt
+		self predefined at: aSelector ifPresent: [ :pre |
+			self methods at: sender put: (pre cull: operands)
+		] ifAbsent: [
+			self halt
+		]
 	]
 
 ]
@@ -329,6 +332,18 @@ SWClass >> pool [
 SWClass >> pool: anObject [
 
 	pool := anObject
+]
+
+{ #category : #accessing }
+SWClass >> predefined [
+
+	^ predefined ifNil: [ predefined := Dictionary new ]
+]
+
+{ #category : #accessing }
+SWClass >> predefined: anObject [
+
+	predefined := anObject
 ]
 
 { #category : #streaming }

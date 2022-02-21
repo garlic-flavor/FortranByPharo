@@ -55,7 +55,7 @@ SWDecoder >> atInteger: anInteger [
 
 { #category : #accessing }
 SWDecoder >> atMessage: aMessageNode [
-	self result << self pool getResult: aMessageNode selector with: (self children collect: [ :each | each result ])
+	self result << (self pool getResult: aMessageNode selector with: (self children collect: [ :each | each result ])).
 		
 ]
 
@@ -171,11 +171,11 @@ SWDecoder >> node: anObject [
 { #category : #'as yet unclassified' }
 SWDecoder >> operands: operands [
 	|receiver|
-	receiver := operands removeFirst value.
+	receiver := operands first value.
 	self add: 'self' as: receiver.
 	self add: 'super' as: receiver superclass.
 	
-	self node argumentNames  with: operands do: [ :name :type |
+	self node argumentNames  with: (operands copyFrom: 2 to: (operands size)) do: [ :name :type |
 		self add: name as: type
 	].
 	self node temporaries do: [ :each |

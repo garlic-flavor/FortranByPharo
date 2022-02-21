@@ -86,12 +86,12 @@ SWPool >> getClassTranspiler: aClass [
 SWPool >> getResult: aSelector with: operands [
 	^ self class search: aSelector in: operands first value ifFound: [ :method |
 		(self getClassTranspiler: method methodClass)
-			getResult: aSelector with: operands
+			getResult: aSelector with: operands.
 	] ifNone: [
 		self logger log: [ 'An unknown method detected: ', aSelector ].
 		(self haltList includes: #unresolvedSelector)  ifTrue: [ self halt ].
 		UndefinedObject
-	].
+	]
 
 ]
 
@@ -232,16 +232,18 @@ SWPool >> initialize_Magnitude: ct [
 SWPool >> initialize_Number: ct [
 	ct
 		declareMethodAsBinaryOperator: #+;
+"
 		declareMethodAsBinaryOperator: #-;
 		declareMethodAsBinaryOperator: #*;
 		declareMethodAsBinaryOperator: #/
-		
+" yourself
 ]
 
 { #category : #initialization }
 SWPool >> initialize_Object: ct [
 	ct
 		declareMethodAsCompareOperator: #=;
+"
 		declareMethod: #error: asReturn: nil;
 		declareMethod: #printString asReturn: String;
 		declareMethod: #size asReturn: Integer;
@@ -250,6 +252,7 @@ SWPool >> initialize_Object: ct [
 		declareMethod: #at: asReturn: Object;
 		declareMethodReturnsReceiver: #putOn:;
 		declareMethodReturnsReceiver: #assert:description:
+" yourself
 ]
 
 { #category : #initialization }
@@ -277,11 +280,13 @@ SWPool >> initialize_PathClass: ct [
 SWPool >> initialize_ProtoObject: ct [
 	ct
 		declareMethodAsCompareOperator: #==;
+"
 		declareMethodReturnsReceiversClass: #class;
 		declareMethodReturnsFirstArgument: #ifNil:;
 		declareMethodReturnsFirstArgument: #ifNotNil:;
 		declareMethodReturnsFirstArgument: #ifNil:ifNotNil;
 		declareMethodReturnsFirstArgument: #ifNotNil:ifNil:
+" yourself
 ]
 
 { #category : #initialization }
