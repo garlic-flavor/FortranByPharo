@@ -150,7 +150,8 @@ SWPool >> initialize_BinaryFileStream: ct [
 SWPool >> initialize_BlockClosure: ct [
 	ct
 		declareMethodReturnsReceiversElement: #on:do:;
-		declareMethodReturnsReceiversElement: #ensure:
+		declareMethodReturnsReceiversElement: #ensure:;
+		declareMethodReturnsReceiversElement: #value:
 ]
 
 { #category : #initialization }

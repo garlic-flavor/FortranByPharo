@@ -340,8 +340,8 @@ SWTestProgram >> _44_ifTrue_and_local_variable [
 { #category : #'as yet unclassified' }
 SWTestProgram >> _45_locals: arg1 [
 	|outer1|
-	outer1 = true.
-	outer1 ifTrue: [|inner|
+	outer1 := true.
+	^ outer1 ifTrue: [|inner|
 		inner := 234.
 	] ifFalse: [ |inner inner2|
 		inner := 345.
@@ -356,7 +356,7 @@ SWTestProgram >> _46_locals2: arg1 [
 	[ :arg2| |inner1|
 		outer1 ifTrue: [|inner2|
 			inner1 := 'hoge'.
-			inner2 := 234.
+			^ inner2 := 234.
 		].
 	] value: 345.
 ]

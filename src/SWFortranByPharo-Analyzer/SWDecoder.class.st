@@ -38,6 +38,11 @@ SWDecoder >> add: aName as: aType [
 ]
 
 { #category : #accessing }
+SWDecoder >> at: anObject [
+	self result << anObject class
+]
+
+{ #category : #accessing }
 SWDecoder >> atAssignTo: aLValue with: aRValue [
 	self decodeChildren.
 	self result << self children first result.

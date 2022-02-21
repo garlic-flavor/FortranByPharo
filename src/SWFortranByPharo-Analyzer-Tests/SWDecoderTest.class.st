@@ -182,3 +182,33 @@ SWDecoderTest >> test_41_cascading [
 	self resultOfNo: 41 with: { String } equals: String
 
 ]
+
+{ #category : #tests }
+SWDecoderTest >> test_42_opBinaries [
+	self resultOfNo: 42 with: { Float } equals: Float
+
+]
+
+{ #category : #tests }
+SWDecoderTest >> test_43_closure_local_variable [
+	self resultOfNo: 43 with: { } equals: SWTestProgram
+
+]
+
+{ #category : #tests }
+SWDecoderTest >> test_44_ifTrue_and_local_variable [
+	self resultOfNo: 44 with: { } equals: SmallInteger
+
+]
+
+{ #category : #tests }
+SWDecoderTest >> test_45_locals [
+	self resultOfNo: 45 with: { String } equals: SmallInteger
+
+]
+
+{ #category : #tests }
+SWDecoderTest >> test_46_locals2 [
+	self resultOfNo: 46 with: { String } equals: SmallInteger
+
+]
