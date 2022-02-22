@@ -72,3 +72,12 @@ SWStd class >> js_import_from_With: arguments Using: transpiler [
 SWStd class >> print: msg [
 	Transcript show: msg; cr.
 ]
+
+{ #category : #'as yet unclassified' }
+SWStd class >> transpile_selfClass: ct [
+	ct
+		senderTranspilerOf: #print: is: [ :transpiler |
+			transpiler putStdOut.
+		]
+
+]

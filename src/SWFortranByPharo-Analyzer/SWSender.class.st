@@ -44,3 +44,17 @@ SWSender >> operands: anObject [
 
 	operands := anObject
 ]
+
+{ #category : #streaming }
+SWSender >> printOn: aStream [
+	self putOn: aStream
+]
+
+{ #category : #streaming }
+SWSender >> putOn: aStream [
+	method ifNil: [
+		aStream << 'nil'
+	] ifNotNil: [
+		aStream << method selector
+	]
+]

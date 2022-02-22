@@ -8,7 +8,7 @@ Class {
 }
 
 { #category : #'as yet unclassified' }
-SWMangle class >> mangle: aSender [
+SWMangle class >> mangle: aDecoder [
 	^ self subclassResponsibility
 ]
 

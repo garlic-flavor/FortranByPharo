@@ -3,53 +3,18 @@ I am a pool of SWClassInfo.
 "
 Class {
 	#name : #SWPool,
-	#superclass : #Object,
-	#instVars : [
-		'payload',
-		'owner'
-	],
+	#superclass : #SWPoolBase,
 	#category : #'SWFortranByPharo-Analyzer-Analyzer'
 }
 
-{ #category : #utils }
-SWPool class >> search: selector in: aClass [
-	^ self search: selector in: aClass ifFound: [ :detected | detected ] ifNone: [ self error: (selector, ' is not found in ', aClass asString) ]
-
+{ #category : #'as yet unclassified' }
+SWPool class >> classDispatcherClass [
+	^ SWClass
 ]
 
-{ #category : #utils }
-SWPool class >> search: selector in: aClass ifFound: foundBlock ifNone: noneBlock [
-	aClass ifNil: [ ^ noneBlock value ].
-
-	^ aClass methodDict at: selector ifPresent: [ :detected |
-			foundBlock value: detected
-	] ifAbsent: [
-			self search: selector in: aClass superclass ifFound: foundBlock ifNone: noneBlock
-	]
-
-]
-
-{ #category : #api }
-SWPool >> addInitializerIn: aClass [
-	"invoke aClass>>#initialize_Hoge: with Hoge class transpiler."
-	 aClass classSide methodDict values select: [ :each |
-		each selector beginsWith: 'initialize_'
-	] thenDo: [ :each ||name target|
-		name := each selector copyAfter: $_.
-		name := (each selector endsWith: 'Class:') ifTrue: [
-			name copyUpToLast: $C
-		] ifFalse: [
-			name copyUpToLast: $:
-		].
-		name = 'self' ifTrue: [ name := aClass instanceSide name ].
-		target := Smalltalk globals at: name asSymbol.
-		(each selector endsWith: 'Class:') ifTrue: [
-			target := target classSide
-		].
-		each valueWithReceiver: aClass instanceSide arguments: {
-			self getClassTranspiler: target
-		}
-	]
+{ #category : #'as yet unclassified' }
+SWPool class >> initializersKey [
+	^ 'decode_'
 ]
 
 { #category : #accessing }
@@ -64,53 +29,16 @@ SWPool >> decoderClass [
 	^ self owner class
 ]
 
-{ #category : #enumerating }
-SWPool >> detect: aNeedle ifFound: aBlock [
-self halt; flag: #toRemove.
-	^ self payload detect: aNeedle ifFound: aBlock
-]
-
-{ #category : #private }
-SWPool >> getClassTranspiler: aClass [
-	^ self payload at: aClass ifAbsent: [|newCT|
-		newCT := self newClassTranspiler: aClass.
-		aClass isClassSide ifTrue: [
-			(self getClassTranspiler: aClass instanceSide)
-		].
-		newCT
-	]
-
-]
-
 { #category : #'as yet unclassified' }
-SWPool >> getResult: aSelector with: operands [
-	(self haltList includes: aSelector) ifTrue: [ self halt ].
-	^ self class search: aSelector in: operands first value ifFound: [ :method |
-		(self getClassTranspiler: method methodClass)
-			getResult: method with: operands.
-	] ifNone: [
-		self logger log: [ 'An unknown method detected: ', aSelector ].
-		(self haltList includes: self owner class unresolvedSelectorKey)  ifTrue: [ self halt ].
-		UndefinedObject
-	]
+SWPool >> getResult: aSender [
+	^ (self getClassDispatcher: aSender method methodClass)
+		getResult: aSender
 
 ]
 
 { #category : #'private - accessing' }
 SWPool >> haltList [
 	^ self owner haltList
-]
-
-{ #category : #private }
-SWPool >> initialize: aClassTranspiler asOf: aClass [
-	|initializer|
-	aClass ifNil: [ ^ aClassTranspiler ].
-	self initialize: aClassTranspiler asOf: aClass superclass.
-	initializer := self initializerFor: aClass.
-	(self respondsTo: initializer) ifTrue: [
-		self perform: initializer with: aClassTranspiler
-	].
-	^ aClassTranspiler
 ]
 
 { #category : #initialization }
@@ -390,94 +318,7 @@ SWPool >> initialize_ThreadSafeTranscript: ct [
 		declareMethodReturnsFirstArgument: #critical:
 ]
 
-{ #category : #private }
-SWPool >> initializerFor: target [
-	^ (String streamContents: [ :s |
-		s
-			<< 'initialize_';
-			<< target instanceSide name;
-			<< (target isClassSide ifTrue: [ 'Class' ] ifFalse: [ '' ]);
-			<< ':'
-	]) asSymbol.
-
-]
-
 { #category : #accessing }
 SWPool >> logger [
 	^ self owner logger
-]
-
-{ #category : #private }
-SWPool >> newClassTranspiler: target [
-	|ct|
-	ct := self classTranspilerClass new
-		pool: self;
-		targetClass: target;
-		yourself.
-	self payload at: target put: ct.
-	self initialize: ct asOf: target.
-	target isInstanceSide ifTrue: [ self addInitializerIn: target ].
-	^ ct
-]
-
-{ #category : #api }
-SWPool >> newSenderOf: aSelector super: supered receiver: receiver with: args [
-	|method|
-self error; flag: #toRemove.
-	method := self class search: aSelector
-		in: (supered ifTrue: [ receiver value superclass ] ifFalse: [ receiver value ]).
-	^ method ifNil: [ 
-		self newUndefinedSenderOf: aSelector receiver: receiver with: args
-	] ifNotNil: [
-		(self getClassTranspiler: method methodClass)
-			getSenderOf: method receiver: receiver with: args
-	]
-]
-
-{ #category : #private }
-SWPool >> newUndefinedSenderOf: aSelector receiver: receiver with: args [
-	self error; flag: #toRemove.
-	self logger log: [ 'An unknown method detected: ', aSelector ].
-	(self owner haltList includes: #unresolvedSelector)  ifTrue: [ self halt ].
-	^ self senderTranspilerClass new
-		selector: aSelector;
-		receiver: receiver;
-		arguments: args;
-		specifyReturnTypeAs: UndefinedObject;
-		yourself
-
-]
-
-{ #category : #accessing }
-SWPool >> owner [
-
-	^ owner
-]
-
-{ #category : #accessing }
-SWPool >> owner: anObject [
-
-	owner := anObject
-]
-
-{ #category : #accessing }
-SWPool >> payload [
-
-	^ payload ifNil: [ payload := Dictionary new ]
-]
-
-{ #category : #accessing }
-SWPool >> payload: anObject [
-
-	payload := anObject
-]
-
-{ #category : #printing }
-SWPool >> printOn: aStream [
-	self putOn: aStream.
-]
-
-{ #category : #streaming }
-SWPool >> putOn: aStream [
-	aStream << $#; << (self hash % 16rFFFF) printStringHex
 ]

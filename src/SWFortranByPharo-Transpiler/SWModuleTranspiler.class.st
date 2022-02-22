@@ -120,7 +120,7 @@ SWModuleTranspiler >> transpile [
 { #category : #'public API' }
 SWModuleTranspiler >> transpile: aClass [
 	|ct|
-	ct := (self payload pool getClassTranspiler: aClass instanceSide).
+	ct := (self payload pool getClassDispatcher: aClass instanceSide).
 	ct isTranspiled ifTrue: [ ^ self ].
 	ct markAsTranspiled.
 	self solveDependencies: aClass.

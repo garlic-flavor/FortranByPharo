@@ -8,7 +8,7 @@ Class {
 }
 
 { #category : #'private - code generation' }
-SWMangleOfJS class >> mangle: sender [
-	^ self safeSelectorNameOf: sender selector
+SWMangleOfJS class >> mangle: decoder [
+	^ self safeSelectorNameOf: decoder node selector
 
 ]

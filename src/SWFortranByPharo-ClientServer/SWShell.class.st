@@ -7,6 +7,23 @@ Class {
 	#category : #'SWFortranByPharo-ClientServer-Shell'
 }
 
+{ #category : #initialization }
+SWShell class >> decode_OSEnvironmentClass: transpiler [
+	transpiler
+		declareMethodReturnsReceiversInstance: #current
+]
+
+{ #category : #initialization }
+SWShell class >> decode_OSSUnixSubprocess: transpiler [
+	transpiler
+		declareMethod: #createADefaultWriteStream asReturn: WriteStream";
+		declareMethod: #shellCommand asReturn: String;
+		declareMethodReturnsReceiver: #shell:command:;
+		declareMethod: #waitForExit asReturn: SmallInteger;
+		declareMethod: #isSuccess asReturn: Boolean;
+		declareMethodReturnsReceiver: #initialize"
+]
+
 { #category : #execution }
 SWShell class >> execute: command [
 	"I execute 'exe' with 'list', then return its result."
@@ -53,23 +70,6 @@ SWShell class >> filePathOf: aName [
 	path parent ensureCreateDirectory.
 	^ path
 
-]
-
-{ #category : #initialization }
-SWShell class >> initialize_OSEnvironmentClass: transpiler [
-	transpiler
-		declareMethodReturnsReceiversInstance: #current
-]
-
-{ #category : #initialization }
-SWShell class >> initialize_OSSUnixSubprocess: transpiler [
-	transpiler
-		declareMethod: #createADefaultWriteStream asReturn: WriteStream";
-		declareMethod: #shellCommand asReturn: String;
-		declareMethodReturnsReceiver: #shell:command:;
-		declareMethod: #waitForExit asReturn: SmallInteger;
-		declareMethod: #isSuccess asReturn: Boolean;
-		declareMethodReturnsReceiver: #initialize"
 ]
 
 { #category : #execution }

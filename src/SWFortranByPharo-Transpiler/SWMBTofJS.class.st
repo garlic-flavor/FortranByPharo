@@ -308,6 +308,14 @@ SWMBTofJS >> putSelfDefinition [
 	self put: 'var self = this;'; cr
 ]
 
+{ #category : #'as yet unclassified' }
+SWMBTofJS >> putStdOut [
+	self
+		put: 'console.log';
+		putArguments: (self decoder children copyFrom: 2 to: 2)
+
+]
+
 { #category : #'code generation' }
 SWMBTofJS >> putVariableDeclarationOf: aVariableName [
 	self halt; flag: #toRewrite.

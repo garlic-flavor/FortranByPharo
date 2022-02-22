@@ -9,6 +9,7 @@ Class {
 		'result',
 		'methodResult',
 		'children',
+		'sender',
 		'pool',
 		'slot',
 		'haltList',
@@ -43,6 +44,18 @@ SWDecoder class >> poolClass [
 { #category : #'as yet unclassified' }
 SWDecoder class >> pragmaKey [
 	^ #pragma
+]
+
+{ #category : #utils }
+SWDecoder class >> search: selector in: aClass [
+	aClass ifNil: [ ^ nil ].
+
+	^ aClass methodDict at: selector ifPresent: [ :detected |
+		detected
+	] ifAbsent: [
+		self search: selector in: aClass superclass
+	]
+
 ]
 
 { #category : #'as yet unclassified' }
@@ -121,18 +134,10 @@ SWDecoder >> atInteger: anInteger [
 { #category : #accessing }
 SWDecoder >> atMessage: aMessageNode [
 	self decodeChildren.
-	(aMessageNode selector = #declare:as: and: [ self children first result = SWType class ])ifTrue: [|name type|
-		"A special case for type specification by source code."
-		name := aMessageNode children second evaluate.
-		type := aMessageNode children third evaluate.
-		name = #return ifTrue: [
-			self methodResult << (SWType new: type with: SWType userSpecifyingPriority)
-		] ifFalse: [
-			slot detect: [ :each | each name = name ] ifFound: [ :found | found << type ].
-		].
-		self result << SWType.
+	(aMessageNode selector = #declare:as: and: [ self children first result = SWType class ])ifTrue: [
+		self userSpecifyVariableType: aMessageNode
 	] ifFalse: [
-		self result << (self pool getResult: aMessageNode selector with: (self children collect: [ :each | each result ])).
+		self atOrdinaryMessage: aMessageNode
 	]
 ]
 
@@ -146,6 +151,25 @@ SWDecoder >> atMethod: traverser [
 { #category : #accessing }
 SWDecoder >> atNil [
 	self result << UndefinedObject
+]
+
+{ #category : #accessing }
+SWDecoder >> atOrdinaryMessage: aMessageNode [
+	 |operands method|
+	(self haltList includes: aMessageNode selector) ifTrue: [ self halt ].
+	operands := self children collect: [ :each | each result ].		
+	method := self class search: aMessageNode selector in: operands first value.
+	self sender: (SWSender new
+		operands: operands;
+		method: method;
+		yourself).
+	method ifNil: [
+		self logger log: [ 'An unknown method detected: ', aMessageNode selector ].
+		(self haltList includes: self class unresolvedSelectorKey)  ifTrue: [ self halt ].
+	] ifNotNil: [
+		self result << (self pool getResult: self sender).
+	]
+
 ]
 
 { #category : #accessing }
@@ -372,6 +396,18 @@ SWDecoder >> resultIsLastChildsResult [
 ]
 
 { #category : #accessing }
+SWDecoder >> sender [
+
+	^ sender
+]
+
+{ #category : #accessing }
+SWDecoder >> sender: anObject [
+
+	sender := anObject
+]
+
+{ #category : #accessing }
 SWDecoder >> slot [
 
 	^ slot ifNil: [ slot := OrderedCollection new: (self node numArgs + self node temporaries size) ]
@@ -381,4 +417,18 @@ SWDecoder >> slot [
 SWDecoder >> slot: anObject [
 
 	slot := anObject
+]
+
+{ #category : #'as yet unclassified' }
+SWDecoder >> userSpecifyVariableType: aNode [
+	|name type|
+	"A special case for type specification by source code."
+	name := aNode children second evaluate.
+	type := aNode children third evaluate.
+	name = #return ifTrue: [
+		self methodResult << (SWType new: type with: SWType userSpecifyingPriority)
+	] ifFalse: [
+		slot detect: [ :each | each name = name ] ifFound: [ :found | found << type ].
+	].
+	self result << SWType.
 ]

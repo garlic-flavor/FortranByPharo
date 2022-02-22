@@ -17,6 +17,40 @@ Class {
 	#category : #'SWFortranByPharo-ClientServer-Shell'
 }
 
+{ #category : #initialization }
+SWShellEnvironment class >> decode_OSEnvironmentClass: ct [
+	ct
+		declareMethodReturnsReceiversInstance: #environmentFor:
+
+]
+
+{ #category : #initialization }
+SWShellEnvironment class >> decode_OSPlatformClass: ct [
+	ct
+		declareMethodReturnsReceiversInstance: #current
+]
+
+{ #category : #initialization }
+SWShellEnvironment class >> decode_OSSUnixSubprocess: ct [
+	ct
+		declareMethodReturnsReceiver: #run;
+		declareMethodReturnsReceiver: #initialize
+
+]
+
+{ #category : #initialization }
+SWShellEnvironment class >> decode_self: transpiler [
+	transpiler
+		declareMethod: #localDirectory asReturn: FileLocator
+";
+		defineMethodBody: #localDirectory as: [ :t |
+			t
+				put: 'return FileLocator.localDirectory()';
+				putStatementDelimiter;
+				cr
+		]"
+]
+
 { #category : #accessing }
 SWShellEnvironment class >> default [
 	^ default ifNil: [ default := self newDefault ]
@@ -39,40 +73,6 @@ SWShellEnvironment class >> initializeInstanceSideTranspiler: transpiler [
 				];
 				yourself
 		]
-]
-
-{ #category : #initialization }
-SWShellEnvironment class >> initialize_OSEnvironmentClass: ct [
-	ct
-		declareMethodReturnsReceiversInstance: #environmentFor:
-
-]
-
-{ #category : #initialization }
-SWShellEnvironment class >> initialize_OSPlatformClass: ct [
-	ct
-		declareMethodReturnsReceiversInstance: #current
-]
-
-{ #category : #initialization }
-SWShellEnvironment class >> initialize_OSSUnixSubprocess: ct [
-	ct
-		declareMethodReturnsReceiver: #run;
-		declareMethodReturnsReceiver: #initialize
-
-]
-
-{ #category : #initialization }
-SWShellEnvironment class >> initialize_self: transpiler [
-	transpiler
-		declareMethod: #localDirectory asReturn: FileLocator
-";
-		defineMethodBody: #localDirectory as: [ :t |
-			t
-				put: 'return FileLocator.localDirectory()';
-				putStatementDelimiter;
-				cr
-		]"
 ]
 
 { #category : #'instance creation' }

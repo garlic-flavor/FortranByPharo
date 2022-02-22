@@ -32,6 +32,68 @@ SWServer class >> buildThenInspect [
 
 ]
 
+{ #category : #initialization }
+SWServer class >> decode_STONWriter: ct [
+	ct
+		declareMethodReturnsReceiver: #jsonMode:
+
+]
+
+{ #category : #initialization }
+SWServer class >> decode_ZnEntity: ct [
+	ct
+		declareMethod: #contents asReturn: String
+
+]
+
+{ #category : #initialization }
+SWServer class >> decode_ZnEntityClass: ct [
+	ct
+		declareMethodReturnsReceiversInstance: #type:
+
+]
+
+{ #category : #initialization }
+SWServer class >> decode_ZnHeadersClass: ct [
+	ct
+		declareMethodReturnsReceiversClass: #defaultResponseHeaders
+
+]
+
+{ #category : #initialization }
+SWServer class >> decode_ZnManagingMultiThreadedServer: ct [
+	ct
+		declareMethodReturnsReceiver: #closeConnections
+
+]
+
+{ #category : #initialization }
+SWServer class >> decode_ZnResponseClass: transpiler [
+	transpiler
+		declareMethodReturnsReceiversInstance: #notFound:
+]
+
+{ #category : #initialization }
+SWServer class >> decode_ZnServer: ct [
+	ct
+		declareMethodReturnsSecondArgument: #optionAt:ifAbsent:
+]
+
+{ #category : #initialization }
+SWServer class >> decode_ZnSingleThreadedServer: ct [
+	ct
+		declareMethodReturnsReceiver: #stop:;
+		declareMethodReturnsReceiver: #start
+
+]
+
+{ #category : #initialization }
+SWServer class >> decode_ZnWebSocket: ct [
+	ct
+		declareMethodReturnsReceiver: #sendMessage:
+
+]
+
 { #category : #accessing }
 SWServer class >> default [
 	^ default
@@ -46,68 +108,6 @@ self error; flag: #toRemove.
 		self error: aName, ' is in out of the local directory.'
 	].
 	^ path
-
-]
-
-{ #category : #initialization }
-SWServer class >> initialize_STONWriter: ct [
-	ct
-		declareMethodReturnsReceiver: #jsonMode:
-
-]
-
-{ #category : #initialization }
-SWServer class >> initialize_ZnEntity: ct [
-	ct
-		declareMethod: #contents asReturn: String
-
-]
-
-{ #category : #initialization }
-SWServer class >> initialize_ZnEntityClass: ct [
-	ct
-		declareMethodReturnsReceiversInstance: #type:
-
-]
-
-{ #category : #initialization }
-SWServer class >> initialize_ZnHeadersClass: ct [
-	ct
-		declareMethodReturnsReceiversClass: #defaultResponseHeaders
-
-]
-
-{ #category : #initialization }
-SWServer class >> initialize_ZnManagingMultiThreadedServer: ct [
-	ct
-		declareMethodReturnsReceiver: #closeConnections
-
-]
-
-{ #category : #initialization }
-SWServer class >> initialize_ZnResponseClass: transpiler [
-	transpiler
-		declareMethodReturnsReceiversInstance: #notFound:
-]
-
-{ #category : #initialization }
-SWServer class >> initialize_ZnServer: ct [
-	ct
-		declareMethodReturnsSecondArgument: #optionAt:ifAbsent:
-]
-
-{ #category : #initialization }
-SWServer class >> initialize_ZnSingleThreadedServer: ct [
-	ct
-		declareMethodReturnsReceiver: #stop:;
-		declareMethodReturnsReceiver: #start
-
-]
-
-{ #category : #initialization }
-SWServer class >> initialize_ZnWebSocket: ct [
-	ct
-		declareMethodReturnsReceiver: #sendMessage:
 
 ]
 

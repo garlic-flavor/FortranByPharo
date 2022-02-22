@@ -7,8 +7,7 @@ Class {
 	#instVars : [
 		'decoder',
 		'stream',
-		'messageNest',
-		'generator'
+		'pool'
 	],
 	#category : #'SWFortranByPharo-Transpiler-Common'
 }
@@ -30,6 +29,11 @@ SWMethodBodyTranspiler class >> new: decoder [
 		yourself
 ]
 
+{ #category : #'as yet unclassified' }
+SWMethodBodyTranspiler class >> poolClass [
+	^ SWTranspilerPool
+]
+
 { #category : #accessing }
 SWMethodBodyTranspiler class >> senderTranspilerClass [
 	self halt; flag: #toRewrite.
@@ -44,8 +48,68 @@ SWMethodBodyTranspiler >> << anObject [
 ]
 
 { #category : #'code generation' }
+SWMethodBodyTranspiler >> atCascade: aCascadeNode [
+	aCascadeNode leftmostChainReceiver class = RBVariableNode ifTrue: [
+		self
+			transpileChildrenWithDelimiter;
+			preventStatementDelimiter;
+			preventNewline
+	] ifFalse: [
+		self halt.
+	]
+
+]
+
+{ #category : #accessing }
+SWMethodBodyTranspiler >> atMessage: aMessageNode [
+	(self pool predefinedSenderTranspiler: self decoder sender) ifNotNil: [ :predefined |
+		predefined value: self
+	] ifNil: [
+		self
+			transpileChild: self decoder children first;
+			putClassAccessor;
+			put: self mangle;
+			putArguments: (self decoder children copyFrom: 2 to: self decoder children size)
+	]
+
+]
+
+{ #category : #accessing }
+SWMethodBodyTranspiler >> atMethod: aMethodNode [
+	self transpileChildren.
+
+]
+
+{ #category : #'code generation' }
+SWMethodBodyTranspiler >> atReturn: aReturnNode [
+	self put: 'return '.
+	self transpileChildren
+
+]
+
+{ #category : #'code generation' }
+SWMethodBodyTranspiler >> atSequence: aSequenceNode [
+	self transpileChildrenWithDelimiter
+
+]
+
+{ #category : #accessing }
+SWMethodBodyTranspiler >> atString: aString [
+	self
+		put: '"';
+		put: aString;
+		put: '"'
+]
+
+{ #category : #accessing }
+SWMethodBodyTranspiler >> atVariable: aVariableNode [
+	self put: aVariableNode name
+
+]
+
+{ #category : #'code generation' }
 SWMethodBodyTranspiler >> cr [
-	self halt; flag: #toRemove.
+
 	self stream putLine
 ]
 
@@ -112,9 +176,14 @@ SWMethodBodyTranspiler >> incMessageNest [
 	1 < messageNest ifTrue: [ self put: '(' ].
 ]
 
+{ #category : #'as yet unclassified' }
+SWMethodBodyTranspiler >> mangle [
+	^ self class mangleClass mangle: self decoder
+]
+
 { #category : #'private - code generation' }
 SWMethodBodyTranspiler >> mangle: aName [
-	self halt; flag: #toRewrite.
+	self error; flag: #toRemove.
 	^ self class mangleClass mangle: aName
 ]
 
@@ -156,38 +225,48 @@ SWMethodBodyTranspiler >> newFullClosure: lit with: operands [
 		yourself
 ]
 
+{ #category : #accessing }
+SWMethodBodyTranspiler >> pool [
+
+	^ pool ifNil: [
+		pool  := self class poolClass new
+			owner: self
+			yourself
+	]
+]
+
+{ #category : #accessing }
+SWMethodBodyTranspiler >> pool: anObject [
+
+	pool := anObject
+]
+
 { #category : #'code generation - protected' }
 SWMethodBodyTranspiler >> preventNewline [
-	self halt; flag: #toRewrite.
 	self stream preventNewline
 ]
 
 { #category : #'code generation - protected' }
 SWMethodBodyTranspiler >> preventStatementDelimiter [
-	self halt; flag: #toRewrite.
 	self stream preventDelimiter
 ]
 
 { #category : #'code generation' }
 SWMethodBodyTranspiler >> put: anObject [
-	self halt; flag: #toRewrite.
 	self stream put: anObject asString
 ]
 
 { #category : #'code generation' }
 SWMethodBodyTranspiler >> putArguments: arguments [
-	self halt; flag: #toRewrite.
 
-	self
-		put: '(';
-		withoutMessageNestDo: [
-			arguments do: [ :each |
-				self << each
-			] separatedBy: [
-				self put: ', '
-			]
-		];
-		put: ')'
+	self put: '('.
+	arguments do: [ :each |
+		self transpileChild: each
+	] separatedBy: [
+		self put: ', '
+	].
+
+	self put: ')'
 
 ]
 
@@ -255,7 +334,6 @@ SWMethodBodyTranspiler >> putCharacter: c [
 
 { #category : #'code generation' }
 SWMethodBodyTranspiler >> putClassAccessor [
-	self halt; flag: #toRewrite.
 	self put: '.'
 ]
 
@@ -461,7 +539,6 @@ SWMethodBodyTranspiler >> putStatement: aStatement [
 
 { #category : #'code generation' }
 SWMethodBodyTranspiler >> putStatementDelimiter [
-	self halt; flag: #toRewrite.
 	self stream putDelimiter
 ]
 
@@ -520,9 +597,35 @@ SWMethodBodyTranspiler >> stream: anObject [
 
 { #category : #'public API' }
 SWMethodBodyTranspiler >> transpile [
-	self halt; flag: #toRewrite.
-	self generator value: self.
+	self decoder node dispatchTo: self.
 	^ self stream contents
+]
+
+{ #category : #'as yet unclassified' }
+SWMethodBodyTranspiler >> transpileChild: aDecoder [
+	^ self copy
+		decoder: aDecoder;
+		transpile
+
+]
+
+{ #category : #'as yet unclassified' }
+SWMethodBodyTranspiler >> transpileChildren [
+	self decoder children do: [ :child |
+		self transpileChild: child
+	].
+
+]
+
+{ #category : #'as yet unclassified' }
+SWMethodBodyTranspiler >> transpileChildrenWithDelimiter [
+	self decoder children do: [ :child |
+		self
+			transpileChild: child;
+			putStatementDelimiter;
+			cr
+	].
+
 ]
 
 { #category : #'private - code generation' }
