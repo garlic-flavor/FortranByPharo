@@ -3,8 +3,9 @@ I transpile a method of Pharo class.
 "
 Class {
 	#name : #SWMethodBodyTranspiler,
-	#superclass : #SWDecoderOld,
+	#superclass : #Object,
 	#instVars : [
+		'decoder',
 		'stream',
 		'messageNest',
 		'generator'
@@ -22,36 +23,61 @@ SWMethodBodyTranspiler class >> methodDefinitionTranspilerClass [
 	^ self subclassResponsibility
 ]
 
+{ #category : #'instance creation' }
+SWMethodBodyTranspiler class >> new: decoder [
+	^ self new
+		decoder: decoder;
+		yourself
+]
+
 { #category : #accessing }
 SWMethodBodyTranspiler class >> senderTranspilerClass [
+	self halt; flag: #toRewrite.
 	^ SWSenderTranspiler
 ]
 
 { #category : #'code generation' }
 SWMethodBodyTranspiler >> << anObject [
+	self halt; flag: #toRemove.
 	anObject dispatchTo: self
 
 ]
 
 { #category : #'code generation' }
 SWMethodBodyTranspiler >> cr [
+	self halt; flag: #toRemove.
 	self stream putLine
 ]
 
 { #category : #'code generation - protected' }
 SWMethodBodyTranspiler >> decIndent [
+	self halt; flag: #toRemove.
 	self stream decIndent
 ]
 
 { #category : #'private - code generation' }
 SWMethodBodyTranspiler >> decMessageNest [
+	self halt; flag: #toRemove.
 	messageNest := messageNest - 1.
 	0 < messageNest ifTrue: [ self put: ')' ].
 
 ]
 
 { #category : #accessing }
+SWMethodBodyTranspiler >> decoder [
+
+	^ decoder
+]
+
+{ #category : #accessing }
+SWMethodBodyTranspiler >> decoder: anObject [
+
+	decoder := anObject
+]
+
+{ #category : #accessing }
 SWMethodBodyTranspiler >> generator [
+	self halt; flag: #toRewrite.
 	^ generator ifNil: [ generator := [ :transpiler | |m|
 		m := transpiler method.
 
@@ -68,40 +94,47 @@ SWMethodBodyTranspiler >> generator [
 
 { #category : #accessing }
 SWMethodBodyTranspiler >> generator: anObject [
+	self halt; flag: #toRemove.
 
 	generator := anObject
 ]
 
 { #category : #'code generation - protected' }
 SWMethodBodyTranspiler >> incIndent [
+	self halt; flag: #toRewrite.
 	self stream incIndent
 ]
 
 { #category : #'private - code generation' }
 SWMethodBodyTranspiler >> incMessageNest [
+	self halt; flag: #toRewrite.
 	messageNest := messageNest + 1.
 	1 < messageNest ifTrue: [ self put: '(' ].
 ]
 
 { #category : #'private - code generation' }
 SWMethodBodyTranspiler >> mangle: aName [
+	self halt; flag: #toRewrite.
 	^ self class mangleClass mangle: aName
 ]
 
 { #category : #accessing }
 SWMethodBodyTranspiler >> messageNest [
+	self halt; flag: #toRewrite.
 
 	^ messageNest ifNil: [ messageNest := 0 ]
 ]
 
 { #category : #accessing }
 SWMethodBodyTranspiler >> messageNest: anObject [
+	self halt; flag: #toRewrite.
 
 	messageNest := anObject
 ]
 
 { #category : #'instance creation' }
 SWMethodBodyTranspiler >> newFullClosure: lit with: operands [
+	self halt; flag: #toRewrite.
 	^ (super newFullClosure: lit with: operands)
 		stream: self stream;
 		generator: [ :transpiler | |node|
@@ -125,21 +158,25 @@ SWMethodBodyTranspiler >> newFullClosure: lit with: operands [
 
 { #category : #'code generation - protected' }
 SWMethodBodyTranspiler >> preventNewline [
+	self halt; flag: #toRewrite.
 	self stream preventNewline
 ]
 
 { #category : #'code generation - protected' }
 SWMethodBodyTranspiler >> preventStatementDelimiter [
+	self halt; flag: #toRewrite.
 	self stream preventDelimiter
 ]
 
 { #category : #'code generation' }
 SWMethodBodyTranspiler >> put: anObject [
+	self halt; flag: #toRewrite.
 	self stream put: anObject asString
 ]
 
 { #category : #'code generation' }
 SWMethodBodyTranspiler >> putArguments: arguments [
+	self halt; flag: #toRewrite.
 
 	self
 		put: '(';
@@ -156,6 +193,7 @@ SWMethodBodyTranspiler >> putArguments: arguments [
 
 { #category : #'code generation' }
 SWMethodBodyTranspiler >> putArray: anArray [
+	self halt; flag: #toRewrite.
 
 	self put: '['.
 	anArray do: [:each |
@@ -169,6 +207,7 @@ SWMethodBodyTranspiler >> putArray: anArray [
 
 { #category : #'code generation' }
 SWMethodBodyTranspiler >> putAssignTo: key with: value [
+	self halt; flag: #toRewrite.
 
 	self
 		<< key;
@@ -179,6 +218,7 @@ SWMethodBodyTranspiler >> putAssignTo: key with: value [
 
 { #category : #streaming }
 SWMethodBodyTranspiler >> putBasenameOn: aStream [
+	self halt; flag: #toRewrite.
 	aStream
 		<< self receiverClass instanceSide name;
 		<< self selector asCamelCase
@@ -186,6 +226,7 @@ SWMethodBodyTranspiler >> putBasenameOn: aStream [
 
 { #category : #'code generation' }
 SWMethodBodyTranspiler >> putBlock: aBlockNode [
+	self halt; flag: #toRewrite.
 
 	self
 		put: '{';
@@ -205,6 +246,7 @@ SWMethodBodyTranspiler >> putCascade: aRBCascadeNode [
 
 { #category : #'code generation' }
 SWMethodBodyTranspiler >> putCharacter: c [
+	self halt; flag: #toRewrite.
 	self
 		put: '"';
 		put: c asString;
@@ -213,12 +255,14 @@ SWMethodBodyTranspiler >> putCharacter: c [
 
 { #category : #'code generation' }
 SWMethodBodyTranspiler >> putClassAccessor [
+	self halt; flag: #toRewrite.
 	self put: '.'
 ]
 
 { #category : #'code generation' }
 SWMethodBodyTranspiler >> putClosure: aNode [
 	|tran|
+	self halt; flag: #toRewrite.
 	tran := self senders at: aNode.
 	tran transpile.
 
@@ -226,6 +270,7 @@ SWMethodBodyTranspiler >> putClosure: aNode [
 
 { #category : #'code generation' }
 SWMethodBodyTranspiler >> putCode: code [
+	self halt; flag: #toRewrite.
 	^ self putCode: code with: {  }
 ]
 
@@ -233,6 +278,7 @@ SWMethodBodyTranspiler >> putCode: code [
 SWMethodBodyTranspiler >> putCode: code with: anAssociationArray [
 	"when a line in code ends with $\, the line continues to the next."
 	|matcher leftPad escaped|
+	self halt; flag: #toRewrite.
 
 	matcher := RxMatcher forString: '(\\\r|\s+\\$)'.
 	escaped := matcher copy: code replacingMatchesWith: ''.
@@ -276,16 +322,19 @@ SWMethodBodyTranspiler >> putImport: anArray from: aSource [
 
 { #category : #'code generation' }
 SWMethodBodyTranspiler >> putInteger: anInteger [
+	self halt; flag: #toRewrite.
 	self put: anInteger asString
 ]
 
 { #category : #'code generation' }
 SWMethodBodyTranspiler >> putLine: anObject [
+	self halt; flag: #toRewrite.
 	self stream putLine: anObject asString
 ]
 
 { #category : #'code generation' }
 SWMethodBodyTranspiler >> putMessage: aNode [
+	self halt; flag: #toRewrite.
 	self incMessageNest.
 	self << (self senders at: aNode).
 	self decMessageNest
@@ -294,6 +343,7 @@ SWMethodBodyTranspiler >> putMessage: aNode [
 { #category : #'code generation' }
 SWMethodBodyTranspiler >> putMessage: aNode withReceiver: aRNode [
 	|sender|
+	self halt; flag: #toRewrite.
 	sender := (self senders at: aNode) copy.
 	sender node: (aNode copy
 		receiver: aRNode
@@ -313,6 +363,7 @@ SWMethodBodyTranspiler >> putNil [
 
 { #category : #'code generation' }
 SWMethodBodyTranspiler >> putOpBinary: aNode [
+	self halt; flag: #toRewrite.
 	self
 		<< aNode receiver;
 		put: ' ';
@@ -324,6 +375,7 @@ SWMethodBodyTranspiler >> putOpBinary: aNode [
 
 { #category : #'code generation' }
 SWMethodBodyTranspiler >> putParameters: anArray [
+	self halt; flag: #toRewrite.
 
 	anArray do: [:each |
 		self put: each asString
@@ -335,6 +387,7 @@ SWMethodBodyTranspiler >> putParameters: anArray [
 
 { #category : #'code generation' }
 SWMethodBodyTranspiler >> putReturn: value [
+	self halt; flag: #toRewrite.
 	
 	^ self
 		put: 'return ';
@@ -345,6 +398,7 @@ SWMethodBodyTranspiler >> putReturn: value [
 
 { #category : #'code generation' }
 SWMethodBodyTranspiler >> putReturnSelf [
+	self halt; flag: #toRewrite.
 	self putStatement: (RBReturnNode value: (RBVariableNode named: 'self'))
 ]
 
@@ -360,6 +414,7 @@ SWMethodBodyTranspiler >> putSelfDefinition [
 
 { #category : #'as yet unclassified' }
 SWMethodBodyTranspiler >> putSender: aNode with: aSender [
+	self halt; flag: #toRewrite.
 	self
 		<< aNode receiver;
 		putClassAccessor;
@@ -369,6 +424,7 @@ SWMethodBodyTranspiler >> putSender: aNode with: aSender [
 
 { #category : #'code generation' }
 SWMethodBodyTranspiler >> putSequence: aSequence [
+	self halt; flag: #toRewrite.
 	self withoutMessageNestDo: [
 		aSequence statements do: [ :each |
 			self putStatement: each
@@ -378,6 +434,7 @@ SWMethodBodyTranspiler >> putSequence: aSequence [
 
 { #category : #'code generation' }
 SWMethodBodyTranspiler >> putSequenceWithReturn: aSequence [
+	self halt; flag: #toRewrite.
 	self withoutMessageNestDo: [
 		aSequence statements doWithIndex: [ :each :index |
 			((aSequence isLast: each) and: [ each class ~= RBReturnNode ]) ifTrue: [
@@ -394,6 +451,7 @@ SWMethodBodyTranspiler >> putSequenceWithReturn: aSequence [
 
 { #category : #'code generation' }
 SWMethodBodyTranspiler >> putStatement: aStatement [
+	self halt; flag: #toRewrite.
 	self
 		<< aStatement;
 		putStatementDelimiter;
@@ -403,11 +461,13 @@ SWMethodBodyTranspiler >> putStatement: aStatement [
 
 { #category : #'code generation' }
 SWMethodBodyTranspiler >> putStatementDelimiter [
+	self halt; flag: #toRewrite.
 	self stream putDelimiter
 ]
 
 { #category : #'code generation' }
 SWMethodBodyTranspiler >> putString: aString [
+	self halt; flag: #toRewrite.
 	self
 		put: '"';
 		put: aString;
@@ -416,6 +476,7 @@ SWMethodBodyTranspiler >> putString: aString [
 
 { #category : #'code generation' }
 SWMethodBodyTranspiler >> putSymbol: aByteSymbol [
+	self halt; flag: #toRewrite.
 	self stream
 		put: '"';
 		put: aByteSymbol asString;
@@ -424,6 +485,7 @@ SWMethodBodyTranspiler >> putSymbol: aByteSymbol [
 
 { #category : #'code generation' }
 SWMethodBodyTranspiler >> putVariable: aVariableNode [
+	self halt; flag: #toRewrite.
 
 	aVariableNode name = #self ifTrue: [
 		^ self putSelf
@@ -458,6 +520,7 @@ SWMethodBodyTranspiler >> stream: anObject [
 
 { #category : #'public API' }
 SWMethodBodyTranspiler >> transpile [
+	self halt; flag: #toRewrite.
 	self generator value: self.
 	^ self stream contents
 ]
@@ -465,6 +528,7 @@ SWMethodBodyTranspiler >> transpile [
 { #category : #'private - code generation' }
 SWMethodBodyTranspiler >> withoutMessageNestDo: aBlock [
 	|nest|
+	self halt; flag: #toRewrite.
 	nest := messageNest.
 	messageNest := 0.
 	aBlock value.

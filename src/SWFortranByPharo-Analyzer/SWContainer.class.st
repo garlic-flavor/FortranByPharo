@@ -2,7 +2,7 @@
 SWContainerType represents a container, like BlockClosure or Array, Dictionary and so on.
 "
 Class {
-	#name : #SWContainerType,
+	#name : #SWContainer,
 	#superclass : #SWType,
 	#instVars : [
 		'elementType'
@@ -11,18 +11,18 @@ Class {
 }
 
 { #category : #accessing }
-SWContainerType >> elementType [
+SWContainer >> elementType [
 
 	^ elementType
 ]
 
 { #category : #accessing }
-SWContainerType >> elementType: anObject [
+SWContainer >> elementType: anObject [
 
 	elementType := anObject
 ]
 
 { #category : #testing }
-SWContainerType >> isContainer [
+SWContainer >> isContainer [
 	^ true
 ]

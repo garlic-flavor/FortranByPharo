@@ -6,14 +6,17 @@ Class {
 
 { #category : #utilities }
 SWMethodBodyTranspilerTest >> transpile: method withArguments: args [
-	|transpiler|
-	transpiler := self transpilerClass new: method with: args.
-	transpiler logger enabled: true.
+	|decoder transpiler|
+	decoder := SWDecoder new: method sourceNode with: args.
+	decoder enableLogging.
+	decoder decode.
+	
+	transpiler := self transpilerClass new: decoder.
 	transpiler stream newline: String cr.
 "
 	transpiler classInfo: (transpiler pool getClassTranspiler: method methodClass).
 "
-	transpiler decode; transpile.
+	transpiler transpile.
 	^ transpiler
 
 ]

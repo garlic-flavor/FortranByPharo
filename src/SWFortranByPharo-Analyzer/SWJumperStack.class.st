@@ -9,7 +9,7 @@ Class {
 	#instVars : [
 		'payload'
 	],
-	#category : #'SWFortranByPharo-Analyzer-Slot'
+	#category : #'SWFortranByPharo-Analyzer-Olds'
 }
 
 { #category : #testing }

@@ -396,14 +396,14 @@ SWDecoderOld >> pushFullClosure: lit numCopied: numCopied receiverOnStack: rcvr 
 	self logger log: 'decode closure' withStack: self code slot.
 	decoder := self newFullClosure: lit with: numCopied
 	decoder decode.
-	ret := (SWContainerType new: BlockClosure)
+	ret := (SWContainer new: BlockClosure)
 		elementType: decoder return value;
 		yourself.
 	lit hasMethodReturn ifTrue: [
 		self return << ret
 	].
 	self senders at: decoder method sourceNode put: decoder.
-	self stack push: (SWVariableType new: ret).
+	self stack push: (SWVariable new: ret).
 
 	super pushFullClosure: lit numCopied: numCopied  receiverOnStack: rcvr ignoreOuterContext: ignore 
 ]

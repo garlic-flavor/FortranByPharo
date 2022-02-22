@@ -53,7 +53,7 @@ SWDecoder class >> unresolvedSelectorKey [
 
 { #category : #adding }
 SWDecoder >> add: aName as: aType [
-	self slot addLast: ((SWVariableType new: aType)
+	self slot addLast: ((SWVariable new: aType)
 		name: aName;
 		yourself)
 ]
@@ -99,7 +99,7 @@ SWDecoder >> atClosure: aBlockNode [
 	aBlockNode temporaries do: [ :temp |
 		self add: temp name as: nil
 	].
-	res := ((SWContainerType new: BlockClosure)
+	res := ((SWContainer new: BlockClosure)
 		elementType: self decodeChildren;
 		yourself).
 	self result << res.
@@ -139,7 +139,7 @@ SWDecoder >> atMessage: aMessageNode [
 { #category : #accessing }
 SWDecoder >> atMethod: traverser [
 	self decodeChildren.
-	self methodResult << (SWVariableType new: (self slot detect: [:each | each name = 'self' ]) value with: SWType receiverTypePriority)
+	self methodResult << (SWVariable new: (self slot detect: [:each | each name = 'self' ]) value with: SWType receiverTypePriority)
 
 ]
 
@@ -199,7 +199,7 @@ SWDecoder >> children: anObject [
 
 { #category : #api }
 SWDecoder >> decode [
-	methodResult ifNil: [ methodResult := SWVariableType new ].
+	methodResult ifNil: [ methodResult := SWVariable new ].
 	self pool.
 	self node dispatchTo: self.
 	^ methodResult
@@ -355,7 +355,7 @@ SWDecoder >> pool: anObject [
 { #category : #accessing }
 SWDecoder >> result [
 
-	^ result ifNil: [ result := SWVariableType new ]
+	^ result ifNil: [ result := SWVariable new ]
 ]
 
 { #category : #accessing }

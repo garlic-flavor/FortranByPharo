@@ -11,7 +11,7 @@ Class {
 		'initialStack',
 		'route1'
 	],
-	#category : #'SWFortranByPharo-Analyzer-Slot'
+	#category : #'SWFortranByPharo-Analyzer-Olds'
 }
 
 { #category : #accessing }

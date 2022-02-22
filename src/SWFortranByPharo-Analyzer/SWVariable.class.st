@@ -3,7 +3,7 @@ I have an information about a variable.
 about, its type, const or not, and other properties.
 "
 Class {
-	#name : #SWVariableType,
+	#name : #SWVariable,
 	#superclass : #Object,
 	#instVars : [
 		'name',
@@ -15,12 +15,12 @@ Class {
 }
 
 { #category : #'instance creation' }
-SWVariableType class >> new: aType [
+SWVariable class >> new: aType [
 	^ self new: aType with: nil 
 ]
 
 { #category : #'instance creation' }
-SWVariableType class >> new: aType with: aPriority [
+SWVariable class >> new: aType with: aPriority [
 	^ self new
 		<< aType;
 		priority: aPriority;
@@ -29,8 +29,8 @@ SWVariableType class >> new: aType with: aPriority [
 ]
 
 { #category : #'accumulator ops' }
-SWVariableType >> << rightObject [
-	(rightObject class includesBehavior: SWVariableType) ifTrue: [
+SWVariable >> << rightObject [
+	(rightObject class includesBehavior: SWVariable) ifTrue: [
 		self priority < rightObject priority ifFalse: [ ^ rightObject ].
 		self type: rightObject type.
 		self properties addAll: rightObject properties.
@@ -51,84 +51,84 @@ SWVariableType >> << rightObject [
 ]
 
 { #category : #comparing }
-SWVariableType >> = right [
+SWVariable >> = right [
 	^ self value = right value
 ]
 
 { #category : #adding }
-SWVariableType >> addProperty: aProp [
+SWVariable >> addProperty: aProp [
 	self properties add: aProp
 ]
 
 { #category : #accessing }
-SWVariableType >> assignCounter [
+SWVariable >> assignCounter [
 
 	^ assignCounter ifNil: [ assignCounter := OrderedCollection new ]
 ]
 
 { #category : #accessing }
-SWVariableType >> elementType [
+SWVariable >> elementType [
 	^ self type elementType
 ]
 
 { #category : #testing }
-SWVariableType >> hasProperty: aProperty [
+SWVariable >> hasProperty: aProperty [
 	^ self properties includes: aProperty
 ]
 
 { #category : #comparing }
-SWVariableType >> hash [
+SWVariable >> hash [
 	^ self type hash
 ]
 
 { #category : #accessing }
-SWVariableType >> name [
+SWVariable >> name [
 	^ name
 ]
 
 { #category : #accessing }
-SWVariableType >> name: aName [
+SWVariable >> name: aName [
 	name := aName
 ]
 
 { #category : #printing }
-SWVariableType >> printOn: aStream [
+SWVariable >> printOn: aStream [
 
 	^ self putOn: aStream
 ]
 
 { #category : #accessing }
-SWVariableType >> priority [
+SWVariable >> priority [
 
 	^ self type priority
 
 ]
 
 { #category : #accessing }
-SWVariableType >> priority: anObject [
+SWVariable >> priority: anObject [
 
 	^ self type priority: anObject.
 ]
 
 { #category : #accessing }
-SWVariableType >> properties [
+SWVariable >> properties [
 
 	^ properties ifNil: [ properties := Set new ]
 ]
 
 { #category : #accessing }
-SWVariableType >> properties: anObject [
+SWVariable >> properties: anObject [
 
 	properties := anObject
 ]
 
 { #category : #accessing }
-SWVariableType >> property: propName [
+SWVariable >> property: propName [
 	^ self properties at: propName ifAbsent: nil
 ]
 
 { #category : #streaming }
-SWVariableType >> putOn: aStream [
+SWVariable >> putOn: aStream [
 	aStream
 		<< name asString;
 		space;
@@ -144,24 +144,24 @@ SWVariableType >> putOn: aStream [
 ]
 
 { #category : #removing }
-SWVariableType >> removeProperty: propName [
+SWVariable >> removeProperty: propName [
 	properties remove: propName ifAbsent: [  ].
 ]
 
 { #category : #accessing }
-SWVariableType >> type [
+SWVariable >> type [
 
 	^ type ifNil: [ type := SWType new ]
 ]
 
 { #category : #accessing }
-SWVariableType >> type: anObject [
+SWVariable >> type: anObject [
 
 	type := anObject
 
 ]
 
 { #category : #accessing }
-SWVariableType >> value [
+SWVariable >> value [
 	^ self type value
 ]

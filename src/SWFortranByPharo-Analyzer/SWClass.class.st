@@ -104,7 +104,7 @@ SWClass >> declareMethodReturnsFirstArgumentsElement: aName [
 { #category : #api }
 SWClass >> declareMethodReturnsFirstOrSecondArgument: aName [
 	self addPredefined: aName with: [ :operands |
-		SWVariableType new
+		SWVariable new
 			<< operands second;
 			<< operands third;
 			yourself
@@ -115,7 +115,7 @@ SWClass >> declareMethodReturnsFirstOrSecondArgument: aName [
 { #category : #api }
 SWClass >> declareMethodReturnsFirstOrSecondArgumentsElement: aName [
 	self addPredefined: aName with: [ :operands |
-		SWVariableType new
+		SWVariable new
 			<< operands second elementType;
 			<< operands third elementType;
 			yourself
@@ -134,7 +134,7 @@ SWClass >> declareMethodReturnsReceiver: aName [
 { #category : #api }
 SWClass >> declareMethodReturnsReceiverOrFirstArgument: aName [
 	self addPredefined: aName with: [ :operands |
-		SWVariableType new
+		SWVariable new
 			<< operands first;
 			<< operands second;
 			yourself
@@ -145,7 +145,7 @@ SWClass >> declareMethodReturnsReceiverOrFirstArgument: aName [
 { #category : #api }
 SWClass >> declareMethodReturnsReceiverOrFirstArgumentsElement: aName [
 	self addPredefined: aName with: [ :operands |
-		SWVariableType new
+		SWVariable new
 			<< operands first;
 			<< operands second elementType;
 			yourself
@@ -241,7 +241,7 @@ SWClass >> getResult: method with: operands [
 		self predefined at: method selector ifPresent: [ :pre |
 			self methods at: sender put: (pre cull: operands)
 		] ifAbsent: [ |result|
-			result := SWVariableType new.
+			result := SWVariable new.
 			self methods at: sender put: result.
 			self decoderClass new
 				logger: self logger;

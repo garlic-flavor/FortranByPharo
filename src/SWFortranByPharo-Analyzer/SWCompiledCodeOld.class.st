@@ -111,7 +111,7 @@ SWCompiledCodeOld >> putOn: aStream [
 { #category : #accessing }
 SWCompiledCodeOld >> receiver [
 	^ receiver ifNil: [
-		receiver := SWVariableType new
+		receiver := SWVariable new
 			priority: SWType receiverTypePriority;
 			yourself
 	]
@@ -131,7 +131,7 @@ SWCompiledCodeOld >> receiverClass [
 { #category : #accessing }
 SWCompiledCodeOld >> return [
 
-	^ return ifNil: [ return := SWVariableType new ]
+	^ return ifNil: [ return := SWVariable new ]
 ]
 
 { #category : #accessing }

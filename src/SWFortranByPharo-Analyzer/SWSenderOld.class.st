@@ -120,5 +120,5 @@ SWSenderOld >> selector: anObject [
 
 { #category : #accessing }
 SWSenderOld >> specifyReturnTypeAs: aType [
-	return := SWVariableType new: aType
+	return := SWVariable new: aType
 ]

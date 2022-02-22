@@ -7,12 +7,12 @@ Class {
 	#instVars : [
 		'payload'
 	],
-	#category : #'SWFortranByPharo-Analyzer-Slot'
+	#category : #'SWFortranByPharo-Analyzer-Olds'
 }
 
 { #category : #accessing }
 SWSlotOld class >> elementClass [
-	^ SWVariableType
+	^ SWVariable
 ]
 
 { #category : #'instance creation' }
@@ -51,7 +51,7 @@ SWSlotOld >> at: index [
 SWSlotOld >> atOffset: offset [
 	"offset is  0 based.".
 	"offset 0 responds to the first argument."
-	^ self payload at: (offset + 1) ifAbsentPut: [ SWVariableType new ].
+	^ self payload at: (offset + 1) ifAbsentPut: [ SWVariable new ].
 ]
 
 { #category : #enumerating }

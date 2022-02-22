@@ -29,11 +29,15 @@ SWMBTofJS class >> senderTranspilerClass [
 
 { #category : #accessing }
 SWMBTofJS >> mangledName [
+	self halt; flag: #toRewrite.
+"
 	^ self class mangleClass safeSelectorNameOf: (method class = ByteSymbol ifTrue: [ method ] ifFalse: [ self method selector ])
+"
 ]
 
 { #category : #'code generation' }
 SWMBTofJS >> putBlock: aBlock [
+	self halt; flag: #toRewrite.
 
 	self
 		put: '{';
@@ -54,6 +58,7 @@ SWMBTofJS >> putBlock: aBlock [
 
 { #category : #'code generation' }
 SWMBTofJS >> putBlockAsExpression: aBlock [
+	self halt; flag: #toRewrite.
 
 	aBlock statements size = 1 ifTrue: [
 		self << (aBlock statements at: 1)
@@ -68,6 +73,7 @@ SWMBTofJS >> putBlockAsExpression: aBlock [
 { #category : #'code generation' }
 SWMBTofJS >> putCascade: aRBCascadeNode [
 	|variables receiver|
+	self halt; flag: #toRewrite.
 
 	(self trySimpleCascade: aRBCascadeNode) ifTrue: [ ^ self ].
 
@@ -94,6 +100,7 @@ SWMBTofJS >> putCascade: aRBCascadeNode [
 
 { #category : #streaming }
 SWMBTofJS >> putFilenameOn: aStream [
+	self halt; flag: #toRewrite.
 	aStream << 'cache/'.
 	super putBasenameOn: aStream.
 	aStream << '.mjs'
@@ -102,6 +109,7 @@ SWMBTofJS >> putFilenameOn: aStream [
 { #category : #'code generation' }
 SWMBTofJS >> putIfFalse: aNode [
 	self stream log.
+	self halt; flag: #toRewrite.
 
 	(aNode lastIsReturn or: [ aNode parent class = RBSequenceNode ]) ifTrue: [
 		self
@@ -122,6 +130,7 @@ SWMBTofJS >> putIfFalse: aNode [
 { #category : #'code generation' }
 SWMBTofJS >> putIfTrue: aNode [
 	self stream log.
+	self halt; flag: #toRewrite.
 	
 	aNode isExpression ifTrue: [
 		self
@@ -142,6 +151,7 @@ SWMBTofJS >> putIfTrue: aNode [
 { #category : #'code generation' }
 SWMBTofJS >> putIfTrueIfFalse: aNode [
 	self stream log.
+	self halt; flag: #toRewrite.
 	
 	aNode lastIsReturn ifTrue: [
 		self
@@ -165,6 +175,7 @@ SWMBTofJS >> putIfTrueIfFalse: aNode [
 
 { #category : #'code generation' }
 SWMBTofJS >> putImport: anArray from: aSource [
+	self halt; flag: #toRewrite.
 	self put: 'import {'.
 	anArray do: [ :each |
 		self put: each asString
@@ -178,6 +189,7 @@ SWMBTofJS >> putImport: anArray from: aSource [
 
 { #category : #'code generation' }
 SWMBTofJS >> putNew: aNode [
+	self halt; flag: #toRewrite.
 	self
 		put: '(new ';
 		<< aNode receiver;
@@ -187,12 +199,14 @@ SWMBTofJS >> putNew: aNode [
 
 { #category : #'as yet unclassified' }
 SWMBTofJS >> putNil [
+	self halt; flag: #toRewrite.
 	self put: 'null'
 ]
 
 { #category : #enumerating }
 SWMBTofJS >> putOnDo: aNode [ 
 	|receiver|
+	self halt; flag: #toRewrite.
 	receiver := aNode receiver.
 	aNode isExpression ifTrue: [	
 		self halt; flag: #toImplement.
@@ -246,6 +260,7 @@ SWMBTofJS >> putOnDo: aNode [
 
 { #category : #'code generation' }
 SWMBTofJS >> putOpBinary: aNode [
+	self halt; flag: #toRewrite.
 	super putOpBinary: (aNode selector = #= ifTrue: [
 		aNode copy
 			selector: #==;
@@ -255,6 +270,7 @@ SWMBTofJS >> putOpBinary: aNode [
 
 { #category : #'code generation' }
 SWMBTofJS >> putOrdinaryCallee: aNode [
+	self halt; flag: #toRewrite.
 	self stream log.
 	self methodClass ifNil: [ ^ super putOrdinaryCallee: aNode ].
 	self methodClass isClassSide ifFalse: [ ^ super putOrdinaryCallee: aNode ].
@@ -272,6 +288,7 @@ SWMBTofJS >> putOrdinaryCallee: aNode [
 
 { #category : #'code generation' }
 SWMBTofJS >> putReturnThisClassName [
+	self halt; flag: #toRewrite.
 	self
 		put: 'return this.name';
 		putStatementDelimiter;
@@ -280,17 +297,20 @@ SWMBTofJS >> putReturnThisClassName [
 
 { #category : #'code generation' }
 SWMBTofJS >> putSelf [
+	self halt; flag: #toRewrite.
 
 	self put: (self receiverClass isClassSide ifTrue: [ self receiverClass soleInstance name ] ifFalse: [ 'self' ])
 ]
 
 { #category : #'code generation' }
 SWMBTofJS >> putSelfDefinition [
+	self halt; flag: #toRewrite.
 	self put: 'var self = this;'; cr
 ]
 
 { #category : #'code generation' }
 SWMBTofJS >> putVariableDeclarationOf: aVariableName [
+	self halt; flag: #toRewrite.
 	self
 		put: 'var ';
 		put: aVariableName;
@@ -313,6 +333,7 @@ SWMBTofJS >> put_upToEnd: aNode [
 
 { #category : #'code generation' }
 SWMBTofJS >> trySimpleCascade: aRBCascadeNode [
+	self halt; flag: #toRewrite.
 
 	aRBCascadeNode receiver class = RBVariableNode ifFalse: [ ^ false ].
 	aRBCascadeNode isExpression ifTrue: [
