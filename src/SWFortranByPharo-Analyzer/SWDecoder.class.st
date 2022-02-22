@@ -22,6 +22,11 @@ SWDecoder class >> classTranspilerClass [
 	^ SWClass
 ]
 
+{ #category : #'as yet unclassified' }
+SWDecoder class >> globalAccessKey [
+	^ #globalAccess
+]
+
 { #category : #'instance creation' }
 SWDecoder class >> new: aNode with: operands [
 	^ self new
@@ -35,6 +40,17 @@ SWDecoder class >> poolClass [
 	^ SWPool
 ]
 
+{ #category : #'as yet unclassified' }
+SWDecoder class >> pragmaKey [
+	^ #pragma
+]
+
+{ #category : #'as yet unclassified' }
+SWDecoder class >> unresolvedSelectorKey [
+	^ #unresolvedSelector
+
+]
+
 { #category : #adding }
 SWDecoder >> add: aName as: aType [
 	self slot addLast: ((SWVariableType new: aType)
@@ -45,6 +61,11 @@ SWDecoder >> add: aName as: aType [
 { #category : #accessing }
 SWDecoder >> at: anObject [
 	self result << anObject class
+]
+
+{ #category : #accessing }
+SWDecoder >> atArray: anArrayNode [
+	self result << Array
 ]
 
 { #category : #accessing }
@@ -61,6 +82,11 @@ SWDecoder >> atAssignTo: aLValue with: aRValue [
 SWDecoder >> atCascade: aCascadeNode [
 	self resultIsLastChildsResult
 
+]
+
+{ #category : #accessing }
+SWDecoder >> atCharacter: aCharacter [
+	self result << aCharacter class
 ]
 
 { #category : #accessing }
@@ -99,10 +125,13 @@ SWDecoder >> atMessage: aMessageNode [
 		"A special case for type specification by source code."
 		name := aMessageNode children second evaluate.
 		type := aMessageNode children third evaluate.
-		slot detect: [ :each | each name = name ] ifFound: [ :found | found << type ].
+		name = #return ifTrue: [
+			self methodResult << (SWType new: type with: SWType userSpecifyingPriority)
+		] ifFalse: [
+			slot detect: [ :each | each name = name ] ifFound: [ :found | found << type ].
+		].
 		self result << SWType.
 	] ifFalse: [
-		(self haltList includes: aMessageNode selector) ifTrue: [ self halt ].
 		self result << (self pool getResult: aMessageNode selector with: (self children collect: [ :each | each result ])).
 	]
 ]
@@ -110,8 +139,13 @@ SWDecoder >> atMessage: aMessageNode [
 { #category : #accessing }
 SWDecoder >> atMethod: traverser [
 	self decodeChildren.
-	self methodResult << (SWVariableType new: self slot first value with: SWType receiverTypePriority)
+	self methodResult << (SWVariableType new: (self slot detect: [:each | each name = 'self' ]) value with: SWType receiverTypePriority)
 
+]
+
+{ #category : #accessing }
+SWDecoder >> atNil [
+	self result << UndefinedObject
 ]
 
 { #category : #accessing }
@@ -196,22 +230,47 @@ SWDecoder >> enableLogging [
 
 { #category : #accessing }
 SWDecoder >> haltAt: aSymbol [
-	self haltList add: aSymbol
+	self haltAt: aSymbol switch: true
+]
+
+{ #category : #accessing }
+SWDecoder >> haltAt: key switch: aBoolean [
+	aBoolean ifTrue: [
+		self haltList add: key
+	] ifFalse: [
+		self haltList remove: key ifAbsent: [  ]
+	]
 ]
 
 { #category : #'as yet unclassified' }
 SWDecoder >> haltAtGlobalAccess [
-	self haltAt: #globalAccess
+	self haltAtGlobalAccess: true
+]
+
+{ #category : #'as yet unclassified' }
+SWDecoder >> haltAtGlobalAccess: aBoolean [
+	self haltAt: self class globalAccessKey switch: aBoolean
 ]
 
 { #category : #'as yet unclassified' }
 SWDecoder >> haltAtPragma [
-	self haltAt: #pragma
+	self haltAtPragma: true
+]
+
+{ #category : #'as yet unclassified' }
+SWDecoder >> haltAtPragma: aBoolean [
+	self haltAt: self class pragmaKey switch: aBoolean
 ]
 
 { #category : #'as yet unclassified' }
 SWDecoder >> haltAtUnresolvedSelector [
-	self haltAt: #unresolvedSelector
+	self haltAtUnresolvedSelector: true
+]
+
+{ #category : #'as yet unclassified' }
+SWDecoder >> haltAtUnresolvedSelector: aBoolean [
+	self haltAt: self class unresolvedSelectorKey switch: aBoolean
+
 ]
 
 { #category : #accessing }

@@ -370,6 +370,42 @@ SWTestProgram >> _47_access_to_instance_variables [
 	
 ]
 
+{ #category : #'as yet unclassified' }
+SWTestProgram >> _48_SWShellEnvironemt_default [
+	^ SWShellEnvironment default
+
+]
+
+{ #category : #'as yet unclassified' }
+SWTestProgram >> _49_SWShellEnvironemtLocalDirectory [
+	^ SWShellEnvironment default localDirectory
+
+]
+
+{ #category : #'as yet unclassified' }
+SWTestProgram >> _50_SWShell_class_execute [
+	^ SWShell execute: 'echo hoge'
+
+]
+
+{ #category : #'as yet unclassified' }
+SWTestProgram >> _51_TestCase [
+	^ TestCase selector: 'hoge'
+]
+
+{ #category : #'as yet unclassified' }
+SWTestProgram >> _52_ZnServerClass_default [
+
+	ZnServer startDefaultOn: 50000.
+	^ ZnServer default
+]
+
+{ #category : #'as yet unclassified' }
+SWTestProgram >> _53_SWServerClass_starton [
+
+	^ SWServer start
+]
+
 { #category : #accessing }
 SWTestProgram >> var1 [
 

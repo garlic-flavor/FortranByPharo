@@ -232,6 +232,7 @@ SWClass >> defineMethodSender: aSelector as: anInitializer [
 { #category : #'as yet unclassified' }
 SWClass >> getResult: method with: operands [
 	|sender|
+	(self haltList includes: method) ifTrue: [ self halt ].
 	sender := SWSender new
 		method: method;
 		operands: operands;
@@ -417,8 +418,11 @@ SWClass >> setBreakpointOn: aName [
 SWClass >> slot [
 	^ slot ifNil: [
 		slot := SWSlot new.
-		self targetClass slots do: [ :ids |
-			slot push name: ids name
+		self targetClass slots do: [ :item |
+			slot push name: item name
+		].
+		self targetClass classVarNames do: [ :item |
+			slot push name: item
 		].
 		slot
 	]

@@ -84,12 +84,13 @@ SWPool >> getClassTranspiler: aClass [
 
 { #category : #'as yet unclassified' }
 SWPool >> getResult: aSelector with: operands [
+	(self haltList includes: aSelector) ifTrue: [ self halt ].
 	^ self class search: aSelector in: operands first value ifFound: [ :method |
 		(self getClassTranspiler: method methodClass)
 			getResult: method with: operands.
 	] ifNone: [
 		self logger log: [ 'An unknown method detected: ', aSelector ].
-		(self haltList includes: #unresolvedSelector)  ifTrue: [ self halt ].
+		(self haltList includes: self owner class unresolvedSelectorKey)  ifTrue: [ self halt ].
 		UndefinedObject
 	]
 

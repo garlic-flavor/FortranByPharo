@@ -64,7 +64,12 @@ SWShell class >> initialize_OSEnvironmentClass: transpiler [
 { #category : #initialization }
 SWShell class >> initialize_OSSUnixSubprocess: transpiler [
 	transpiler
-		declareMethod: #createADefaultWriteStream asReturn: WriteStream
+		declareMethod: #createADefaultWriteStream asReturn: WriteStream";
+		declareMethod: #shellCommand asReturn: String;
+		declareMethodReturnsReceiver: #shell:command:;
+		declareMethod: #waitForExit asReturn: SmallInteger;
+		declareMethod: #isSuccess asReturn: Boolean;
+		declareMethodReturnsReceiver: #initialize"
 ]
 
 { #category : #execution }

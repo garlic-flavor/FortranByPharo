@@ -49,6 +49,12 @@ SWShellEnvironment class >> initialize_OSEnvironmentClass: ct [
 ]
 
 { #category : #initialization }
+SWShellEnvironment class >> initialize_OSPlatformClass: ct [
+	ct
+		declareMethodReturnsReceiversInstance: #current
+]
+
+{ #category : #initialization }
 SWShellEnvironment class >> initialize_OSSUnixSubprocess: ct [
 	ct
 		declareMethodReturnsReceiver: #run;
@@ -59,13 +65,14 @@ SWShellEnvironment class >> initialize_OSSUnixSubprocess: ct [
 { #category : #initialization }
 SWShellEnvironment class >> initialize_self: transpiler [
 	transpiler
-		declareMethod: #localDirectory asReturn: FileLocator;
+		declareMethod: #localDirectory asReturn: FileLocator
+";
 		defineMethodBody: #localDirectory as: [ :t |
 			t
 				put: 'return FileLocator.localDirectory()';
 				putStatementDelimiter;
 				cr
-		]
+		]"
 ]
 
 { #category : #'instance creation' }

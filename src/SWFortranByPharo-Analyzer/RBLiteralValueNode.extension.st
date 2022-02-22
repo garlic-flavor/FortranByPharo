@@ -5,7 +5,7 @@ RBLiteralValueNode >> dispatchTo: transpiler [
 	^ self value ifNotNil: [
 		self value dispatchTo: transpiler
 	] ifNil: [
-		transpiler putNil
+		transpiler atNil
 	]
 
 ]

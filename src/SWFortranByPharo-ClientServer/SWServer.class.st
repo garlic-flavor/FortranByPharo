@@ -160,7 +160,7 @@ SWServer class >> solveDependenciesUsing: transpiler [
 { #category : #accessing }
 SWServer class >> start [
 	<script>
-	default := self new
+	^ default := self new
 		startOn: 50000.
 ]
 

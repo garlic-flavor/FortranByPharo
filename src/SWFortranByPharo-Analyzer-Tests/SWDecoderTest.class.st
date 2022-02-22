@@ -13,7 +13,6 @@ SWDecoderTest >> decodeNo: no with: args [
 		node: (SWTestProgram getMy: no) sourceNode;
 		operands: (args copyWithFirst: SWTestProgram);
 		enableLogging;
-		haltAtUnresolvedSelector;
 		decode;
 		yourself
 ]
@@ -30,6 +29,8 @@ SWDecoderTest >> resultOfNo: no with: args equals: type [
 SWDecoderTest >> setUp [
 	super setUp.
 	decoder := SWDecoder new
+		haltAtUnresolvedSelector;
+		yourself
 	"Put here a common initialization logic for tests"
 ]
 
@@ -217,4 +218,38 @@ SWDecoderTest >> test_46_locals2 [
 SWDecoderTest >> test_47_access_to_instance_variable [
 	self resultOfNo: 47 with: {  } equals: SmallInteger
 
+]
+
+{ #category : #tests }
+SWDecoderTest >> test_48_SWShellEnvironment_default [
+	self resultOfNo: 48 with: { } equals: SWShellEnvironment
+]
+
+{ #category : #tests }
+SWDecoderTest >> test_49_SWShellEnvironment_localDirectory [
+	self resultOfNo: 49 with: { } equals: FileLocator
+]
+
+{ #category : #tests }
+SWDecoderTest >> test_50_SWShell_class_execute [
+	decoder haltAtUnresolvedSelector: false.
+	self resultOfNo: 50 with: { } equals: String
+]
+
+{ #category : #tests }
+SWDecoderTest >> test_51_TestCase [
+
+	self resultOfNo: 51 with: { } equals: TestCase
+]
+
+{ #category : #tests }
+SWDecoderTest >> test_52_ZnServerClass_default [
+	decoder haltAtUnresolvedSelector: false.
+	self resultOfNo: 52 with: { } equals: ZnManagingMultiThreadedServer 
+]
+
+{ #category : #tests }
+SWDecoderTest >> test_53_SWServerClass_starton [
+	decoder haltAtUnresolvedSelector: false.
+	self resultOfNo: 53 with: { } equals: SWServer
 ]
