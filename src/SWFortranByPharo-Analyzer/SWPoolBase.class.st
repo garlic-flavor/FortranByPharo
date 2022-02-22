@@ -33,7 +33,7 @@ SWPoolBase class >> initializersKey [
 	^ self subclassResponsibility
 ]
 
-{ #category : #api }
+{ #category : #private }
 SWPoolBase >> addInitializerIn: aClass [
 	"invoke aClass>>#initialize_Hoge: with Hoge class transpiler."
 	 aClass classSide methodDict values select: [ :each |

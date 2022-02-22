@@ -14,6 +14,7 @@ SWCDTofJS class >> methodDefinitionTranspilerClass [
 
 { #category : #initialization }
 SWCDTofJS >> initialize_Behavior [
+	self error; flag: #toRemove.
 	super initialize_Behavior.
 	self
 		defineMethodSender: #new as: [ :transpiler :sender ||aNode|
@@ -28,6 +29,7 @@ SWCDTofJS >> initialize_Behavior [
 
 { #category : #initialization }
 SWCDTofJS >> initialize_BlockClosure [
+	self error; flag: #toRemove.
 	super initialize_BlockClosure.
 	self
 		defineMethodSender: #on:do: as: [ :transpiler :sender | transpiler putOnDo: sender node ];
@@ -36,6 +38,7 @@ SWCDTofJS >> initialize_BlockClosure [
 
 { #category : #initialization }
 SWCDTofJS >> initialize_Boolean [
+	self error; flag: #toRemove.
 	super initialize_Boolean.
 	self defineMethodSender: #ifTrue:ifFalse: as: [ :transpiler :sender | | aNode |
 		aNode := sender node.
@@ -79,6 +82,7 @@ SWCDTofJS >> initialize_Boolean [
 
 { #category : #initialization }
 SWCDTofJS >> initialize_Collection [
+	self error; flag: #toRemove.
 	super initialize_Collection.
 	self
 		defineMethodSender: #inject:into: as: [ :transpiler :sender | | aNode |
@@ -96,6 +100,7 @@ SWCDTofJS >> initialize_Collection [
 
 { #category : #initialization }
 SWCDTofJS >> initialize_Object [
+	self error; flag: #toRemove.
 	super initialize_Object.
 	self
 		defineMethodSender: #yourself as: [ :transpiler :sender |
@@ -126,6 +131,7 @@ SWCDTofJS >> initialize_Object [
 
 { #category : #initialization }
 SWCDTofJS >> initialize_PositionableStream [
+	self error; flag: #toRemove.
 	self
 		defineMethodSender:  #upToEnd as: [ :transpiler :sender |
 			transpiler
@@ -137,6 +143,7 @@ SWCDTofJS >> initialize_PositionableStream [
 
 { #category : #initialization }
 SWCDTofJS >> initialize_ProtoObject [
+	self error; flag: #toRemove.
 	super initialize_ProtoObject.
 	self
 		defineMethodSender: #ifNotNil: as: [ :transpiler :sender ||aNode|
@@ -165,6 +172,7 @@ SWCDTofJS >> initialize_ProtoObject [
 
 { #category : #initialization }
 SWCDTofJS >> initialize_SWStdClass [
+	self error; flag: #toRemove.
 	super initialize_SWStdClass.
 	self
 		defineMethodSender: #print: as: [ :transpiler :sender |
@@ -189,12 +197,14 @@ SWCDTofJS >> initialize_SWStdClass [
 
 { #category : #initialization }
 SWCDTofJS >> initialize_Stream [
+	self error; flag: #toRemove.
 	self
 		defineMethodSender: #<< as: [ :transpiler :sender | transpiler putSender: sender node with: #write ]
 ]
 
 { #category : #initialization }
 SWCDTofJS >> initialize_String [
+	self error; flag: #toRemove.
 	super initialize_String.
 	self
 		defineMethodSender: #beginsWith: as: [ :transpiler :sender |
@@ -208,6 +218,7 @@ SWCDTofJS >> initialize_String [
 
 { #category : #initialization }
 SWCDTofJS >> initialize_ThreadSafeTranscript [
+	self error; flag: #toRemove.
 
 	self
 		defineMethodSender: #<< as: [ :transpiler :sender |
@@ -252,6 +263,8 @@ SWCDTofJS >> putMemberDeclarationOf: aVariableTypeInfo [
 
 { #category : #'as yet unclassified' }
 SWCDTofJS >> put_ensure_: transpiler with: aNode [
+	self error; flag: #toRemove.
+
 	transpiler
 		put: '(function(){ try {';
 		cr;

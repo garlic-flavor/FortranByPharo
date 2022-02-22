@@ -389,6 +389,11 @@ SWMethodBodyTranspiler >> putIfTrue: aNode [
 ]
 
 { #category : #'code generation' }
+SWMethodBodyTranspiler >> putIfTrueIfFalse [
+	^ self subclassResponsibility
+]
+
+{ #category : #'code generation' }
 SWMethodBodyTranspiler >> putIfTrueIfFalse: aNode [
 	^ self subclassResponsibility
 ]

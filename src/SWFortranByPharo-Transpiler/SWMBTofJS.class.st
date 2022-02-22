@@ -149,6 +149,33 @@ SWMBTofJS >> putIfTrue: aNode [
 ]
 
 { #category : #'code generation' }
+SWMBTofJS >> putIfTrueIfFalse [
+	self decoder node isExpression.
+	self decoder node containsReturn.
+	self halt.
+"	
+	aNode lastIsReturn ifTrue: [
+		self
+			put: 'if(';
+			<< aNode receiver;
+			put: ')';
+			<< (aNode arguments at: 1);
+			put: 'else ';
+			<< (aNode arguments at: 2)
+	] ifFalse: [
+		self
+			put: '(';
+			<< aNode receiver;
+			put: ' ? ';
+ 			putBlockAsExpression: (aNode arguments at: 1);
+			put: ' : ';
+			putBlockAsExpression: (aNode arguments at: 2);
+			put: ')'
+	]
+"
+]
+
+{ #category : #'code generation' }
 SWMBTofJS >> putIfTrueIfFalse: aNode [
 	self stream log.
 	self halt; flag: #toRewrite.

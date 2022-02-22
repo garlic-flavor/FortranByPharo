@@ -29,14 +29,14 @@ SWPool >> decoderClass [
 	^ self owner class
 ]
 
-{ #category : #'as yet unclassified' }
+{ #category : #api }
 SWPool >> getResult: aSender [
 	^ (self getClassDispatcher: aSender method methodClass)
 		getResult: aSender
 
 ]
 
-{ #category : #'private - accessing' }
+{ #category : #accessing }
 SWPool >> haltList [
 	^ self owner haltList
 ]

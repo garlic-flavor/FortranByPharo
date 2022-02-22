@@ -2,13 +2,13 @@
 A SWVariableTypeInfoTest is a test class for testing the behavior of SWVariableTypeInfo
 "
 Class {
-	#name : #SWVariableTypeInfoTest,
+	#name : #SWVariableTest,
 	#superclass : #TestCase,
 	#category : #'SWFortranByPharo-Analyzer-Tests-Type'
 }
 
 { #category : #utilities }
-SWVariableTypeInfoTest >> putOnOf: anObject mustMatchesWith: exp [
+SWVariableTest >> putOnOf: anObject mustMatchesWith: exp [
 
 	|matcher str|
 	matcher := RxMatcher forString: exp.
@@ -18,7 +18,7 @@ SWVariableTypeInfoTest >> putOnOf: anObject mustMatchesWith: exp [
 ]
 
 { #category : #tests }
-SWVariableTypeInfoTest >> testBasics [
+SWVariableTest >> testBasics [
 
 	|vi|
 	vi := SWVariable new: SmallInteger.
@@ -27,7 +27,7 @@ SWVariableTypeInfoTest >> testBasics [
 ]
 
 { #category : #test }
-SWVariableTypeInfoTest >> testLessThanLessThan [
+SWVariableTest >> testLessThanLessThan [
 
 	|v1 v2|
 	v1 := SWVariable new: [ SmallInteger ].
@@ -42,7 +42,7 @@ SWVariableTypeInfoTest >> testLessThanLessThan [
 ]
 
 { #category : #test }
-SWVariableTypeInfoTest >> testPutOn [
+SWVariableTest >> testPutOn [
 
 	|vi|
 	vi := (SWVariable new: SmallInteger)

@@ -8,14 +8,6 @@ Class {
 	#category : #'SWFortranByPharo-ClientServer-Common'
 }
 
-{ #category : #'code generation' }
-SWStd class >> f90_print_With: arguments Using: transpiler [
-	self error; flag: #toRemove.
-	transpiler
-		put: 'print *, ';
-		transpile: (arguments at: 1)
-]
-
 { #category : #'as yet unclassified' }
 SWStd class >> haltOnDecoding [
 	self error; flag: #toRemove

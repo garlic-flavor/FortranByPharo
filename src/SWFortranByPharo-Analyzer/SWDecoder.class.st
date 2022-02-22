@@ -71,17 +71,17 @@ SWDecoder >> add: aName as: aType [
 		yourself)
 ]
 
-{ #category : #accessing }
+{ #category : #'dispatching-callback' }
 SWDecoder >> at: anObject [
 	self result << anObject class
 ]
 
-{ #category : #accessing }
+{ #category : #'dispatching-callback' }
 SWDecoder >> atArray: anArrayNode [
 	self result << Array
 ]
 
-{ #category : #accessing }
+{ #category : #'dispatching-callback' }
 SWDecoder >> atAssignTo: aLValue with: aRValue [
 	self decodeChildren.
 	self result << self children first result.
@@ -91,18 +91,18 @@ SWDecoder >> atAssignTo: aLValue with: aRValue [
 
 ]
 
-{ #category : #accessing }
+{ #category : #'dispatching-callback' }
 SWDecoder >> atCascade: aCascadeNode [
 	self resultIsLastChildsResult
 
 ]
 
-{ #category : #accessing }
+{ #category : #'dispatching-callback' }
 SWDecoder >> atCharacter: aCharacter [
 	self result << aCharacter class
 ]
 
-{ #category : #accessing }
+{ #category : #'dispatching-callback' }
 SWDecoder >> atClosure: aBlockNode [
 	|outerScope res|
 	outerScope := self slot copy.
@@ -120,18 +120,18 @@ SWDecoder >> atClosure: aBlockNode [
 
 ]
 
-{ #category : #accessing }
+{ #category : #'dispatching-callback' }
 SWDecoder >> atFloat: aFloat [
 	self result << aFloat class
 ]
 
-{ #category : #accessing }
+{ #category : #'dispatching-callback' }
 SWDecoder >> atInteger: anInteger [
 	self result << anInteger class
 
 ]
 
-{ #category : #accessing }
+{ #category : #'dispatching-callback' }
 SWDecoder >> atMessage: aMessageNode [
 	self decodeChildren.
 	(aMessageNode selector = #declare:as: and: [ self children first result = SWType class ])ifTrue: [
@@ -141,19 +141,19 @@ SWDecoder >> atMessage: aMessageNode [
 	]
 ]
 
-{ #category : #accessing }
+{ #category : #'dispatching-callback' }
 SWDecoder >> atMethod: traverser [
 	self decodeChildren.
 	self methodResult << (SWVariable new: (self slot detect: [:each | each name = 'self' ]) value with: SWType receiverTypePriority)
 
 ]
 
-{ #category : #accessing }
+{ #category : #'dispatching-callback' }
 SWDecoder >> atNil [
 	self result << UndefinedObject
 ]
 
-{ #category : #accessing }
+{ #category : #private }
 SWDecoder >> atOrdinaryMessage: aMessageNode [
 	 |operands method|
 	(self haltList includes: aMessageNode selector) ifTrue: [ self halt ].
@@ -172,34 +172,34 @@ SWDecoder >> atOrdinaryMessage: aMessageNode [
 
 ]
 
-{ #category : #accessing }
+{ #category : #'dispatching-callback' }
 SWDecoder >> atPragma: aPragmaNode [
 	(self haltList includes: #pragma) ifTrue: [ self halt ]
 ]
 
-{ #category : #accessing }
+{ #category : #'dispatching-callback' }
 SWDecoder >> atReturn: aReturnNode [
 	self methodResult << self decodeChildren
 
 ]
 
-{ #category : #accessing }
+{ #category : #'dispatching-callback' }
 SWDecoder >> atSequence: aSequenceNode [
 	self resultIsLastChildsResult
 
 ]
 
-{ #category : #accessing }
+{ #category : #'dispatching-callback' }
 SWDecoder >> atString: aString [
 	self result << aString class
 ]
 
-{ #category : #accessing }
+{ #category : #'dispatching-callback' }
 SWDecoder >> atSymbol: aByteSymbol [
 	self result << aByteSymbol class
 ]
 
-{ #category : #accessing }
+{ #category : #'dispatching-callback' }
 SWDecoder >> atVariable: aVariableNode [
 	self result << (self slot detect: [ :each | each name = aVariableNode name ] ifNone: [
 		self logger log: [ 'Access to global: ', aVariableNode name ].
@@ -229,7 +229,7 @@ SWDecoder >> decode [
 	^ methodResult
 ]
 
-{ #category : #'as yet unclassified' }
+{ #category : #private }
 SWDecoder >> decodeChildWith: aNode [
 	^ self copy
 		node: aNode;
@@ -238,7 +238,7 @@ SWDecoder >> decodeChildWith: aNode [
 		yourself.
 ]
 
-{ #category : #'as yet unclassified' }
+{ #category : #private }
 SWDecoder >> decodeChildren [
 	self children: (OrderedCollection new: self node children size).
 	self node children do: [ :child |
@@ -247,17 +247,17 @@ SWDecoder >> decodeChildren [
 	^ self children ifNotEmpty: [ self children last result ] ifEmpty: [ nil ]
 ]
 
-{ #category : #initialization }
+{ #category : #modifying }
 SWDecoder >> enableLogging [
 	self logger enabled: true
 ]
 
-{ #category : #accessing }
+{ #category : #modifying }
 SWDecoder >> haltAt: aSymbol [
 	self haltAt: aSymbol switch: true
 ]
 
-{ #category : #accessing }
+{ #category : #modifying }
 SWDecoder >> haltAt: key switch: aBoolean [
 	aBoolean ifTrue: [
 		self haltList add: key
@@ -266,32 +266,32 @@ SWDecoder >> haltAt: key switch: aBoolean [
 	]
 ]
 
-{ #category : #'as yet unclassified' }
+{ #category : #modifying }
 SWDecoder >> haltAtGlobalAccess [
 	self haltAtGlobalAccess: true
 ]
 
-{ #category : #'as yet unclassified' }
+{ #category : #modifying }
 SWDecoder >> haltAtGlobalAccess: aBoolean [
 	self haltAt: self class globalAccessKey switch: aBoolean
 ]
 
-{ #category : #'as yet unclassified' }
+{ #category : #modifying }
 SWDecoder >> haltAtPragma [
 	self haltAtPragma: true
 ]
 
-{ #category : #'as yet unclassified' }
+{ #category : #modifying }
 SWDecoder >> haltAtPragma: aBoolean [
 	self haltAt: self class pragmaKey switch: aBoolean
 ]
 
-{ #category : #'as yet unclassified' }
+{ #category : #modifying }
 SWDecoder >> haltAtUnresolvedSelector [
 	self haltAtUnresolvedSelector: true
 ]
 
-{ #category : #'as yet unclassified' }
+{ #category : #modifying }
 SWDecoder >> haltAtUnresolvedSelector: aBoolean [
 	self haltAt: self class unresolvedSelectorKey switch: aBoolean
 
@@ -345,7 +345,7 @@ SWDecoder >> node: anObject [
 	node := anObject
 ]
 
-{ #category : #'as yet unclassified' }
+{ #category : #api }
 SWDecoder >> operands: operands [
 	|receiver|
 	receiver := operands first value.
@@ -388,7 +388,7 @@ SWDecoder >> result: anObject [
 	result := anObject
 ]
 
-{ #category : #'as yet unclassified' }
+{ #category : #private }
 SWDecoder >> resultIsLastChildsResult [
 	self decodeChildren ifNotNil: [ :res |
 		self result << res
@@ -419,7 +419,7 @@ SWDecoder >> slot: anObject [
 	slot := anObject
 ]
 
-{ #category : #'as yet unclassified' }
+{ #category : #private }
 SWDecoder >> userSpecifyVariableType: aNode [
 	|name type|
 	"A special case for type specification by source code."

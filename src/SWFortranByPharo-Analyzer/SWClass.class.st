@@ -160,12 +160,12 @@ SWClass >> declareMethodReturnsSecondArgument: aName [
 
 ]
 
-{ #category : #multipart }
+{ #category : #accessing }
 SWClass >> decoderClass [
 	^ self pool decoderClass
 ]
 
-{ #category : #'as yet unclassified' }
+{ #category : #api }
 SWClass >> getResult: aSender [
 	(self haltList includes: aSender method) ifTrue: [ self halt ].
 	^ self methods at: aSender ifAbsent: [
@@ -188,7 +188,7 @@ SWClass >> getResult: aSender [
 
 ]
 
-{ #category : #'private - accessing' }
+{ #category : #accessing }
 SWClass >> haltList [
 	^ self pool haltList
 ]

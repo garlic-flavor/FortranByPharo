@@ -18,6 +18,15 @@ SWTranspilerPool class >> initializersKey [
 ]
 
 { #category : #'as yet unclassified' }
+SWTranspilerPool >> initialize_Boolean: ct [
+	ct
+		senderTranspilerOf: #ifTrue:ifFalse: is: [ :transpiler |
+			transpiler putIfTrueIfFalse
+		]
+
+]
+
+{ #category : #'as yet unclassified' }
 SWTranspilerPool >> predefinedSenderTranspiler: aSender [
 	aSender method ifNil: [ ^ nil ].
 	^ (self getClassDispatcher: aSender method methodClass)

@@ -23,6 +23,11 @@ SWClassBase >> pool: anObject [
 	pool := anObject
 ]
 
+{ #category : #printing }
+SWClassBase >> printOn: aStream [
+	self putOn: aStream
+]
+
 { #category : #streaming }
 SWClassBase >> putOn: aStream [
 	aStream << self targetClass name

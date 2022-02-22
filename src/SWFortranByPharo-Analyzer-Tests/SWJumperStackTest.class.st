@@ -1,7 +1,7 @@
 Class {
 	#name : #SWJumperStackTest,
 	#superclass : #TestCase,
-	#category : #'SWFortranByPharo-Analyzer-Tests-Slot'
+	#category : #'SWFortranByPharo-Analyzer-Tests-Olds'
 }
 
 { #category : #tests }
