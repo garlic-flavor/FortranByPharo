@@ -61,6 +61,16 @@ SWMethodBodyTranspiler >> atCascade: aCascadeNode [
 ]
 
 { #category : #accessing }
+SWMethodBodyTranspiler >> atClosure: aBlockNode [
+	^ self subclassResponsibility 
+]
+
+{ #category : #'code generation' }
+SWMethodBodyTranspiler >> atInteger: anInteger [
+	self put: anInteger asString
+]
+
+{ #category : #accessing }
 SWMethodBodyTranspiler >> atMessage: aMessageNode [
 	(self pool predefinedSenderTranspiler: self decoder sender) ifNotNil: [ :predefined |
 		predefined value: self
@@ -103,6 +113,7 @@ SWMethodBodyTranspiler >> atString: aString [
 
 { #category : #accessing }
 SWMethodBodyTranspiler >> atVariable: aVariableNode [
+	aVariableNode parent class = RBMethodNode ifTrue: [ ^self ].
 	self put: aVariableNode name
 
 ]
@@ -624,12 +635,22 @@ SWMethodBodyTranspiler >> transpileChildren [
 
 { #category : #'as yet unclassified' }
 SWMethodBodyTranspiler >> transpileChildrenWithDelimiter [
-	self decoder children do: [ :child |
-		self
-			transpileChild: child;
-			putStatementDelimiter;
-			cr
-	].
+	self decoder node isExpression ifTrue: [
+		1 < self decoder children size ifTrue: [ self put: '(' ].
+		self decoder children do: [ :child |
+			self transpileChild: child
+		] separatedBy: [
+			self put: ', '
+		].
+		1 < self decoder children size ifTrue: [ self put: ')' ].
+	] ifFalse: [
+		self decoder children do: [ :child |
+			self
+				transpileChild: child;
+				putStatementDelimiter;
+				cr
+		].
+	]
 
 ]
 

@@ -7,7 +7,7 @@ Class {
 { #category : #utilities }
 SWMethodBodyTranspilerTest >> transpile: method withArguments: args [
 	|decoder transpiler|
-	decoder := SWDecoder new: method sourceNode with: args.
+	decoder := SWDecoder new: method with: args.
 	decoder enableLogging.
 	decoder decode.
 	

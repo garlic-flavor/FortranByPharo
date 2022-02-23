@@ -166,7 +166,7 @@ SWDecoder >> atOrdinaryMessage: aMessageNode [
 
 { #category : #'dispatching-callback' }
 SWDecoder >> atPragma: aPragmaNode [
-	(self haltList includes: #pragma) ifTrue: [ self halt ]
+	(self haltList includes: self class pragmaKey) ifTrue: [ self halt ]
 ]
 
 { #category : #'dispatching-callback' }
@@ -323,22 +323,6 @@ SWDecoder >> method: aMethod [
 ]
 
 { #category : #accessing }
-SWDecoder >> methodResult [
-self error; flag: #toRemove.
-"
-	^ methodResult
-"
-]
-
-{ #category : #accessing }
-SWDecoder >> methodResult: anObject [
-self error; flag: #toRemove.
-"
-	methodResult := anObject
-"
-]
-
-{ #category : #accessing }
 SWDecoder >> node [
 
 	^ node
@@ -398,15 +382,6 @@ SWDecoder >> result [
 SWDecoder >> result: anObject [
 
 	result := anObject
-]
-
-{ #category : #private }
-SWDecoder >> resultIsLastChildsResult [
-	self error; flag: #toRemove.
-	self decodeChildren ifNotNil: [ :res |
-		self result << res
-	].
-	^ self result
 ]
 
 { #category : #accessing }

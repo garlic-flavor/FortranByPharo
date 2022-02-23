@@ -4,3 +4,9 @@ Extension { #name : #RBSequenceNode }
 RBSequenceNode >> dispatchTo: traverser [
 	traverser atSequence: self
 ]
+
+{ #category : #'*SWFortranByPharo-Analyzer' }
+RBSequenceNode >> isExpression [
+	self containsReturn ifTrue: [ ^ false ].
+	^ super isExpression
+]

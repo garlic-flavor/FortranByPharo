@@ -28,6 +28,16 @@ SWMBTofJS class >> senderTranspilerClass [
 ]
 
 { #category : #accessing }
+SWMBTofJS >> atClosure: aBlockNode [
+	aBlockNode isExpression ifTrue: [
+		self transpileChildren.
+	] ifFalse: [
+		self halt.
+	]
+
+]
+
+{ #category : #accessing }
 SWMBTofJS >> mangledName [
 	self halt; flag: #toRewrite.
 "
@@ -150,8 +160,18 @@ SWMBTofJS >> putIfTrue: aNode [
 
 { #category : #'code generation' }
 SWMBTofJS >> putIfTrueIfFalse [
-	self decoder node isExpression.
-	self decoder node containsReturn.
+	self decoder node isExpression ifTrue: [
+		self
+			put: '(';
+			transpileChild: self decoder children first;
+			put: ' ? ';
+			transpileChild: self decoder children second;
+			put: ' : ';
+			transpileChild: self decoder children third;
+			put: ')'.
+		^ self
+	].
+
 	self halt.
 "	
 	aNode lastIsReturn ifTrue: [
