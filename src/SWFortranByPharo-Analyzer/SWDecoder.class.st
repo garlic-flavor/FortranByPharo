@@ -81,7 +81,7 @@ SWDecoder >> atAssignTo: aLValue with: aRValue [
 
 { #category : #'dispatching-callback' }
 SWDecoder >> atCascade: aCascadeNode [
-	self resultIsLastChildsResult
+	self result << self decodeChildren
 
 ]
 
@@ -441,7 +441,7 @@ SWDecoder >> userSpecifyVariableType: aNode [
 	name := aNode children second evaluate.
 	type := aNode children third evaluate.
 	name = #return ifTrue: [
-		self methodResult << (SWType new: type with: SWType userSpecifyingPriority)
+		self sender result << (SWType new: type with: SWType userSpecifyingPriority)
 	] ifFalse: [
 		slot detect: [ :each | each name = name ] ifFound: [ :found | found << type ].
 	].

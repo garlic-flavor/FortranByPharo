@@ -76,3 +76,8 @@ SWSender >> result: anObject [
 
 	result := anObject
 ]
+
+{ #category : #accessing }
+SWSender >> sender [
+	^ self
+]

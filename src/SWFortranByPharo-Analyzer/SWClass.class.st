@@ -168,13 +168,12 @@ SWClass >> decoderClass [
 { #category : #api }
 SWClass >> getResult: aSender [
 	(self haltList includes: aSender method) ifTrue: [ self halt ].
-	^ self methods detect: aSender ifFound: [ :found |
+	^ self methods at: aSender ifPresent: [ :found |
 		found sender
-	] ifNone: [
+	] ifAbsent: [
 		self predefined at: aSender method selector ifPresent: [ :pre |
 			aSender result << (pre cull: aSender operands).
-			self methods at: aSender put: (self newMethodDecoder: aSender).
-			aSender
+			self methods at: aSender put: aSender.
 		] ifAbsent: [ |decoder|
 			decoder := self newMethodDecoder: aSender.
 			self methods at: aSender put: decoder.
@@ -215,9 +214,8 @@ SWClass >> newMethodDecoder: aSender [
 		haltList: self haltList;
 		pool: self pool;
 		slot: self slot copy;
-		sender: aSender;
-		node: aSender method sourceNode;
-		readySlot;
+		method: aSender method;
+		operands: aSender operands;
 		yourself
 ]
 

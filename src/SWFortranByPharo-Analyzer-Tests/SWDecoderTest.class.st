@@ -28,9 +28,11 @@ SWDecoderTest >> resultOfNo: no with: args equals: type [
 SWDecoderTest >> setUp [
 	super setUp.
 	decoder := SWDecoder new
+"
 		haltAtUnresolvedSelector;
+"
 		yourself
-	"Put here a common initialization logic for tests"
+
 ]
 
 { #category : #tests }

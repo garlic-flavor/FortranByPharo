@@ -62,7 +62,7 @@ SWPool >> getSender: aSelector with: operands [
 				yourself)
 	] ifNone: [
 		self logger log: [ 'An unknown method detected: ', aSelector ].
-		(self haltList includes: self class unresolvedSelectorKey)  ifTrue: [ self halt ].
+		(self haltList includes: self owner class unresolvedSelectorKey)  ifTrue: [ self halt ].
 		SWSender new
 			operands: operands;
 			yourself
