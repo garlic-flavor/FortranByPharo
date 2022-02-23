@@ -168,21 +168,19 @@ SWClass >> decoderClass [
 { #category : #api }
 SWClass >> getResult: aSender [
 	(self haltList includes: aSender method) ifTrue: [ self halt ].
-	^ self methods at: aSender ifAbsent: [
+	^ self methods detect: aSender ifFound: [ :found |
+		found sender
+	] ifNone: [
 		self predefined at: aSender method selector ifPresent: [ :pre |
-			self methods at: aSender put: (pre cull: aSender operands)
-		] ifAbsent: [ |result|
-			result := SWVariable new.
-			self methods at: aSender put: result.
-			self decoderClass new
-				logger: self logger;
-				haltList: self haltList;
-				pool: self pool;
-				node: aSender method sourceNode;
-				slot: self slot copy;
-				operands: aSender operands;
-				methodResult: result;
-				decode
+			aSender result << (pre cull: aSender operands).
+			self methods at: aSender put: (self newMethodDecoder: aSender).
+			aSender
+		] ifAbsent: [ |decoder|
+			decoder := self newMethodDecoder: aSender.
+			self methods at: aSender put: decoder.
+			decoder
+				decode;
+				sender
 		]
 	]
 
@@ -208,6 +206,19 @@ SWClass >> methods [
 SWClass >> methods: anObject [
 
 	methods := anObject
+]
+
+{ #category : #'instance creation' }
+SWClass >> newMethodDecoder: aSender [
+	^ self decoderClass new
+		logger: self logger;
+		haltList: self haltList;
+		pool: self pool;
+		slot: self slot copy;
+		sender: aSender;
+		node: aSender method sourceNode;
+		readySlot;
+		yourself
 ]
 
 { #category : #accessing }

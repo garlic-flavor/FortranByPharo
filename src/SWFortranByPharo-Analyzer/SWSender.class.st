@@ -6,7 +6,8 @@ Class {
 	#superclass : #Object,
 	#instVars : [
 		'method',
-		'operands'
+		'operands',
+		'result'
 	],
 	#category : #'SWFortranByPharo-Analyzer-Analyzer'
 }
@@ -14,6 +15,11 @@ Class {
 { #category : #comparing }
 SWSender >> = right [
 	^ self method = right method and: [ self operands = right operands ]
+]
+
+{ #category : #testing }
+SWSender >> hasResult [
+	^ result isNotNil
 ]
 
 { #category : #comparing }
@@ -57,4 +63,16 @@ SWSender >> putOn: aStream [
 	] ifNotNil: [
 		aStream << method selector
 	]
+]
+
+{ #category : #accessing }
+SWSender >> result [
+
+	^ result ifNil: [ result := SWVariable new ]
+]
+
+{ #category : #accessing }
+SWSender >> result: anObject [
+
+	result := anObject
 ]

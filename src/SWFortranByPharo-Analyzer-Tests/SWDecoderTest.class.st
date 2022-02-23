@@ -10,7 +10,7 @@ Class {
 { #category : #'as yet unclassified' }
 SWDecoderTest >> decodeNo: no with: args [
 	^ decoder
-		node: (SWTestProgram getMy: no) sourceNode;
+		method: (SWTestProgram getMy: no);
 		operands: (args copyWithFirst: SWTestProgram);
 		enableLogging;
 		decode;
@@ -19,9 +19,8 @@ SWDecoderTest >> decodeNo: no with: args [
 
 { #category : #'as yet unclassified' }
 SWDecoderTest >> resultOfNo: no with: args equals: type [
-	|decoder|
-	decoder := self decodeNo: no with: args.
-	self assert: decoder methodResult value equals: type
+	self decodeNo: no with: args.
+	self assert: decoder sender result value equals: type
 
 ]
 

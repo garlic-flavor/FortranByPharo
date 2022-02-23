@@ -6,12 +6,11 @@ Class {
 	#superclass : #Object,
 	#instVars : [
 		'node',
-		'result',
-		'methodResult',
-		'children',
-		'sender',
-		'pool',
 		'slot',
+		'result',
+		'sender',
+		'children',
+		'pool',
 		'haltList',
 		'logger'
 	],
@@ -20,6 +19,7 @@ Class {
 
 { #category : #accessing }
 SWDecoder class >> classTranspilerClass [
+	self error; flag: #toRemove.
 	^ SWClass
 ]
 
@@ -29,9 +29,9 @@ SWDecoder class >> globalAccessKey [
 ]
 
 { #category : #'instance creation' }
-SWDecoder class >> new: aNode with: operands [
+SWDecoder class >> new: aMethod with: operands [
 	^ self new
-		node: aNode;
+		method: aMethod;
 		operands: operands;
 		yourself
 ]
@@ -44,18 +44,6 @@ SWDecoder class >> poolClass [
 { #category : #'as yet unclassified' }
 SWDecoder class >> pragmaKey [
 	^ #pragma
-]
-
-{ #category : #utils }
-SWDecoder class >> search: selector in: aClass [
-	aClass ifNil: [ ^ nil ].
-
-	^ aClass methodDict at: selector ifPresent: [ :detected |
-		detected
-	] ifAbsent: [
-		self search: selector in: aClass superclass
-	]
-
 ]
 
 { #category : #'as yet unclassified' }
@@ -144,8 +132,9 @@ SWDecoder >> atMessage: aMessageNode [
 { #category : #'dispatching-callback' }
 SWDecoder >> atMethod: traverser [
 	self decodeChildren.
-	self methodResult << (SWVariable new: (self slot detect: [:each | each name = 'self' ]) value with: SWType receiverTypePriority)
-
+	self sender hasResult ifFalse: [
+		self sender result << self sender operands first
+	]
 ]
 
 { #category : #'dispatching-callback' }
@@ -155,8 +144,10 @@ SWDecoder >> atNil [
 
 { #category : #private }
 SWDecoder >> atOrdinaryMessage: aMessageNode [
-	 |operands method|
-	(self haltList includes: aMessageNode selector) ifTrue: [ self halt ].
+
+	self sender: (self pool getSender: aMessageNode selector with: (self children collect: [ :each | each result ])).
+	self result << self sender result
+"
 	operands := self children collect: [ :each | each result ].		
 	method := self class search: aMessageNode selector in: operands first value.
 	self sender: (SWSender new
@@ -169,6 +160,7 @@ SWDecoder >> atOrdinaryMessage: aMessageNode [
 	] ifNotNil: [
 		self result << (self pool getResult: self sender).
 	]
+"
 
 ]
 
@@ -179,13 +171,13 @@ SWDecoder >> atPragma: aPragmaNode [
 
 { #category : #'dispatching-callback' }
 SWDecoder >> atReturn: aReturnNode [
-	self methodResult << self decodeChildren
+	self sender result << (self result << self decodeChildren)
 
 ]
 
 { #category : #'dispatching-callback' }
 SWDecoder >> atSequence: aSequenceNode [
-	self resultIsLastChildsResult
+	self result << self decodeChildren
 
 ]
 
@@ -201,6 +193,7 @@ SWDecoder >> atSymbol: aByteSymbol [
 
 { #category : #'dispatching-callback' }
 SWDecoder >> atVariable: aVariableNode [
+
 	self result << (self slot detect: [ :each | each name = aVariableNode name ] ifNone: [
 		self logger log: [ 'Access to global: ', aVariableNode name ].
 		(self haltList includes: #globalAccess) ifTrue: [ self halt ].
@@ -212,7 +205,9 @@ SWDecoder >> atVariable: aVariableNode [
 { #category : #accessing }
 SWDecoder >> children [
 
-	^ children
+	^ children ifNil: [
+		children := OrderedCollection new: self node children size
+	]
 ]
 
 { #category : #accessing }
@@ -223,26 +218,26 @@ SWDecoder >> children: anObject [
 
 { #category : #api }
 SWDecoder >> decode [
-	methodResult ifNil: [ methodResult := SWVariable new ].
 	self pool.
 	self node dispatchTo: self.
-	^ methodResult
+
 ]
 
 { #category : #private }
-SWDecoder >> decodeChildWith: aNode [
+SWDecoder >> decodeChild: aNode [
 	^ self copy
 		node: aNode;
 		slot: self slot copy;
+		result: nil;
+		children: nil;
 		decode;
 		yourself.
 ]
 
 { #category : #private }
 SWDecoder >> decodeChildren [
-	self children: (OrderedCollection new: self node children size).
 	self node children do: [ :child |
-		self children addLast: (self decodeChildWith: child)
+		self children addLast: (self decodeChild: child)
 	].
 	^ self children ifNotEmpty: [ self children last result ] ifEmpty: [ nil ]
 ]
@@ -322,15 +317,25 @@ SWDecoder >> logger: anObject [
 ]
 
 { #category : #accessing }
-SWDecoder >> methodResult [
+SWDecoder >> method: aMethod [
+	self sender method: aMethod.
+	self node: aMethod sourceNode.
+]
 
+{ #category : #accessing }
+SWDecoder >> methodResult [
+self error; flag: #toRemove.
+"
 	^ methodResult
+"
 ]
 
 { #category : #accessing }
 SWDecoder >> methodResult: anObject [
-
+self error; flag: #toRemove.
+"
 	methodResult := anObject
+"
 ]
 
 { #category : #accessing }
@@ -347,16 +352,8 @@ SWDecoder >> node: anObject [
 
 { #category : #api }
 SWDecoder >> operands: operands [
-	|receiver|
-	receiver := operands first value.
-	self add: 'self' as: receiver.
-	self add: 'super' as: receiver superclass.
-	self node argumentNames  with: (operands copyFrom: 2 to: (operands size)) do: [ :name :type |
-		self add: name as: type
-	].
-	self node temporaries do: [ :each |
-		self add: each name as: nil
-	].
+	self sender operands: operands.
+	self readySlot.
 
 ]
 
@@ -376,6 +373,21 @@ SWDecoder >> pool: anObject [
 	pool := anObject
 ]
 
+{ #category : #'as yet unclassified' }
+SWDecoder >> readySlot [
+	|receiver|
+	receiver := self sender operands first value.
+	self add: 'self' as: receiver.
+	self add: 'super' as: receiver superclass.
+	self node argumentNames  with: (self sender operands copyFrom: 2 to: (self sender operands size)) do: [ :name :type |
+		self add: name as: type
+	].
+	self node temporaries do: [ :each |
+		self add: each name as: nil
+	].
+
+]
+
 { #category : #accessing }
 SWDecoder >> result [
 
@@ -390,21 +402,24 @@ SWDecoder >> result: anObject [
 
 { #category : #private }
 SWDecoder >> resultIsLastChildsResult [
+	self error; flag: #toRemove.
 	self decodeChildren ifNotNil: [ :res |
 		self result << res
-	]
+	].
+	^ self result
 ]
 
 { #category : #accessing }
 SWDecoder >> sender [
 
-	^ sender
+	^ sender ifNil: [ sender := SWSender new ]
 ]
 
 { #category : #accessing }
 SWDecoder >> sender: anObject [
 
-	sender := anObject
+	sender := anObject.
+	
 ]
 
 { #category : #accessing }

@@ -17,6 +17,18 @@ SWPool class >> initializersKey [
 	^ 'decode_'
 ]
 
+{ #category : #utils }
+SWPool class >> search: selector in: aClass ifFound: foundBlock ifNone: noneBlock [
+	aClass ifNil: [ ^ noneBlock value ].
+
+	^ aClass methodDict at: selector ifPresent: [ :detected |
+		foundBlock value: detected
+	] ifAbsent: [
+		self search: selector in: aClass superclass ifFound: foundBlock ifNone: noneBlock
+	]
+
+]
+
 { #category : #accessing }
 SWPool >> classTranspilerClass [
 
@@ -31,8 +43,30 @@ SWPool >> decoderClass [
 
 { #category : #api }
 SWPool >> getResult: aSender [
+	self error; flag: #toRemove.
 	^ (self getClassDispatcher: aSender method methodClass)
 		getResult: aSender
+
+]
+
+{ #category : #api }
+SWPool >> getSender: aSelector with: operands [
+	(self haltList includes: aSelector) ifTrue: [ self halt ].
+
+	^ self class search: aSelector in: operands first value ifFound: [ :foundMethod |
+		(self haltList includes: foundMethod) ifTrue: [ self halt ].
+		(self getClassDispatcher: foundMethod methodClass)
+			getResult: (SWSender new
+				method: foundMethod;
+				operands: operands;
+				yourself)
+	] ifNone: [
+		self logger log: [ 'An unknown method detected: ', aSelector ].
+		(self haltList includes: self class unresolvedSelectorKey)  ifTrue: [ self halt ].
+		SWSender new
+			operands: operands;
+			yourself
+	]
 
 ]
 
