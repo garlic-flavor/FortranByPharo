@@ -138,10 +138,22 @@ SWMBTofJS >> putIfFalse: aNode [
 ]
 
 { #category : #'code generation' }
-SWMBTofJS >> putIfTrue: aNode [
-	self stream log.
-	self halt; flag: #toRewrite.
-	
+SWMBTofJS >> putIfTrue [
+	self decoder node isExpression ifTrue: [
+		self halt.
+	] ifFalse: [
+		self
+			put: 'if(';
+			transpileChild: self decoder children first;
+			put: '){';
+			cr;
+			incIndent;
+			transpileChild: self decoder children second;
+			decIndent;
+			put: '}';
+			preventStatementDelimiter
+	].
+"	
 	aNode isExpression ifTrue: [
 		self
 			put: '(';
@@ -156,6 +168,7 @@ SWMBTofJS >> putIfTrue: aNode [
 			put: ')';
 			putBlock: (aNode arguments at: 1)
 	]
+"
 ]
 
 { #category : #'code generation' }
@@ -235,13 +248,12 @@ SWMBTofJS >> putImport: anArray from: aSource [
 ]
 
 { #category : #'code generation' }
-SWMBTofJS >> putNew: aNode [
-	self halt; flag: #toRewrite.
+SWMBTofJS >> putNew [
 	self
-		put: '(new ';
-		<< aNode receiver;
-		putArguments: aNode arguments;
-		put: ')'
+		put: 'new ';
+		transpileChild: self decoder children first;
+		putArguments: self decoder children allButFirst
+
 ]
 
 { #category : #'as yet unclassified' }
@@ -373,6 +385,16 @@ SWMBTofJS >> putVariableDeclarationOf: aVariableName [
 		cr
 
 		
+]
+
+{ #category : #'as yet unclassified' }
+SWMBTofJS >> putYourself [
+	self decoder node isExpression ifTrue: [
+		self transpileChild: self decoder children first
+	] ifFalse: [
+		self halt.
+	]
+
 ]
 
 { #category : #'as yet unclassified' }

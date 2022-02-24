@@ -49,13 +49,30 @@ SWMethodBodyTranspiler >> << anObject [
 
 { #category : #'code generation' }
 SWMethodBodyTranspiler >> atCascade: aCascadeNode [
-	aCascadeNode leftmostChainReceiver class = RBVariableNode ifTrue: [
+	aCascadeNode receiver class = RBVariableNode ifTrue: [
 		self
 			transpileChildrenWithDelimiter;
 			preventStatementDelimiter;
 			preventNewline
-	] ifFalse: [
-		self halt.
+	] ifFalse: [|receiverResult original|
+		receiverResult := self decoder children first children first result.
+		original := self decoder children.
+		self put: 'function(_receiver_){'; cr; incIndent; put: ' return '.
+		self decoder children: (self decoder children collect: [:child||copied|
+			copied := child copy.
+			copied children at: 1 put: (SWDecoder new
+				node: (RBVariableNode named: #_receiver_ );
+				result: receiverResult;
+				yourself).
+			copied
+		]).
+		self transpileChildrenWithDelimiter.
+		self decoder children: original.
+		self
+			putStatementDelimiter;
+			cr; decIndent; put: '}(';
+			transpileChild: self decoder children first children first;
+			put: ')'
 	]
 
 ]
@@ -126,7 +143,6 @@ SWMethodBodyTranspiler >> cr [
 
 { #category : #'code generation - protected' }
 SWMethodBodyTranspiler >> decIndent [
-	self halt; flag: #toRemove.
 	self stream decIndent
 ]
 
@@ -176,7 +192,6 @@ SWMethodBodyTranspiler >> generator: anObject [
 
 { #category : #'code generation - protected' }
 SWMethodBodyTranspiler >> incIndent [
-	self halt; flag: #toRewrite.
 	self stream incIndent
 ]
 
@@ -250,6 +265,11 @@ SWMethodBodyTranspiler >> pool [
 SWMethodBodyTranspiler >> pool: anObject [
 
 	pool := anObject
+]
+
+{ #category : #copying }
+SWMethodBodyTranspiler >> postCopy [
+	decoder := decoder copy
 ]
 
 { #category : #'code generation - protected' }
@@ -395,17 +415,12 @@ SWMethodBodyTranspiler >> putIfFalse: aNode [
 ]
 
 { #category : #'code generation' }
-SWMethodBodyTranspiler >> putIfTrue: aNode [
+SWMethodBodyTranspiler >> putIfTrue [
 	^ self subclassResponsibility
 ]
 
 { #category : #'code generation' }
 SWMethodBodyTranspiler >> putIfTrueIfFalse [
-	^ self subclassResponsibility
-]
-
-{ #category : #'code generation' }
-SWMethodBodyTranspiler >> putIfTrueIfFalse: aNode [
 	^ self subclassResponsibility
 ]
 
@@ -446,7 +461,7 @@ SWMethodBodyTranspiler >> putMessage: aNode withReceiver: aRNode [
 ]
 
 { #category : #'code generation' }
-SWMethodBodyTranspiler >> putNew: aNode [
+SWMethodBodyTranspiler >> putNew [
 	^ self subclassResponsibility
 ]
 
@@ -598,6 +613,11 @@ SWMethodBodyTranspiler >> putVariableDeclarationOf: aVariableInfo [
 	^ self subclassResponsibility 
 ]
 
+{ #category : #'as yet unclassified' }
+SWMethodBodyTranspiler >> putYourself [
+	^ self subclassResponsibility 
+]
+
 { #category : #accessing }
 SWMethodBodyTranspiler >> stream [
 	^ stream ifNil: [ stream := SWTranspilerStream new ]
@@ -640,7 +660,7 @@ SWMethodBodyTranspiler >> transpileChildrenWithDelimiter [
 		self decoder children do: [ :child |
 			self transpileChild: child
 		] separatedBy: [
-			self put: ', '
+			self put: ', '; cr
 		].
 		1 < self decoder children size ifTrue: [ self put: ')' ].
 	] ifFalse: [

@@ -50,12 +50,12 @@ SWMBTofJSTest >> test_06_cascading [
 	|transpiler result|
 	transpiler := self transpileNo: 41 withArguments: { String }.
 	result := transpiler stream contents.
-	self assert: result equals: 'return (function(_receiver_) {
-    _receiver_.failed();
-    _receiver_.message_("hogehoge");
-    _receiver_.uri_(uri);
-    return _receiver_;
-})((new SWServerStatus())).toString();
+	self assert: result equals: 'return function(_receiver_){
+     return (_receiver_.failed(), 
+    _receiver_.message_("hogehoge"), 
+    _receiver_.uri_(uri), 
+    _receiver_);
+}(new SWServerStatus()).toString();
 '
 ]
 
