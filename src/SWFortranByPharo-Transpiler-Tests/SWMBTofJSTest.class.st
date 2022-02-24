@@ -74,12 +74,11 @@ SWMBTofJSTest >> test_08_try_catch [
 	|transpiler result|
 	transpiler := self transpileNo: 34 withArguments: {  }.
 	result := transpiler stream contents.
-self halt.
-	self assert: result equals: 'return (function(){try {
+	self assert: result equals: 'return function(){ try {
     return 1 + 2;
 } catch {
     return self.error();
-}})();
+}}();
 '
 
 ]

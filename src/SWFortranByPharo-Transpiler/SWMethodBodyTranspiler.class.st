@@ -54,24 +54,27 @@ SWMethodBodyTranspiler >> atCascade: aCascadeNode [
 			transpileChildrenWithDelimiter;
 			preventStatementDelimiter;
 			preventNewline
-	] ifFalse: [|receiverResult original|
-		receiverResult := self decoder children first children first result.
+	] ifFalse: [|receiver original|
+		receiver := self decoder children first children first.
 		original := self decoder children.
 		self put: 'function(_receiver_){'; cr; incIndent; put: ' return '.
 		self decoder children: (self decoder children collect: [:child||copied|
 			copied := child copy.
 			copied children at: 1 put: (SWDecoder new
 				node: (RBVariableNode named: #_receiver_ );
-				result: receiverResult;
+				result: receiver result;
 				yourself).
 			copied
 		]).
 		self transpileChildrenWithDelimiter.
 		self decoder children: original.
+		receiver node: (receiver node copy
+			parent: nil;
+			yourself).
 		self
 			putStatementDelimiter;
 			cr; decIndent; put: '}(';
-			transpileChild: self decoder children first children first;
+			transpileChild: receiver;
 			put: ')'
 	]
 
@@ -89,6 +92,7 @@ SWMethodBodyTranspiler >> atInteger: anInteger [
 
 { #category : #accessing }
 SWMethodBodyTranspiler >> atMessage: aMessageNode [
+	aMessageNode parent class = RBMessageNode ifTrue: [ self put: '(' ].
 	(self pool predefinedSenderTranspiler: self decoder sender) ifNotNil: [ :predefined |
 		predefined value: self
 	] ifNil: [
@@ -96,8 +100,10 @@ SWMethodBodyTranspiler >> atMessage: aMessageNode [
 			transpileChild: self decoder children first;
 			putClassAccessor;
 			put: self mangle;
-			putArguments: (self decoder children copyFrom: 2 to: self decoder children size)
-	]
+			putArguments: self decoder children allButFirst
+	].
+	aMessageNode parent class = RBMessageNode ifTrue: [ self put: ')' ].
+
 
 ]
 
@@ -470,15 +476,19 @@ SWMethodBodyTranspiler >> putNil [
 	self subclassResponsibility 
 ]
 
+{ #category : #'as yet unclassified' }
+SWMethodBodyTranspiler >> putOnDo [
+	^ self subclassResponsibility 
+]
+
 { #category : #'code generation' }
-SWMethodBodyTranspiler >> putOpBinary: aNode [
-	self halt; flag: #toRewrite.
+SWMethodBodyTranspiler >> putOpBinary [
 	self
-		<< aNode receiver;
+		transpileChild: self decoder children first;
 		put: ' ';
-		put: aNode selector;
+		put: self decoder node selector;
 		put: ' ';
-		<< (aNode arguments at: 1)
+		transpileChild: self decoder children second
 
 ]
 

@@ -23,11 +23,27 @@ SWTranspilerPool >> initialize_Behavior: ct [
 		senderTranspilerOf: #new is: [ :transpiler |  transpiler putNew ]
 ]
 
+{ #category : #initialization }
+SWTranspilerPool >> initialize_BlockClosure: ct [
+	ct
+		senderTranspilerOf: #on:do: is: [ :bt | bt putOnDo ]
+]
+
 { #category : #'as yet unclassified' }
 SWTranspilerPool >> initialize_Boolean: ct [
 	ct
 		senderTranspilerOf: #ifTrue:ifFalse: is: [ :transpiler | transpiler putIfTrueIfFalse ];
 		senderTranspilerOf: #ifTrue: is: [ :transpiler | transpiler putIfTrue ]
+
+]
+
+{ #category : #initialization }
+SWTranspilerPool >> initialize_Number: ct [
+	ct
+		senderTranspilerOf: #+ is: [ :bt | bt putOpBinary ];
+		senderTranspilerOf: #- is: [ :bt | bt putOpBinary ];
+		senderTranspilerOf: #* is: [ :bt | bt putOpBinary ];
+		senderTranspilerOf: #/ is: [ :bt | bt putOpBinary ]
 
 ]
 

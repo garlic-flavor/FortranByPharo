@@ -32,7 +32,7 @@ SWMBTofJS >> atClosure: aBlockNode [
 	aBlockNode isExpression ifTrue: [
 		self transpileChildren.
 	] ifFalse: [
-		self halt.
+		self transpileChildrenWithDelimiter
 	]
 
 ]
@@ -263,9 +263,21 @@ SWMBTofJS >> putNil [
 ]
 
 { #category : #enumerating }
-SWMBTofJS >> putOnDo: aNode [ 
+SWMBTofJS >> putOnDo [
+	self decoder node isExpression ifTrue: [
+		self
+			put: 'function(){ try {'; cr; incIndent; put: 'return ';
+			transpileChild: self decoder children first;
+			putStatementDelimiter;
+			cr; decIndent; put: '} catch {'; cr; incIndent; put: 'return ';
+			transpileChild: self decoder children third;
+			putStatementDelimiter; cr; decIndent; put: '}}()'
+	] ifFalse: [
+		self halt.
+	]
+
+"
 	|receiver|
-	self halt; flag: #toRewrite.
 	receiver := aNode receiver.
 	aNode isExpression ifTrue: [	
 		self halt; flag: #toImplement.
@@ -282,6 +294,7 @@ SWMBTofJS >> putOnDo: aNode [
 	].
 	self
 		<< aNode arguments second		
+"
 "
 	aNode isExpression ifTrue: [
 		transpiler put: '(function(){'
