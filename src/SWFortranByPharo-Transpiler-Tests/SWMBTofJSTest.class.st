@@ -1,6 +1,6 @@
 Class {
 	#name : #SWMBTofJSTest,
-	#superclass : #SWMethodBodyTranspilerTest,
+	#superclass : #SWTranspilerTestBase,
 	#category : #'SWFortranByPharo-Transpiler-Tests-JS'
 }
 
@@ -234,6 +234,15 @@ return (outer1 ? function(){
     inner2 = "hello";
 }());
 '
+]
+
+{ #category : #utilities }
+SWMBTofJSTest >> transpile: selector with: args [
+	self setUpDecoder: selector with: args.
+	transpiler decoder: decoder.
+	transpiler stream newline: String cr.
+	transpiler transpile.
+
 ]
 
 { #category : #accessing }

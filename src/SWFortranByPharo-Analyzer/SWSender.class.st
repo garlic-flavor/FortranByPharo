@@ -66,6 +66,11 @@ SWSender >> putOn: aStream [
 ]
 
 { #category : #accessing }
+SWSender >> receiverClass [
+	^ self operands first value
+]
+
+{ #category : #accessing }
 SWSender >> result [
 
 	^ result ifNil: [ result := SWVariable new ]

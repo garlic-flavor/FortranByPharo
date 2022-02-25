@@ -230,6 +230,7 @@ SWMethodBodyTranspiler >> mangle [
 
 { #category : #accessing }
 SWMethodBodyTranspiler >> method [
+	self error; flag: #toRemove.
 	^ self decoder method
 ]
 
@@ -561,6 +562,12 @@ SWMethodBodyTranspiler >> putVariableDeclaration [
 { #category : #'as yet unclassified' }
 SWMethodBodyTranspiler >> putYourself [
 	^ self subclassResponsibility 
+]
+
+{ #category : #accessing }
+SWMethodBodyTranspiler >> receiverClass [
+	self error; flag: #toRemove.
+	^ self decoder receiverClass
 ]
 
 { #category : #accessing }

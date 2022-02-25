@@ -1,6 +1,6 @@
 Class {
 	#name : #SWMBTofF90Test,
-	#superclass : #SWMethodBodyTranspilerTest,
+	#superclass : #SWTranspilerTestBase,
 	#category : #'SWFortranByPharo-Transpiler-Tests-F90'
 }
 

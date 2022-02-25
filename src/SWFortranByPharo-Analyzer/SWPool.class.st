@@ -17,6 +17,11 @@ SWPool class >> initializersKey [
 	^ 'decode_'
 ]
 
+{ #category : #'as yet unclassified' }
+SWPool class >> search: aSelector in: aClass [
+	^ self search: aSelector in: aClass ifFound: [ :found | found ] ifNone: [ self error ]
+]
+
 { #category : #utils }
 SWPool class >> search: selector in: aClass ifFound: foundBlock ifNone: noneBlock [
 	aClass ifNil: [ ^ noneBlock value ].

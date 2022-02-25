@@ -5,13 +5,20 @@ Class {
 	#name : #SWModuleTranspiler,
 	#superclass : #Object,
 	#instVars : [
-		'payload'
+		'mainTranspiler',
+		'decoder'
 	],
 	#category : #'SWFortranByPharo-Transpiler-Common'
 }
 
+{ #category : #accessing }
+SWModuleTranspiler class >> decoderClass [
+	^ SWDecoder
+]
+
 { #category : #constants }
 SWModuleTranspiler class >> extension [
+	self error; flag: #toRemove.
 	^ self subclassResponsibility 
 ]
 
@@ -22,6 +29,7 @@ SWModuleTranspiler class >> methodBodyTranspilerClass [
 
 { #category : #'instance creation' }
 SWModuleTranspiler class >> newFrom: aClass [
+	self halt; flag: #toRewrite.
 	^ (self new)
 		payload: (self methodBodyTranspilerClass
 			new: (self methodBodyTranspilerClass poolClass search: #main in: aClass classSide)
@@ -32,33 +40,58 @@ SWModuleTranspiler class >> newFrom: aClass [
 
 { #category : #accessing }
 SWModuleTranspiler >> basename [
+	self halt; flag: #toRewrite.
 	^ String streamContents: [ :s | self payload putBasenameOn: s ]
 ]
 
 { #category : #accessing }
 SWModuleTranspiler >> contents [
+	self halt; flag: #toRewrite.
 	self payload isDecoded ifFalse: [ self transpile ].
 	^ self stream contents
 ]
 
+{ #category : #api }
+SWModuleTranspiler >> decode [
+	self decoder pool addInitializerIn: self decoder receiverClass.
+	self decoder decode.
+
+]
+
 { #category : #'public API' }
 SWModuleTranspiler >> decode: aSelector with: args [
+	self halt; flag: #toRewrite.
 
 	^ self pool newSenderOf: aSelector super: false with: (SWSlotOld newFrom: args)
 ]
 
 { #category : #accessing }
+SWModuleTranspiler >> decoder [
+
+	^ decoder ifNil: [ decoder := self class decoderClass new ]
+]
+
+{ #category : #accessing }
+SWModuleTranspiler >> decoder: anObject [
+
+	decoder := anObject
+]
+
+{ #category : #accessing }
 SWModuleTranspiler >> filename [
+	self halt; flag: #toRewrite.
 	^ String streamContents: [ :s | self payload putFilenameOn: s ]
 ]
 
 { #category : #accessing }
 SWModuleTranspiler >> haltAt: sender [
+	self halt; flag: #toRewrite.
 	self payload haltAt: sender
 ]
 
 { #category : #'public API' }
 SWModuleTranspiler >> import: anArray from: basename [
+	self halt; flag: #toRewrite.
 	self payload
 		putImport: anArray from: basename;
 		putStatementDelimiter;
@@ -67,28 +100,29 @@ SWModuleTranspiler >> import: anArray from: basename [
 
 { #category : #accessing }
 SWModuleTranspiler >> logger [
+	self halt; flag: #toRewrite.
 	^ self payload logger
 ]
 
 { #category : #accessing }
-SWModuleTranspiler >> payload [
+SWModuleTranspiler >> mainTranspiler [
 
-	^ payload
+	^ mainTranspiler ifNil: [
+		mainTranspiler := self class methodBodyTranspilerClass new
+			decoder: self decoder;
+			yourself.
+	]
 ]
 
 { #category : #accessing }
-SWModuleTranspiler >> payload: anObject [
+SWModuleTranspiler >> mainTranspiler: anObject [
 
-	payload := anObject
-]
-
-{ #category : #accessing }
-SWModuleTranspiler >> pool [
-	^ self payload pool
+	mainTranspiler := anObject
 ]
 
 { #category : #private }
 SWModuleTranspiler >> solveDependencies [
+	self halt; flag: #toRewrite.
 	self solveDependencies: self payload receiverClass
 
 ]
@@ -96,6 +130,7 @@ SWModuleTranspiler >> solveDependencies [
 { #category : #private }
 SWModuleTranspiler >> solveDependencies: aClass [
 	|tClass solver|
+	self halt; flag: #toRewrite.
 	solver := #solveDependenciesUsing:.
 	tClass := aClass instanceSide.
 	(tClass respondsTo: solver) ifTrue: [
@@ -105,30 +140,25 @@ SWModuleTranspiler >> solveDependencies: aClass [
 
 { #category : #accessing }
 SWModuleTranspiler >> stream [
-	^ self payload stream
+	^ self mainTranspiler stream
 ]
 
 { #category : #'public API' }
 SWModuleTranspiler >> transpile [
-	self pool addInitializerIn: self payload receiverClass.
-	self payload decode.
-	self transpile: self payload receiverClass.
-	self transpilePayload
+	self mainTranspiler pool addInitializerIn: self decoder receiverClass.
+	self transpile: self decoder receiverClass.
+	self mainTranspiler transpile
 
 ]
 
 { #category : #'public API' }
 SWModuleTranspiler >> transpile: aClass [
-	|ct|
-	ct := (self payload pool getClassDispatcher: aClass instanceSide).
+	|ct cct|
+	ct := (self mainTranspiler pool getClassDispatcher: aClass instanceSide).
 	ct isTranspiled ifTrue: [ ^ self ].
-	ct markAsTranspiled.
-	self solveDependencies: aClass.
+	ct decoder: (self decoder pool getClassDispatcher: aClass instanceSide).
+	cct := (self mainTranspiler pool getClassDispatcher: aClass classSide).
+	cct decoder: (self decoder pool getClassDispatcher: aClass classSide).
 	ct transpile.
 
-]
-
-{ #category : #'as yet unclassified' }
-SWModuleTranspiler >> transpilePayload [
-	self payload transpile
 ]

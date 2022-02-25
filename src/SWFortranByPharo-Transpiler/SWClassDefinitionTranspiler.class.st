@@ -5,8 +5,7 @@ Class {
 	#name : #SWClassDefinitionTranspiler,
 	#superclass : #SWClassBase,
 	#instVars : [
-		'stream',
-		'isTranspiled',
+		'decoder',
 		'predefinedSender'
 	],
 	#category : #'SWFortranByPharo-Transpiler-Common'
@@ -24,6 +23,18 @@ SWClassDefinitionTranspiler >> declareMethodAsCompareOperator: aName [
 	self defineMethodSender: aName as: [ :transpiler :sender |
 		transpiler putOpBinary: sender node
 	]
+]
+
+{ #category : #accessing }
+SWClassDefinitionTranspiler >> decoder [
+
+	^ decoder
+]
+
+{ #category : #accessing }
+SWClassDefinitionTranspiler >> decoder: anObject [
+
+	decoder := anObject
 ]
 
 { #category : #'public API' }
@@ -83,22 +94,10 @@ SWClassDefinitionTranspiler >> initialize_TestCaseClass [
 
 ]
 
-{ #category : #testing }
+{ #category : #accessing }
 SWClassDefinitionTranspiler >> isTranspiled [
-	self halt; flag: #toRewrite.
-	^ isTranspiled ifNil: [ isTranspiled := false ]
-]
 
-{ #category : #'as yet unclassified' }
-SWClassDefinitionTranspiler >> markAsNotTranspiled [
-	self halt; flag: #toRewrite.
-	isTranspiled := false
-]
-
-{ #category : #'as yet unclassified' }
-SWClassDefinitionTranspiler >> markAsTranspiled [
-	self halt; flag: #toRewrite.
-	isTranspiled := true
+	^ decoder isNotNil
 ]
 
 { #category : #'instance creation' }
@@ -129,7 +128,6 @@ SWClassDefinitionTranspiler >> predefinedSenderTranspiler: aSelector [
 
 { #category : #'code generation' }
 SWClassDefinitionTranspiler >> putClassFooter [
-	self halt; flag: #toRewrite.
 	self stream
 		put: '}';
 		putLine
@@ -137,7 +135,6 @@ SWClassDefinitionTranspiler >> putClassFooter [
 
 { #category : #'code generation' }
 SWClassDefinitionTranspiler >> putClassHeader [
-	self halt; flag: #toRewrite.
 	self stream
 		put: 'class ';
 		put: targetClass name;
@@ -147,13 +144,14 @@ SWClassDefinitionTranspiler >> putClassHeader [
 
 { #category : #'code generation' }
 SWClassDefinitionTranspiler >> putMember [
-	self halt; flag: #toRewrite.
-	self slot do: [ :each |
-		(each isNotNil and: [ each name isEmptyOrNil not ]) ifTrue: [
-			self putMemberDeclarationOf: each
+	self targetClass slots do: [ :each |
+		self decoder slot detect: [ :one | one name = each ] ifFound: [ :found |
+			(found isNotNil and: [ found name isEmptyOrNil not ]) ifTrue: [
+				self putMemberDeclarationOf: found
+			]
 		]
 	].
-	self methods do: [ :each | self putMethodDefinition: each ].
+	self decoder methods do: [ :each | self putMethodDefinition: each ].
 
 ]
 
@@ -181,52 +179,34 @@ SWClassDefinitionTranspiler >> senderTranspilerOf: aSelector is: initializer [
 
 { #category : #accessing }
 SWClassDefinitionTranspiler >> stream [
-	self halt; flag: #toRewrite.
-
-	^ stream ifNil: [ stream := self pool owner stream ]
-]
-
-{ #category : #accessing }
-SWClassDefinitionTranspiler >> stream: anObject [
-	self halt; flag: #toRewrite.
-
-	stream := anObject
+	^ self pool owner stream
 ]
 
 { #category : #'public API' }
 SWClassDefinitionTranspiler >> transpile [
-	self halt; flag: #toRewrite.
 	self targetClass isInstanceSide ifTrue: [
 		self transpileAsInstanceSide
 	] ifFalse: [
 		self transpileAsClassSide
 	].
-	self markAsTranspiled
 
 ]
 
 { #category : #private }
 SWClassDefinitionTranspiler >> transpileAsClassSide [
-	self halt; flag: #toRewrite.
-
 	self putMember
 
 ]
 
 { #category : #private }
 SWClassDefinitionTranspiler >> transpileAsInstanceSide [
-	self halt; flag: #toRewrite.
-"
 	self stream putComment: self targetClass comment.
 	self putClassHeader.
 	self stream incIndent.
-	classSide ifNotNil: [
-		classSide transpileAsClassSide
-	].
-	
+	(self pool getClassDispatcher: targetClass classSide)
+		transpileAsClassSide.
 	self putMember.
-
 	self stream decIndent.
 	self putClassFooter.
-"
+
 ]

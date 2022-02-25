@@ -2,13 +2,13 @@
 This is an implementation of SWSenderTranspiler for ECMAScript.
 "
 Class {
-	#name : #SWSTofJS,
+	#name : #SWSTofJSOld,
 	#superclass : #SWSenderTranspiler,
-	#category : #'SWFortranByPharo-Transpiler-JS'
+	#category : #'SWFortranByPharo-Transpiler-Olds'
 }
 
 { #category : #accessing }
-SWSTofJS >> generator [
+SWSTofJSOld >> generator [
 	^ generator ifNil: [ |ordinary receiverClass|
 		ordinary := super generator.
 

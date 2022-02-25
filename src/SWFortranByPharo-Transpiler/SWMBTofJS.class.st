@@ -22,9 +22,14 @@ SWMBTofJS class >> methodDefinitionTranspilerClass [
 	^ SWMDTofJS
 ]
 
+{ #category : #'as yet unclassified' }
+SWMBTofJS class >> poolClass [
+	^ SWPoolOfJS
+]
+
 { #category : #accessing }
 SWMBTofJS class >> senderTranspilerClass [
-	^ SWSTofJS
+	^ SWSTofJSOld
 ]
 
 { #category : #'as yet unclassified' }

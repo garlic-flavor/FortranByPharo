@@ -1,6 +1,6 @@
 Class {
 	#name : #SWMDTofJSTest,
-	#superclass : #SWMethodDefinitionTranspilerTest,
+	#superclass : #SWTranspilerTestBase,
 	#category : #'SWFortranByPharo-Transpiler-Tests-JS'
 }
 
@@ -17,6 +17,16 @@ SWMDTofJSTest >> test_0030_has_arguments [
     return arg;
 }
 '
+]
+
+{ #category : #utilities }
+SWMDTofJSTest >> transpile: selector with: args [
+	self setUpDecoder: selector with: args.
+	transpiler bodyTranspiler: (SWMBTofJS new
+		decoder: decoder;
+		yourself).
+	transpiler stream newline: String cr.
+	transpiler transpile
 ]
 
 { #category : #accessing }

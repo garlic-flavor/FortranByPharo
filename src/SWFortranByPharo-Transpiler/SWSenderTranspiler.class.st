@@ -7,7 +7,7 @@ Class {
 	#instVars : [
 		'generator'
 	],
-	#category : #'SWFortranByPharo-Transpiler-Common'
+	#category : #'SWFortranByPharo-Transpiler-Olds'
 }
 
 { #category : #'code generation' }

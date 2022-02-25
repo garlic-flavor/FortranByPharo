@@ -385,6 +385,11 @@ SWDecoder >> readySlot [
 ]
 
 { #category : #accessing }
+SWDecoder >> receiverClass [
+	^ self sender receiverClass
+]
+
+{ #category : #accessing }
 SWDecoder >> result [
 
 	^ result ifNil: [ result := SWVariable new ]
