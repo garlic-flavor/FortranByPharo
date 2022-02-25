@@ -225,11 +225,13 @@ SWDecoder >> decode [
 
 { #category : #private }
 SWDecoder >> decodeChild: aNode [
-	^ self shallowCopy
+	^ self class new
 		node: aNode;
+		sender: self sender;
 		slot: self slot copy;
-		result: nil;
-		children: nil;
+		pool: self pool;
+		haltList: self haltList;
+		logger: self logger;
 		decode;
 		yourself.
 ]
@@ -355,11 +357,6 @@ SWDecoder >> pool [
 SWDecoder >> pool: anObject [
 
 	pool := anObject
-]
-
-{ #category : #copying }
-SWDecoder >> postCopy [
-	children := children copy
 ]
 
 { #category : #'as yet unclassified' }

@@ -7,7 +7,8 @@ Class {
 	#instVars : [
 		'decoder',
 		'stream',
-		'pool'
+		'pool',
+		'isExpression'
 	],
 	#category : #'SWFortranByPharo-Transpiler-Common'
 }
@@ -47,6 +48,15 @@ SWMethodBodyTranspiler >> << anObject [
 
 ]
 
+{ #category : #accessing }
+SWMethodBodyTranspiler >> atAssignTo: aVariable with: aValue [
+	self
+		transpileChild: self children second;
+		put: ' = ';
+		transpileChild: self children first
+
+]
+
 { #category : #'code generation' }
 SWMethodBodyTranspiler >> atCascade: aCascadeNode [
 	aCascadeNode receiver class = RBVariableNode ifTrue: [
@@ -55,10 +65,10 @@ SWMethodBodyTranspiler >> atCascade: aCascadeNode [
 			preventStatementDelimiter;
 			preventNewline
 	] ifFalse: [|receiver original|
-		receiver := self decoder children first children first.
-		original := self decoder children.
+		receiver := self children first children first.
+		original := self children.
 		self put: 'function(_receiver_){'; cr; incIndent; put: ' return '.
-		self decoder children: (self decoder children collect: [:child||copied|
+		self decoder children: (self children collect: [:child||copied|
 			copied := child copy.
 			copied children at: 1 put: (SWDecoder new
 				node: (RBVariableNode named: #_receiver_ );
@@ -93,14 +103,14 @@ SWMethodBodyTranspiler >> atInteger: anInteger [
 { #category : #accessing }
 SWMethodBodyTranspiler >> atMessage: aMessageNode [
 	aMessageNode parent class = RBMessageNode ifTrue: [ self put: '(' ].
-	(self pool predefinedSenderTranspiler: self decoder sender) ifNotNil: [ :predefined |
+	(self pool predefinedSenderTranspiler: self sender) ifNotNil: [ :predefined |
 		predefined value: self
 	] ifNil: [
 		self
-			transpileChild: self decoder children first;
+			transpileChild: self children first;
 			putClassAccessor;
 			put: self mangle;
-			putArguments: self decoder children allButFirst
+			putArguments: self children allButFirst
 	].
 	aMessageNode parent class = RBMessageNode ifTrue: [ self put: ')' ].
 
@@ -109,19 +119,22 @@ SWMethodBodyTranspiler >> atMessage: aMessageNode [
 
 { #category : #accessing }
 SWMethodBodyTranspiler >> atMethod: aMethodNode [
-	self transpileChildren.
+	self putBlock
 
 ]
 
 { #category : #'code generation' }
 SWMethodBodyTranspiler >> atReturn: aReturnNode [
 	self put: 'return '.
-	self transpileChildren
-
+	(self child: self children first)
+		isExpression: true;
+		transpile
+		
 ]
 
 { #category : #'code generation' }
 SWMethodBodyTranspiler >> atSequence: aSequenceNode [
+	self halt.
 	self transpileChildrenWithDelimiter
 
 ]
@@ -137,8 +150,25 @@ SWMethodBodyTranspiler >> atString: aString [
 { #category : #accessing }
 SWMethodBodyTranspiler >> atVariable: aVariableNode [
 	aVariableNode parent class = RBMethodNode ifTrue: [ ^self ].
+	aVariableNode parent class = RBSequenceNode ifTrue: [
+		^ self putVariableDeclaration
+	].
 	self put: aVariableNode name
 
+]
+
+{ #category : #accessing }
+SWMethodBodyTranspiler >> child: aDecoder [
+	^ self class new
+		decoder: aDecoder;
+		stream: self stream;
+		pool: self pool;
+		yourself
+]
+
+{ #category : #accessing }
+SWMethodBodyTranspiler >> children [
+	^ decoder children
 ]
 
 { #category : #'code generation' }
@@ -150,14 +180,6 @@ SWMethodBodyTranspiler >> cr [
 { #category : #'code generation - protected' }
 SWMethodBodyTranspiler >> decIndent [
 	self stream decIndent
-]
-
-{ #category : #'private - code generation' }
-SWMethodBodyTranspiler >> decMessageNest [
-	self halt; flag: #toRemove.
-	messageNest := messageNest - 1.
-	0 < messageNest ifTrue: [ self put: ')' ].
-
 ]
 
 { #category : #accessing }
@@ -201,36 +223,21 @@ SWMethodBodyTranspiler >> incIndent [
 	self stream incIndent
 ]
 
-{ #category : #'private - code generation' }
-SWMethodBodyTranspiler >> incMessageNest [
-	self halt; flag: #toRewrite.
-	messageNest := messageNest + 1.
-	1 < messageNest ifTrue: [ self put: '(' ].
+{ #category : #accessing }
+SWMethodBodyTranspiler >> isExpression [
+
+	^ isExpression ifNil: [ isExpression := false ]
+]
+
+{ #category : #accessing }
+SWMethodBodyTranspiler >> isExpression: anObject [
+
+	isExpression := anObject
 ]
 
 { #category : #'as yet unclassified' }
 SWMethodBodyTranspiler >> mangle [
 	^ self class mangleClass mangle: self decoder
-]
-
-{ #category : #'private - code generation' }
-SWMethodBodyTranspiler >> mangle: aName [
-	self error; flag: #toRemove.
-	^ self class mangleClass mangle: aName
-]
-
-{ #category : #accessing }
-SWMethodBodyTranspiler >> messageNest [
-	self halt; flag: #toRewrite.
-
-	^ messageNest ifNil: [ messageNest := 0 ]
-]
-
-{ #category : #accessing }
-SWMethodBodyTranspiler >> messageNest: anObject [
-	self halt; flag: #toRewrite.
-
-	messageNest := anObject
 ]
 
 { #category : #'instance creation' }
@@ -258,6 +265,11 @@ SWMethodBodyTranspiler >> newFullClosure: lit with: operands [
 ]
 
 { #category : #accessing }
+SWMethodBodyTranspiler >> node [
+	^ decoder node
+]
+
+{ #category : #accessing }
 SWMethodBodyTranspiler >> pool [
 
 	^ pool ifNil: [
@@ -273,11 +285,6 @@ SWMethodBodyTranspiler >> pool: anObject [
 	pool := anObject
 ]
 
-{ #category : #copying }
-SWMethodBodyTranspiler >> postCopy [
-	decoder := decoder copy
-]
-
 { #category : #'code generation - protected' }
 SWMethodBodyTranspiler >> preventNewline [
 	self stream preventNewline
@@ -291,6 +298,11 @@ SWMethodBodyTranspiler >> preventStatementDelimiter [
 { #category : #'code generation' }
 SWMethodBodyTranspiler >> put: anObject [
 	self stream put: anObject asString
+]
+
+{ #category : #'as yet unclassified' }
+SWMethodBodyTranspiler >> putArgumentDeclaration [
+	^ self subclassResponsibility 
 ]
 
 { #category : #'code generation' }
@@ -321,17 +333,6 @@ SWMethodBodyTranspiler >> putArray: anArray [
 
 ]
 
-{ #category : #'code generation' }
-SWMethodBodyTranspiler >> putAssignTo: key with: value [
-	self halt; flag: #toRewrite.
-
-	self
-		<< key;
-		put: ' = ';
-		<< value
-
-]
-
 { #category : #streaming }
 SWMethodBodyTranspiler >> putBasenameOn: aStream [
 	self halt; flag: #toRewrite.
@@ -340,24 +341,16 @@ SWMethodBodyTranspiler >> putBasenameOn: aStream [
 		<< self selector asCamelCase
 ]
 
-{ #category : #'code generation' }
-SWMethodBodyTranspiler >> putBlock: aBlockNode [
-	self halt; flag: #toRewrite.
+{ #category : #accessing }
+SWMethodBodyTranspiler >> putBlock [
+	self children allButLastDo: [ :child |
+		(self child: child)
+			putArgumentDeclaration
+	].
+	(self child: self children last)
+		isExpression: self isExpression;
+		putSequence
 
-	self
-		put: '{';
-		putSequence: aBlockNode body;
-		put: '}'
-]
-
-{ #category : #'code generation' }
-SWMethodBodyTranspiler >> putBlockAsExpression: aBlock [
-	^ self subclassResponsibility 
-]
-
-{ #category : #'code generation' }
-SWMethodBodyTranspiler >> putCascade: aRBCascadeNode [
-	^ self subclassResponsibility 
 ]
 
 { #category : #'code generation' }
@@ -426,44 +419,13 @@ SWMethodBodyTranspiler >> putIfTrue [
 ]
 
 { #category : #'code generation' }
-SWMethodBodyTranspiler >> putIfTrueIfFalse [
+SWMethodBodyTranspiler >> putIfTrueIfFalse: strait [
 	^ self subclassResponsibility
 ]
 
 { #category : #'code generation' }
 SWMethodBodyTranspiler >> putImport: anArray from: aSource [
 	^ self subclassResponsibility 
-]
-
-{ #category : #'code generation' }
-SWMethodBodyTranspiler >> putInteger: anInteger [
-	self halt; flag: #toRewrite.
-	self put: anInteger asString
-]
-
-{ #category : #'code generation' }
-SWMethodBodyTranspiler >> putLine: anObject [
-	self halt; flag: #toRewrite.
-	self stream putLine: anObject asString
-]
-
-{ #category : #'code generation' }
-SWMethodBodyTranspiler >> putMessage: aNode [
-	self halt; flag: #toRewrite.
-	self incMessageNest.
-	self << (self senders at: aNode).
-	self decMessageNest
-]
-
-{ #category : #'code generation' }
-SWMethodBodyTranspiler >> putMessage: aNode withReceiver: aRNode [
-	|sender|
-	self halt; flag: #toRewrite.
-	sender := (self senders at: aNode) copy.
-	sender node: (aNode copy
-		receiver: aRNode
-		yourself).
-	self << sender
 ]
 
 { #category : #'code generation' }
@@ -484,11 +446,11 @@ SWMethodBodyTranspiler >> putOnDo [
 { #category : #'code generation' }
 SWMethodBodyTranspiler >> putOpBinary [
 	self
-		transpileChild: self decoder children first;
+		transpileChild: self children first;
 		put: ' ';
-		put: self decoder node selector;
+		put: self node selector;
 		put: ' ';
-		transpileChild: self decoder children second
+		transpileChild: self children second
 
 ]
 
@@ -502,17 +464,6 @@ SWMethodBodyTranspiler >> putParameters: anArray [
 		self put: ', '
 	]
 
-]
-
-{ #category : #'code generation' }
-SWMethodBodyTranspiler >> putReturn: value [
-	self halt; flag: #toRewrite.
-	
-	^ self
-		put: 'return ';
-		withoutMessageNestDo: [
-			self << value
-		]
 ]
 
 { #category : #'code generation' }
@@ -531,33 +482,41 @@ SWMethodBodyTranspiler >> putSelfDefinition [
 	^ self subclassResponsibility 
 ]
 
-{ #category : #'as yet unclassified' }
-SWMethodBodyTranspiler >> putSender: aNode with: aSender [
-	self halt; flag: #toRewrite.
-	self
-		<< aNode receiver;
-		putClassAccessor;
-		put: aSender;
-		putArguments: aNode arguments
-]
-
 { #category : #'code generation' }
-SWMethodBodyTranspiler >> putSequence: aSequence [
-	self halt; flag: #toRewrite.
-	self withoutMessageNestDo: [
-		aSequence statements do: [ :each |
-			self putStatement: each
+SWMethodBodyTranspiler >> putSequence [
+	self isExpression ifTrue: [
+		self children ifEmpty: [ ^ self ].
+		1 < self children size ifTrue: [ self put: '(' ].
+		self children allButLastDo: [ :child |
+			(self child: child)
+				isExpression: false;
+				transpile.
+			self put: ', '; cr
+		].
+		(self child: self children last)
+			isExpression: true;
+			transpile.
+		1 < self children size ifTrue: [ self put: ')' ].
+	] ifFalse: [
+		self children do: [ :child |
+			(self child: child)
+				isExpression: false;
+				transpile.
+			self putStatementDelimiter;  cr
 		]
 	]
+
 ]
 
 { #category : #'code generation' }
 SWMethodBodyTranspiler >> putSequenceWithReturn: aSequence [
-	self halt; flag: #toRewrite.
+	self error; flag: #toRemove.
 	self withoutMessageNestDo: [
 		aSequence statements doWithIndex: [ :each :index |
 			((aSequence isLast: each) and: [ each class ~= RBReturnNode ]) ifTrue: [
 				self
+					node:each;
+					atReturn: self decoder;
 					putReturn: each;
 					putStatementDelimiter;
 					cr
@@ -569,27 +528,8 @@ SWMethodBodyTranspiler >> putSequenceWithReturn: aSequence [
 ]
 
 { #category : #'code generation' }
-SWMethodBodyTranspiler >> putStatement: aStatement [
-	self halt; flag: #toRewrite.
-	self
-		<< aStatement;
-		putStatementDelimiter;
-		cr
-
-]
-
-{ #category : #'code generation' }
 SWMethodBodyTranspiler >> putStatementDelimiter [
 	self stream putDelimiter
-]
-
-{ #category : #'code generation' }
-SWMethodBodyTranspiler >> putString: aString [
-	self halt; flag: #toRewrite.
-	self
-		put: '"';
-		put: aString;
-		put: '"'.
 ]
 
 { #category : #'code generation' }
@@ -602,30 +542,18 @@ SWMethodBodyTranspiler >> putSymbol: aByteSymbol [
 ]
 
 { #category : #'code generation' }
-SWMethodBodyTranspiler >> putVariable: aVariableNode [
-	self halt; flag: #toRewrite.
-
-	aVariableNode name = #self ifTrue: [
-		^ self putSelf
-	].
-	(self classInfo isNotNil and: [ self classInfo hasVariable: aVariableNode name ]) ifTrue: [
-		self
-			putSelf;
-			putClassAccessor;
-			put: '_'
-	].
-	self put: aVariableNode name
-
-]
-
-{ #category : #'code generation' }
-SWMethodBodyTranspiler >> putVariableDeclarationOf: aVariableInfo [
+SWMethodBodyTranspiler >> putVariableDeclaration [
 	^ self subclassResponsibility 
 ]
 
 { #category : #'as yet unclassified' }
 SWMethodBodyTranspiler >> putYourself [
 	^ self subclassResponsibility 
+]
+
+{ #category : #accessing }
+SWMethodBodyTranspiler >> sender [
+	^ decoder sender
 ]
 
 { #category : #accessing }
@@ -649,15 +577,31 @@ SWMethodBodyTranspiler >> transpile [
 
 { #category : #'as yet unclassified' }
 SWMethodBodyTranspiler >> transpileChild: aDecoder [
-	^ self copy
-		decoder: aDecoder;
+	^ (self child: aDecoder)
+		isExpression: self isExpression;
+		transpile
+
+]
+
+{ #category : #'as yet unclassified' }
+SWMethodBodyTranspiler >> transpileChildAsExpression: aDecoder [
+	^ (self child: aDecoder)
+		isExpression: true;
+		transpile
+
+]
+
+{ #category : #'as yet unclassified' }
+SWMethodBodyTranspiler >> transpileChildAsNotExpression: aDecoder [
+	^ (self child: aDecoder)
+		isExpression: false;
 		transpile
 
 ]
 
 { #category : #'as yet unclassified' }
 SWMethodBodyTranspiler >> transpileChildren [
-	self decoder children do: [ :child |
+	self children do: [ :child |
 		self transpileChild: child
 	].
 
@@ -665,16 +609,17 @@ SWMethodBodyTranspiler >> transpileChildren [
 
 { #category : #'as yet unclassified' }
 SWMethodBodyTranspiler >> transpileChildrenWithDelimiter [
-	self decoder node isExpression ifTrue: [
-		1 < self decoder children size ifTrue: [ self put: '(' ].
-		self decoder children do: [ :child |
+	self error; flag: #toRemove.
+	self isExpression ifTrue: [
+		1 < self children size ifTrue: [ self put: '(' ].
+		self children do: [ :child |
 			self transpileChild: child
 		] separatedBy: [
 			self put: ', '; cr
 		].
-		1 < self decoder children size ifTrue: [ self put: ')' ].
+		1 < self children size ifTrue: [ self put: ')' ].
 	] ifFalse: [
-		self decoder children do: [ :child |
+		self children do: [ :child |
 			self
 				transpileChild: child;
 				putStatementDelimiter;
@@ -682,14 +627,4 @@ SWMethodBodyTranspiler >> transpileChildrenWithDelimiter [
 		].
 	]
 
-]
-
-{ #category : #'private - code generation' }
-SWMethodBodyTranspiler >> withoutMessageNestDo: aBlock [
-	|nest|
-	self halt; flag: #toRewrite.
-	nest := messageNest.
-	messageNest := 0.
-	aBlock value.
-	messageNest := nest
 ]

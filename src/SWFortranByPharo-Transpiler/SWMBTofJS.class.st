@@ -29,6 +29,7 @@ SWMBTofJS class >> senderTranspilerClass [
 
 { #category : #accessing }
 SWMBTofJS >> atClosure: aBlockNode [
+	self halt.
 	aBlockNode isExpression ifTrue: [
 		self transpileChildren.
 	] ifFalse: [
@@ -43,6 +44,10 @@ SWMBTofJS >> mangledName [
 "
 	^ self class mangleClass safeSelectorNameOf: (method class = ByteSymbol ifTrue: [ method ] ifFalse: [ self method selector ])
 "
+]
+
+{ #category : #'as yet unclassified' }
+SWMBTofJS >> putArgumentDeclaration [
 ]
 
 { #category : #'code generation' }
@@ -117,120 +122,58 @@ SWMBTofJS >> putFilenameOn: aStream [
 ]
 
 { #category : #'code generation' }
-SWMBTofJS >> putIfFalse: aNode [
-	self stream log.
-	self halt; flag: #toRewrite.
-
-	(aNode lastIsReturn or: [ aNode parent class = RBSequenceNode ]) ifTrue: [
-		self
-			put: 'if(!';
-			<< aNode receiver;
-			put: ')';
-			putBlock: (aNode arguments at: 1)
-	] ifFalse: [
-		self
-			put: '(!(';
-			<< aNode receiver;
-			put: ')) ? ';
-			putBlockAsExpression: (aNode arguments at: 1);
-			put: ' : null'
-	]
-]
-
-{ #category : #'code generation' }
-SWMBTofJS >> putIfTrue [
-	self decoder node isExpression ifTrue: [
+SWMBTofJS >> putIfTrue: strait [
+	self isExpression ifTrue: [
 		self halt.
 	] ifFalse: [
-		self
-			put: 'if(';
-			transpileChild: self decoder children first;
-			put: '){';
-			cr;
-			incIndent;
-			transpileChild: self decoder children second;
-			decIndent;
-			put: '}';
-			preventStatementDelimiter
-	].
-"	
-	aNode isExpression ifTrue: [
-		self
-			put: '(';
-			<< aNode receiver;
-			put: ' ? ';
-			putBlockAsExpression: (aNode arguments at: 1);
-			put: ' : null)'
-	] ifFalse: [
-		self
-			put: 'if(';
-			<< aNode receiver;
-			put: ')';
-			putBlock: (aNode arguments at: 1)
+		self put: 'if('.
+		strait ifFalse: [ self put: '!' ].
+		(self child: self children first)
+			isExpression: true;
+			transpile.
+		self put: '){'; cr; incIndent.
+		(self child: self children second)
+			isExpression: false;
+			putBlock.
+		self decIndent; put: '}'; preventStatementDelimiter
 	]
-"
+
 ]
 
 { #category : #'code generation' }
-SWMBTofJS >> putIfTrueIfFalse [
-	self decoder node isExpression ifTrue: [
-		self
-			put: '(';
-			transpileChild: self decoder children first;
-			put: ' ? ';
-			transpileChild: self decoder children second;
-			put: ' : ';
-			transpileChild: self decoder children third;
-			put: ')'.
-		^ self
-	].
-
-	self halt.
-"	
-	aNode lastIsReturn ifTrue: [
-		self
-			put: 'if(';
-			<< aNode receiver;
-			put: ')';
-			<< (aNode arguments at: 1);
-			put: 'else ';
-			<< (aNode arguments at: 2)
+SWMBTofJS >> putIfTrueIfFalse: strait [
+	self isExpression ifTrue: [
+		self put: '('.
+		strait ifFalse: [ self put: '!' ].
+		(self child: self children first)
+			isExpression: true;
+			transpile.
+		self put: ' ? '.
+		(self child: self children second)
+			isExpression: true;
+			putBlock.
+		self 	put: ' : '.
+		(self child: self children third)
+			isExpression: true;
+			putBlock.
+		self put: ')'.
 	] ifFalse: [
-		self
-			put: '(';
-			<< aNode receiver;
-			put: ' ? ';
- 			putBlockAsExpression: (aNode arguments at: 1);
-			put: ' : ';
-			putBlockAsExpression: (aNode arguments at: 2);
-			put: ')'
+		self put: 'if('.
+		strait ifFalse: [ self put: '!' ].
+		(self child: self children first)
+			isExpression: true;
+			transpile.
+		self put: '){'; cr; incIndent.
+		(self child: self children second)
+			isExpression: false;
+			putBlock.
+		self decIndent; put: '} else {'; cr; incIndent.
+		(self child: self children third)
+			isExpression: false;
+			putBlock.
+		self decIndent; put: '}'; preventStatementDelimiter
 	]
-"
-]
 
-{ #category : #'code generation' }
-SWMBTofJS >> putIfTrueIfFalse: aNode [
-	self stream log.
-	self halt; flag: #toRewrite.
-	
-	aNode lastIsReturn ifTrue: [
-		self
-			put: 'if(';
-			<< aNode receiver;
-			put: ')';
-			<< (aNode arguments at: 1);
-			put: 'else ';
-			<< (aNode arguments at: 2)
-	] ifFalse: [
-		self
-			put: '(';
-			<< aNode receiver;
-			put: ' ? ';
- 			putBlockAsExpression: (aNode arguments at: 1);
-			put: ' : ';
-			putBlockAsExpression: (aNode arguments at: 2);
-			put: ')'
-	]
 ]
 
 { #category : #'code generation' }
@@ -264,7 +207,7 @@ SWMBTofJS >> putNil [
 
 { #category : #enumerating }
 SWMBTofJS >> putOnDo [
-	self decoder node isExpression ifTrue: [
+	self isExpression ifTrue: [
 		self
 			put: 'function(){ try {'; cr; incIndent; put: 'return ';
 			transpileChild: self decoder children first;
@@ -274,6 +217,12 @@ SWMBTofJS >> putOnDo [
 			putStatementDelimiter; cr; decIndent; put: '}}()'
 	] ifFalse: [
 		self halt.
+		self
+			put: 'try {';
+			transpileChildAsNotExpression: self children first;
+			put: '} catch {';
+			transpileChildAsNotExpression: self children third;
+			put: '}'
 	]
 
 "
@@ -389,15 +338,11 @@ SWMBTofJS >> putStdOut [
 ]
 
 { #category : #'code generation' }
-SWMBTofJS >> putVariableDeclarationOf: aVariableName [
-	self halt; flag: #toRewrite.
+SWMBTofJS >> putVariableDeclaration [
 	self
 		put: 'var ';
-		put: aVariableName;
-		put: ' = null;';
-		cr
-
-		
+		put: self decoder node name;
+		put: ' = null'
 ]
 
 { #category : #'as yet unclassified' }

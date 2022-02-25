@@ -4,8 +4,31 @@ Class {
 	#category : #'SWFortranByPharo-Transpiler-Tests-Common'
 }
 
+{ #category : #'as yet unclassified' }
+SWMethodBodyTranspilerTest >> noFromSelector: selector [
+	^ ((selector copyAfter: $_) copyUpTo: $_) asInteger.
+
+]
+
+{ #category : #'as yet unclassified' }
+SWMethodBodyTranspilerTest >> resultWith: arguments [
+	|transpiler result|
+	transpiler := self transpileNo: (self noFromSelector: thisContext sender selector) with: arguments.
+	result := transpiler stream contents.
+	result inspect.
+	self halt.
+]
+
+{ #category : #'as yet unclassified' }
+SWMethodBodyTranspilerTest >> resultWith: arguments equals: expected [
+	|transpiler result|
+	transpiler := self transpileNo: (self noFromSelector: thisContext sender selector) with: arguments.
+	result := transpiler stream contents.
+	self assert: result equals: expected
+]
+
 { #category : #utilities }
-SWMethodBodyTranspilerTest >> transpile: method withArguments: args [
+SWMethodBodyTranspilerTest >> transpile: method with: args [
 	|decoder transpiler|
 	decoder := SWDecoder new: method with: args.
 	decoder enableLogging.
@@ -22,8 +45,8 @@ SWMethodBodyTranspilerTest >> transpile: method withArguments: args [
 ]
 
 { #category : #utilities }
-SWMethodBodyTranspilerTest >> transpileNo: no withArguments: args [
-	^ self transpile: (SWTestProgram getMy: no) withArguments: ({SWTestProgram}, args)
+SWMethodBodyTranspilerTest >> transpileNo: no with: args [
+	^ self transpile: (SWTestProgram getMy: no) with: ({SWTestProgram}, args)
 ]
 
 { #category : #accessing }

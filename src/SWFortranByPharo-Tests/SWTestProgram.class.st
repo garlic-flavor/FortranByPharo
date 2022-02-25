@@ -14,7 +14,7 @@ Class {
 SWTestProgram class >> getMy: no [
 	|header|
 	header := String streamContents: [ :s |
-		s << $_; << (no asString padLeftTo: 2 with: $0)
+		s << $_; << (no asString padLeftTo: 4 with: $0)
 	].
 	self methodDict valuesDo: [ :val |
 		(val selector beginsWith: header) ifTrue: [ ^ val ]
@@ -23,23 +23,30 @@ SWTestProgram class >> getMy: no [
 ]
 
 { #category : #'tests - source' }
-SWTestProgram >> _01_return_constant [
+SWTestProgram >> _0010_nop [
+]
+
+{ #category : #'tests - source' }
+SWTestProgram >> _0020_return_constant [
 
 	^ 345
 ]
 
 { #category : #'tests - source' }
-SWTestProgram >> _02_has_arguments: arg [
+SWTestProgram >> _0030_has_arguments: arg [
 	^ arg
 ]
 
 { #category : #'tests - source' }
-SWTestProgram >> _03_return_self [
+SWTestProgram >> _0040_local_variables [
 
+	| tmp1 tmp2 tmp3 tmp4 tmp5 tmp6 tmp7 tmp8 tmp9 |
+
+	^ tmp9 := 123
 ]
 
 { #category : #'tests - source' }
-SWTestProgram >> _04_call_wellknown_message: arg1 [
+SWTestProgram >> _0050_call_wellknown_message: arg1 [
 
 	| tmp1 |
 	tmp1 := 123.
@@ -47,56 +54,56 @@ SWTestProgram >> _04_call_wellknown_message: arg1 [
 ]
 
 { #category : #'tests - source' }
-SWTestProgram >> _05_ifTrue_ifFalse: needle [
+SWTestProgram >> _0060_ifTrue_ifFalse: needle [
 	needle ifTrue: [ 123 ] ifFalse: [ 'False' ]
 	
 ]
 
 { #category : #'tests - source' }
-SWTestProgram >> _06_ifTrue_ifFalse_expression: needle [
+SWTestProgram >> _0070_ifTrue_ifFalse_expression: needle [
 	^ needle ifTrue: [ 123 ] ifFalse: [ 'False' ]
 	
 ]
 
 { #category : #'tests - source' }
-SWTestProgram >> _07_ifTrue_ifFalse_shortcircuit: needle [
+SWTestProgram >> _0080_ifTrue_ifFalse_shortcircuit: needle [
 	needle ifTrue: [ ^ 123 ] ifFalse: [ ^ 'False' ]
 	
 ]
 
 { #category : #'tests - source' }
-SWTestProgram >> _08_ifFalse_ifTrue: needle [
+SWTestProgram >> _0090_ifFalse_ifTrue: needle [
 	needle ifFalse: [ 123 ] ifTrue: [ 'True' ]
 	
 ]
 
 { #category : #'tests - source' }
-SWTestProgram >> _09_ifFalse_ifTrue_expression: needle [
+SWTestProgram >> _0100_ifFalse_ifTrue_expression: needle [
 	^ needle ifFalse: [ 123 ] ifTrue: [ 'True' ]
 	
 ]
 
 { #category : #'tests - source' }
-SWTestProgram >> _10_ifFalse_ifTrue_shortcircuit: needle [
+SWTestProgram >> _0110_ifFalse_ifTrue_shortcircuit: needle [
 	needle ifFalse: [ ^ 123 ] ifTrue: [ ^ 'True' ]
 	
 ]
 
 { #category : #'tests - source' }
-SWTestProgram >> _11_ifTrue: needle [
+SWTestProgram >> _0120_ifTrue: needle [
 	needle ifTrue: [ 123 ]
 	
 ]
 
 { #category : #'tests - source' }
-SWTestProgram >> _12_ifTrue_shortcircuit: needle [
+SWTestProgram >> _0130_ifTrue_shortcircuit: needle [
 	needle ifTrue: [ ^ 123 ].
 	^ 'false'
 	
 ]
 
 { #category : #'tests - source' }
-SWTestProgram >> _13_ifFalse: needle [
+SWTestProgram >> _0140_ifFalse: needle [
 	needle ifFalse: [ 123 ]
 	
 ]
@@ -195,14 +202,6 @@ SWTestProgram >> _27_ifNotNil_shortcircuit: needle [
 { #category : #'tests - source' }
 SWTestProgram >> _28_method_call [
 	^ SWStd print: 'hoge!'
-]
-
-{ #category : #'tests - source' }
-SWTestProgram >> _29_local_variables [
-
-	| tmp1 tmp2 tmp3 tmp4 tmp5 tmp6 tmp7 tmp8 tmp9 |
-
-	^ tmp9 := 123
 ]
 
 { #category : #'tests - source' }

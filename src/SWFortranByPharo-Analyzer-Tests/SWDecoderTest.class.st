@@ -12,14 +12,25 @@ SWDecoderTest >> decodeNo: no with: args [
 	^ decoder
 		method: (SWTestProgram getMy: no);
 		operands: (args copyWithFirst: SWTestProgram);
-		enableLogging;
 		decode;
 		yourself
 ]
 
 { #category : #'as yet unclassified' }
-SWDecoderTest >> resultOfNo: no with: args equals: type [
-	self decodeNo: no with: args.
+SWDecoderTest >> noFromSelector: selector [
+	^ ((selector copyAfter: $_) copyUpTo: $_) asInteger.
+
+]
+
+{ #category : #'as yet unclassified' }
+SWDecoderTest >> resultWith: args [
+	self decodeNo: (self noFromSelector: thisContext sender selector) with: args.
+	self halt.
+]
+
+{ #category : #'as yet unclassified' }
+SWDecoderTest >> resultWith: args equals: type [
+	self decodeNo: (self noFromSelector: thisContext sender selector) with: args.
 	self assert: decoder sender result value equals: type
 
 ]
@@ -28,51 +39,55 @@ SWDecoderTest >> resultOfNo: no with: args equals: type [
 SWDecoderTest >> setUp [
 	super setUp.
 	decoder := SWDecoder new
-"
-		haltAtUnresolvedSelector;
-"
-		yourself
+
 
 ]
 
 { #category : #tests }
-SWDecoderTest >> test_01_return_constnat [
-	self resultOfNo: 1 with: {} equals: SmallInteger
+SWDecoderTest >> test_0010_nop [
+	self resultWith: {  } equals: SWTestProgram
+
 ]
 
 { #category : #tests }
-SWDecoderTest >> test_02_has_arguments [
-	self resultOfNo: 2 with: { Float } equals: Float
+SWDecoderTest >> test_0020_return_constnat [
+	self resultWith: {} equals: SmallInteger
 ]
 
 { #category : #tests }
-SWDecoderTest >> test_03_return_self [
-	self resultOfNo: 3 with: {  } equals: SWTestProgram
+SWDecoderTest >> test_0030_has_arguments [
+	self resultWith: { Float } equals: Float
 ]
 
 { #category : #tests }
-SWDecoderTest >> test_04_call_wellknown_message [
-	self resultOfNo: 4 with: { Float } equals: Float
+SWDecoderTest >> test_0040_local_variables [
+	self resultWith: { } equals: SmallInteger
+
 ]
 
 { #category : #tests }
-SWDecoderTest >> test_05_ifTrue_ifFalse [
-	self resultOfNo: 5 with: { Boolean } equals: SWTestProgram
+SWDecoderTest >> test_0050_call_wellknown_message [
+	self resultWith: { Float } equals: Float
 ]
 
 { #category : #tests }
-SWDecoderTest >> test_06_ifTrue_ifFalse_expression [
-	self resultOfNo: 6 with: { Boolean } equals: SmallInteger
+SWDecoderTest >> test_0060_ifTrue_ifFalse [
+	self resultWith: { Boolean } equals: SWTestProgram
 ]
 
 { #category : #tests }
-SWDecoderTest >> test_07_ifTrue_ifFalse_shortcircuit [
-	self resultOfNo: 7 with: { Boolean } equals: SmallInteger
+SWDecoderTest >> test_0070_ifTrue_ifFalse_expression [
+	self resultWith: { Boolean } equals: SmallInteger
 ]
 
 { #category : #tests }
-SWDecoderTest >> test_08_ifTrue_ifFalse [
-	self resultOfNo: 8 with: { Boolean } equals: SWTestProgram
+SWDecoderTest >> test_0080_ifTrue_ifFalse_shortcircuit [
+	self resultWith: { Boolean } equals: SmallInteger
+]
+
+{ #category : #tests }
+SWDecoderTest >> test_0090_ifTrue_ifFalse [
+	self resultWith: { Boolean } equals: SWTestProgram
 ]
 
 { #category : #tests }
@@ -116,12 +131,6 @@ SWDecoderTest >> test_27_ifNotNil_shortcircuit [
 { #category : #tests }
 SWDecoderTest >> test_28_method_call [
 	self resultOfNo: 28 with: { } equals: SWStd class
-
-]
-
-{ #category : #tests }
-SWDecoderTest >> test_29_local_variables [
-	self resultOfNo: 29 with: { } equals: SmallInteger
 
 ]
 

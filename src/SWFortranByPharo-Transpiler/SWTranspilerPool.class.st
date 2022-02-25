@@ -32,8 +32,11 @@ SWTranspilerPool >> initialize_BlockClosure: ct [
 { #category : #'as yet unclassified' }
 SWTranspilerPool >> initialize_Boolean: ct [
 	ct
-		senderTranspilerOf: #ifTrue:ifFalse: is: [ :transpiler | transpiler putIfTrueIfFalse ];
-		senderTranspilerOf: #ifTrue: is: [ :transpiler | transpiler putIfTrue ]
+		senderTranspilerOf: #ifTrue:ifFalse: is: [ :bt | bt putIfTrueIfFalse: true];
+		senderTranspilerOf: #ifFalse:ifTrue: is: [ :bt | bt putIfTrueIfFalse: false ];
+		senderTranspilerOf: #ifTrue: is: [ :bt | bt putIfTrue: true ];
+		senderTranspilerOf: #ifFalse: is: [ :bt | bt putIfTrue: false ]
+
 
 ]
 
