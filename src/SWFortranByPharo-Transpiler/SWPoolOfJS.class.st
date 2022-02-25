@@ -8,6 +8,6 @@ Class {
 }
 
 { #category : #accessing }
-SWPoolOfJS class >> classDispatcherClass [
+SWPoolOfJS class >> classProcedureClass [
 	^ SWCDTofJS
 ]

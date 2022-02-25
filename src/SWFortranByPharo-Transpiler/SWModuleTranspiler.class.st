@@ -11,15 +11,15 @@ Class {
 	#category : #'SWFortranByPharo-Transpiler-Common'
 }
 
-{ #category : #accessing }
-SWModuleTranspiler class >> decoderClass [
-	^ SWDecoder
-]
-
 { #category : #constants }
 SWModuleTranspiler class >> extension [
 	self error; flag: #toRemove.
 	^ self subclassResponsibility 
+]
+
+{ #category : #accessing }
+SWModuleTranspiler class >> methodBodyProcedureClass [
+	^ SWDecoder
 ]
 
 { #category : #'as yet unclassified' }
@@ -68,7 +68,7 @@ SWModuleTranspiler >> decode: aSelector with: args [
 { #category : #accessing }
 SWModuleTranspiler >> decoder [
 
-	^ decoder ifNil: [ decoder := self class decoderClass new ]
+	^ decoder ifNil: [ decoder := self class methodBodyProcedureClass new ]
 ]
 
 { #category : #accessing }
@@ -154,11 +154,11 @@ SWModuleTranspiler >> transpile [
 { #category : #'public API' }
 SWModuleTranspiler >> transpile: aClass [
 	|ct cct|
-	ct := (self mainTranspiler pool getClassDispatcher: aClass instanceSide).
+	ct := (self mainTranspiler pool getClassProcedure: aClass instanceSide).
 	ct isTranspiled ifTrue: [ ^ self ].
-	ct decoder: (self decoder pool getClassDispatcher: aClass instanceSide).
-	cct := (self mainTranspiler pool getClassDispatcher: aClass classSide).
-	cct decoder: (self decoder pool getClassDispatcher: aClass classSide).
+	ct decoder: (self decoder pool getClassProcedure: aClass instanceSide).
+	cct := (self mainTranspiler pool getClassProcedure: aClass classSide).
+	cct decoder: (self decoder pool getClassProcedure: aClass classSide).
 	ct transpile.
 
 ]

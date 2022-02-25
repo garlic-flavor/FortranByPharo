@@ -160,11 +160,6 @@ SWClass >> declareMethodReturnsSecondArgument: aName [
 
 ]
 
-{ #category : #accessing }
-SWClass >> decoderClass [
-	^ self pool decoderClass
-]
-
 { #category : #api }
 SWClass >> getResult: aSender [
 	(self haltList includes: aSender method) ifTrue: [ self halt ].
@@ -175,7 +170,7 @@ SWClass >> getResult: aSender [
 			aSender result << (pre cull: aSender operands).
 			self methods at: aSender put: aSender.
 		] ifAbsent: [ |decoder|
-			decoder := self newMethodDecoder: aSender.
+			decoder := self newMethodBodyDecoder: aSender.
 			self methods at: aSender put: decoder.
 			decoder
 				decode;
@@ -196,6 +191,11 @@ SWClass >> logger [
 ]
 
 { #category : #accessing }
+SWClass >> methodBodyDecoderClass [
+	^ self pool methodBodyDecoderClass
+]
+
+{ #category : #accessing }
 SWClass >> methods [
 	"A Set object consists of referenced methods."
 	^ methods ifNil: [methods := Dictionary new ]
@@ -208,8 +208,8 @@ SWClass >> methods: anObject [
 ]
 
 { #category : #'instance creation' }
-SWClass >> newMethodDecoder: aSender [
-	^ self decoderClass new
+SWClass >> newMethodBodyDecoder: aSender [
+	^ self methodBodyDecoderClass new
 		logger: self logger;
 		haltList: self haltList;
 		pool: self pool;

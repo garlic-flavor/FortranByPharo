@@ -12,32 +12,33 @@ Class {
 }
 
 { #category : #'as yet unclassified' }
-SWPoolBase class >> classDispatcherClass [
+SWPoolBase class >> classProcedureClass [
 	^ self subclassResponsibility 
 ]
 
-{ #category : #private }
-SWPoolBase class >> initializerFor: target [
+{ #category : #'as yet unclassified' }
+SWPoolBase class >> initializerFor: aClass [
 	^ (String streamContents: [ :s |
 		s
-			<< 'initialize_';
-			<< target instanceSide name;
-			<< (target isClassSide ifTrue: [ 'Class' ] ifFalse: [ '' ]);
+			<< self initializersHeader;
+			<< '_';
+			<< aClass instanceSide name;
+			<< (aClass isClassSide ifTrue: [ 'Class' ] ifFalse: [ '' ]);
 			<< ':'
 	]) asSymbol.
 
 ]
 
 { #category : #'as yet unclassified' }
-SWPoolBase class >> initializersKey [
-	^ self subclassResponsibility
+SWPoolBase class >> initializersHeader [
+	^ self subclassResponsibility 
 ]
 
 { #category : #private }
 SWPoolBase >> addInitializerIn: aClass [
 	"invoke aClass>>#initialize_Hoge: with Hoge class transpiler."
 	 aClass classSide methodDict values select: [ :each |
-		each selector beginsWith: self class initializersKey
+		each selector beginsWith: self class initializersHeader
 	] thenDo: [ :each ||name target|
 		name := each selector copyAfter: $_.
 		name := (each selector endsWith: 'Class:') ifTrue: [
@@ -46,22 +47,24 @@ SWPoolBase >> addInitializerIn: aClass [
 			name copyUpToLast: $:
 		].
 		name = 'self' ifTrue: [ name := aClass instanceSide name ].
-		target := Smalltalk globals at: name asSymbol.
-		(each selector endsWith: 'Class:') ifTrue: [
-			target := target classSide
-		].
-		each valueWithReceiver: aClass instanceSide arguments: {
-			self getClassDispatcher: target
-		}
+		name ifNotEmpty: [
+			target := Smalltalk globals at: name asSymbol.
+			(each selector endsWith: 'Class:') ifTrue: [
+				target := target classSide
+			].
+			each valueWithReceiver: aClass instanceSide arguments: {
+				self getClassProcedure: target
+			}
+		]
 	]
 ]
 
-{ #category : #private }
-SWPoolBase >> getClassDispatcher: aClass [
+{ #category : #api }
+SWPoolBase >> getClassProcedure: aClass [
 	^ self payload at: aClass ifAbsent: [|newCT|
-		newCT := self newClassDispatcher: aClass.
+		newCT := self newClassProcedure: aClass.
 		aClass isClassSide ifTrue: [
-			self getClassDispatcher: aClass instanceSide
+			self getClassProcedure: aClass instanceSide
 		].
 		newCT
 	]
@@ -77,19 +80,20 @@ SWPoolBase >> initialize: aClassDispatcher asOf: aClass [
 	(self respondsTo: initializer) ifTrue: [
 		self perform: initializer with: aClassDispatcher
 	].
+	aClass isInstanceSide ifTrue: [ self addInitializerIn: aClass ].
+
 	^ aClassDispatcher
 ]
 
 { #category : #private }
-SWPoolBase >> newClassDispatcher: target [
+SWPoolBase >> newClassProcedure: target [
 	|ct|
-	ct := self class classDispatcherClass new
+	ct := self class classProcedureClass new
 		pool: self;
 		targetClass: target;
 		yourself.
 	self payload at: target put: ct.
 	self initialize: ct asOf: target.
-	target isInstanceSide ifTrue: [ self addInitializerIn: target ].
 	^ ct
 ]
 

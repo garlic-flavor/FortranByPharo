@@ -1,5 +1,5 @@
 "
-a baseclass of SWClass and SWClassDefinitionTranspiler
+baseclass of SWClass
 "
 Class {
 	#name : #SWClassBase,

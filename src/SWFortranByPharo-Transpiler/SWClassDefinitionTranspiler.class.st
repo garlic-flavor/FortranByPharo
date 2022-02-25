@@ -11,18 +11,29 @@ Class {
 	#category : #'SWFortranByPharo-Transpiler-Common'
 }
 
+{ #category : #'as yet unclassified' }
+SWClassDefinitionTranspiler class >> methodBodyTranspilerClass [
+	^ self subclassResponsibility 
+]
+
 { #category : #accessing }
 SWClassDefinitionTranspiler class >> methodDefinitionTranspilerClass [
 	^ self subclassResponsibility 
 ]
 
-{ #category : #api }
-SWClassDefinitionTranspiler >> declareMethodAsCompareOperator: aName [
-	self halt; flag: #toRewrite.
-	super declareMethodAsCompareOperator: aName.
-	self defineMethodSender: aName as: [ :transpiler :sender |
-		transpiler putOpBinary: sender node
-	]
+{ #category : #adding }
+SWClassDefinitionTranspiler >> addSlotAbout: aClass [
+	self error; flag: #toRemove.
+	"
+	aClass ifNil: [ ^ self ].
+	aClass slots do: [ :item |
+		slot push name: item name
+	].
+	aClass classVarNames do: [ :item |
+		slot push name: item
+	].
+	self addSlotAbout: aClass superclass
+"
 ]
 
 { #category : #accessing }
@@ -57,41 +68,10 @@ SWClassDefinitionTranspiler >> defineMethodSender: aName as: aGenerator [
 	]
 ]
 
-{ #category : #initialization }
-SWClassDefinitionTranspiler >> initialize_Number [
-	self halt; flag: #toRewrite.
-	super initialize_Number.
-	self
-		defineMethodSender: #+ as: [ :transpiler :sender | transpiler putOpBinary: sender node ];
-		defineMethodSender: #- as: [ :transpiler :sender | transpiler putOpBinary: sender node ];
-		defineMethodSender: #* as: [ :transpiler :sender | transpiler putOpBinary: sender node ];
-		defineMethodSender: #/ as: [ :transpiler :sender | transpiler putOpBinary: sender node ]
-]
-
-{ #category : #initialization }
-SWClassDefinitionTranspiler >> initialize_ProtoObject [
-	self halt; flag: #toRewrite.
-	super initialize_ProtoObject.
-	self
-		defineMethodSender: #flag: as: [ :transpiler :sender |
-			transpiler preventStatementDelimiter; preventNewline
-		]
-]
-
-{ #category : #initialization }
-SWClassDefinitionTranspiler >> initialize_TestCaseClass [
-	self halt; flag: #toRewrite.
-	super initialize_TestCaseClass.
-	self
-		defineMethodBody: #allTestSelectors as: [ :transpiler |
-			transpiler putStatement: (RBReturnNode value: (RBLiteralArrayNode value: (
-				transpiler receiverClass instanceSide methodDict keys select: [ :each |
-					each beginsWith: 'test'
-				] thenCollect: [ :each |
-					RBLiteralValueNode value: each
-				])))
-		]
-
+{ #category : #accessing }
+SWClassDefinitionTranspiler >> haltList [
+	self error; flag: #toRemove.
+	^ self pool haltList
 ]
 
 { #category : #accessing }
@@ -100,11 +80,54 @@ SWClassDefinitionTranspiler >> isTranspiled [
 	^ decoder isNotNil
 ]
 
+{ #category : #accessing }
+SWClassDefinitionTranspiler >> logger [
+	self error; flag: #toRemove.
+	^ self pool logger
+]
+
+{ #category : #accessing }
+SWClassDefinitionTranspiler >> methodBodyProcedureClass [
+	self error; flag: #toRemove.
+	^ self pool methodBodyProcedureClass
+]
+
+{ #category : #accessing }
+SWClassDefinitionTranspiler >> methods [
+	self error; flag: #toRemove.
+	
+	"A Set object consists of referenced methods."
+"
+	^ methods ifNil: [methods := Dictionary new ]
+"
+]
+
+{ #category : #accessing }
+SWClassDefinitionTranspiler >> methods: anObject [
+self error; flag: #toRemove.
+"
+	methods := anObject
+"
+]
+
 { #category : #'instance creation' }
 SWClassDefinitionTranspiler >> newDecoderOf: aMethod with: args [
 	self halt; flag: #toRewrite.
 	^ (super newDecoderOf: aMethod with: args)
 		stream: self stream;
+		yourself
+]
+
+{ #category : #'instance creation' }
+SWClassDefinitionTranspiler >> newMethodBodyProcedure: aSender [
+self error; flag: #toRemove.
+	^ self methodBodyProcedureClass new
+		logger: self logger;
+		haltList: self haltList;
+		pool: self pool;
+		slot: self slot copy;
+		method: aSender method;
+		operands: aSender operands;
 		yourself
 ]
 
@@ -145,7 +168,7 @@ SWClassDefinitionTranspiler >> putClassHeader [
 { #category : #'code generation' }
 SWClassDefinitionTranspiler >> putMember [
 	self targetClass slots do: [ :each |
-		self decoder slot detect: [ :one | one name = each ] ifFound: [ :found |
+		self decoder slot detect: [ :one | one name = each name ] ifFound: [ :found |
 			(found isNotNil and: [ found name isEmptyOrNil not ]) ifTrue: [
 				self putMemberDeclarationOf: found
 			]
@@ -157,17 +180,18 @@ SWClassDefinitionTranspiler >> putMember [
 
 { #category : #'code generation' }
 SWClassDefinitionTranspiler >> putMemberDeclarationOf: aVariableTypeInfo [
-	self halt; flag: #toRewrite.
 	^ self subclassResponsibility
 
 ]
 
 { #category : #'code generation' }
-SWClassDefinitionTranspiler >> putMethodDefinition: aMBT [
-	self halt; flag: #toRewrite.
-	aMBT ifNil: [ ^ self ].
-	aMBT class methodDefinitionTranspilerClass new
-		bodyTranspiler: aMBT;
+SWClassDefinitionTranspiler >> putMethodDefinition: aDecoder [
+	aDecoder class = SWDecoder ifFalse: [ ^ self ].
+	self class methodDefinitionTranspilerClass new
+		bodyTranspiler: (self class methodBodyTranspilerClass new
+			decoder: aDecoder;
+			stream: self stream;
+			yourself);
 		transpile
 
 ]
@@ -175,6 +199,36 @@ SWClassDefinitionTranspiler >> putMethodDefinition: aMBT [
 { #category : #'as yet unclassified' }
 SWClassDefinitionTranspiler >> senderTranspilerOf: aSelector is: initializer [
 	self predefinedSender at: aSelector put: initializer
+]
+
+{ #category : #api }
+SWClassDefinitionTranspiler >> setBreakpointOn: aName [
+	self error; flag: #toRemove.
+	"
+	self addPredefined: aName with: [ :operands |
+		self halt.
+	]
+"
+]
+
+{ #category : #accessing }
+SWClassDefinitionTranspiler >> slot [
+	self error; flag: #toRemove.
+	"
+	^ slot ifNil: [
+		slot := SWSlot new.
+		self addSlotAbout: self targetClass.
+		slot
+	]
+"
+]
+
+{ #category : #accessing }
+SWClassDefinitionTranspiler >> slot: anObject [
+self error; flag: #toRemove.
+"
+	slot := anObject
+"
 ]
 
 { #category : #accessing }
@@ -203,7 +257,7 @@ SWClassDefinitionTranspiler >> transpileAsInstanceSide [
 	self stream putComment: self targetClass comment.
 	self putClassHeader.
 	self stream incIndent.
-	(self pool getClassDispatcher: targetClass classSide)
+	(self pool getClassProcedure: targetClass classSide)
 		transpileAsClassSide.
 	self putMember.
 	self stream decIndent.

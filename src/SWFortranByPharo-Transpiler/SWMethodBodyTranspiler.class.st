@@ -230,7 +230,6 @@ SWMethodBodyTranspiler >> mangle [
 
 { #category : #accessing }
 SWMethodBodyTranspiler >> method [
-	self error; flag: #toRemove.
 	^ self decoder method
 ]
 

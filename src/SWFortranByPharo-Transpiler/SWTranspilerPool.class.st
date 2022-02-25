@@ -7,30 +7,34 @@ Class {
 	#category : #'SWFortranByPharo-Transpiler-Common'
 }
 
-{ #category : #accessing }
-SWTranspilerPool class >> classDispatcherClass [
-	^ SWClassDefinitionTranspiler
+{ #category : #'as yet unclassified' }
+SWTranspilerPool class >> initializersHeader [
+	^ 'transpile'
 ]
 
 { #category : #'as yet unclassified' }
-SWTranspilerPool class >> initializersKey [
-	^ 'transpile_'
+SWTranspilerPool >> predefinedSenderTranspiler: aSender [
+	aSender method ifNil: [ ^ nil ].
+	^ (self getClassProcedure: aSender method methodClass)
+		predefinedSenderTranspiler: aSender method selector
+
+
 ]
 
 { #category : #initialization }
-SWTranspilerPool >> initialize_Behavior: ct [
+SWTranspilerPool >> transpile_Behavior: ct [
 	ct
 		senderTranspilerOf: #new is: [ :transpiler |  transpiler putNew ]
 ]
 
 { #category : #initialization }
-SWTranspilerPool >> initialize_BlockClosure: ct [
+SWTranspilerPool >> transpile_BlockClosure: ct [
 	ct
 		senderTranspilerOf: #on:do: is: [ :bt | bt putOnDo ]
 ]
 
 { #category : #'as yet unclassified' }
-SWTranspilerPool >> initialize_Boolean: ct [
+SWTranspilerPool >> transpile_Boolean: ct [
 	ct
 		senderTranspilerOf: #ifTrue:ifFalse: is: [ :bt | bt putIfTrueIfFalse: true];
 		senderTranspilerOf: #ifFalse:ifTrue: is: [ :bt | bt putIfTrueIfFalse: false ];
@@ -41,13 +45,13 @@ SWTranspilerPool >> initialize_Boolean: ct [
 ]
 
 { #category : #initialization }
-SWTranspilerPool >> initialize_Magnitude: ct [
+SWTranspilerPool >> transpile_Magnitude: ct [
 	ct
 		senderTranspilerOf: #< is: [ :bt | bt putOpBinary ]
 ]
 
 { #category : #initialization }
-SWTranspilerPool >> initialize_Number: ct [
+SWTranspilerPool >> transpile_Number: ct [
 	ct
 		senderTranspilerOf: #+ is: [ :bt | bt putOpBinary ];
 		senderTranspilerOf: #- is: [ :bt | bt putOpBinary ];
@@ -57,7 +61,7 @@ SWTranspilerPool >> initialize_Number: ct [
 ]
 
 { #category : #initialization }
-SWTranspilerPool >> initialize_Object: ct [
+SWTranspilerPool >> transpile_Object: ct [
 	ct
 		senderTranspilerOf: #yourself is: [ :transpiler |
 			transpiler putYourself
@@ -65,17 +69,8 @@ SWTranspilerPool >> initialize_Object: ct [
 ]
 
 { #category : #initialization }
-SWTranspilerPool >> initialize_ProtoObject: ct [
+SWTranspilerPool >> transpile_ProtoObject: ct [
 	ct
 		senderTranspilerOf: #ifNotNil:ifNil: is: [ :bt | bt putIfNotNilIfNil: true ];
 		senderTranspilerOf: #ifNil: is: [ :bt | bt putIfNotNil: false ]
-]
-
-{ #category : #'as yet unclassified' }
-SWTranspilerPool >> predefinedSenderTranspiler: aSender [
-	aSender method ifNil: [ ^ nil ].
-	^ (self getClassDispatcher: aSender method methodClass)
-		predefinedSenderTranspiler: aSender method selector
-
-
 ]

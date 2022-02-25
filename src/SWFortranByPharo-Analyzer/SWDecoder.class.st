@@ -369,7 +369,7 @@ SWDecoder >> pool: anObject [
 	pool := anObject
 ]
 
-{ #category : #'as yet unclassified' }
+{ #category : #private }
 SWDecoder >> readySlot [
 	|receiver|
 	receiver := self sender operands first value.

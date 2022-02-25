@@ -7,6 +7,11 @@ Class {
 	#category : #'SWFortranByPharo-Transpiler-JS'
 }
 
+{ #category : #'as yet unclassified' }
+SWCDTofJS class >> methodBodyTranspilerClass [
+	^ SWMBTofJS
+]
+
 { #category : #accessing }
 SWCDTofJS class >> methodDefinitionTranspilerClass [
 	^ SWMDTofJS
