@@ -5,7 +5,7 @@ Class {
 }
 
 { #category : #tests }
-SWMTofF90Test >> test_01_Transcript [
+SWMTofF90Test >> test_0410_Transcript [
 	|mt|
 	mt := SWMTofF90 new
 		payload: (SWMTofF90 methodBodyTranspilerClass new: (SWTestProgram getMy: 39) with: { SWTestProgram });

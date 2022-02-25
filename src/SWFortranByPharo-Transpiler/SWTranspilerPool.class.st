@@ -41,6 +41,12 @@ SWTranspilerPool >> initialize_Boolean: ct [
 ]
 
 { #category : #initialization }
+SWTranspilerPool >> initialize_Magnitude: ct [
+	ct
+		senderTranspilerOf: #< is: [ :bt | bt putOpBinary ]
+]
+
+{ #category : #initialization }
 SWTranspilerPool >> initialize_Number: ct [
 	ct
 		senderTranspilerOf: #+ is: [ :bt | bt putOpBinary ];
@@ -56,6 +62,13 @@ SWTranspilerPool >> initialize_Object: ct [
 		senderTranspilerOf: #yourself is: [ :transpiler |
 			transpiler putYourself
 		]
+]
+
+{ #category : #initialization }
+SWTranspilerPool >> initialize_ProtoObject: ct [
+	ct
+		senderTranspilerOf: #ifNotNil:ifNil: is: [ :bt | bt putIfNotNilIfNil: true ];
+		senderTranspilerOf: #ifNil: is: [ :bt | bt putIfNotNil: false ]
 ]
 
 { #category : #'as yet unclassified' }

@@ -49,6 +49,11 @@ SWMethodBodyTranspiler >> << anObject [
 ]
 
 { #category : #accessing }
+SWMethodBodyTranspiler >> at: anObject [
+	self halt.
+]
+
+{ #category : #accessing }
 SWMethodBodyTranspiler >> atAssignTo: aVariable with: aValue [
 	self
 		transpileChild: self children second;
@@ -57,37 +62,14 @@ SWMethodBodyTranspiler >> atAssignTo: aVariable with: aValue [
 
 ]
 
-{ #category : #'code generation' }
-SWMethodBodyTranspiler >> atCascade: aCascadeNode [
-	aCascadeNode receiver class = RBVariableNode ifTrue: [
-		self
-			transpileChildrenWithDelimiter;
-			preventStatementDelimiter;
-			preventNewline
-	] ifFalse: [|receiver original|
-		receiver := self children first children first.
-		original := self children.
-		self put: 'function(_receiver_){'; cr; incIndent; put: ' return '.
-		self decoder children: (self children collect: [:child||copied|
-			copied := child copy.
-			copied children at: 1 put: (SWDecoder new
-				node: (RBVariableNode named: #_receiver_ );
-				result: receiver result;
-				yourself).
-			copied
-		]).
-		self transpileChildrenWithDelimiter.
-		self decoder children: original.
-		receiver node: (receiver node copy
-			parent: nil;
-			yourself).
-		self
-			putStatementDelimiter;
-			cr; decIndent; put: '}(';
-			transpileChild: receiver;
-			put: ')'
-	]
+{ #category : #accessing }
+SWMethodBodyTranspiler >> atBoolean: trueOrFalse [
+	^ self subclassResponsibility 
+]
 
+{ #category : #accessing }
+SWMethodBodyTranspiler >> atCascade: aCascadeNode [
+	^ self subclassResponsibility 
 ]
 
 { #category : #accessing }
@@ -102,6 +84,7 @@ SWMethodBodyTranspiler >> atInteger: anInteger [
 
 { #category : #accessing }
 SWMethodBodyTranspiler >> atMessage: aMessageNode [
+
 	aMessageNode parent class = RBMessageNode ifTrue: [ self put: '(' ].
 	(self pool predefinedSenderTranspiler: self sender) ifNotNil: [ :predefined |
 		predefined value: self
@@ -343,13 +326,17 @@ SWMethodBodyTranspiler >> putBasenameOn: aStream [
 
 { #category : #accessing }
 SWMethodBodyTranspiler >> putBlock [
-	self children allButLastDo: [ :child |
-		(self child: child)
-			putArgumentDeclaration
-	].
-	(self child: self children last)
-		isExpression: self isExpression;
-		putSequence
+	(self isExpression = false and: [ self children size = 1 ]) ifTrue: [
+		self children allButLastDo: [ :child |
+			(self child: child)
+				putArgumentDeclaration
+		].
+		(self child: self children last)
+			isExpression: self isExpression;
+			putSequence
+	] ifFalse: [
+		self halt.
+	]
 
 ]
 
@@ -410,6 +397,11 @@ SWMethodBodyTranspiler >> putFilenameOn: aStream [
 
 { #category : #'code generation' }
 SWMethodBodyTranspiler >> putIfFalse: aNode [
+	^ self subclassResponsibility 
+]
+
+{ #category : #'as yet unclassified' }
+SWMethodBodyTranspiler >> putIfNotNilIfNil: strait [
 	^ self subclassResponsibility 
 ]
 

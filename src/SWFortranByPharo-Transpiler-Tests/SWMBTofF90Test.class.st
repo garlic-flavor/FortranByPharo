@@ -5,7 +5,7 @@ Class {
 }
 
 { #category : #tests }
-SWMBTofF90Test >> test_01_Transcript [
+SWMBTofF90Test >> test_0410_Transcript [
 	|transpiler result|
 	transpiler := self transpileNo: 39 with: {  }.
 	result := transpiler stream contents.

@@ -79,6 +79,11 @@ SWDecoder >> atAssignTo: aLValue with: aRValue [
 
 ]
 
+{ #category : #accessing }
+SWDecoder >> atBoolean: aBoolean [
+	self result << aBoolean class
+]
+
 { #category : #'dispatching-callback' }
 SWDecoder >> atCascade: aCascadeNode [
 	self result << self decodeChildren

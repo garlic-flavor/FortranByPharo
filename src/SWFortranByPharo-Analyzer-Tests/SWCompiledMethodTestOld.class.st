@@ -11,7 +11,7 @@ Class {
 { #category : #running }
 SWCompiledMethodTestOld >> setUp [
 	super setUp.
-	compiledMethod := SWTestProgram >>#_45_locals:.
+	compiledMethod := SWTestProgram >>#_0440_locals:.
 	cc := SWCompiledMethodOld new: compiledMethod receiver: SWTestProgram with: { Dictionary }
 
 ]

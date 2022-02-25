@@ -16,7 +16,7 @@ SWMethodBodyTranspilerTest >> resultWith: arguments [
 	transpiler := self transpileNo: (self noFromSelector: thisContext sender selector) with: arguments.
 	result := transpiler stream contents.
 	result inspect.
-	self halt.
+
 ]
 
 { #category : #'as yet unclassified' }

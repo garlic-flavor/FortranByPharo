@@ -27,6 +27,40 @@ SWMBTofJS class >> senderTranspilerClass [
 	^ SWSTofJS
 ]
 
+{ #category : #'as yet unclassified' }
+SWMBTofJS >> atBoolean: trueOrFalse [
+	self put: (trueOrFalse ifTrue: [ 'true' ] ifFalse: [ 'false' ])
+]
+
+{ #category : #'code generation' }
+SWMBTofJS >> atCascade: aCascadeNode [
+	aCascadeNode receiver class = RBVariableNode ifTrue: [
+		self
+			putSequence;
+			preventStatementDelimiter;
+			preventNewline
+	] ifFalse: [|receiver original|
+		receiver := self children first children first.
+		original := self children.
+		self put: 'function(_receiver_){'; cr; incIndent; put: 'return ('; cr; incIndent.
+		self children do: [:child|
+			child children at: 1 put: (SWDecoder new
+				node: (RBVariableNode named: #_receiver_ );
+				result: receiver result;
+				yourself).
+			(self child: child)
+				transpile.
+		] separatedBy: [ self put: ', '; cr ].
+		
+		self put: ');'; cr; decIndent; decIndent; put: '}('.
+		(self child: receiver)
+			isExpression: true;
+			transpile.
+		self put: ')'
+	]
+
+]
+
 { #category : #accessing }
 SWMBTofJS >> atClosure: aBlockNode [
 	self halt.
@@ -85,6 +119,11 @@ SWMBTofJS >> putBlockAsExpression: aBlock [
 	]
 ]
 
+{ #category : #'as yet unclassified' }
+SWMBTofJS >> putBoolean: trueOrFalse [
+	self put: (trueOrFalse ifTrue: [ 'true' ] ifFalse: [ 'false' ])
+]
+
 { #category : #'code generation' }
 SWMBTofJS >> putCascade: aRBCascadeNode [
 	|variables receiver|
@@ -119,6 +158,78 @@ SWMBTofJS >> putFilenameOn: aStream [
 	aStream << 'cache/'.
 	super putBasenameOn: aStream.
 	aStream << '.mjs'
+]
+
+{ #category : #'as yet unclassified' }
+SWMBTofJS >> putIfNotNil: strait [
+	self isExpression ifTrue: [|conditionNode|
+		conditionNode := self children first node.
+		conditionNode class = RBVariableNode ifTrue: [
+			self
+				put: '(';
+				put: conditionNode name;
+				put: (strait ifTrue: [ ' == ' ] ifFalse: [ ' != ' ]);
+				put: ' null ? ';
+				put: conditionNode name;
+				put: ' : '.
+			(self child: self children second)
+				isExpression: true;
+				putBlock.
+			self  put: ')'
+		] ifFalse: [
+			self halt.
+		]
+
+	] ifFalse: [
+		self halt.
+		self put: 'if('.
+		strait ifFalse: [ self put: '!' ].
+		(self child: self children first)
+			isExpression: true;
+			transpile.
+		self put: '){'; cr; incIndent.
+		(self child: self children second)
+			isExpression: false;
+			putBlock.
+		self decIndent; put: '}'; preventStatementDelimiter
+	]
+
+]
+
+{ #category : #'as yet unclassified' }
+SWMBTofJS >> putIfNotNilIfNil: strait [
+	self isExpression ifTrue: [
+		self put: '('.
+		(self child: self children first)
+			isExpression: true;
+			transpile.
+		self put: (strait ifTrue: [ ' != null ' ] ifFalse: [ ' == null'  ]).
+		self put: ' ? '.
+		(self child: self children second)
+			isExpression: true;
+			putBlock.
+		self 	put: ' : '.
+		(self child: self children third)
+			isExpression: true;
+			putBlock.
+		self put: ')'.
+	] ifFalse: [
+		self put: 'if('.
+		(self child: self children first)
+			isExpression: true;
+			transpile.
+		self put: (strait ifTrue: [ ' != null' ] ifFalse: [ ' == null'  ]).
+		self put: '){'; cr; incIndent.
+		(self child: self children second)
+			isExpression: false;
+			putBlock.
+		self decIndent; put: '} else {'; cr; incIndent.
+		(self child: self children third)
+			isExpression: false;
+			putBlock.
+		self decIndent; put: '}'; preventStatementDelimiter
+	]
+
 ]
 
 { #category : #'code generation' }
@@ -208,21 +319,25 @@ SWMBTofJS >> putNil [
 { #category : #enumerating }
 SWMBTofJS >> putOnDo [
 	self isExpression ifTrue: [
-		self
-			put: 'function(){ try {'; cr; incIndent; put: 'return ';
-			transpileChild: self decoder children first;
-			putStatementDelimiter;
-			cr; decIndent; put: '} catch {'; cr; incIndent; put: 'return ';
-			transpileChild: self decoder children third;
-			putStatementDelimiter; cr; decIndent; put: '}}()'
+		self put: 'function(){ try {'; cr; incIndent; put: 'return '.
+		(self child: self children first)
+			isExpression: true;
+			putBlock.
+		self putStatementDelimiter; cr; decIndent; put: '} catch {'; cr; incIndent; put: 'return '.
+		(self child: self children third)
+			isExpression: true;
+			putBlock.
+		self putStatementDelimiter; cr; decIndent; put: '}}()'
 	] ifFalse: [
-		self halt.
-		self
-			put: 'try {';
-			transpileChildAsNotExpression: self children first;
-			put: '} catch {';
-			transpileChildAsNotExpression: self children third;
-			put: '}'
+		self put: 'try {'; cr; incIndent.
+		(self child: self children first)
+			isExpression: false;
+			putBlock.
+		self decIndent; put: '} catch {'; cr; incIndent.
+		(self child: self children third)
+			isExpression: false;
+			putBlock.
+		self decIndent; put: '}'; preventStatementDelimiter 
 	]
 
 "

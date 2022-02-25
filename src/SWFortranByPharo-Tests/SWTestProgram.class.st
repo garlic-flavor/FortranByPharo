@@ -109,90 +109,64 @@ SWTestProgram >> _0140_ifFalse: needle [
 ]
 
 { #category : #'tests - source' }
-SWTestProgram >> _14_ifFalse_shortcircuit: needle [
+SWTestProgram >> _0150_ifFalse_shortcircuit: needle [
 	needle ifFalse: [ ^ 123 ].
 	^ 'true'
 	
 ]
 
 { #category : #'tests - source' }
-SWTestProgram >> _15_ifNotNil_ifNil: needle [
+SWTestProgram >> _0160_ifNotNil_ifNil: needle [
 	needle ifNotNil: [ 123 ] ifNil: [ 'Nil' ]
 	
 ]
 
 { #category : #'tests - source' }
-SWTestProgram >> _16_ifNotNil_ifNil_expression: needle [
+SWTestProgram >> _0170_ifNotNil_ifNil_expression: needle [
 	^ needle ifNotNil: [ 123 ] ifNil: [ 'Nil' ]
 	
 ]
 
 { #category : #'tests - source' }
-SWTestProgram >> _17_ifNotNil_ifNil_shortcircuit: needle [
+SWTestProgram >> _0180_ifNotNil_ifNil_shortcircuit: needle [
 	needle ifNotNil: [ ^ 123 ] ifNil: [ ^ 'Nil' ]
 	
 ]
 
 { #category : #'tests - source' }
-SWTestProgram >> _18_ifNil_ifNotNil: needle [
+SWTestProgram >> _0190_ifNil_ifNotNil: needle [
 	needle ifNil: [ 123 ] ifNotNil: [ 'NotNil' ]
 	
 ]
 
 { #category : #'tests - source' }
-SWTestProgram >> _19_ifNil_ifNotNil_expression: needle [
+SWTestProgram >> _0200_ifNil_ifNotNil_expression: needle [
 	^ needle ifNil: [ 123 ] ifNotNil: [ 'NotNil' ]
 	
 ]
 
 { #category : #'tests - source' }
-SWTestProgram >> _20_ifNil_ifNotNil_shortcircuit: needle [
+SWTestProgram >> _0210_ifNil_ifNotNil_shortcircuit: needle [
 	needle ifNil: [ ^ 123 ] ifNotNil: [ ^ 'NotNil' ]
 	
 ]
 
 { #category : #'tests - source' }
-SWTestProgram >> _21_ifNil: needle [
-	needle ifNil: [ 123 ]
-	
-]
-
-{ #category : #'tests - source' }
-SWTestProgram >> _22_ifNil_expression: needle [
-	^ needle ifNil: [ 123 ]
-	
-]
-
-{ #category : #'tests - source' }
-SWTestProgram >> _23_ifNil_shortcircuit: needle [
-	needle ifNil: [ ^ 123 ].
-	^ 'notnil'
-	
-]
-
-{ #category : #'tests - source' }
-SWTestProgram >> _24_ifNil_accessor [
-	^ var1 ifNil: [ var1 := 123 ]
-
-	
-]
-
-{ #category : #'tests - source' }
-SWTestProgram >> _25_ifNotNil: needle [
+SWTestProgram >> _0220_ifNotNil: needle [
 	needle ifNotNil: [ 123 ]
 
 	
 ]
 
 { #category : #'tests - source' }
-SWTestProgram >> _26_ifNotNil_expression: needle [
+SWTestProgram >> _0230_ifNotNil_expression: needle [
 	^ needle ifNotNil: [ 123 ]
 
 	
 ]
 
 { #category : #'tests - source' }
-SWTestProgram >> _27_ifNotNil_shortcircuit: needle [
+SWTestProgram >> _0240_ifNotNil_shortcircuit: needle [
 	needle ifNotNil: [ ^ 123 ].
 	^ 'nil'
 
@@ -200,20 +174,46 @@ SWTestProgram >> _27_ifNotNil_shortcircuit: needle [
 ]
 
 { #category : #'tests - source' }
-SWTestProgram >> _28_method_call [
+SWTestProgram >> _0250_ifNil: needle [
+	needle ifNil: [ 123 ]
+	
+]
+
+{ #category : #'tests - source' }
+SWTestProgram >> _0260_ifNil_expression: needle [
+	^ needle ifNil: [ 123 ]
+	
+]
+
+{ #category : #'tests - source' }
+SWTestProgram >> _0270_ifNil_shortcircuit: needle [
+	needle ifNil: [ ^ 123 ].
+	^ 'notnil'
+	
+]
+
+{ #category : #'tests - source' }
+SWTestProgram >> _0280_ifNil_accessor [
+	^ var1 ifNil: [ var1 := 123 ]
+
+	
+]
+
+{ #category : #'tests - source' }
+SWTestProgram >> _0290_method_call [
 	^ SWStd print: 'hoge!'
 ]
 
 { #category : #'tests - source' }
-SWTestProgram >> _30_recursive_message_call: arg1 [
+SWTestProgram >> _0300_recursive_message_call: arg1 [
 
 	^ 0 < arg1
-		  ifTrue: [ arg1 + (self _30_recursive_message_call: arg1 - 1) ]
+		  ifTrue: [ arg1 + (self _0300_recursive_message_call: arg1 - 1) ]
 		  ifFalse: [ 0 ]
 ]
 
 { #category : #'tests - source' }
-SWTestProgram >> _31_new: arg1 [
+SWTestProgram >> _0310_new: arg1 [
 	|loc1 loc2|
 	loc1 := Dictionary new.
 	loc2 := Set new.
@@ -221,7 +221,7 @@ SWTestProgram >> _31_new: arg1 [
 ]
 
 { #category : #'tests - source' }
-SWTestProgram >> _32_return_literal [
+SWTestProgram >> _0320_return_literal [
 	|dict url|
 	dict := Dictionary new.
 	dict at: 'fuga' put: (url ifNil: [ 'hoge' ]).
@@ -229,7 +229,7 @@ SWTestProgram >> _32_return_literal [
 ]
 
 { #category : #'tests - source' }
-SWTestProgram >> _33_try_catch [
+SWTestProgram >> _0330_try_catch [
 
 	[  
 		1 + 2
@@ -239,7 +239,7 @@ SWTestProgram >> _33_try_catch [
 ]
 
 { #category : #'tests - source' }
-SWTestProgram >> _34_try_catch_expression [
+SWTestProgram >> _0340_try_catch_expression [
 
 	^ [  
 		1 + 2
@@ -249,7 +249,7 @@ SWTestProgram >> _34_try_catch_expression [
 ]
 
 { #category : #'tests - source' }
-SWTestProgram >> _35_try_catch_shortcircuit [
+SWTestProgram >> _0350_try_catch_shortcircuit [
 
 	 [  
 		^ 1 + 2
@@ -260,48 +260,34 @@ SWTestProgram >> _35_try_catch_shortcircuit [
 ]
 
 { #category : #'tests - source' }
-SWTestProgram >> _36_ensure [
+SWTestProgram >> _0360_ensure [
 	[ 
 		123
 	] ensure: [ 'hoge' ]
 ]
 
 { #category : #'tests - source' }
-SWTestProgram >> _37_ensure_expression [
+SWTestProgram >> _0370_ensure_expression [
 	^ [ 
 		123
 	] ensure: [ 'hoge' ]
 ]
 
 { #category : #'tests - source' }
-SWTestProgram >> _38_ensure_shortcircuit [
+SWTestProgram >> _0380_ensure_shortcircuit [
 	[ 
 		^ 123
 	] ensure: [ 'hoge' ].
 	^ 'false'
 ]
 
-{ #category : #'tests - source' }
-SWTestProgram >> _39_call_Transcript [
-
-	Transcript
-		show: 'Hello, good-bye!';
-		cr;
-		cr
-]
-
 { #category : #'as yet unclassified' }
-SWTestProgram >> _40_user_specified_variable_type [
-
-	| tmp1 |
-	SWType declare: #tmp1 as: Integer.
-	tmp1 := 3.14159265358979.
-
-	^ tmp1 * 2.23620679
+SWTestProgram >> _0390_opBinaries: a [
+	^ a + 100 * 200 - 300 / 400
 ]
 
 { #category : #'tests - source' }
-SWTestProgram >> _41_cascading: uri [
+SWTestProgram >> _0400_cascading: uri [
 	^ (SWServerStatus new
 		failed;
 		message: 'hogehoge';
@@ -310,13 +296,17 @@ SWTestProgram >> _41_cascading: uri [
 
 ]
 
-{ #category : #'as yet unclassified' }
-SWTestProgram >> _42_opBinaries: a [
-	^ a + 100 * 200 - 300 / 400
+{ #category : #'tests - source' }
+SWTestProgram >> _0410_call_Transcript [
+
+	Transcript
+		show: 'Hello, good-bye!';
+		cr;
+		cr
 ]
 
 { #category : #'as yet unclassified' }
-SWTestProgram >> _43_closure_local_variable [
+SWTestProgram >> _0420_closure_local_variable [
 
 	[ |hoge|
 		hoge := 123.
@@ -326,7 +316,7 @@ SWTestProgram >> _43_closure_local_variable [
 ]
 
 { #category : #'as yet unclassified' }
-SWTestProgram >> _44_ifTrue_and_local_variable [
+SWTestProgram >> _0430_ifTrue_and_local_variable [
 	|outervar|
 	outervar := true.
 	outervar ifTrue: [|inner| 
@@ -337,7 +327,7 @@ SWTestProgram >> _44_ifTrue_and_local_variable [
 ]
 
 { #category : #'as yet unclassified' }
-SWTestProgram >> _45_locals: arg1 [
+SWTestProgram >> _0440_locals: arg1 [
 	|outer1|
 	outer1 := true.
 	^ outer1 ifTrue: [|inner|
@@ -346,6 +336,16 @@ SWTestProgram >> _45_locals: arg1 [
 		inner := 345.
 		inner2 := 'hello'
 	]
+]
+
+{ #category : #'as yet unclassified' }
+SWTestProgram >> _40_user_specified_variable_type [
+
+	| tmp1 |
+	SWType declare: #tmp1 as: Integer.
+	tmp1 := 3.14159265358979.
+
+	^ tmp1 * 2.23620679
 ]
 
 { #category : #'as yet unclassified' }

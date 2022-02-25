@@ -28,6 +28,35 @@ SWMBTofF90 class >> senderTranspilerClass [
 ]
 
 { #category : #'code generation' }
+SWMBTofF90 >> atCascade: aCascadeNode [
+	aCascadeNode receiver class = RBVariableNode ifTrue: [
+		self
+			transpileChildrenWithDelimiter;
+			preventStatementDelimiter;
+			preventNewline
+	] ifFalse: [|receiver original|
+		receiver := self children first children first.
+		original := self children.
+		self put: 'function(_receiver_){'; cr; incIndent; put: 'return ('.
+		self children do: [:child|
+			child children at: 1 put: (SWDecoder new
+				node: (RBVariableNode named: #_receiver_ );
+				result: receiver result;
+				yourself).
+			(self child: child)
+				transpile.
+		] separatedBy: [ self put: ', ' ].
+		
+		self decIndent; put: '); }('.
+		(self child: receiver)
+			isExpression: true;
+			transpile.
+		self put: ')'
+	]
+
+]
+
+{ #category : #'code generation' }
 SWMBTofF90 >> putCascade: aRBCascadeNode [
 
 	(self trySimpleCascade: aRBCascadeNode) ifTrue: [ ^ self ].
