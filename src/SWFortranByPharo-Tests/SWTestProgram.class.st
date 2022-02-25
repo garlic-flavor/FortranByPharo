@@ -10,6 +10,12 @@ Class {
 	#category : #'SWFortranByPharo-Tests'
 }
 
+{ #category : #'as yet unclassified' }
+SWTestProgram class >> getBySelector: aSelector [
+	^ self getMy: ((aSelector copyAfter: $_) copyUpTo: $_) asInteger.
+
+]
+
 { #category : #acccessing }
 SWTestProgram class >> getMy: no [
 	|header|

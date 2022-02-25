@@ -8,18 +8,18 @@ Class {
 }
 
 { #category : #'code generation' }
-SWMDTofJS >> putFunctionFooter [
+SWMDTofJS >> putMethodFooter [
 	self stream putLine: '}'.
 
 ]
 
 { #category : #'code generation' }
-SWMDTofJS >> putFunctionHeader [
+SWMDTofJS >> putMethodHeader [
 	self bodyTranspiler method methodClass isClassSide ifTrue: [
 		self stream put: 'static '
 	].
 	self stream
-		put: self bodyTranspiler mangledName;
+		put: self bodyTranspiler mangle;
 		put: '('.
 
 	self bodyTranspiler arguments do: [ :vi |

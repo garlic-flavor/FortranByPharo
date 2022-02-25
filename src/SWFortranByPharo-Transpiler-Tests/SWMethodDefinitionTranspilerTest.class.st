@@ -1,14 +1,15 @@
 Class {
-	#name : #SWMethodBodyTranspilerTest,
+	#name : #SWMethodDefinitionTranspilerTest,
 	#superclass : #SWTranspilerTestBase,
 	#category : #'SWFortranByPharo-Transpiler-Tests-Common'
 }
 
 { #category : #utilities }
-SWMethodBodyTranspilerTest >> transpile: selector with: args [
+SWMethodDefinitionTranspilerTest >> transpile: selector with: args [
 	self setUpDecoder: selector with: args.
-	transpiler decoder: decoder.
+	transpiler bodyTranspiler: (SWMBTofJS new
+		decoder: decoder;
+		yourself).
 	transpiler stream newline: String cr.
-	transpiler transpile.
-
+	transpiler transpile
 ]

@@ -49,6 +49,11 @@ SWMethodBodyTranspiler >> << anObject [
 ]
 
 { #category : #accessing }
+SWMethodBodyTranspiler >> arguments [
+	^ self node arguments
+]
+
+{ #category : #accessing }
 SWMethodBodyTranspiler >> at: anObject [
 	self halt.
 ]
@@ -221,6 +226,11 @@ SWMethodBodyTranspiler >> isExpression: anObject [
 { #category : #'as yet unclassified' }
 SWMethodBodyTranspiler >> mangle [
 	^ self class mangleClass mangle: self decoder
+]
+
+{ #category : #accessing }
+SWMethodBodyTranspiler >> method [
+	^ self decoder method
 ]
 
 { #category : #'instance creation' }

@@ -324,6 +324,11 @@ SWDecoder >> logger: anObject [
 ]
 
 { #category : #accessing }
+SWDecoder >> method [
+	^ self sender method
+]
+
+{ #category : #accessing }
 SWDecoder >> method: aMethod [
 	self sender method: aMethod.
 	self node: aMethod sourceNode.

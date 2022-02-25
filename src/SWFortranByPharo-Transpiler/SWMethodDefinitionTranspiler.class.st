@@ -24,12 +24,12 @@ SWMethodDefinitionTranspiler >> bodyTranspiler: anObject [
 ]
 
 { #category : #'code generation' }
-SWMethodDefinitionTranspiler >> putFunctionFooter [
+SWMethodDefinitionTranspiler >> putMethodFooter [
 	^ self subclassResponsibility 
 ]
 
 { #category : #'code generation' }
-SWMethodDefinitionTranspiler >> putFunctionHeader [
+SWMethodDefinitionTranspiler >> putMethodHeader [
 	^ self subclassResponsibility 
 ]
 
@@ -48,10 +48,10 @@ SWMethodDefinitionTranspiler >> stream: anObject [
 { #category : #'public API' }
 SWMethodDefinitionTranspiler >> transpile [
 	self stream putComment: self bodyTranspiler method comment.
-	self putFunctionHeader.
+	self putMethodHeader.
 	self stream incIndent.
 	self bodyTranspiler transpile.
 	self stream decIndent.
-	self putFunctionFooter.
+	self putMethodFooter.
 
 ]
