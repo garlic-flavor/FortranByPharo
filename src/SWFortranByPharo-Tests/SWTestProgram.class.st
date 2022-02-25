@@ -339,17 +339,7 @@ SWTestProgram >> _0440_locals: arg1 [
 ]
 
 { #category : #'as yet unclassified' }
-SWTestProgram >> _40_user_specified_variable_type [
-
-	| tmp1 |
-	SWType declare: #tmp1 as: Integer.
-	tmp1 := 3.14159265358979.
-
-	^ tmp1 * 2.23620679
-]
-
-{ #category : #'as yet unclassified' }
-SWTestProgram >> _46_locals2: arg1 [
+SWTestProgram >> _0450_locals2: arg1 [
 	|outer0 outer1 outer2 outer3|
 	outer1 := true.
 	[ :arg2| |inner1|
@@ -361,46 +351,55 @@ SWTestProgram >> _46_locals2: arg1 [
 ]
 
 { #category : #'as yet unclassified' }
-SWTestProgram >> _47_access_to_instance_variables [
-	|satp|
-	satp := SWTestProgram new.
-	satp var1: 999.
-	^ satp var1
-	
+SWTestProgram >> _0460_access_to_local_variables [
+	|tp|
+	tp := SWTestProgram new.
+	tp var1: 123.
+	^ tp var1
 ]
 
 { #category : #'as yet unclassified' }
-SWTestProgram >> _48_SWShellEnvironemt_default [
+SWTestProgram >> _0470_user_specified_variable_type [
+
+	| tmp1 |
+	SWType declare: #tmp1 as: Integer.
+	tmp1 := 3.14159265358979.
+
+	^ tmp1 * 2.23620679
+]
+
+{ #category : #'as yet unclassified' }
+SWTestProgram >> _1010_SWShellEnvironemt_default [
 	^ SWShellEnvironment default
 
 ]
 
 { #category : #'as yet unclassified' }
-SWTestProgram >> _49_SWShellEnvironemtLocalDirectory [
+SWTestProgram >> _1020_SWShellEnvironemtLocalDirectory [
 	^ SWShellEnvironment default localDirectory
 
 ]
 
 { #category : #'as yet unclassified' }
-SWTestProgram >> _50_SWShell_class_execute [
+SWTestProgram >> _1030_SWShell_class_execute [
 	^ SWShell execute: 'echo hoge'
 
 ]
 
 { #category : #'as yet unclassified' }
-SWTestProgram >> _51_TestCase [
+SWTestProgram >> _1040_TestCase [
 	^ TestCase selector: 'hoge'
 ]
 
 { #category : #'as yet unclassified' }
-SWTestProgram >> _52_ZnServerClass_default [
+SWTestProgram >> _1050_ZnServerClass_default [
 
 	ZnServer startDefaultOn: 50000.
 	^ ZnServer default
 ]
 
 { #category : #'as yet unclassified' }
-SWTestProgram >> _53_SWServerClass_starton [
+SWTestProgram >> _1060_SWServerClass_starton [
 
 	^ SWServer start
 ]

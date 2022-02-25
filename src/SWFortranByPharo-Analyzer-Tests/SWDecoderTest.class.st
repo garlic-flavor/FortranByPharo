@@ -1,47 +1,8 @@
 Class {
 	#name : #SWDecoderTest,
-	#superclass : #TestCase,
-	#instVars : [
-		'decoder'
-	],
+	#superclass : #SWDecoderTestBase,
 	#category : #'SWFortranByPharo-Analyzer-Tests-Analyzer'
 }
-
-{ #category : #'as yet unclassified' }
-SWDecoderTest >> decodeNo: no with: args [
-	^ decoder
-		method: (SWTestProgram getMy: no);
-		operands: (args copyWithFirst: SWTestProgram);
-		decode;
-		yourself
-]
-
-{ #category : #'as yet unclassified' }
-SWDecoderTest >> noFromSelector: selector [
-	^ ((selector copyAfter: $_) copyUpTo: $_) asInteger.
-
-]
-
-{ #category : #'as yet unclassified' }
-SWDecoderTest >> resultWith: args [
-	self decodeNo: (self noFromSelector: thisContext sender selector) with: args.
-	self halt.
-]
-
-{ #category : #'as yet unclassified' }
-SWDecoderTest >> resultWith: args equals: type [
-	self decodeNo: (self noFromSelector: thisContext sender selector) with: args.
-	self assert: decoder sender result value equals: type
-
-]
-
-{ #category : #running }
-SWDecoderTest >> setUp [
-	super setUp.
-	decoder := SWDecoder new
-
-
-]
 
 { #category : #tests }
 SWDecoderTest >> test_0010_nop [
@@ -91,175 +52,135 @@ SWDecoderTest >> test_0090_ifTrue_ifFalse [
 ]
 
 { #category : #tests }
-SWDecoderTest >> test_11_ifTrue [
-	self resultOfNo: 11 with: { Boolean } equals: SWTestProgram
+SWDecoderTest >> test_0120_ifTrue [
+	self resultWith: { Boolean } equals: SWTestProgram
 ]
 
 { #category : #tests }
-SWDecoderTest >> test_13_ifFalse [
-	self resultOfNo: 13 with: { Boolean } equals: SWTestProgram
+SWDecoderTest >> test_0140_ifFalse [
+	self resultWith: { Boolean } equals: SWTestProgram
 ]
 
 { #category : #tests }
-SWDecoderTest >> test_16_ifNotNil_ifNil_expression [
-	self resultOfNo: 16 with: { Boolean } equals: SmallInteger
+SWDecoderTest >> test_0170_ifNotNil_ifNil_expression [
+	self resultWith: { Boolean } equals: SmallInteger
 ]
 
 { #category : #tests }
-SWDecoderTest >> test_18_ifNil_ifNotNil_expression [
-	self resultOfNo: 18 with: { Boolean } equals: SWTestProgram
+SWDecoderTest >> test_0190_ifNil_ifNotNil [
+	self resultWith: { Boolean } equals: SWTestProgram
 ]
 
 { #category : #tests }
-SWDecoderTest >> test_22_ifNil_expression [
-	self resultOfNo: 22 with: { UndefinedObject } equals: SmallInteger.
-
-]
-
-{ #category : #tests }
-SWDecoderTest >> test_22_ifNil_expression2 [
-	self resultOfNo: 22 with: { String } equals: String
+SWDecoderTest >> test_0240_ifNotNil_shortcircuit [
+	self resultWith: { UndefinedObject } equals: SmallInteger
 
 ]
 
 { #category : #tests }
-SWDecoderTest >> test_27_ifNotNil_shortcircuit [
-	self resultOfNo: 27 with: { UndefinedObject } equals: SmallInteger
+SWDecoderTest >> test_0260_ifNil_expression [
+	self resultWith: { UndefinedObject } equals: SmallInteger.
 
 ]
 
 { #category : #tests }
-SWDecoderTest >> test_28_method_call [
-	self resultOfNo: 28 with: { } equals: SWStd class
+SWDecoderTest >> test_0260_ifNil_expression2 [
+	self resultWith: { String } equals: String
 
 ]
 
 { #category : #tests }
-SWDecoderTest >> test_30_recursive_message_call [
-	self resultOfNo: 30 with: { SmallInteger } equals: SmallInteger
+SWDecoderTest >> test_0290_method_call [
+	self resultWith: { } equals: SWStd class
 
 ]
 
 { #category : #tests }
-SWDecoderTest >> test_31_new [
-	self resultOfNo: 31 with: { SmallInteger } equals: Set
+SWDecoderTest >> test_0300_recursive_message_call [
+	self resultWith: { SmallInteger } equals: SmallInteger
 
 ]
 
 { #category : #tests }
-SWDecoderTest >> test_32_return_literal [
-	self resultOfNo: 32 with: {  } equals: Dictionary
+SWDecoderTest >> test_0310_new [
+	self resultWith: { SmallInteger } equals: Set
 
 ]
 
 { #category : #tests }
-SWDecoderTest >> test_33_try_catch [
-	self resultOfNo: 33 with: {  } equals: SWTestProgram
+SWDecoderTest >> test_0320_return_literal [
+	self resultWith: {  } equals: Dictionary
 
 ]
 
 { #category : #tests }
-SWDecoderTest >> test_34_try_catch_expression [
-	self resultOfNo: 34 with: {  } equals: SmallInteger
+SWDecoderTest >> test_0330_try_catch [
+	self resultWith: {  } equals: SWTestProgram
 
 ]
 
 { #category : #tests }
-SWDecoderTest >> test_37_try_catch_expression [
-	self resultOfNo: 37 with: {  } equals: SmallInteger
+SWDecoderTest >> test_0340_try_catch_expression [
+	self resultWith: {  } equals: SmallInteger
 
 ]
 
 { #category : #tests }
-SWDecoderTest >> test_38_try_catch_shortcircuit [
-	self resultOfNo: 38 with: {  } equals: SmallInteger
+SWDecoderTest >> test_0350_try_catch_shortcircuit [
+	self resultWith: {  } equals: SmallInteger
 
 ]
 
 { #category : #tests }
-SWDecoderTest >> test_39_call_Transceipt [
-	self resultOfNo: 39 with: {  } equals: SWTestProgram
+SWDecoderTest >> test_0390_opBinaries [
+	self resultWith: { Float } equals: Float
 
 ]
 
 { #category : #tests }
-SWDecoderTest >> test_40_user_specified_variable_type [
-	self resultOfNo: 40 with: {  } equals: Integer
+SWDecoderTest >> test_0400_cascading [
+	self resultWith: { String } equals: String
 
 ]
 
 { #category : #tests }
-SWDecoderTest >> test_41_cascading [
-	self resultOfNo: 41 with: { String } equals: String
+SWDecoderTest >> test_0410_call_Transceipt [
+	self resultWith: {  } equals: SWTestProgram
 
 ]
 
 { #category : #tests }
-SWDecoderTest >> test_42_opBinaries [
-	self resultOfNo: 42 with: { Float } equals: Float
+SWDecoderTest >> test_0420_closure_local_variable [
+	self resultWith: { } equals: SWTestProgram
 
 ]
 
 { #category : #tests }
-SWDecoderTest >> test_43_closure_local_variable [
-	self resultOfNo: 43 with: { } equals: SWTestProgram
+SWDecoderTest >> test_0430_ifTrue_and_local_variable [
+	self resultWith: { } equals: SmallInteger
 
 ]
 
 { #category : #tests }
-SWDecoderTest >> test_44_ifTrue_and_local_variable [
-	self resultOfNo: 44 with: { } equals: SmallInteger
+SWDecoderTest >> test_0440_locals [
+	self resultWith: { String } equals: SmallInteger
 
 ]
 
 { #category : #tests }
-SWDecoderTest >> test_45_locals [
-	self resultOfNo: 45 with: { String } equals: SmallInteger
+SWDecoderTest >> test_0450_locals2 [
+	self resultWith: { String } equals: SmallInteger
 
 ]
 
 { #category : #tests }
-SWDecoderTest >> test_46_locals2 [
-	self resultOfNo: 46 with: { String } equals: SmallInteger
+SWDecoderTest >> test_0460_access_to_instance_variable [
+	self resultWith: {  } equals: SmallInteger
 
 ]
 
 { #category : #tests }
-SWDecoderTest >> test_47_access_to_instance_variable [
-	self resultOfNo: 47 with: {  } equals: SmallInteger
+SWDecoderTest >> test_0470_user_specified_variable_type [
+	self resultWith: {  } equals: Integer
 
-]
-
-{ #category : #tests }
-SWDecoderTest >> test_48_SWShellEnvironment_default [
-	self resultOfNo: 48 with: { } equals: SWShellEnvironment
-]
-
-{ #category : #tests }
-SWDecoderTest >> test_49_SWShellEnvironment_localDirectory [
-	self resultOfNo: 49 with: { } equals: FileLocator
-]
-
-{ #category : #tests }
-SWDecoderTest >> test_50_SWShell_class_execute [
-	decoder haltAtUnresolvedSelector: false.
-	self resultOfNo: 50 with: { } equals: String
-]
-
-{ #category : #tests }
-SWDecoderTest >> test_51_TestCase [
-
-	self resultOfNo: 51 with: { } equals: TestCase
-]
-
-{ #category : #tests }
-SWDecoderTest >> test_52_ZnServerClass_default [
-	decoder haltAtUnresolvedSelector: false.
-	self resultOfNo: 52 with: { } equals: ZnManagingMultiThreadedServer 
-]
-
-{ #category : #tests }
-SWDecoderTest >> test_53_SWServerClass_starton [
-	decoder haltAtUnresolvedSelector: false.
-	self resultOfNo: 53 with: { } equals: SWServer
 ]

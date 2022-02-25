@@ -13,7 +13,7 @@ Class {
 SWCompiledBlockTestOld >> setUp [
 	super setUp.
 	
-	compiledMethod := SWTestProgram>>#_46_locals2:.
+	compiledMethod := SWTestProgram>>#_0450_locals2:.
 	cc := SWCompiledBlockDripperOld dripFrom: compiledMethod receiver: SWTestProgram args: { Dictionary }.
 	compiledBlock := cc payload.
 	"Put here a common initialization logic for tests"

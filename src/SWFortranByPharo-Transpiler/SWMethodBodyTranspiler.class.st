@@ -326,17 +326,27 @@ SWMethodBodyTranspiler >> putBasenameOn: aStream [
 
 { #category : #accessing }
 SWMethodBodyTranspiler >> putBlock [
-	(self isExpression = false and: [ self children size = 1 ]) ifTrue: [
-		self children allButLastDo: [ :child |
-			(self child: child)
-				putArgumentDeclaration
-		].
-		(self child: self children last)
-			isExpression: self isExpression;
-			putSequence
-	] ifFalse: [
-		self halt.
+	|functionized|
+	functionized := (self isExpression and: [ self node arguments isNotEmpty or: [ self node temporaries isNotEmpty ] ]).
+	functionized ifTrue: [
+		self put: 'function('.
+		self node arguments do: [ :each |
+			self put: each name
+		] separatedBy: [ self put: ', ' ].
+		self put: '){'; cr; incIndent.
+	].
+	self children allButLastDo: [ :child |
+		(self child: child)
+			putArgumentDeclaration
+	].
+	(self child: self children last)
+		isExpression: (functionized not and: [ self isExpression ]);
+		putSequence.
+	functionized ifTrue: [
+		self
+			decIndent; put: '}()'
 	]
+	
 
 ]
 

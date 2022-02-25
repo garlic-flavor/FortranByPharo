@@ -222,18 +222,17 @@ return outervar;
 
 { #category : #tests }
 SWMBTofJSTest >> test_0440_locals [
-	self resultWith: { SmallInteger }
-]
-
-{ #category : #tests }
-SWMBTofJSTest >> test_12_has_arguments [
-	|transpiler result|
-	transpiler := self transpileNo: 2 with: { String }.
-	result := transpiler stream contents.
-	self halt.
-	self assert: result equals: 'Transcript.show_("Hello, good-bye!");
-Transcript.cr();
-Transcript.cr();
+	self resultWith: { SmallInteger } equals: 'var outer1 = null;
+outer1 = true;
+return (outer1 ? function(){
+    var inner = null;
+    inner = 234;
+}() : function(){
+    var inner = null;
+    var inner2 = null;
+    inner = 345;
+    inner2 = "hello";
+}());
 '
 ]
 
