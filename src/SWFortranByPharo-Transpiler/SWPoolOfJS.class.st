@@ -11,3 +11,8 @@ Class {
 SWPoolOfJS class >> classInfoClass [
 	^ SWCDTofJS
 ]
+
+{ #category : #'as yet unclassified' }
+SWPoolOfJS class >> methodBodyTranspilerClass [
+	^ SWMBTofJS
+]

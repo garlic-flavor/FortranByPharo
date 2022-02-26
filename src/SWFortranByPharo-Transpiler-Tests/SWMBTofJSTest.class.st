@@ -4,6 +4,11 @@ Class {
 	#category : #'SWFortranByPharo-Transpiler-Tests-JS'
 }
 
+{ #category : #'as yet unclassified' }
+SWMBTofJSTest class >> poolClass [
+	^ SWPoolOfJS
+]
+
 { #category : #tests }
 SWMBTofJSTest >> test_0010_nop [
 	self resultWith: {  } equals: ''
@@ -234,18 +239,4 @@ return (outer1 ? function(){
     inner2 = "hello";
 }());
 '
-]
-
-{ #category : #utilities }
-SWMBTofJSTest >> transpile: selector with: args [
-	self setUpDecoder: selector with: args.
-	transpiler decoder: decoder.
-	transpiler stream newline: String cr.
-	transpiler transpile.
-
-]
-
-{ #category : #accessing }
-SWMBTofJSTest >> transpilerClass [
-	^ SWMBTofJS
 ]

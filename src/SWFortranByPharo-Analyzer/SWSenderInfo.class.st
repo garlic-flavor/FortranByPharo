@@ -11,14 +11,35 @@ Class {
 	#category : #'SWFortranByPharo-Analyzer-Analyzer'
 }
 
+{ #category : #'instance creation' }
+SWSenderInfo class >> newFrom: anObject [
+	anObject class = SWSenderInfo ifTrue: [
+		^ self new
+			method: anObject method;
+			operands: anObject operands;
+			yourself.
+	].
+	self error.
+]
+
 { #category : #comparing }
 SWSenderInfo >> = right [
 	^ self method = right method and: [ self operands = right operands ]
 ]
 
+{ #category : #accessing }
+SWSenderInfo >> expression [
+	^ nil
+]
+
 { #category : #comparing }
 SWSenderInfo >> hash [
 	^ (operands copyWith: method) hash
+]
+
+{ #category : #accessing }
+SWSenderInfo >> messageInfo [
+	^ nil
 ]
 
 { #category : #accessing }
@@ -62,4 +83,9 @@ SWSenderInfo >> putOn: aStream [
 { #category : #accessing }
 SWSenderInfo >> receiverClass [
 	^ self operands first value
+]
+
+{ #category : #accessing }
+SWSenderInfo >> senderInfo [
+	^ self
 ]

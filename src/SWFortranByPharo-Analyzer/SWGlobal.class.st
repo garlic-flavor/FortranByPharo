@@ -26,11 +26,6 @@ SWGlobal class >> initializersHeader [
 ]
 
 { #category : #constants }
-SWGlobal class >> methodInfoClass [
-	^ SWMethodInfo
-]
-
-{ #category : #constants }
 SWGlobal class >> pragmaKey [
 	^ #pragma
 ]
@@ -332,6 +327,14 @@ SWGlobal >> decode_ThreadSafeTranscript: ct [
 		declareMethodReturnsFirstArgument: #nextPut:;
 		declareMethodReturnsReceiver: #endEntry;
 		declareMethodReturnsFirstArgument: #critical:
+]
+
+{ #category : #'as yet unclassified' }
+SWGlobal >> getExpression: aSenderInfo [
+
+	^ (self getClassInfo: aSenderInfo method methodClass)
+		getExpression: aSenderInfo
+
 ]
 
 { #category : #api }

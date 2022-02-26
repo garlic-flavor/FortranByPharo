@@ -49,7 +49,7 @@ SWMBTofJS >> atCascade: aCascadeNode [
 		original := self children.
 		self put: 'function(_receiver_){'; cr; incIndent; put: 'return ('; cr; incIndent.
 		self children do: [:child|
-			child children at: 1 put: (SWMethodInfo new
+			child children at: 1 put: (SWExpression new
 				node: (RBVariableNode named: #_receiver_ );
 				result: receiver result;
 				yourself).
@@ -310,8 +310,8 @@ SWMBTofJS >> putImport: anArray from: aSource [
 SWMBTofJS >> putNew [
 	self
 		put: 'new ';
-		transpileChild: self decoder children first;
-		putArguments: self decoder children allButFirst
+		transpileChild: self children first;
+		putArguments: self children allButFirst
 
 ]
 
@@ -453,7 +453,7 @@ SWMBTofJS >> putSelfDefinition [
 SWMBTofJS >> putStdOut [
 	self
 		put: 'console.log';
-		putArguments: (self decoder children copyFrom: 2 to: 2)
+		putArguments: (self expression children copyFrom: 2 to: 2)
 
 ]
 
@@ -461,17 +461,13 @@ SWMBTofJS >> putStdOut [
 SWMBTofJS >> putVariableDeclaration [
 	self
 		put: 'var ';
-		put: self decoder node name;
+		put: self node name;
 		put: ' = null'
 ]
 
 { #category : #'as yet unclassified' }
 SWMBTofJS >> putYourself [
-	self decoder node isExpression ifTrue: [
-		self transpileChild: self decoder children first
-	] ifFalse: [
-		self halt.
-	]
+	self transpileChild: self children first
 
 ]
 

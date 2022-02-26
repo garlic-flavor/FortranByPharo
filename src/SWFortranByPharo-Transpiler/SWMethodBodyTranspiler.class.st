@@ -5,7 +5,7 @@ Class {
 	#name : #SWMethodBodyTranspiler,
 	#superclass : #Object,
 	#instVars : [
-		'decoder',
+		'expression',
 		'stream',
 		'pool',
 		'isExpression'
@@ -42,18 +42,6 @@ SWMethodBodyTranspiler class >> senderTranspilerClass [
 ]
 
 { #category : #'code generation' }
-SWMethodBodyTranspiler >> << anObject [
-	self halt; flag: #toRemove.
-	anObject dispatchTo: self
-
-]
-
-{ #category : #accessing }
-SWMethodBodyTranspiler >> arguments [
-	^ self node arguments
-]
-
-{ #category : #accessing }
 SWMethodBodyTranspiler >> at: anObject [
 	self halt.
 ]
@@ -91,7 +79,7 @@ SWMethodBodyTranspiler >> atInteger: anInteger [
 SWMethodBodyTranspiler >> atMessage: aMessageNode [
 
 	aMessageNode parent class = RBMessageNode ifTrue: [ self put: '(' ].
-	(self pool predefinedSenderTranspiler: self sender) ifNotNil: [ :predefined |
+	(self pool predefinedSenderTranspiler: self expression senderInfo) ifNotNil: [ :predefined |
 		predefined value: self
 	] ifNil: [
 		self
@@ -146,9 +134,9 @@ SWMethodBodyTranspiler >> atVariable: aVariableNode [
 ]
 
 { #category : #accessing }
-SWMethodBodyTranspiler >> child: aDecoder [
+SWMethodBodyTranspiler >> child: anExpression [
 	^ self class new
-		decoder: aDecoder;
+		expression: anExpression;
 		stream: self stream;
 		pool: self pool;
 		yourself
@@ -156,7 +144,7 @@ SWMethodBodyTranspiler >> child: aDecoder [
 
 { #category : #accessing }
 SWMethodBodyTranspiler >> children [
-	^ decoder children
+	^ expression children
 ]
 
 { #category : #'code generation' }
@@ -171,39 +159,15 @@ SWMethodBodyTranspiler >> decIndent [
 ]
 
 { #category : #accessing }
-SWMethodBodyTranspiler >> decoder [
+SWMethodBodyTranspiler >> expression [
 
-	^ decoder
+	^ expression
 ]
 
 { #category : #accessing }
-SWMethodBodyTranspiler >> decoder: anObject [
+SWMethodBodyTranspiler >> expression: anObject [
 
-	decoder := anObject
-]
-
-{ #category : #accessing }
-SWMethodBodyTranspiler >> generator [
-	self halt; flag: #toRewrite.
-	^ generator ifNil: [ generator := [ :transpiler | |m|
-		m := transpiler method.
-
-		transpiler locals do: [ :each | self putVariableDeclarationOf: each name ].
-		(transpiler classInfo isNotNil and: [ m methodClass isInstanceSide ]) ifTrue: [
-			self putSelfDefinition
-		].
-		transpiler putSequence: m sourceNode body.
-		(transpiler classInfo isNotNil and: [ m sourceNode lastIsReturn not]) ifTrue: [
-			transpiler putReturnSelf
-		]
-	] ]
-]
-
-{ #category : #accessing }
-SWMethodBodyTranspiler >> generator: anObject [
-	self halt; flag: #toRemove.
-
-	generator := anObject
+	expression := anObject
 ]
 
 { #category : #'code generation - protected' }
@@ -225,51 +189,23 @@ SWMethodBodyTranspiler >> isExpression: anObject [
 
 { #category : #'as yet unclassified' }
 SWMethodBodyTranspiler >> mangle [
-	^ self class mangleClass mangle: self decoder
+	^ self class mangleClass mangle: self expression
 ]
 
 { #category : #accessing }
 SWMethodBodyTranspiler >> method [
-	^ self decoder method
-]
-
-{ #category : #'instance creation' }
-SWMethodBodyTranspiler >> newFullClosure: lit with: operands [
-	self halt; flag: #toRewrite.
-	^ (super newFullClosure: lit with: operands)
-		stream: self stream;
-		generator: [ :transpiler | |node|
-			node := transpiler method sourceNode.
-			transpiler putBlock: node				
-"
-			transpiler
-				put: '{';
-				incIndent;
-				cr.
-			transpiler locals do: [ :each | self putVariableDeclarationOf: each name ].
-			transpiler putSequence: m sourceNode body.
-			transpiler
-				decIndent;
-				put: '}';
-				preventStatementDelimiter 
-"
-		];
-		yourself
+	^ self expression method
 ]
 
 { #category : #accessing }
 SWMethodBodyTranspiler >> node [
-	^ decoder node
+	^ expression node
 ]
 
 { #category : #accessing }
 SWMethodBodyTranspiler >> pool [
 
-	^ pool ifNil: [
-		pool  := self class poolClass new
-			owner: self
-			yourself
-	]
+	^ pool
 ]
 
 { #category : #accessing }
@@ -570,13 +506,8 @@ SWMethodBodyTranspiler >> receiverClass [
 ]
 
 { #category : #accessing }
-SWMethodBodyTranspiler >> sender [
-	^ decoder sender
-]
-
-{ #category : #accessing }
 SWMethodBodyTranspiler >> stream [
-	^ stream ifNil: [ stream := SWTranspilerStream new ]
+	^ stream ifNil: [ stream := self pool stream ]
 
 ]
 
@@ -589,7 +520,7 @@ SWMethodBodyTranspiler >> stream: anObject [
 
 { #category : #'public API' }
 SWMethodBodyTranspiler >> transpile [
-	self decoder node dispatchTo: self.
+	self node dispatchTo: self.
 	^ self stream contents
 ]
 

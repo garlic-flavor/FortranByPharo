@@ -17,13 +17,12 @@ Class {
 	#category : #'SWFortranByPharo-Analyzer-Analyzer'
 }
 
-{ #category : #adding }
-SWClassInfo >> addPredefined: aName with: initializer [
-	self predefined at: aName put: initializer.
-
+{ #category : #constants }
+SWClassInfo class >> expressionClass [
+	^ SWExpression
 ]
 
-{ #category : #adding }
+{ #category : #private }
 SWClassInfo >> addSlotAbout: aClass [
 	aClass ifNil: [ ^ self ].
 	aClass slots do: [ :item |
@@ -37,7 +36,7 @@ SWClassInfo >> addSlotAbout: aClass [
 
 { #category : #api }
 SWClassInfo >> declareMethod: aName asReturn: rType [
-	self addPredefined: aName with: [ :operands |
+	self predefined at: aName put: [ :operands |
 		rType
 	]
 
@@ -46,7 +45,7 @@ SWClassInfo >> declareMethod: aName asReturn: rType [
 { #category : #api }
 SWClassInfo >> declareMethodAsBinaryOperator: aName [
 
-	self addPredefined: aName with: [ :operands |
+	self predefined at: aName put: [ :operands |
 		operands first
 	]
 
@@ -54,7 +53,7 @@ SWClassInfo >> declareMethodAsBinaryOperator: aName [
 
 { #category : #api }
 SWClassInfo >> declareMethodAsCompareOperator: aName [
-	self addPredefined: aName with: [ :operands |
+	self predefined at: aName put: [ :operands |
 		Boolean
 	]
 
@@ -62,15 +61,15 @@ SWClassInfo >> declareMethodAsCompareOperator: aName [
 
 { #category : #api }
 SWClassInfo >> declareMethodReturnsFirstArgument: aName [
-	self addPredefined: aName with: [ :operator |
-		operator second
+	self predefined at: aName put: [ :operands |
+		operands second
 	]
 
 ]
 
 { #category : #api }
 SWClassInfo >> declareMethodReturnsFirstArgumentsElement: aName [
-	self addPredefined: aName with: [ :operands |
+	self predefined at: aName put: [ :operands |
 		operands second elementType
 	]
 
@@ -78,7 +77,7 @@ SWClassInfo >> declareMethodReturnsFirstArgumentsElement: aName [
 
 { #category : #api }
 SWClassInfo >> declareMethodReturnsFirstOrSecondArgument: aName [
-	self addPredefined: aName with: [ :operands |
+	self predefined at: aName put: [ :operands |
 		SWValue new
 			<< operands second;
 			<< operands third;
@@ -89,7 +88,7 @@ SWClassInfo >> declareMethodReturnsFirstOrSecondArgument: aName [
 
 { #category : #api }
 SWClassInfo >> declareMethodReturnsFirstOrSecondArgumentsElement: aName [
-	self addPredefined: aName with: [ :operands |
+	self predefined at: aName put: [ :operands |
 		SWValue new
 			<< operands second elementType;
 			<< operands third elementType;
@@ -100,7 +99,7 @@ SWClassInfo >> declareMethodReturnsFirstOrSecondArgumentsElement: aName [
 
 { #category : #api }
 SWClassInfo >> declareMethodReturnsReceiver: aName [
-	self addPredefined: aName with: [ :operands |
+	self predefined at: aName put: [ :operands |
 		operands first
 	]
 
@@ -108,7 +107,7 @@ SWClassInfo >> declareMethodReturnsReceiver: aName [
 
 { #category : #api }
 SWClassInfo >> declareMethodReturnsReceiverOrFirstArgument: aName [
-	self addPredefined: aName with: [ :operands |
+	self predefined at: aName put: [ :operands |
 		SWValue new
 			<< operands first;
 			<< operands second;
@@ -119,7 +118,7 @@ SWClassInfo >> declareMethodReturnsReceiverOrFirstArgument: aName [
 
 { #category : #api }
 SWClassInfo >> declareMethodReturnsReceiverOrFirstArgumentsElement: aName [
-	self addPredefined: aName with: [ :operands |
+	self predefined at: aName put: [ :operands |
 		SWValue new
 			<< operands first;
 			<< operands second elementType;
@@ -130,7 +129,7 @@ SWClassInfo >> declareMethodReturnsReceiverOrFirstArgumentsElement: aName [
 
 { #category : #api }
 SWClassInfo >> declareMethodReturnsReceiversClass: aName [
-	self addPredefined: aName with: [ :operands |
+	self predefined at: aName put: [ :operands |
 		operands first value classSide
 	]
 
@@ -138,7 +137,7 @@ SWClassInfo >> declareMethodReturnsReceiversClass: aName [
 
 { #category : #api }
 SWClassInfo >> declareMethodReturnsReceiversElement: aName [
-	self addPredefined: aName with: [ :operands |
+	self predefined at: aName put: [ :operands |
 		operands first elementType
 	]
 
@@ -146,7 +145,7 @@ SWClassInfo >> declareMethodReturnsReceiversElement: aName [
 
 { #category : #api }
 SWClassInfo >> declareMethodReturnsReceiversInstance: aName [
-	self addPredefined: aName with: [:operands |
+	self predefined at: aName put: [:operands |
 		operands first value instanceSide
 	]
 
@@ -154,30 +153,38 @@ SWClassInfo >> declareMethodReturnsReceiversInstance: aName [
 
 { #category : #api }
 SWClassInfo >> declareMethodReturnsSecondArgument: aName [
-	self addPredefined: aName with: [ :operands |
+	self predefined at: aName put: [ :operands |
 		operands third
 	]
 
 ]
 
 { #category : #api }
-SWClassInfo >> getMessageInfo: aSenderInfo [
-	^ self methods at: aSenderInfo ifPresent: [ :found |
-		found messageInfo
-	] ifAbsent: [|messageInfo|
-		messageInfo := SWMessageInfo newFrom: aSenderInfo.
-		self predefined at: aSenderInfo method selector ifPresent: [ :pre |
+SWClassInfo >> getExpression: aSenderInfo [
+	^ (self getInfo: aSenderInfo) expression
+]
+
+{ #category : #private }
+SWClassInfo >> getInfo: aSenderInfo [
+	^ self methods at: aSenderInfo ifAbsent: [
+		self predefined at: aSenderInfo method selector ifPresent: [ :pre | |messageInfo|
+			messageInfo := SWMessageInfo newFrom: aSenderInfo.
 			messageInfo result << (pre cull: aSenderInfo operands).
 			self methods at: aSenderInfo put: messageInfo.
 		] ifAbsent: [ |methodInfo|
-			methodInfo := self newMessgeInfo: aSenderInfo.
+			methodInfo := self newExpression: aSenderInfo.
 			self methods at: aSenderInfo put: methodInfo.
 			methodInfo
 				decode;
-				messageInfo
+				yourself
 		]
 	]
 
+]
+
+{ #category : #api }
+SWClassInfo >> getMessageInfo: aSenderInfo [
+	^ (self getInfo: aSenderInfo) messageInfo
 ]
 
 { #category : #accessing }
@@ -192,9 +199,9 @@ SWClassInfo >> methods: anObject [
 	methods := anObject
 ]
 
-{ #category : #'instance creation' }
-SWClassInfo >> newMessgeInfo: aSenderInfo [
-	^ self pool class methodInfoClass new
+{ #category : #private }
+SWClassInfo >> newExpression: aSenderInfo [
+	^ self class expressionClass new
 		pool: self pool;
 		slot: self slot copy;
 		method: aSenderInfo method;

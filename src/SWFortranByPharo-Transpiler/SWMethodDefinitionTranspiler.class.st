@@ -5,7 +5,8 @@ Class {
 	#name : #SWMethodDefinitionTranspiler,
 	#superclass : #Object,
 	#instVars : [
-		'bodyTranspiler'
+		'bodyTranspiler',
+		'stream'
 	],
 	#category : #'SWFortranByPharo-Transpiler-Common'
 }
@@ -35,7 +36,13 @@ SWMethodDefinitionTranspiler >> putMethodHeader [
 { #category : #accessing }
 SWMethodDefinitionTranspiler >> stream [
 
-	^ self bodyTranspiler stream
+	^ stream ifNil: [ stream := bodyTranspiler stream ]
+]
+
+{ #category : #accessing }
+SWMethodDefinitionTranspiler >> stream: anObject [
+
+	stream := anObject
 ]
 
 { #category : #'public API' }

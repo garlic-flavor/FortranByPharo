@@ -4,6 +4,10 @@ Transpilers pool.
 Class {
 	#name : #SWTranspilerPool,
 	#superclass : #SWPoolBase,
+	#instVars : [
+		'global',
+		'stream'
+	],
 	#category : #'SWFortranByPharo-Transpiler-Common'
 }
 
@@ -13,11 +17,56 @@ SWTranspilerPool class >> initializersHeader [
 ]
 
 { #category : #'as yet unclassified' }
+SWTranspilerPool class >> methodBodyTranspilerClass [
+	^ self subclassResponsibility 
+]
+
+{ #category : #accessing }
+SWTranspilerPool >> global [
+
+	^ global ifNil: [ global := SWGlobal new ]
+]
+
+{ #category : #accessing }
+SWTranspilerPool >> global: anObject [
+
+	global := anObject
+]
+
+{ #category : #'as yet unclassified' }
 SWTranspilerPool >> predefinedSenderTranspiler: aSender [
 	aSender method ifNil: [ ^ nil ].
 	^ (self getClassInfo: aSender method methodClass)
 		predefinedSenderTranspiler: aSender method selector
 
+
+]
+
+{ #category : #accessing }
+SWTranspilerPool >> stream [
+
+	^ stream ifNil: [ stream := SWTranspilerStream new ]
+]
+
+{ #category : #accessing }
+SWTranspilerPool >> stream: anObject [
+
+	stream := anObject
+]
+
+{ #category : #'as yet unclassified' }
+SWTranspilerPool >> transpileBody: aMethod with: operands [
+	|ex bt|
+	ex := self global getExpression: (SWSenderInfo new
+		method: aMethod;
+		operands: operands;
+		yourself).
+	bt := self class methodBodyTranspilerClass new
+		expression: ex;
+		pool: self;
+		yourself.
+	bt transpile.
+	^ self stream contents.
 
 ]
 

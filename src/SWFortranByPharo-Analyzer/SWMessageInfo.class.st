@@ -10,17 +10,6 @@ Class {
 	#category : #'SWFortranByPharo-Analyzer-Analyzer'
 }
 
-{ #category : #'instance creation' }
-SWMessageInfo class >> newFrom: anObject [
-	anObject class = SWSenderInfo ifTrue: [
-		^ self new
-			method: anObject method;
-			operands: anObject operands;
-			yourself.
-	].
-	self error.
-]
-
 { #category : #testing }
 SWMessageInfo >> hasResult [
 	^ result isNotNil

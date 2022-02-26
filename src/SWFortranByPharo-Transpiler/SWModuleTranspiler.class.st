@@ -5,27 +5,11 @@ Class {
 	#name : #SWModuleTranspiler,
 	#superclass : #Object,
 	#instVars : [
-		'mainTranspiler',
-		'decoder'
+		'pool',
+		'stream'
 	],
 	#category : #'SWFortranByPharo-Transpiler-Common'
 }
-
-{ #category : #constants }
-SWModuleTranspiler class >> extension [
-	self error; flag: #toRemove.
-	^ self subclassResponsibility 
-]
-
-{ #category : #accessing }
-SWModuleTranspiler class >> methodBodyProcedureClass [
-	^ SWMethodInfo
-]
-
-{ #category : #'as yet unclassified' }
-SWModuleTranspiler class >> methodBodyTranspilerClass [
-	^ self subclassResponsibility 
-]
 
 { #category : #'instance creation' }
 SWModuleTranspiler class >> newFrom: aClass [
@@ -36,6 +20,11 @@ SWModuleTranspiler class >> newFrom: aClass [
 			with: { aClass classSide });
 		yourself
 
+]
+
+{ #category : #'as yet unclassified' }
+SWModuleTranspiler class >> poolClass [
+	^ self subclassResponsibility 
 ]
 
 { #category : #accessing }
@@ -120,6 +109,22 @@ SWModuleTranspiler >> mainTranspiler: anObject [
 	mainTranspiler := anObject
 ]
 
+{ #category : #accessing }
+SWModuleTranspiler >> pool [
+
+	^ pool ifNil: [
+		pool := self class poolClass new
+			stream: self stream;
+			yourself
+	]
+]
+
+{ #category : #accessing }
+SWModuleTranspiler >> pool: anObject [
+
+	pool := anObject
+]
+
 { #category : #private }
 SWModuleTranspiler >> solveDependencies [
 	self halt; flag: #toRewrite.
@@ -140,7 +145,13 @@ SWModuleTranspiler >> solveDependencies: aClass [
 
 { #category : #accessing }
 SWModuleTranspiler >> stream [
-	^ self mainTranspiler stream
+	^ stream ifNil: [ stream := SWTranspilerStream  new ]
+]
+
+{ #category : #accessing }
+SWModuleTranspiler >> stream: anObject [
+
+	stream := anObject
 ]
 
 { #category : #'public API' }

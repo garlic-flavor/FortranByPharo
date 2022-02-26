@@ -2,7 +2,7 @@
 resolve the class of a RBNode.
 "
 Class {
-	#name : #SWMethodInfo,
+	#name : #SWExpression,
 	#superclass : #Object,
 	#instVars : [
 		'node',
@@ -15,33 +15,25 @@ Class {
 	#category : #'SWFortranByPharo-Analyzer-Analyzer'
 }
 
-{ #category : #'instance creation' }
-SWMethodInfo class >> new: aMethod with: operands [
-	^ self new
-		method: aMethod;
-		operands: operands;
-		yourself
-]
-
 { #category : #adding }
-SWMethodInfo >> addToSlot: aName as: aType [
+SWExpression >> addToSlot: aName as: aType [
 	self slot addLast: ((SWVariable new: aType)
 		name: aName;
 		yourself)
 ]
 
 { #category : #'dispatching-callback' }
-SWMethodInfo >> at: anObject [
+SWExpression >> at: anObject [
 	self result << anObject class
 ]
 
 { #category : #'dispatching-callback' }
-SWMethodInfo >> atArray: anArrayNode [
+SWExpression >> atArray: anArrayNode [
 	self result << Array
 ]
 
 { #category : #'dispatching-callback' }
-SWMethodInfo >> atAssignTo: aLValue with: aRValue [
+SWExpression >> atAssignTo: aLValue with: aRValue [
 	self decodeChildren.
 	self result << self children first result.
 	self slot detect: [ :each | each name = aLValue name ] ifFound: [ :var |
@@ -51,23 +43,23 @@ SWMethodInfo >> atAssignTo: aLValue with: aRValue [
 ]
 
 { #category : #accessing }
-SWMethodInfo >> atBoolean: aBoolean [
+SWExpression >> atBoolean: aBoolean [
 	self result << aBoolean class
 ]
 
 { #category : #'dispatching-callback' }
-SWMethodInfo >> atCascade: aCascadeNode [
+SWExpression >> atCascade: aCascadeNode [
 	self result << self decodeChildren
 
 ]
 
 { #category : #'dispatching-callback' }
-SWMethodInfo >> atCharacter: aCharacter [
+SWExpression >> atCharacter: aCharacter [
 	self result << aCharacter class
 ]
 
 { #category : #'dispatching-callback' }
-SWMethodInfo >> atClosure: aBlockNode [
+SWExpression >> atClosure: aBlockNode [
 	|outerScope res|
 	outerScope := self slot copy.
 	aBlockNode argumentNames do: [ :name |
@@ -85,18 +77,18 @@ SWMethodInfo >> atClosure: aBlockNode [
 ]
 
 { #category : #'dispatching-callback' }
-SWMethodInfo >> atFloat: aFloat [
+SWExpression >> atFloat: aFloat [
 	self result << aFloat class
 ]
 
 { #category : #'dispatching-callback' }
-SWMethodInfo >> atInteger: anInteger [
+SWExpression >> atInteger: anInteger [
 	self result << anInteger class
 
 ]
 
 { #category : #'dispatching-callback' }
-SWMethodInfo >> atMessage: aMessageNode [
+SWExpression >> atMessage: aMessageNode [
 	self decodeChildren.
 	(aMessageNode selector = #declare:as: and: [ self children first result = SWType class ])ifTrue: [
 		self userSpecifyVariableType: aMessageNode
@@ -106,7 +98,7 @@ SWMethodInfo >> atMessage: aMessageNode [
 ]
 
 { #category : #'dispatching-callback' }
-SWMethodInfo >> atMethod: traverser [
+SWExpression >> atMethod: traverser [
 	self decodeChildren.
 	self messageInfo hasResult ifFalse: [
 		self messageInfo result << self messageInfo operands first
@@ -114,12 +106,12 @@ SWMethodInfo >> atMethod: traverser [
 ]
 
 { #category : #'dispatching-callback' }
-SWMethodInfo >> atNil [
+SWExpression >> atNil [
 	self result << UndefinedObject
 ]
 
 { #category : #private }
-SWMethodInfo >> atOrdinaryMessage: aMessageNode [
+SWExpression >> atOrdinaryMessage: aMessageNode [
 
 	self messageInfo: (self pool getMessageInfo: aMessageNode selector with: (self children collect: [ :each | each result ])).
 	self result << self messageInfo result
@@ -141,34 +133,34 @@ SWMethodInfo >> atOrdinaryMessage: aMessageNode [
 ]
 
 { #category : #'dispatching-callback' }
-SWMethodInfo >> atPragma: aPragmaNode [
+SWExpression >> atPragma: aPragmaNode [
 	self pool atPragma
 ]
 
 { #category : #'dispatching-callback' }
-SWMethodInfo >> atReturn: aReturnNode [
+SWExpression >> atReturn: aReturnNode [
 	self messageInfo result << (self result << self decodeChildren)
 
 ]
 
 { #category : #'dispatching-callback' }
-SWMethodInfo >> atSequence: aSequenceNode [
+SWExpression >> atSequence: aSequenceNode [
 	self result << self decodeChildren
 
 ]
 
 { #category : #'dispatching-callback' }
-SWMethodInfo >> atString: aString [
+SWExpression >> atString: aString [
 	self result << aString class
 ]
 
 { #category : #'dispatching-callback' }
-SWMethodInfo >> atSymbol: aByteSymbol [
+SWExpression >> atSymbol: aByteSymbol [
 	self result << aByteSymbol class
 ]
 
 { #category : #'dispatching-callback' }
-SWMethodInfo >> atVariable: aVariableNode [
+SWExpression >> atVariable: aVariableNode [
 
 	self result << (self slot detect: [ :each | each name = aVariableNode name ] ifNone: [
 		self pool atGlobalAccess.
@@ -178,25 +170,25 @@ SWMethodInfo >> atVariable: aVariableNode [
 ]
 
 { #category : #accessing }
-SWMethodInfo >> children [
+SWExpression >> children [
 
 	^ children
 ]
 
 { #category : #accessing }
-SWMethodInfo >> children: anObject [
+SWExpression >> children: anObject [
 
 	children := anObject
 ]
 
 { #category : #api }
-SWMethodInfo >> decode [
+SWExpression >> decode [
 	self node dispatchTo: self.
 
 ]
 
 { #category : #private }
-SWMethodInfo >> decodeChild: aNode [
+SWExpression >> decodeChild: aNode [
 	^ self class new
 		node: aNode;
 		messageInfo: self messageInfo;
@@ -207,7 +199,7 @@ SWMethodInfo >> decodeChild: aNode [
 ]
 
 { #category : #private }
-SWMethodInfo >> decodeChildren [
+SWExpression >> decodeChildren [
 	self children: (self node children collect: [ :child |
 		self decodeChild: child
 	]).
@@ -215,61 +207,66 @@ SWMethodInfo >> decodeChildren [
 ]
 
 { #category : #accessing }
-SWMethodInfo >> messageInfo [
+SWExpression >> expression [
+	^ self
+]
+
+{ #category : #accessing }
+SWExpression >> messageInfo [
 
 	^ messageInfo ifNil: [ messageInfo := SWMessageInfo new ]
 ]
 
 { #category : #accessing }
-SWMethodInfo >> messageInfo: anObject [
+SWExpression >> messageInfo: anObject [
 
 	messageInfo := anObject
 ]
 
 { #category : #accessing }
-SWMethodInfo >> method [
+SWExpression >> method [
 	^ self messageInfo method
 ]
 
 { #category : #accessing }
-SWMethodInfo >> method: aMethod [
+SWExpression >> method: aMethod [
 	self messageInfo method: aMethod.
 
 ]
 
 { #category : #accessing }
-SWMethodInfo >> node [
+SWExpression >> node [
 
 	^ node ifNil: [ node := self messageInfo method sourceNode ]
 ]
 
 { #category : #accessing }
-SWMethodInfo >> node: anObject [
+SWExpression >> node: anObject [
 
 	node := anObject
 ]
 
 { #category : #api }
-SWMethodInfo >> operands: operands [
+SWExpression >> operands: operands [
 	self messageInfo operands: operands.
 	self readySlot.
 
 ]
 
 { #category : #accessing }
-SWMethodInfo >> pool [
+SWExpression >> pool [
 
 	^ pool
 ]
 
 { #category : #accessing }
-SWMethodInfo >> pool: anObject [
+SWExpression >> pool: anObject [
 
 	pool := anObject
 ]
 
 { #category : #private }
-SWMethodInfo >> readySlot [
+SWExpression >> readySlot [
 	|receiver|
 	receiver := self messageInfo operands first value.
 	self addToSlot: 'self' as: receiver.
@@ -284,36 +281,41 @@ SWMethodInfo >> readySlot [
 ]
 
 { #category : #accessing }
-SWMethodInfo >> receiverClass [
+SWExpression >> receiverClass [
 	^ self messageInfo receiverClass
 ]
 
 { #category : #accessing }
-SWMethodInfo >> result [
+SWExpression >> result [
 
 	^ result ifNil: [ result := SWValue new ]
 ]
 
 { #category : #accessing }
-SWMethodInfo >> result: anObject [
+SWExpression >> result: anObject [
 
 	result := anObject
 ]
 
 { #category : #accessing }
-SWMethodInfo >> slot [
+SWExpression >> senderInfo [
+	^ messageInfo
+]
+
+{ #category : #accessing }
+SWExpression >> slot [
 
 	^ slot ifNil: [ slot := OrderedCollection new: (self node numArgs + self node temporaries size) ]
 ]
 
 { #category : #accessing }
-SWMethodInfo >> slot: anObject [
+SWExpression >> slot: anObject [
 
 	slot := anObject
 ]
 
 { #category : #private }
-SWMethodInfo >> userSpecifyVariableType: aNode [
+SWExpression >> userSpecifyVariableType: aNode [
 	|name type|
 	"A special case for type specification by source code."
 	name := aNode children second evaluate.
