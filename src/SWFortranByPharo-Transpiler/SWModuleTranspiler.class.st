@@ -94,6 +94,11 @@ SWModuleTranspiler >> logger [
 ]
 
 { #category : #accessing }
+SWModuleTranspiler >> main: aMethod [
+	^ self pool transpile: aMethod with: { aMethod methodClass }
+]
+
+{ #category : #accessing }
 SWModuleTranspiler >> mainTranspiler [
 
 	^ mainTranspiler ifNil: [

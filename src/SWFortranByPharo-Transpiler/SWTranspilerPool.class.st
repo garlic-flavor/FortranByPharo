@@ -54,6 +54,35 @@ SWTranspilerPool >> stream: anObject [
 	stream := anObject
 ]
 
+{ #category : #'public API' }
+SWTranspilerPool >> transpile: aClass [
+	|cdt|
+	cdt := (self getClassInfo: aClass).
+	cdt isTranspiled ifTrue: [ ^ self ].
+	cdt classInfo: (self global getClassInfo: aClass).
+	cdt transpile
+	
+
+]
+
+{ #category : #'as yet unclassified' }
+SWTranspilerPool >> transpile: aMethod with: operands [
+	|ex bt|
+	ex := self global getExpression: (SWSenderInfo new
+		method: aMethod;
+		operands: operands;
+		yourself).
+	self transpile: aMethod methodClass instanceSide.
+	self transpile: operands first value instanceSide.
+	bt := self class methodBodyTranspilerClass new
+		expression: ex;
+		pool: self;
+		yourself.
+	bt transpile.
+	^ self stream contents.
+
+]
+
 { #category : #'as yet unclassified' }
 SWTranspilerPool >> transpileBody: aMethod with: operands [
 	|ex bt|

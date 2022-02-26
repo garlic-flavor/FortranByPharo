@@ -22,7 +22,7 @@ SWMDTofJS >> putMethodHeader [
 		put: self bodyTranspiler mangle;
 		put: '('.
 
-	self bodyTranspiler arguments do: [ :vi |
+	self bodyTranspiler node arguments do: [ :vi |
 		self stream put: vi name
 	] separatedBy: [
 		self stream put: ', '

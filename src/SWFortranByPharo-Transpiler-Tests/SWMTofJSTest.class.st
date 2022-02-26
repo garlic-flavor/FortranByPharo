@@ -4,11 +4,18 @@ Class {
 	#category : #'SWFortranByPharo-Transpiler-Tests-JS'
 }
 
+{ #category : #accessing }
+SWMTofJSTest class >> moduleTranspilerClass [
+	^ SWMTofJS
+]
+
 { #category : #tests }
 SWMTofJSTest >> test_0010_nop [
 	self resultWith: {  } equals: '/// I''m a test class for SWDecoderTest.
 class SWTestProgram extends PharoObject {
     _var1 = null;
+    _0010_nop(){
+    }
 }
 '
 ]
@@ -20,6 +27,12 @@ class SWTestProgram extends PharoObject {
     _var1 = null;
     var1(){
         return var1;
+    }
+    _0460_access_to_local_variables(){
+        var tp = null;
+        tp = new SWTestProgram();
+        tp.var1_(123);
+        return tp.var1();
     }
     var1_(anObject){
         var1 = anObject;
@@ -33,17 +46,6 @@ return tp.var1();
 ]
 
 { #category : #utilities }
-SWMTofJSTest >> transpile: selector with: arguments [
-	decoder
-		method: (self getMethodBySelector: selector);
-		operands: (self makeArgument: arguments).
-	transpiler decoder: decoder.
-	transpiler decode.
-	transpiler stream newline: String cr.
-	transpiler transpile.
-]
-
-{ #category : #accessing }
-SWMTofJSTest >> transpilerClass [
-	^ SWMTofJS
+SWMTofJSTest >> transpile: aMethod with: arguments [
+	^ module main: aMethod
 ]

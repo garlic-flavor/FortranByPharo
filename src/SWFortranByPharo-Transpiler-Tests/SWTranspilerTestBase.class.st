@@ -2,20 +2,20 @@ Class {
 	#name : #SWTranspilerTestBase,
 	#superclass : #TestCase,
 	#instVars : [
-		'pool'
+		'module'
 	],
 	#category : #'SWFortranByPharo-Transpiler-Tests-Common'
 }
 
-{ #category : #'as yet unclassified' }
-SWTranspilerTestBase class >> poolClass [
+{ #category : #accessing }
+SWTranspilerTestBase class >> moduleTranspilerClass [
 	^ self subclassResponsibility 
 ]
 
 { #category : #'as yet unclassified' }
 SWTranspilerTestBase >> _resultWith: arguments [
-	^ pool
-		transpileBody: (SWTestProgram getBySelector: thisContext sender sender selector)
+	^ self
+		transpile: (SWTestProgram getBySelector: thisContext sender sender selector)
 		with: (arguments copyWithFirst: SWTestProgram).
 
 ]
@@ -38,7 +38,12 @@ SWTranspilerTestBase >> resultWith: arguments equals: expected [
 { #category : #running }
 SWTranspilerTestBase >> setUp [
 	super setUp.
-	pool := self class poolClass new.
-	pool stream newline: String cr
+	module := self class moduleTranspilerClass new.
+	module stream newline: String cr
 	"Put here a common initialization logic for tests"
+]
+
+{ #category : #utilities }
+SWTranspilerTestBase >> transpile: aMethod with: operands [
+	^ self subclassResponsibility 
 ]

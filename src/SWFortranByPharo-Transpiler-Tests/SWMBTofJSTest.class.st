@@ -4,9 +4,9 @@ Class {
 	#category : #'SWFortranByPharo-Transpiler-Tests-JS'
 }
 
-{ #category : #'as yet unclassified' }
-SWMBTofJSTest class >> poolClass [
-	^ SWPoolOfJS
+{ #category : #accessing }
+SWMBTofJSTest class >> moduleTranspilerClass [
+	^ SWMTofJS
 ]
 
 { #category : #tests }
@@ -239,4 +239,10 @@ return (outer1 ? function(){
     inner2 = "hello";
 }());
 '
+]
+
+{ #category : #utilities }
+SWMBTofJSTest >> transpile: aMethod with: operands [
+	^ module pool transpileBody: aMethod with: operands
+
 ]

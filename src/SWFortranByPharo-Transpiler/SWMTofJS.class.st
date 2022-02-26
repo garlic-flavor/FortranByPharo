@@ -8,6 +8,6 @@ Class {
 }
 
 { #category : #'as yet unclassified' }
-SWMTofJS class >> methodBodyTranspilerClass [ 
-	^ SWMBTofJS
+SWMTofJS class >> poolClass [
+	^ SWPoolOfJS
 ]
