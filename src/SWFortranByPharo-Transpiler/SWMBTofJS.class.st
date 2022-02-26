@@ -32,6 +32,16 @@ SWMBTofJS class >> senderTranspilerClass [
 	^ SWSTofJSOld
 ]
 
+{ #category : #accessing }
+SWMBTofJS >> atArray: anArrayNode [
+	self put: '['.
+	self children do: [ :child |
+		self transpileChild: child
+	] separatedBy: [ self put: ', ' ].
+	self put: ']'.
+
+]
+
 { #category : #'as yet unclassified' }
 SWMBTofJS >> atBoolean: trueOrFalse [
 	self put: (trueOrFalse ifTrue: [ 'true' ] ifFalse: [ 'false' ])
@@ -75,6 +85,14 @@ SWMBTofJS >> atClosure: aBlockNode [
 		self transpileChildrenWithDelimiter
 	]
 
+]
+
+{ #category : #accessing }
+SWMBTofJS >> atSymbol: aSymbol [
+	self
+		put: '"';
+		put: aSymbol asString;
+		put: '"'
 ]
 
 { #category : #accessing }

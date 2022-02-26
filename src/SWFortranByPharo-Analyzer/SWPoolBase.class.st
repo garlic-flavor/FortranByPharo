@@ -33,6 +33,23 @@ SWPoolBase class >> initializersHeader [
 	^ self subclassResponsibility 
 ]
 
+{ #category : #utils }
+SWPoolBase class >> search: aSelector in: aClass [
+	^ self search: aSelector in: aClass ifFound: [ :found | found ] ifNone: [ self error ]
+]
+
+{ #category : #utils }
+SWPoolBase class >> search: selector in: aClass ifFound: foundBlock ifNone: noneBlock [
+	aClass ifNil: [ ^ noneBlock value ].
+
+	^ aClass methodDict at: selector ifPresent: [ :detected |
+		foundBlock value: detected
+	] ifAbsent: [
+		self search: selector in: aClass superclass ifFound: foundBlock ifNone: noneBlock
+	]
+
+]
+
 { #category : #private }
 SWPoolBase >> addInitializerIn: aClass [
 	"invoke aClass>>#initialize_Hoge: with Hoge class transpiler."

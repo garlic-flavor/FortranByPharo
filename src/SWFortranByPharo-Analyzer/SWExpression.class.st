@@ -29,6 +29,7 @@ SWExpression >> at: anObject [
 
 { #category : #'dispatching-callback' }
 SWExpression >> atArray: anArrayNode [
+	self decodeChildren.
 	self result << Array
 ]
 

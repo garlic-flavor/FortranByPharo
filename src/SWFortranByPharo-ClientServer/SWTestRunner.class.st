@@ -6,15 +6,14 @@ Class {
 
 { #category : #building }
 SWTestRunner class >> build [
-	|module|
-	module := self newModuleTranspiler.
-	module transpile.
-	^ module
+	^ self moduleTranspilerClass main: self.
+
 ]
 
 { #category : #running }
 SWTestRunner class >> go [
 	|module result|
+	self halt; flag: #toRewrite.
 	module := self build.
 	result := (SWPRofJS go: module).
 	(STON reader
@@ -59,16 +58,6 @@ SWTestRunner class >> name [
 	^ super name
 ]
 
-{ #category : #building }
-SWTestRunner class >> newModuleTranspiler [
-	|mt|
-	mt := self moduleTranspilerClass newFrom: self.
-	mt payload logger enabled: true.
-	^ mt
-		
-
-]
-
 { #category : #suites }
 SWTestRunner class >> runAllTests [
 	^ self buildSuiteFromSelectors run
@@ -86,6 +75,14 @@ SWTestRunner class >> solveDependenciesUsing: transpiler [
 	]
 
 
+]
+
+{ #category : #building }
+SWTestRunner class >> tryBuild [
+	|module result|
+	module := self build.
+	result := module stream contents.
+	self halt
 ]
 
 { #category : #running }

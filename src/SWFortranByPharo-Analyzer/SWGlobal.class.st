@@ -30,23 +30,6 @@ SWGlobal class >> pragmaKey [
 	^ #pragma
 ]
 
-{ #category : #utils }
-SWGlobal class >> search: aSelector in: aClass [
-	^ self search: aSelector in: aClass ifFound: [ :found | found ] ifNone: [ self error ]
-]
-
-{ #category : #utils }
-SWGlobal class >> search: selector in: aClass ifFound: foundBlock ifNone: noneBlock [
-	aClass ifNil: [ ^ noneBlock value ].
-
-	^ aClass methodDict at: selector ifPresent: [ :detected |
-		foundBlock value: detected
-	] ifAbsent: [
-		self search: selector in: aClass superclass ifFound: foundBlock ifNone: noneBlock
-	]
-
-]
-
 { #category : #constants }
 SWGlobal class >> unresolvedSelectorKey [
 	^ #unresolvedSelector

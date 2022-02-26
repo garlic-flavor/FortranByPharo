@@ -12,12 +12,9 @@ Class {
 }
 
 { #category : #'instance creation' }
-SWModuleTranspiler class >> newFrom: aClass [
-	self halt; flag: #toRewrite.
-	^ (self new)
-		payload: (self methodBodyTranspilerClass
-			new: (self methodBodyTranspilerClass poolClass search: #main in: aClass classSide)
-			with: { aClass classSide });
+SWModuleTranspiler class >> main: aClass [
+	^ self new
+		main: (self poolClass search: #main in: aClass classSide) with: { aClass classSide };
 		yourself
 
 ]
@@ -96,6 +93,11 @@ SWModuleTranspiler >> logger [
 { #category : #accessing }
 SWModuleTranspiler >> main: aMethod [
 	^ self pool transpile: aMethod with: { aMethod methodClass }
+]
+
+{ #category : #accessing }
+SWModuleTranspiler >> main: aMethod with: operands [
+	^ self pool transpile: aMethod with: operands
 ]
 
 { #category : #accessing }

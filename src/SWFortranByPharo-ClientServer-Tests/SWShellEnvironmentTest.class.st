@@ -28,7 +28,7 @@ SWShellEnvironmentTest class >> solveDependenciesUsing: transpiler [
 { #category : #building }
 SWShellEnvironmentTest class >> tryBuild [
 	<script>
-	self build inspect
+	super tryBuild
 ]
 
 { #category : #test }
