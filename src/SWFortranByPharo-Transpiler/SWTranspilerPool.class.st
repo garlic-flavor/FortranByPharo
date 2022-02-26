@@ -9,13 +9,13 @@ Class {
 
 { #category : #'as yet unclassified' }
 SWTranspilerPool class >> initializersHeader [
-	^ 'transpile'
+	^ 'transpile_'
 ]
 
 { #category : #'as yet unclassified' }
 SWTranspilerPool >> predefinedSenderTranspiler: aSender [
 	aSender method ifNil: [ ^ nil ].
-	^ (self getClassProcedure: aSender method methodClass)
+	^ (self getClassInfo: aSender method methodClass)
 		predefinedSenderTranspiler: aSender method selector
 
 

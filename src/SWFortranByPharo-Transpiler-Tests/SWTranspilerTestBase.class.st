@@ -38,7 +38,7 @@ SWTranspilerTestBase >> resultWith: arguments equals: expected [
 { #category : #running }
 SWTranspilerTestBase >> setUp [
 	super setUp.
-	decoder := SWDecoder new.
+	decoder := SWMethodInfo new.
 	transpiler := self transpilerClass new.
 	"Put here a common initialization logic for tests"
 ]

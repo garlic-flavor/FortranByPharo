@@ -11,7 +11,7 @@ Class {
 		'enabled',
 		'payload'
 	],
-	#category : #'SWFortranByPharo-Analyzer-Logger'
+	#category : #'SWFortranByPharo-Analyzer-Olds'
 }
 
 { #category : #generation }

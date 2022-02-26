@@ -30,15 +30,11 @@ SWVariableTest >> testBasics [
 SWVariableTest >> testLessThanLessThan [
 
 	|v1 v2|
-	v1 := SWVariable new: [ SmallInteger ].
+	v1 := SWVariable new: Number with: SWType userSpecifyingPriority.
 	v2 := SWVariable new: String.
 	v2 << v1.
-	self assert: v2 value equals: String.
-	self assert: v1 priority equals: SWType unknownMethodPriority.
-
-	v1 << (SWVariable new: Number with: SWType userSpecifyingPriority).
-	self assert: v1 value equals: Number.
-	self assert: v1 priority equals: SWType userSpecifyingPriority.
+	self assert: v2 value equals: Number.
+	self assert: v2 priority equals: SWType userSpecifyingPriority.
 ]
 
 { #category : #test }
@@ -49,10 +45,6 @@ SWVariableTest >> testPutOn [
 		name: 'hogehoge';
 		yourself.
 	self putOnOf: vi mustMatchesWith: 'hogehoge <SmallInteger\:exactType>'.
-	
-	vi := (SWVariable new: [SmallInteger])
-		yourself.
-	self putOnOf: vi mustMatchesWith: 'nil <lazy\:unknownMethod>'.
 	
 	vi := SWVariable new.
 	self putOnOf: vi mustMatchesWith: 'nil <nil\:default>'.

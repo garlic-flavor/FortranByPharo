@@ -17,7 +17,7 @@ Class {
 
 { #category : #'instance creation' }
 SWDecoderOld class >> classTranspilerClass [
-	^ SWClass
+	^ SWClassInfo
 ]
 
 { #category : #'instance creation' }
@@ -29,7 +29,7 @@ SWDecoderOld class >> new: aCompiledCode [
 
 { #category : #'as yet unclassified' }
 SWDecoderOld class >> poolClass [
-	^ SWPool
+	^ SWGlobal
 ]
 
 { #category : #accessing }

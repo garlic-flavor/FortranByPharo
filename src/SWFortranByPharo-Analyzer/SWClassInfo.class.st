@@ -7,7 +7,7 @@ In these methods, some SWClass>>#define*** methods are called to supply informat
 A Writer of a transpiler, may make subclass of SWClass, and override #newTranspiler*** methods to suit.
 "
 Class {
-	#name : #SWClass,
+	#name : #SWClassInfo,
 	#superclass : #SWClassBase,
 	#instVars : [
 		'slot',
@@ -18,13 +18,13 @@ Class {
 }
 
 { #category : #adding }
-SWClass >> addPredefined: aName with: initializer [
+SWClassInfo >> addPredefined: aName with: initializer [
 	self predefined at: aName put: initializer.
 
 ]
 
 { #category : #adding }
-SWClass >> addSlotAbout: aClass [
+SWClassInfo >> addSlotAbout: aClass [
 	aClass ifNil: [ ^ self ].
 	aClass slots do: [ :item |
 		slot push name: item name
@@ -36,7 +36,7 @@ SWClass >> addSlotAbout: aClass [
 ]
 
 { #category : #api }
-SWClass >> declareMethod: aName asReturn: rType [
+SWClassInfo >> declareMethod: aName asReturn: rType [
 	self addPredefined: aName with: [ :operands |
 		rType
 	]
@@ -44,7 +44,7 @@ SWClass >> declareMethod: aName asReturn: rType [
 ]
 
 { #category : #api }
-SWClass >> declareMethodAsBinaryOperator: aName [
+SWClassInfo >> declareMethodAsBinaryOperator: aName [
 
 	self addPredefined: aName with: [ :operands |
 		operands first
@@ -53,7 +53,7 @@ SWClass >> declareMethodAsBinaryOperator: aName [
 ]
 
 { #category : #api }
-SWClass >> declareMethodAsCompareOperator: aName [
+SWClassInfo >> declareMethodAsCompareOperator: aName [
 	self addPredefined: aName with: [ :operands |
 		Boolean
 	]
@@ -61,7 +61,7 @@ SWClass >> declareMethodAsCompareOperator: aName [
 ]
 
 { #category : #api }
-SWClass >> declareMethodReturnsFirstArgument: aName [
+SWClassInfo >> declareMethodReturnsFirstArgument: aName [
 	self addPredefined: aName with: [ :operator |
 		operator second
 	]
@@ -69,7 +69,7 @@ SWClass >> declareMethodReturnsFirstArgument: aName [
 ]
 
 { #category : #api }
-SWClass >> declareMethodReturnsFirstArgumentsElement: aName [
+SWClassInfo >> declareMethodReturnsFirstArgumentsElement: aName [
 	self addPredefined: aName with: [ :operands |
 		operands second elementType
 	]
@@ -77,9 +77,9 @@ SWClass >> declareMethodReturnsFirstArgumentsElement: aName [
 ]
 
 { #category : #api }
-SWClass >> declareMethodReturnsFirstOrSecondArgument: aName [
+SWClassInfo >> declareMethodReturnsFirstOrSecondArgument: aName [
 	self addPredefined: aName with: [ :operands |
-		SWVariable new
+		SWValue new
 			<< operands second;
 			<< operands third;
 			yourself
@@ -88,9 +88,9 @@ SWClass >> declareMethodReturnsFirstOrSecondArgument: aName [
 ]
 
 { #category : #api }
-SWClass >> declareMethodReturnsFirstOrSecondArgumentsElement: aName [
+SWClassInfo >> declareMethodReturnsFirstOrSecondArgumentsElement: aName [
 	self addPredefined: aName with: [ :operands |
-		SWVariable new
+		SWValue new
 			<< operands second elementType;
 			<< operands third elementType;
 			yourself
@@ -99,7 +99,7 @@ SWClass >> declareMethodReturnsFirstOrSecondArgumentsElement: aName [
 ]
 
 { #category : #api }
-SWClass >> declareMethodReturnsReceiver: aName [
+SWClassInfo >> declareMethodReturnsReceiver: aName [
 	self addPredefined: aName with: [ :operands |
 		operands first
 	]
@@ -107,9 +107,9 @@ SWClass >> declareMethodReturnsReceiver: aName [
 ]
 
 { #category : #api }
-SWClass >> declareMethodReturnsReceiverOrFirstArgument: aName [
+SWClassInfo >> declareMethodReturnsReceiverOrFirstArgument: aName [
 	self addPredefined: aName with: [ :operands |
-		SWVariable new
+		SWValue new
 			<< operands first;
 			<< operands second;
 			yourself
@@ -118,9 +118,9 @@ SWClass >> declareMethodReturnsReceiverOrFirstArgument: aName [
 ]
 
 { #category : #api }
-SWClass >> declareMethodReturnsReceiverOrFirstArgumentsElement: aName [
+SWClassInfo >> declareMethodReturnsReceiverOrFirstArgumentsElement: aName [
 	self addPredefined: aName with: [ :operands |
-		SWVariable new
+		SWValue new
 			<< operands first;
 			<< operands second elementType;
 			yourself
@@ -129,7 +129,7 @@ SWClass >> declareMethodReturnsReceiverOrFirstArgumentsElement: aName [
 ]
 
 { #category : #api }
-SWClass >> declareMethodReturnsReceiversClass: aName [
+SWClassInfo >> declareMethodReturnsReceiversClass: aName [
 	self addPredefined: aName with: [ :operands |
 		operands first value classSide
 	]
@@ -137,7 +137,7 @@ SWClass >> declareMethodReturnsReceiversClass: aName [
 ]
 
 { #category : #api }
-SWClass >> declareMethodReturnsReceiversElement: aName [
+SWClassInfo >> declareMethodReturnsReceiversElement: aName [
 	self addPredefined: aName with: [ :operands |
 		operands first elementType
 	]
@@ -145,7 +145,7 @@ SWClass >> declareMethodReturnsReceiversElement: aName [
 ]
 
 { #category : #api }
-SWClass >> declareMethodReturnsReceiversInstance: aName [
+SWClassInfo >> declareMethodReturnsReceiversInstance: aName [
 	self addPredefined: aName with: [:operands |
 		operands first value instanceSide
 	]
@@ -153,7 +153,7 @@ SWClass >> declareMethodReturnsReceiversInstance: aName [
 ]
 
 { #category : #api }
-SWClass >> declareMethodReturnsSecondArgument: aName [
+SWClassInfo >> declareMethodReturnsSecondArgument: aName [
 	self addPredefined: aName with: [ :operands |
 		operands third
 	]
@@ -161,78 +161,61 @@ SWClass >> declareMethodReturnsSecondArgument: aName [
 ]
 
 { #category : #api }
-SWClass >> getResult: aSender [
-	(self haltList includes: aSender method) ifTrue: [ self halt ].
-	^ self methods at: aSender ifPresent: [ :found |
-		found sender
-	] ifAbsent: [
-		self predefined at: aSender method selector ifPresent: [ :pre |
-			aSender result << (pre cull: aSender operands).
-			self methods at: aSender put: aSender.
-		] ifAbsent: [ |decoder|
-			decoder := self newMethodBodyDecoder: aSender.
-			self methods at: aSender put: decoder.
-			decoder
+SWClassInfo >> getMessageInfo: aSenderInfo [
+	^ self methods at: aSenderInfo ifPresent: [ :found |
+		found messageInfo
+	] ifAbsent: [|messageInfo|
+		messageInfo := SWMessageInfo newFrom: aSenderInfo.
+		self predefined at: aSenderInfo method selector ifPresent: [ :pre |
+			messageInfo result << (pre cull: aSenderInfo operands).
+			self methods at: aSenderInfo put: messageInfo.
+		] ifAbsent: [ |methodInfo|
+			methodInfo := self newMessgeInfo: aSenderInfo.
+			self methods at: aSenderInfo put: methodInfo.
+			methodInfo
 				decode;
-				sender
+				messageInfo
 		]
 	]
 
 ]
 
 { #category : #accessing }
-SWClass >> haltList [
-	^ self pool haltList
-]
-
-{ #category : #accessing }
-SWClass >> logger [
-	^ self pool logger
-]
-
-{ #category : #accessing }
-SWClass >> methodBodyDecoderClass [
-	^ self pool methodBodyDecoderClass
-]
-
-{ #category : #accessing }
-SWClass >> methods [
+SWClassInfo >> methods [
 	"A Set object consists of referenced methods."
 	^ methods ifNil: [methods := Dictionary new ]
 ]
 
 { #category : #accessing }
-SWClass >> methods: anObject [
+SWClassInfo >> methods: anObject [
 
 	methods := anObject
 ]
 
 { #category : #'instance creation' }
-SWClass >> newMethodBodyDecoder: aSender [
-	^ self methodBodyDecoderClass new
-		logger: self logger;
-		haltList: self haltList;
+SWClassInfo >> newMessgeInfo: aSenderInfo [
+	^ self pool class methodInfoClass new
 		pool: self pool;
 		slot: self slot copy;
-		method: aSender method;
-		operands: aSender operands;
+		method: aSenderInfo method;
+		operands: aSenderInfo operands;
 		yourself
 ]
 
 { #category : #accessing }
-SWClass >> predefined [
+SWClassInfo >> predefined [
 
 	^ predefined ifNil: [ predefined := Dictionary new ]
 ]
 
 { #category : #accessing }
-SWClass >> predefined: anObject [
+SWClassInfo >> predefined: anObject [
 
 	predefined := anObject
 ]
 
 { #category : #api }
-SWClass >> setBreakpointOn: aName [
+SWClassInfo >> setBreakpointOn: aName [
 	self addPredefined: aName with: [ :operands |
 		self halt.
 	]
@@ -240,7 +223,7 @@ SWClass >> setBreakpointOn: aName [
 ]
 
 { #category : #accessing }
-SWClass >> slot [
+SWClassInfo >> slot [
 	^ slot ifNil: [
 		slot := SWSlot new.
 		self addSlotAbout: self targetClass.
@@ -249,7 +232,7 @@ SWClass >> slot [
 ]
 
 { #category : #accessing }
-SWClass >> slot: anObject [
+SWClassInfo >> slot: anObject [
 
 	slot := anObject
 ]

@@ -1,63 +1,57 @@
 "
-SWSender is a selector with its operands.
+an information to send a message
 "
 Class {
-	#name : #SWSender,
+	#name : #SWSenderInfo,
 	#superclass : #Object,
 	#instVars : [
 		'method',
-		'operands',
-		'result'
+		'operands'
 	],
 	#category : #'SWFortranByPharo-Analyzer-Analyzer'
 }
 
 { #category : #comparing }
-SWSender >> = right [
+SWSenderInfo >> = right [
 	^ self method = right method and: [ self operands = right operands ]
 ]
 
-{ #category : #testing }
-SWSender >> hasResult [
-	^ result isNotNil
-]
-
 { #category : #comparing }
-SWSender >> hash [
+SWSenderInfo >> hash [
 	^ (operands copyWith: method) hash
 ]
 
 { #category : #accessing }
-SWSender >> method [
+SWSenderInfo >> method [
 
 	^ method
 ]
 
 { #category : #accessing }
-SWSender >> method: anObject [
+SWSenderInfo >> method: anObject [
 
 	method := anObject
 ]
 
 { #category : #accessing }
-SWSender >> operands [
+SWSenderInfo >> operands [
 
 	^ operands
 ]
 
 { #category : #accessing }
-SWSender >> operands: anObject [
+SWSenderInfo >> operands: anObject [
 
 	operands := anObject
 ]
 
 { #category : #streaming }
-SWSender >> printOn: aStream [
+SWSenderInfo >> printOn: aStream [
 	self putOn: aStream
 ]
 
 { #category : #streaming }
-SWSender >> putOn: aStream [
+SWSenderInfo >> putOn: aStream [
 	method ifNil: [
 		aStream << 'nil'
 	] ifNotNil: [
@@ -66,23 +60,6 @@ SWSender >> putOn: aStream [
 ]
 
 { #category : #accessing }
-SWSender >> receiverClass [
+SWSenderInfo >> receiverClass [
 	^ self operands first value
-]
-
-{ #category : #accessing }
-SWSender >> result [
-
-	^ result ifNil: [ result := SWVariable new ]
-]
-
-{ #category : #accessing }
-SWSender >> result: anObject [
-
-	result := anObject
-]
-
-{ #category : #accessing }
-SWSender >> sender [
-	^ self
 ]

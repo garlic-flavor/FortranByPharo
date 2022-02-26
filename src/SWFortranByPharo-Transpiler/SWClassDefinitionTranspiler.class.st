@@ -186,7 +186,7 @@ SWClassDefinitionTranspiler >> putMemberDeclarationOf: aVariableTypeInfo [
 
 { #category : #'code generation' }
 SWClassDefinitionTranspiler >> putMethodDefinition: aDecoder [
-	aDecoder class = SWDecoder ifFalse: [ ^ self ].
+	aDecoder class = SWMethodInfo ifFalse: [ ^ self ].
 	self class methodDefinitionTranspilerClass new
 		bodyTranspiler: (self class methodBodyTranspilerClass new
 			decoder: aDecoder;
@@ -257,7 +257,7 @@ SWClassDefinitionTranspiler >> transpileAsInstanceSide [
 	self stream putComment: self targetClass comment.
 	self putClassHeader.
 	self stream incIndent.
-	(self pool getClassProcedure: targetClass classSide)
+	(self pool getClassInfo: targetClass classSide)
 		transpileAsClassSide.
 	self putMember.
 	self stream decIndent.

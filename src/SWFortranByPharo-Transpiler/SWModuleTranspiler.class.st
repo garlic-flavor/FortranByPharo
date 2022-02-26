@@ -19,7 +19,7 @@ SWModuleTranspiler class >> extension [
 
 { #category : #accessing }
 SWModuleTranspiler class >> methodBodyProcedureClass [
-	^ SWDecoder
+	^ SWMethodInfo
 ]
 
 { #category : #'as yet unclassified' }
@@ -154,11 +154,11 @@ SWModuleTranspiler >> transpile [
 { #category : #'public API' }
 SWModuleTranspiler >> transpile: aClass [
 	|ct cct|
-	ct := (self mainTranspiler pool getClassProcedure: aClass instanceSide).
+	ct := (self mainTranspiler pool getClassInfo: aClass instanceSide).
 	ct isTranspiled ifTrue: [ ^ self ].
-	ct decoder: (self decoder pool getClassProcedure: aClass instanceSide).
-	cct := (self mainTranspiler pool getClassProcedure: aClass classSide).
-	cct decoder: (self decoder pool getClassProcedure: aClass classSide).
+	ct decoder: (self decoder pool getClassInfo: aClass instanceSide).
+	cct := (self mainTranspiler pool getClassInfo: aClass classSide).
+	cct decoder: (self decoder pool getClassInfo: aClass classSide).
 	ct transpile.
 
 ]

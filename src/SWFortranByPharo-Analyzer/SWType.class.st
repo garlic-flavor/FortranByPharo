@@ -20,7 +20,6 @@ Class {
 SWType class >> calcPriorityOf: aClass [
 	aClass ifNil: [ ^ self defaultPriority ].
 	aClass = UndefinedObject ifTrue: [ ^ self defaultPriority ].
-	aClass class = FullBlockClosure ifTrue: [ ^ self unknownMethodPriority ].
 	^ self exactTypePriority 
 ]
 
@@ -41,6 +40,7 @@ SWType class >> exactTypePriority [
 
 { #category : #initialization }
 SWType class >> initialize_selfClass: transpiler [
+	self error; flag: #toRemove
 "
 	transpiler
 		defineMethodSender: #declare:as: as: [ :t :sender |
@@ -162,7 +162,7 @@ SWType >> priority: anObject [
 { #category : #streaming }
 SWType >> putOn: aStream [
 	aStream
-		<< (payload isBlock ifTrue: ['lazy'] ifFalse: [ payload asString ]);
+		<< payload asString;
 		<< $:;
 		<< (self class nameOfPriority: self priority)
 ]

@@ -2,28 +2,46 @@
 I am a pool of SWClassInfo.
 "
 Class {
-	#name : #SWPool,
+	#name : #SWGlobal,
 	#superclass : #SWPoolBase,
+	#instVars : [
+		'haltList'
+	],
 	#category : #'SWFortranByPharo-Analyzer-Analyzer'
 }
 
-{ #category : #'as yet unclassified' }
-SWPool class >> classProcedureClass [
-	^ SWClass
+{ #category : #constants }
+SWGlobal class >> classInfoClass [
+	^ SWClassInfo
 ]
 
-{ #category : #'as yet unclassified' }
-SWPool class >> initializersHeader [
-	^ 'decode'
+{ #category : #constants }
+SWGlobal class >> globalAccessKey [
+	^ #globalAccess
 ]
 
-{ #category : #'as yet unclassified' }
-SWPool class >> search: aSelector in: aClass [
+{ #category : #constants }
+SWGlobal class >> initializersHeader [
+	^ 'decode_'
+]
+
+{ #category : #constants }
+SWGlobal class >> methodInfoClass [
+	^ SWMethodInfo
+]
+
+{ #category : #constants }
+SWGlobal class >> pragmaKey [
+	^ #pragma
+]
+
+{ #category : #utils }
+SWGlobal class >> search: aSelector in: aClass [
 	^ self search: aSelector in: aClass ifFound: [ :found | found ] ifNone: [ self error ]
 ]
 
 { #category : #utils }
-SWPool class >> search: selector in: aClass ifFound: foundBlock ifNone: noneBlock [
+SWGlobal class >> search: selector in: aClass ifFound: foundBlock ifNone: noneBlock [
 	aClass ifNil: [ ^ noneBlock value ].
 
 	^ aClass methodDict at: selector ifPresent: [ :detected |
@@ -34,14 +52,31 @@ SWPool class >> search: selector in: aClass ifFound: foundBlock ifNone: noneBloc
 
 ]
 
+{ #category : #constants }
+SWGlobal class >> unresolvedSelectorKey [
+	^ #unresolvedSelector
+
+]
+
+{ #category : #accessing }
+SWGlobal >> atGlobalAccess [
+	(self haltList includes: self class globalAccessKey) ifTrue: [ self halt ].
+
+]
+
+{ #category : #accessing }
+SWGlobal >> atPragma [
+	(self haltList includes: self class pragmaKey) ifTrue: [ self halt ]
+]
+
 { #category : #initialization }
-SWPool >> decode_AbstractBinaryFileStream: ct [
+SWGlobal >> decode_AbstractBinaryFileStream: ct [
 	ct
 		declareMethodReturnsReceiver: #position:
 ]
 
 { #category : #initialization }
-SWPool >> decode_AbstractFileReference: ct [
+SWGlobal >> decode_AbstractFileReference: ct [
 	ct
 		declareMethodReturnsReceiver: #joinPath:;
 		declareMethod: #contains: asReturn: Boolean;
@@ -55,7 +90,7 @@ SWPool >> decode_AbstractFileReference: ct [
 ]
 
 { #category : #initialization }
-SWPool >> decode_Behavior: ct [
+SWGlobal >> decode_Behavior: ct [
 	ct
 		declareMethodReturnsReceiversInstance: #basicNew:;
 		declareMethodReturnsReceiversInstance: #basicNew
@@ -63,13 +98,13 @@ SWPool >> decode_Behavior: ct [
 ]
 
 { #category : #initialization }
-SWPool >> decode_BinaryFileStream: ct [
+SWGlobal >> decode_BinaryFileStream: ct [
 	ct
 		declareMethodReturnsReceiver: #truncate:
 ]
 
 { #category : #initialization }
-SWPool >> decode_BlockClosure: ct [
+SWGlobal >> decode_BlockClosure: ct [
 	ct
 		declareMethodReturnsReceiversElement: #on:do:;
 		declareMethodReturnsReceiversElement: #ensure:;
@@ -77,7 +112,7 @@ SWPool >> decode_BlockClosure: ct [
 ]
 
 { #category : #initialization }
-SWPool >> decode_Boolean: ct [
+SWGlobal >> decode_Boolean: ct [
 	ct
 		declareMethodReturnsFirstArgumentsElement: #ifTrue:;
  		declareMethodReturnsFirstArgumentsElement: #ifFalse:;
@@ -90,19 +125,19 @@ SWPool >> decode_Boolean: ct [
 ]
 
 { #category : #initialization }
-SWPool >> decode_Character: ct [
+SWGlobal >> decode_Character: ct [
 	ct
 		declareMethod: #asInteger asReturn: Integer
 ]
 
 { #category : #initialization }
-SWPool >> decode_CharacterClass: ct [
+SWGlobal >> decode_CharacterClass: ct [
 	ct
 		declareMethodReturnsReceiversInstance: #value:
 ]
 
 { #category : #initialization }
-SWPool >> decode_Collection: ct [
+SWGlobal >> decode_Collection: ct [
 	ct
 		declareMethodReturnsSecondArgument: #detect:ifNone:;
 		declareMethodReturnsFirstArgument: #inject:into:;
@@ -110,13 +145,13 @@ SWPool >> decode_Collection: ct [
 ]
 
 { #category : #initialization }
-SWPool >> decode_DateAndTimeClass: ct [
+SWGlobal >> decode_DateAndTimeClass: ct [
 	ct
 		declareMethodReturnsReceiversClass: #now
 ]
 
 { #category : #initialization }
-SWPool >> decode_Dictionary: ct [
+SWGlobal >> decode_Dictionary: ct [
 	ct
 		declareMethodReturnsSecondArgument: #at:put:;
 		declareMethodReturnsSecondArgument: #at:ifAbsent:;
@@ -126,25 +161,25 @@ SWPool >> decode_Dictionary: ct [
 ]
 
 { #category : #initialization }
-SWPool >> decode_DictionaryClass: ct [
+SWGlobal >> decode_DictionaryClass: ct [
 	ct
 		declareMethodReturnsReceiversClass: #fromSton:
 ]
 
 { #category : #initialization }
-SWPool >> decode_Exception: ct [
+SWGlobal >> decode_Exception: ct [
 	ct
 		declareMethodReturnsReceiver: #signal
 ]
 
 { #category : #initialization }
-SWPool >> decode_IntervalClass: ct [
+SWGlobal >> decode_IntervalClass: ct [
 	ct
 		setBreakpointOn: #new
 ]
 
 { #category : #initialization }
-SWPool >> decode_Magnitude: ct [
+SWGlobal >> decode_Magnitude: ct [
 	ct
 		declareMethodAsCompareOperator: #>=;
 		declareMethodAsCompareOperator: #<=;
@@ -155,7 +190,7 @@ SWPool >> decode_Magnitude: ct [
 ]
 
 { #category : #initialization }
-SWPool >> decode_Number: ct [
+SWGlobal >> decode_Number: ct [
 	ct
 		declareMethodAsBinaryOperator: #+;
 		declareMethodAsBinaryOperator: #-;
@@ -165,7 +200,7 @@ SWPool >> decode_Number: ct [
 ]
 
 { #category : #initialization }
-SWPool >> decode_Object: ct [
+SWGlobal >> decode_Object: ct [
 	ct
 		declareMethodAsCompareOperator: #=;
 		declareMethod: #error asReturn: nil;
@@ -184,13 +219,13 @@ SWPool >> decode_Object: ct [
 ]
 
 { #category : #initialization }
-SWPool >> decode_OrderedDictionary: ct [
+SWGlobal >> decode_OrderedDictionary: ct [
 	ct
 		declareMethodReturnsReceiver: #initialize:
 ]
 
 { #category : #initialization }
-SWPool >> decode_Path: ct [
+SWGlobal >> decode_Path: ct [
 	ct
 		declareMethodReturnsReceiver: #/;
 		declareMethod: #basename asReturn: String;
@@ -199,13 +234,13 @@ SWPool >> decode_Path: ct [
 ]
 
 { #category : #initialization }
-SWPool >> decode_PathClass: ct [
+SWGlobal >> decode_PathClass: ct [
 	ct
 		declareMethodReturnsReceiversInstance: #from:
 ]
 
 { #category : #initialization }
-SWPool >> decode_ProtoObject: ct [
+SWGlobal >> decode_ProtoObject: ct [
 	ct
 		declareMethodAsCompareOperator: #==;
 		declareMethodReturnsReceiversClass: #class;
@@ -216,21 +251,21 @@ SWPool >> decode_ProtoObject: ct [
 ]
 
 { #category : #initialization }
-SWPool >> decode_STONClass: ct [
+SWGlobal >> decode_STONClass: ct [
 	ct
 		declareMethod: #jsonWriter asReturn: STONWriter;
 		declareMethod: #fromString: asReturn: Object
 ]
 
 { #category : #initialization }
-SWPool >> decode_Semaphore: ct [
+SWGlobal >> decode_Semaphore: ct [
 	ct
 		declareMethodReturnsReceiver: #wait;
 		declareMethodReturnsReceiver: #signal
 ]
 
 { #category : #initialization }
-SWPool >> decode_SequenceableCollection: ct [
+SWGlobal >> decode_SequenceableCollection: ct [
 	ct
 		declareMethodReturnsReceiver: #,;
 		declareMethodReturnsReceiver: #collect:;
@@ -238,14 +273,14 @@ SWPool >> decode_SequenceableCollection: ct [
 ]
 
 { #category : #initialization }
-SWPool >> decode_SequenceableCollectionClass: ct [
+SWGlobal >> decode_SequenceableCollectionClass: ct [
 	ct
 		declareMethodReturnsReceiversInstance: #streamContents:
 
 ]
 
 { #category : #initialization }
-SWPool >> decode_Set: ct [
+SWGlobal >> decode_Set: ct [
 	ct
 		declareMethodReturnsFirstOrSecondArgument: #remove:ifAbsent:;
 		declareMethodReturnsFirstArgument: #add:;
@@ -253,7 +288,7 @@ SWPool >> decode_Set: ct [
 ]
 
 { #category : #initialization }
-SWPool >> decode_SmallDictionary: ct [
+SWGlobal >> decode_SmallDictionary: ct [
 	ct
 		declareMethodReturnsSecondArgument: #at:put:;
 		declareMethodReturnsSecondArgument: #at:ifAbsent:;
@@ -261,7 +296,7 @@ SWPool >> decode_SmallDictionary: ct [
 ]
 
 { #category : #initialization }
-SWPool >> decode_String: ct [
+SWGlobal >> decode_String: ct [
 	ct
 		declareMethodReturnsReceiver: #trimLeft:right:;
 		declareMethodReturnsReceiver: #asLowercase;
@@ -272,26 +307,26 @@ SWPool >> decode_String: ct [
 ]
 
 { #category : #initialization }
-SWPool >> decode_StringClass: ct [
+SWGlobal >> decode_StringClass: ct [
 	ct
 		declareMethodReturnsReceiversInstance: #crlf;
 		declareMethodReturnsReceiversInstance: #with:
 ]
 
 { #category : #initialization }
-SWPool >> decode_TestAsserter: ct [
+SWGlobal >> decode_TestAsserter: ct [
 	ct
 		declareMethodReturnsReceiver: #assert:description:
 ]
 
 { #category : #initialization }
-SWPool >> decode_TestCaseClass: ct [
+SWGlobal >> decode_TestCaseClass: ct [
 	ct
 		declareMethod: #allTestSelectors asReturn: OrderedCollection
 ]
 
 { #category : #initialization }
-SWPool >> decode_ThreadSafeTranscript: ct [
+SWGlobal >> decode_ThreadSafeTranscript: ct [
 	ct
 		declareMethodReturnsFirstArgument: #nextPutAll:;
 		declareMethodReturnsFirstArgument: #nextPut:;
@@ -300,46 +335,84 @@ SWPool >> decode_ThreadSafeTranscript: ct [
 ]
 
 { #category : #api }
-SWPool >> getResult: aSender [
+SWGlobal >> getMessageInfo: aSenderInfo [
 
-	^ (self getClassProcedure: aSender method methodClass)
-		getResult: aSender
+	^ (self getClassInfo: aSenderInfo method methodClass)
+		getMessageInfo: aSenderInfo
 
 ]
 
 { #category : #api }
-SWPool >> getSender: aSelector with: operands [
+SWGlobal >> getMessageInfo: aSelector with: operands [
 	(self haltList includes: aSelector) ifTrue: [ self halt ].
 
 	^ self class search: aSelector in: operands first value ifFound: [ :foundMethod |
 		(self haltList includes: foundMethod) ifTrue: [ self halt ].
-		(self getClassProcedure: foundMethod methodClass)
-			getResult: (SWSender new
-				method: foundMethod;
-				operands: operands;
-				yourself)
+		self getMessageInfo: (SWSenderInfo new
+			method: foundMethod;
+			operands: operands;
+			yourself)
 	] ifNone: [
-		self logger log: [ 'An unknown method detected: ', aSelector ].
-		(self haltList includes: self owner class unresolvedSelectorKey)  ifTrue: [ self halt ].
-		SWSender new
+		(self haltList includes: self class unresolvedSelectorKey)  ifTrue: [ self halt ].
+		SWMessageInfo new
 			operands: operands;
 			yourself
 	]
 
 ]
 
-{ #category : #accessing }
-SWPool >> haltList [
-	^ self owner haltList
+{ #category : #modifying }
+SWGlobal >> haltAt: aSymbol [
+	self haltAt: aSymbol switch: true
+]
+
+{ #category : #modifying }
+SWGlobal >> haltAt: key switch: aBoolean [
+	aBoolean ifTrue: [
+		self haltList add: key
+	] ifFalse: [
+		self haltList remove: key ifAbsent: [  ]
+	]
+]
+
+{ #category : #modifying }
+SWGlobal >> haltAtGlobalAccess [
+	self haltAtGlobalAccess: true
+]
+
+{ #category : #modifying }
+SWGlobal >> haltAtGlobalAccess: aBoolean [
+	self haltAt: self class globalAccessKey switch: aBoolean
+]
+
+{ #category : #modifying }
+SWGlobal >> haltAtPragma [
+	self haltAtPragma: true
+]
+
+{ #category : #modifying }
+SWGlobal >> haltAtPragma: aBoolean [
+	self haltAt: self class pragmaKey switch: aBoolean
+]
+
+{ #category : #modifying }
+SWGlobal >> haltAtUnresolvedSelector [
+	self haltAtUnresolvedSelector: true
+]
+
+{ #category : #modifying }
+SWGlobal >> haltAtUnresolvedSelector: aBoolean [
+	self haltAt: self class unresolvedSelectorKey switch: aBoolean
+
 ]
 
 { #category : #accessing }
-SWPool >> logger [
-	^ self owner logger
+SWGlobal >> haltList [
+	^ haltList ifNil: [ haltList := Set new ]
 ]
 
 { #category : #accessing }
-SWPool >> methodBodyDecoderClass [
+SWGlobal >> haltList: anObject [
 
-	^ self owner class
+	haltList := anObject
 ]

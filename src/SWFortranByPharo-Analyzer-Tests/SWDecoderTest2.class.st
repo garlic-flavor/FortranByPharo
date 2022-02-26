@@ -16,7 +16,7 @@ SWDecoderTest2 >> test_1020_SWShellEnvironment_localDirectory [
 
 { #category : #tests }
 SWDecoderTest2 >> test_1030_SWShell_class_execute [
-	decoder haltAtUnresolvedSelector: false.
+
 	self resultWith: { } equals: String
 ]
 
@@ -28,12 +28,10 @@ SWDecoderTest2 >> test_1040_TestCase [
 
 { #category : #tests }
 SWDecoderTest2 >> test_1050_ZnServerClass_default [
-	decoder haltAtUnresolvedSelector: false.
 	self resultWith: { } equals: ZnManagingMultiThreadedServer 
 ]
 
 { #category : #tests }
 SWDecoderTest2 >> test_1060_SWServerClass_starton [
-	decoder haltAtUnresolvedSelector: false.
 	self resultWith: { } equals: SWServer
 ]

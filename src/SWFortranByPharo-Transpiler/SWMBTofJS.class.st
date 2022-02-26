@@ -49,7 +49,7 @@ SWMBTofJS >> atCascade: aCascadeNode [
 		original := self children.
 		self put: 'function(_receiver_){'; cr; incIndent; put: 'return ('; cr; incIndent.
 		self children do: [:child|
-			child children at: 1 put: (SWDecoder new
+			child children at: 1 put: (SWMethodInfo new
 				node: (RBVariableNode named: #_receiver_ );
 				result: receiver result;
 				yourself).

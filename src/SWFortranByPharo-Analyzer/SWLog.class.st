@@ -10,7 +10,7 @@ Class {
 		'sender',
 		'stack'
 	],
-	#category : #'SWFortranByPharo-Analyzer-Logger'
+	#category : #'SWFortranByPharo-Analyzer-Olds'
 }
 
 { #category : #accessing }

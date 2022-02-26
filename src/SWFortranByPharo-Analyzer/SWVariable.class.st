@@ -7,7 +7,7 @@ Class {
 	#superclass : #Object,
 	#instVars : [
 		'name',
-		'type',
+		'payload',
 		'properties',
 		'assignCounter'
 	],
@@ -31,23 +31,11 @@ SWVariable class >> new: aType with: aPriority [
 { #category : #'accumulator ops' }
 SWVariable >> << rightObject [
 	(rightObject class includesBehavior: SWVariable) ifTrue: [
-		self priority < rightObject priority ifFalse: [ ^ rightObject ].
-		self type: rightObject type.
-		self properties addAll: rightObject properties.
-		self assignCounter add: rightObject.
-		^ rightObject
+		self payload << rightObject payload
+	] ifFalse: [
+		self payload << rightObject.
 	].
-
-	(rightObject class includesBehavior: SWType) ifTrue: [
-		self type priority < rightObject priority ifTrue: [
-			self type: rightObject
-		].
-		^ rightObject
-	].
-
-	self type << rightObject.
-	^ rightObject
-
+	self assignCounter: self assignCounter + 1
 ]
 
 { #category : #comparing }
@@ -63,12 +51,18 @@ SWVariable >> addProperty: aProp [
 { #category : #accessing }
 SWVariable >> assignCounter [
 
-	^ assignCounter ifNil: [ assignCounter := OrderedCollection new ]
+	^ assignCounter ifNil: [ assignCounter := 0 ]
+]
+
+{ #category : #accessing }
+SWVariable >> assignCounter: anObject [
+
+	assignCounter := anObject
 ]
 
 { #category : #accessing }
 SWVariable >> elementType [
-	^ self type elementType
+	^ self payload elementType
 ]
 
 { #category : #testing }
@@ -78,7 +72,7 @@ SWVariable >> hasProperty: aProperty [
 
 { #category : #comparing }
 SWVariable >> hash [
-	^ self type hash
+	^ self payload hash
 ]
 
 { #category : #accessing }
@@ -91,23 +85,29 @@ SWVariable >> name: aName [
 	name := aName
 ]
 
-{ #category : #printing }
-SWVariable >> printOn: aStream [
+{ #category : #accessing }
+SWVariable >> payload [
 
-	^ self putOn: aStream
+	^ payload ifNil: [ payload := SWValue new ]
+]
+
+{ #category : #accessing }
+SWVariable >> payload: anObject [
+
+	payload := anObject
 ]
 
 { #category : #accessing }
 SWVariable >> priority [
 
-	^ self type priority
+	^ self payload priority
 
 ]
 
 { #category : #accessing }
 SWVariable >> priority: anObject [
 
-	^ self type priority: anObject.
+	^ self payload priority: anObject.
 ]
 
 { #category : #accessing }
@@ -133,7 +133,7 @@ SWVariable >> putOn: aStream [
 		<< name asString;
 		space;
 		<< $<;
-		<< self type;
+		<< self payload;
 		<< $>;
 		space";
 		<< '<< ';
@@ -151,17 +151,17 @@ SWVariable >> removeProperty: propName [
 { #category : #accessing }
 SWVariable >> type [
 
-	^ type ifNil: [ type := SWType new ]
+	^ self payload type
 ]
 
 { #category : #accessing }
 SWVariable >> type: anObject [
 
-	type := anObject
+	self payload type: anObject
 
 ]
 
 { #category : #accessing }
 SWVariable >> value [
-	^ self type value
+	^ self payload value
 ]

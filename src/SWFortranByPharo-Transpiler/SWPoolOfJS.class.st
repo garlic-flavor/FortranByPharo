@@ -8,6 +8,6 @@ Class {
 }
 
 { #category : #accessing }
-SWPoolOfJS class >> classProcedureClass [
+SWPoolOfJS class >> classInfoClass [
 	^ SWCDTofJS
 ]
