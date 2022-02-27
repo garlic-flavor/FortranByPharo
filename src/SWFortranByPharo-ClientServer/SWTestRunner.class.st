@@ -28,7 +28,9 @@ SWTestRunner class >> decode_self: ct [
 			method: m;
 			operands: { self };
 			yourself).
-	]
+	].
+	ct pool decode: #setUp with: { self }.
+	ct pool decode: #tearDown with: { self }.
 
 ]
 
@@ -105,6 +107,12 @@ SWTestRunner class >> solveDependenciesUsing: transpiler [
 		transpiler decode: each selector with: { self }
 	]
 
+
+]
+
+{ #category : #'as yet unclassified' }
+SWTestRunner class >> transpile_self: cdt [
+	cdt pool transpile: TestCase.
 
 ]
 

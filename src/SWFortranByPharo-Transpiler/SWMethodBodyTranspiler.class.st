@@ -78,14 +78,11 @@ SWMethodBodyTranspiler >> atInteger: anInteger [
 { #category : #accessing }
 SWMethodBodyTranspiler >> atMessage: aMessageNode [
 
-	aMessageNode parent class = RBMessageNode ifTrue: [ self put: '(' ].
 	(self pool predefinedSenderTranspiler: self expression senderInfo) ifNotNil: [ :predefined |
 		predefined value: self
 	] ifNil: [
 		self putOrdinaryMessage
 	].
-	aMessageNode parent class = RBMessageNode ifTrue: [ self put: ')' ].
-
 
 ]
 
@@ -390,11 +387,11 @@ SWMethodBodyTranspiler >> putOnDo [
 { #category : #'code generation' }
 SWMethodBodyTranspiler >> putOpBinary [
 	self
-		transpileChild: self children first;
+		transpileChildWithBracket: self children first;
 		put: ' ';
 		put: self node selector;
 		put: ' ';
-		transpileChild: self children second
+		transpileChildWithBracket: self children second
 
 ]
 
@@ -532,12 +529,12 @@ SWMethodBodyTranspiler >> stream: anObject [
 { #category : #'public API' }
 SWMethodBodyTranspiler >> transpile [
 	self node dispatchTo: self.
-	^ self stream contents
+
 ]
 
 { #category : #'as yet unclassified' }
 SWMethodBodyTranspiler >> transpileChild: aDecoder [
-	^ (self child: aDecoder)
+	(self child: aDecoder)
 		isExpression: self isExpression;
 		transpile
 
@@ -545,7 +542,7 @@ SWMethodBodyTranspiler >> transpileChild: aDecoder [
 
 { #category : #'as yet unclassified' }
 SWMethodBodyTranspiler >> transpileChildAsExpression: aDecoder [
-	^ (self child: aDecoder)
+	(self child: aDecoder)
 		isExpression: true;
 		transpile
 
@@ -553,9 +550,21 @@ SWMethodBodyTranspiler >> transpileChildAsExpression: aDecoder [
 
 { #category : #'as yet unclassified' }
 SWMethodBodyTranspiler >> transpileChildAsNotExpression: aDecoder [
-	^ (self child: aDecoder)
+	(self child: aDecoder)
 		isExpression: false;
 		transpile
+
+]
+
+{ #category : #'as yet unclassified' }
+SWMethodBodyTranspiler >> transpileChildWithBracket: aDecoder [
+	|needsBracket|
+	needsBracket := aDecoder node class = RBMessageNode.
+	needsBracket ifTrue: [ self put: '(' ].
+	(self child: aDecoder)
+		isExpression: self isExpression;
+		transpile.
+	needsBracket ifTrue: [ self put: ')' ].
 
 ]
 

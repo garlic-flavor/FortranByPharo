@@ -30,11 +30,7 @@ SWVariable class >> new: aType with: aPriority [
 
 { #category : #'accumulator ops' }
 SWVariable >> << rightObject [
-	(rightObject class includesBehavior: SWVariable) ifTrue: [
-		self payload << rightObject payload
-	] ifFalse: [
-		self payload << rightObject.
-	].
+	self payload << rightObject.
 	self assignCounter: self assignCounter + 1
 ]
 

@@ -36,3 +36,13 @@ SWContainer >> hash [
 SWContainer >> isContainer [
 	^ true
 ]
+
+{ #category : #streaming }
+SWContainer >> putOn: aStream [
+	aStream << 'C<'.
+	super putOn: aStream.
+	aStream
+		<< ':';
+		<< elementType asString;
+		 << '>'
+]

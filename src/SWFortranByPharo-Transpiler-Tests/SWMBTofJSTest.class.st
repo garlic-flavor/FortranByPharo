@@ -141,7 +141,7 @@ SWMBTofJSTest >> test_0290_SWStd_print [
 
 { #category : #tests }
 SWMBTofJSTest >> test_0300_recursive_message_call [
-	self resultWith: { SmallInteger } equals: 'return ((0 < arg1) ? arg1 + (self._0300_recursive_message_call_((arg1 - 1))) : 0);
+	self resultWith: { SmallInteger } equals: 'return (0 < arg1 ? arg1 + (self._0300_recursive_message_call_(arg1 - 1)) : 0);
 '
 ]
 
@@ -189,7 +189,7 @@ SWMBTofJSTest >> test_0400_cascading [
         _receiver_.message_("hogehoge"), 
         _receiver_.uri_(uri), 
         _receiver_);
-}((new SWServerStatus())).toString();
+}(new SWServerStatus()).toString();
 '
 ]
 

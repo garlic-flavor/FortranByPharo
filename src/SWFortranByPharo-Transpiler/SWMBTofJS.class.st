@@ -78,12 +78,8 @@ SWMBTofJS >> atCascade: aCascadeNode [
 
 { #category : #accessing }
 SWMBTofJS >> atClosure: aBlockNode [
-	self halt.
-	aBlockNode isExpression ifTrue: [
-		self transpileChildren.
-	] ifFalse: [
-		self transpileChildrenWithDelimiter
-	]
+	self isExpression: false.
+	self putBlock
 
 ]
 
@@ -449,6 +445,7 @@ SWMBTofJS >> putOrdinaryCallee: aNode [
 SWMBTofJS >> putOrdinaryMessage [
 	|methodClass receiverClass|
 
+	self method ifNil: [ ^ super putOrdinaryMessage ].
 	methodClass := self method methodClass.
 	methodClass ifNil: [ ^ super putOrdinaryMessage ].
 	methodClass isInstanceSide ifTrue: [ ^ super putOrdinaryMessage ].

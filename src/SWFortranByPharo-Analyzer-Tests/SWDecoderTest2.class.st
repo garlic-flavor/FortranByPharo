@@ -35,8 +35,3 @@ SWDecoderTest2 >> test_1050_ZnServerClass_default [
 SWDecoderTest2 >> test_1060_SWServerClass_starton [
 	self resultWith: { } equals: SWServer
 ]
-
-{ #category : #tests }
-SWDecoderTest2 >> test_1070_SWShellEnvironment [
-	self resultWith: {  }
-]

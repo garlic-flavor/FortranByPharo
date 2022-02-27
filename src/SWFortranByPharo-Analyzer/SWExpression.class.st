@@ -17,7 +17,8 @@ Class {
 
 { #category : #adding }
 SWExpression >> addToSlot: aName as: aType [
-	self slot addLast: ((SWVariable new: aType)
+	self slot addLast: (SWVariable new
+		<< aType;
 		name: aName;
 		yourself)
 ]
@@ -269,7 +270,7 @@ SWExpression >> pool: anObject [
 { #category : #private }
 SWExpression >> readySlot [
 	|receiver|
-	receiver := self messageInfo operands first value.
+	receiver := self messageInfo operands first.
 	self addToSlot: 'self' as: receiver.
 	self addToSlot: 'super' as: receiver superclass.
 	self node argumentNames  with: (self messageInfo operands allButFirst) do: [ :name :type |

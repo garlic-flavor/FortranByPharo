@@ -38,19 +38,6 @@ SWType class >> exactTypePriority [
 	^ 90
 ]
 
-{ #category : #initialization }
-SWType class >> initialize_selfClass: transpiler [
-	self error; flag: #toRemove
-"
-	transpiler
-		defineMethodSender: #declare:as: as: [ :t :sender |
-			t
-				preventStatementDelimiter;
-				preventNewline
-		]
-"
-]
-
 { #category : #'private - utilities' }
 SWType class >> nameOfPriority: aPriority [
 	^ ((SWType class methodDict values select: [ :m |
@@ -79,16 +66,6 @@ SWType class >> new: aClass with: aPriority [
 		<< aClass;
 		priority: aPriority;
 		yourself
-]
-
-{ #category : #constants }
-SWType class >> receiverTypePriority [
-	^ 60
-]
-
-{ #category : #constants }
-SWType class >> unknownMethodPriority [
-	^ 70
 ]
 
 { #category : #constants }
@@ -165,6 +142,13 @@ SWType >> putOn: aStream [
 		<< payload asString;
 		<< $:;
 		<< (self class nameOfPriority: self priority)
+]
+
+{ #category : #accessing }
+SWType >> superclass [
+	^ self copy
+		payload: self payload superclass;
+		yourself
 ]
 
 { #category : #accessing }

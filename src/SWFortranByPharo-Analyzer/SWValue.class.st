@@ -82,8 +82,14 @@ SWValue >> priority: anObject [
 
 { #category : #streaming }
 SWValue >> putOn: aStream [
-	self type putOn: aStream
+	^ self type putOn: aStream
+]
 
+{ #category : #accessing }
+SWValue >> superclass [
+	^ self copy
+		type: self type superclass;
+		yourself
 ]
 
 { #category : #accessing }

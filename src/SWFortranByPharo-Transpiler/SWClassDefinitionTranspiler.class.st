@@ -7,6 +7,7 @@ Class {
 	#instVars : [
 		'classInfo',
 		'predefinedSender',
+		'predefinedBody',
 		'stream'
 	],
 	#category : #'SWFortranByPharo-Transpiler-Common'
@@ -34,20 +35,27 @@ SWClassDefinitionTranspiler >> classInfo: anObject [
 	classInfo := anObject
 ]
 
-{ #category : #'public API' }
-SWClassDefinitionTranspiler >> defineMethodBody: aName as: anInitializer [
-	self halt; flag: #toRewrite.
-	self addDecoderInitializer: aName with: [ :decoder |
-		decoder
-			generator: 	anInitializer;
-			yourself
-	]
-]
-
 { #category : #accessing }
 SWClassDefinitionTranspiler >> isTranspiled [
 
 	^ classInfo isNotNil
+]
+
+{ #category : #'public API' }
+SWClassDefinitionTranspiler >> methodBodyTranspilerOf: aName is: transpiler [
+	self predefinedBody at: aName put: transpiler
+]
+
+{ #category : #accessing }
+SWClassDefinitionTranspiler >> predefinedBody [
+
+	^ predefinedBody
+]
+
+{ #category : #accessing }
+SWClassDefinitionTranspiler >> predefinedBody: anObject [
+
+	predefinedBody := anObject
 ]
 
 { #category : #accessing }
@@ -105,7 +113,7 @@ SWClassDefinitionTranspiler >> putMemberDeclarationOf: aVariable [
 
 { #category : #'code generation' }
 SWClassDefinitionTranspiler >> putMethodDefinition: anExpression [
-	anExpression expression ifNil: [ ^ self ].
+	anExpression expression ifNil: [ ^ self putPredefinedMethodBody: anExpression messageInfo ].
 	self putMethodHeader: anExpression.
 	self class methodBodyTranspilerClass new
 		expression: anExpression;
@@ -124,6 +132,12 @@ SWClassDefinitionTranspiler >> putMethodFooter: anExpression [
 { #category : #'as yet unclassified' }
 SWClassDefinitionTranspiler >> putMethodHeader: anExpression [
 	^ self subclassResponsibility 
+]
+
+{ #category : #'as yet unclassified' }
+SWClassDefinitionTranspiler >> putPredefinedMethodBody: aMessageInfo [
+	aMessageInfo ifNil: [ ^ self ].
+	self halt; flag: #toImplement
 ]
 
 { #category : #api }

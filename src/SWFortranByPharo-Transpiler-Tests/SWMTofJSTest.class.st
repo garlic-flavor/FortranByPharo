@@ -47,5 +47,5 @@ return tp.var1();
 
 { #category : #utilities }
 SWMTofJSTest >> transpile: aMethod with: arguments [
-	^ module main: aMethod
+	^ module method: aMethod with: arguments
 ]

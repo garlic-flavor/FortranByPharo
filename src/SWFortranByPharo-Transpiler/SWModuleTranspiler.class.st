@@ -14,7 +14,7 @@ Class {
 { #category : #'instance creation' }
 SWModuleTranspiler class >> main: aClass [
 	^ self new
-		main: (self poolClass search: #main in: aClass classSide) with: { aClass classSide };
+		main: aClass;
 		yourself
 
 ]
@@ -99,11 +99,6 @@ SWModuleTranspiler >> main: aClass [
 ]
 
 { #category : #accessing }
-SWModuleTranspiler >> main: aMethod with: operands [
-	^ self pool transpile: aMethod with: operands
-]
-
-{ #category : #accessing }
 SWModuleTranspiler >> mainTranspiler [
 
 	^ mainTranspiler ifNil: [
@@ -117,6 +112,11 @@ SWModuleTranspiler >> mainTranspiler [
 SWModuleTranspiler >> mainTranspiler: anObject [
 
 	mainTranspiler := anObject
+]
+
+{ #category : #accessing }
+SWModuleTranspiler >> method: aMethod with: operands [
+	^ self pool transpile: aMethod with: operands
 ]
 
 { #category : #accessing }
