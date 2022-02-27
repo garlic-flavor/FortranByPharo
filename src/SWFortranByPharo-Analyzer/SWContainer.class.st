@@ -10,6 +10,11 @@ Class {
 	#category : #'SWFortranByPharo-Analyzer-Type'
 }
 
+{ #category : #comparing }
+SWContainer >> = right [
+	^ super = right and: [ self elementType = right elementType ]
+]
+
 { #category : #accessing }
 SWContainer >> elementType [
 
@@ -20,6 +25,11 @@ SWContainer >> elementType [
 SWContainer >> elementType: anObject [
 
 	elementType := anObject
+]
+
+{ #category : #comparing }
+SWContainer >> hash [
+	^ { payload. elementType } hash
 ]
 
 { #category : #testing }

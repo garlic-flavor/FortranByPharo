@@ -1,19 +1,16 @@
 Class {
 	#name : #SWTestRunner,
 	#superclass : #TestCase,
+	#classInstVars : [
+		'moduleTranspiler'
+	],
 	#category : #'SWFortranByPharo-ClientServer-Client'
 }
 
 { #category : #building }
 SWTestRunner class >> build [
-	|mt|
-	mt := self moduleTranspilerClass new.
-"
-	mt pool global haltAtUnresolvedSelector.
-"
-	mt main: self.
-	^ mt
-
+	moduleTranspiler main: self.
+	^ moduleTranspiler
 
 ]
 
@@ -27,7 +24,7 @@ SWTestRunner class >> decode_TestAsserter: ct [
 { #category : #'as yet unclassified' }
 SWTestRunner class >> decode_self: ct [
 	self methodDict values select: [ :m | m protocol beginsWith: 'test' ] thenDo: [ :m |
-		ct getMessageInfo: (SWSenderInfo new
+		ct pool decode: (SWSenderInfo new
 			method: m;
 			operands: { self };
 			yourself).
@@ -62,6 +59,12 @@ SWTestRunner class >> initialize_selfClass: ct [
 		]
 ]
 
+{ #category : #building }
+SWTestRunner class >> inspectResult [
+	(moduleTranspiler stream contents) inspect
+
+]
+
 { #category : #accessing }
 SWTestRunner class >> main [
 	SWStd import: #(PharoObject TestAsserter TestSuite) from: 'Pharo'.
@@ -77,6 +80,11 @@ SWTestRunner class >> moduleTranspilerClass [
 { #category : #accessing }
 SWTestRunner class >> name [
 	^ super name
+]
+
+{ #category : #'instance creation' }
+SWTestRunner class >> newModuleTranspiler [
+	^ moduleTranspiler := self moduleTranspilerClass new
 ]
 
 { #category : #suites }
@@ -98,14 +106,6 @@ SWTestRunner class >> solveDependenciesUsing: transpiler [
 	]
 
 
-]
-
-{ #category : #building }
-SWTestRunner class >> tryBuild [
-	|module result|
-	module := self build.
-	result := module stream contents.
-	result inspect
 ]
 
 { #category : #running }

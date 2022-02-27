@@ -97,6 +97,11 @@ SWVariable >> payload: anObject [
 	payload := anObject
 ]
 
+{ #category : #printing }
+SWVariable >> printOn: aStream [
+	^ self putOn: aStream
+]
+
 { #category : #accessing }
 SWVariable >> priority [
 

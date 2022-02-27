@@ -24,6 +24,30 @@ SWTypeTest >> testBasics [
 
 ]
 
+{ #category : #tests }
+SWTypeTest >> testHash [
+	|set|
+	set := Set new.
+	set add: (SWType new: Integer with: SWType exactTypePriority).
+	self assert: set size equals: 1.
+	set add: (SWType new: Integer with: SWType userSpecifyingPriority).
+	self assert: set size equals: 1.
+	set add: (SWType new: BlockClosure).
+	self assert: set size equals: 2.
+	set add: ((SWContainer new: BlockClosure)
+		elementType: Integer;
+		yourself).
+	self assert: set size equals: 3.
+	set add: ((SWContainer new: BlockClosure)
+		elementType: SmallInteger;
+		yourself).
+	self assert: set size equals: 4.
+	set add: ((SWContainer new: BlockClosure)
+		elementType: Integer;
+		yourself).
+	self assert: set size equals: 4.
+]
+
 { #category : #test }
 SWTypeTest >> testLessThanLessThan [
 

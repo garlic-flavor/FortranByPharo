@@ -20,6 +20,7 @@ SWShellEnvironmentTest class >> moduleTranspilerClass [
 
 { #category : #'as yet unclassified' }
 SWShellEnvironmentTest class >> solveDependenciesUsing: transpiler [
+self error; flag: #toRemove.
 	super solveDependenciesUsing: transpiler.
 	transpiler transpile: SWShellEnvironment
 
@@ -28,7 +29,9 @@ SWShellEnvironmentTest class >> solveDependenciesUsing: transpiler [
 { #category : #building }
 SWShellEnvironmentTest class >> tryBuild [
 	<script>
-	super tryBuild
+	self newModuleTranspiler.
+	self build.
+	self inspectResult.
 ]
 
 { #category : #test }

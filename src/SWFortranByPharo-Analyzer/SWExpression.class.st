@@ -114,7 +114,7 @@ SWExpression >> atNil [
 { #category : #private }
 SWExpression >> atOrdinaryMessage: aMessageNode [
 
-	self messageInfo: (self pool getMessageInfo: aMessageNode selector with: (self children collect: [ :each | each result ])).
+	self messageInfo: (self pool decode: aMessageNode selector with: (self children collect: [ :each | each result ])) messageInfo.
 	self result << self messageInfo result
 "
 	operands := self children collect: [ :each | each result ].		

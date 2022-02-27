@@ -9,7 +9,7 @@ Class {
 
 { #category : #private }
 SWDecoderTestBase >> decode: selector with: args [
-	^ global getMessageInfo: (SWSenderInfo new
+	^ global decode: (SWSenderInfo new
 		method: (SWTestProgram getBySelector: selector);
 		operands: (args copyWithFirst: SWTestProgram);
 		yourself)
@@ -18,15 +18,17 @@ SWDecoderTestBase >> decode: selector with: args [
 
 { #category : #util }
 SWDecoderTestBase >> resultWith: args [
-	|messageInfo|
+	|messageInfo result|
 	messageInfo := self decode: thisContext sender selector with: args.
+	result := messageInfo result.
 	self halt.
 ]
 
 { #category : #util }
 SWDecoderTestBase >> resultWith: args equals: type [
-	|messageInfo|
-	messageInfo := self decode: thisContext sender selector with: args.
+	|decoded messageInfo|
+	decoded := self decode: thisContext sender selector with: args.
+	messageInfo := decoded messageInfo.
 	self assert: messageInfo result value equals: type
 
 ]

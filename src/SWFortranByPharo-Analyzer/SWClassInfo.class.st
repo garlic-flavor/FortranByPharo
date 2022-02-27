@@ -159,13 +159,8 @@ SWClassInfo >> declareMethodReturnsSecondArgument: aName [
 
 ]
 
-{ #category : #api }
-SWClassInfo >> getExpression: aSenderInfo [
-	^ (self getInfo: aSenderInfo) expression
-]
-
 { #category : #private }
-SWClassInfo >> getInfo: aSenderInfo [
+SWClassInfo >> decode: aSenderInfo [
 	^ self methods at: aSenderInfo ifAbsent: [
 		self predefined at: aSenderInfo method selector ifPresent: [ :pre | |messageInfo|
 			messageInfo := SWMessageInfo newFrom: aSenderInfo.
@@ -180,11 +175,6 @@ SWClassInfo >> getInfo: aSenderInfo [
 		]
 	]
 
-]
-
-{ #category : #api }
-SWClassInfo >> getMessageInfo: aSenderInfo [
-	^ (self getInfo: aSenderInfo) messageInfo
 ]
 
 { #category : #accessing }

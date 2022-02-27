@@ -410,6 +410,11 @@ SWTestProgram >> _1060_SWServerClass_starton [
 	^ SWServer start
 ]
 
+{ #category : #'as yet unclassified' }
+SWTestProgram >> _1070_SWShellEnvironment [
+	^ self assert: (SWShellEnvironment default localDirectory fullName endsWith: 'hoge')
+]
+
 { #category : #accessing }
 SWTestProgram >> var1 [
 

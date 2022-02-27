@@ -68,10 +68,10 @@ SWTranspilerPool >> transpile: aClass [
 { #category : #'as yet unclassified' }
 SWTranspilerPool >> transpile: aMethod with: operands [
 	|ex bt|
-	ex := self global getExpression: (SWSenderInfo new
+	ex := (self global decode: (SWSenderInfo new
 		method: aMethod;
 		operands: operands;
-		yourself).
+		yourself)) expression.
 	self global getClassInfo: aMethod methodClass instanceSide.
 	self global getClassInfo: operands first value instanceSide.
 
@@ -89,10 +89,10 @@ SWTranspilerPool >> transpile: aMethod with: operands [
 { #category : #'as yet unclassified' }
 SWTranspilerPool >> transpileBody: aMethod with: operands [
 	|ex bt|
-	ex := self global getExpression: (SWSenderInfo new
+	ex := (self global decode: (SWSenderInfo new
 		method: aMethod;
 		operands: operands;
-		yourself).
+		yourself)) expression.
 	bt := self class methodBodyTranspilerClass new
 		expression: ex;
 		pool: self;

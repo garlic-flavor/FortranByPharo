@@ -47,6 +47,33 @@ SWGlobal >> atPragma [
 	(self haltList includes: self class pragmaKey) ifTrue: [ self halt ]
 ]
 
+{ #category : #api }
+SWGlobal >> decode: aSenderInfo [
+
+	^ (self getClassInfo: aSenderInfo method methodClass)
+		decode: aSenderInfo
+
+]
+
+{ #category : #api }
+SWGlobal >> decode: aSelector with: operands [
+	(self haltList includes: aSelector) ifTrue: [ self halt ].
+	^ self class search: aSelector in: operands first value ifFound: [ :foundMethod |
+		(self haltList includes: foundMethod) ifTrue: [ self halt ].
+		self decode: (SWSenderInfo new
+			method: foundMethod;
+			operands: operands;
+			yourself)
+	] ifNone: [
+		(self haltList includes: aSelector) ifTrue: [ self halt ].
+		(self haltList includes: self class unresolvedSelectorKey)  ifTrue: [ self halt ].
+		SWMessageInfo new
+			operands: operands;
+			yourself
+	]
+
+]
+
 { #category : #initialization }
 SWGlobal >> decode_AbstractBinaryFileStream: ct [
 	ct
@@ -310,41 +337,6 @@ SWGlobal >> decode_ThreadSafeTranscript: ct [
 		declareMethodReturnsFirstArgument: #nextPut:;
 		declareMethodReturnsReceiver: #endEntry;
 		declareMethodReturnsFirstArgument: #critical:
-]
-
-{ #category : #'as yet unclassified' }
-SWGlobal >> getExpression: aSenderInfo [
-
-	^ (self getClassInfo: aSenderInfo method methodClass)
-		getExpression: aSenderInfo
-
-]
-
-{ #category : #api }
-SWGlobal >> getMessageInfo: aSenderInfo [
-
-	^ (self getClassInfo: aSenderInfo method methodClass)
-		getMessageInfo: aSenderInfo
-
-]
-
-{ #category : #api }
-SWGlobal >> getMessageInfo: aSelector with: operands [
-	(self haltList includes: aSelector) ifTrue: [ self halt ].
-
-	^ self class search: aSelector in: operands first value ifFound: [ :foundMethod |
-		(self haltList includes: foundMethod) ifTrue: [ self halt ].
-		self getMessageInfo: (SWSenderInfo new
-			method: foundMethod;
-			operands: operands;
-			yourself)
-	] ifNone: [
-		(self haltList includes: self class unresolvedSelectorKey)  ifTrue: [ self halt ].
-		SWMessageInfo new
-			operands: operands;
-			yourself
-	]
-
 ]
 
 { #category : #modifying }
