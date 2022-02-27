@@ -6,7 +6,32 @@ Class {
 
 { #category : #building }
 SWTestRunner class >> build [
-	^ self moduleTranspilerClass main: self.
+	|mt|
+	mt := self moduleTranspilerClass new.
+"
+	mt pool global haltAtUnresolvedSelector.
+"
+	mt main: self.
+	^ mt
+
+
+]
+
+{ #category : #initialization }
+SWTestRunner class >> decode_TestAsserter: ct [
+
+	ct
+		declareMethodReturnsReceiver: #assert:description:resumable:
+]
+
+{ #category : #'as yet unclassified' }
+SWTestRunner class >> decode_self: ct [
+	self methodDict values select: [ :m | m protocol beginsWith: 'test' ] thenDo: [ :m |
+		ct getMessageInfo: (SWSenderInfo new
+			method: m;
+			operands: { self };
+			yourself).
+	]
 
 ]
 
@@ -22,19 +47,15 @@ SWTestRunner class >> go [
 ]
 
 { #category : #initialization }
-SWTestRunner class >> initialize_TestAsserter: transpiler [
-	transpiler
-		declareMethodReturnsReceiver: #assert:description:resumable:
-]
-
-{ #category : #initialization }
 SWTestRunner class >> initialize_TestSuite: transpiler [
+	self halt; flag: #toRewirte.
 	transpiler
 		declareMethodReturnsReceiver: #run:
 ]
 
 { #category : #initialization }
 SWTestRunner class >> initialize_selfClass: ct [
+	self halt; flag: #toRewirte.
 	ct
 		defineMethodBody: #name as: [ :t |
 			t putReturnThisClassName
@@ -65,6 +86,8 @@ SWTestRunner class >> runAllTests [
 
 { #category : #'code generation' }
 SWTestRunner class >> solveDependenciesUsing: transpiler [
+	self halt; flag: #toRewirte.
+
 	transpiler
 		transpile: TestCase;
 		transpile: SWTestRunner;
@@ -82,7 +105,7 @@ SWTestRunner class >> tryBuild [
 	|module result|
 	module := self build.
 	result := module stream contents.
-	self halt
+	result inspect
 ]
 
 { #category : #running }

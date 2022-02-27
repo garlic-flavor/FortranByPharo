@@ -91,8 +91,11 @@ SWModuleTranspiler >> logger [
 ]
 
 { #category : #accessing }
-SWModuleTranspiler >> main: aMethod [
-	^ self pool transpile: aMethod with: { aMethod methodClass }
+SWModuleTranspiler >> main: aClass [
+	|method|
+
+	method := self class poolClass search: #main in: aClass classSide.
+	^ self pool transpile: method with: { aClass classSide }
 ]
 
 { #category : #accessing }

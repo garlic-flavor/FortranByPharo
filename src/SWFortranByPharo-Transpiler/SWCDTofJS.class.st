@@ -267,6 +267,34 @@ SWCDTofJS >> putMemberDeclarationOf: aVariableTypeInfo [
 ]
 
 { #category : #'as yet unclassified' }
+SWCDTofJS >> putMethodFooter: anExpression [
+	self stream
+		decIndent;
+		putLine: '}'
+]
+
+{ #category : #'as yet unclassified' }
+SWCDTofJS >> putMethodHeader: anExpression [
+	anExpression method methodClass isClassSide ifTrue: [
+		self stream put: 'static '
+	].
+	self stream
+		put: (self class mangleClass mangle: anExpression);
+		put: '('.
+
+	anExpression node arguments do: [ :vi |
+		self stream put: vi name
+	] separatedBy: [
+		self stream put: ', '
+	].
+	self stream
+		putLine: '){';
+		incIndent
+		
+
+]
+
+{ #category : #'as yet unclassified' }
 SWCDTofJS >> put_ensure_: transpiler with: aNode [
 	self error; flag: #toRemove.
 

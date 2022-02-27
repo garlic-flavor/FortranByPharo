@@ -4,7 +4,7 @@ I transpile CompiledMethod to ECMAScript.
 Class {
 	#name : #SWMDTofJS,
 	#superclass : #SWMethodDefinitionTranspiler,
-	#category : #'SWFortranByPharo-Transpiler-JS'
+	#category : #'SWFortranByPharo-Transpiler-Olds'
 }
 
 { #category : #'code generation' }

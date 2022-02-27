@@ -82,11 +82,7 @@ SWMethodBodyTranspiler >> atMessage: aMessageNode [
 	(self pool predefinedSenderTranspiler: self expression senderInfo) ifNotNil: [ :predefined |
 		predefined value: self
 	] ifNil: [
-		self
-			transpileChild: self children first;
-			putClassAccessor;
-			put: self mangle;
-			putArguments: self children allButFirst
+		self putOrdinaryMessage
 	].
 	aMessageNode parent class = RBMessageNode ifTrue: [ self put: ')' ].
 
@@ -129,7 +125,7 @@ SWMethodBodyTranspiler >> atVariable: aVariableNode [
 	aVariableNode parent class = RBSequenceNode ifTrue: [
 		^ self putVariableDeclaration
 	].
-	self put: aVariableNode name
+	self putVariable
 
 ]
 
@@ -402,6 +398,16 @@ SWMethodBodyTranspiler >> putOpBinary [
 
 ]
 
+{ #category : #'as yet unclassified' }
+SWMethodBodyTranspiler >> putOrdinaryMessage [
+	self
+		transpileChild: self children first;
+		putClassAccessor;
+		put: self mangle;
+		putArguments: self children allButFirst
+
+]
+
 { #category : #'code generation' }
 SWMethodBodyTranspiler >> putParameters: anArray [
 	self halt; flag: #toRewrite.
@@ -487,6 +493,11 @@ SWMethodBodyTranspiler >> putSymbol: aByteSymbol [
 		put: '"';
 		put: aByteSymbol asString;
 		put: '"'
+]
+
+{ #category : #'as yet unclassified' }
+SWMethodBodyTranspiler >> putVariable [
+	self put: self node name
 ]
 
 { #category : #'code generation' }

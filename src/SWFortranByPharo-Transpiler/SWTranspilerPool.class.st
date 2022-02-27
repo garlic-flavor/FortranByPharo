@@ -72,6 +72,9 @@ SWTranspilerPool >> transpile: aMethod with: operands [
 		method: aMethod;
 		operands: operands;
 		yourself).
+	self global getClassInfo: aMethod methodClass instanceSide.
+	self global getClassInfo: operands first value instanceSide.
+
 	self transpile: aMethod methodClass instanceSide.
 	self transpile: operands first value instanceSide.
 	bt := self class methodBodyTranspilerClass new

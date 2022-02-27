@@ -51,7 +51,7 @@ SWPoolBase class >> search: selector in: aClass ifFound: foundBlock ifNone: none
 ]
 
 { #category : #private }
-SWPoolBase >> addInitializerIn: aClass [
+SWPoolBase >> addInitializerIn: aClass receiver: receiverClass [
 	"invoke aClass>>#initialize_Hoge: with Hoge class transpiler."
 	 aClass classSide methodDict values select: [ :each |
 		each selector beginsWith: self class initializersHeader
@@ -68,7 +68,7 @@ SWPoolBase >> addInitializerIn: aClass [
 		isClassSide ifTrue: [
 			target := target classSide
 		].
-		each valueWithReceiver: aClass instanceSide arguments: {
+		each valueWithReceiver: receiverClass instanceSide arguments: {
 			self getClassInfo: target
 		}
 	]
@@ -87,15 +87,15 @@ SWPoolBase >> getClassInfo: aClass [
 ]
 
 { #category : #private }
-SWPoolBase >> initialize: aClassInfo asOf: aClass [
+SWPoolBase >> initialize: aClassInfo asOf: aClass receiver: receiverClass [
 
 	| initializer |
 	aClass ifNil: [ ^ aClassInfo ].
-	self initialize: aClassInfo asOf: aClass superclass.
+	self initialize: aClassInfo asOf: aClass superclass receiver: receiverClass.
 	initializer := self class initializerFor: aClass.
 	(self respondsTo: initializer) ifTrue: [ 
 		self perform: initializer with: aClassInfo ].
-	aClass isInstanceSide ifTrue: [ self addInitializerIn: aClass ].
+	aClass isInstanceSide ifTrue: [ self addInitializerIn: aClass receiver: receiverClass ].
 
 	^ aClassInfo
 ]
@@ -108,7 +108,7 @@ SWPoolBase >> newClassInfo: target [
 		targetClass: target;
 		yourself.
 	self payload at: target put: ci.
-	self initialize: ci asOf: target.
+	self initialize: ci asOf: target receiver: target.
 	^ ci
 ]
 

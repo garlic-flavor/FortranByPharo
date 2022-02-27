@@ -12,13 +12,13 @@ Class {
 	#category : #'SWFortranByPharo-Transpiler-Common'
 }
 
-{ #category : #'as yet unclassified' }
-SWClassDefinitionTranspiler class >> methodBodyTranspilerClass [
-	^ self subclassResponsibility 
+{ #category : #constants }
+SWClassDefinitionTranspiler class >> mangleClass [
+	^ self methodBodyTranspilerClass mangleClass
 ]
 
-{ #category : #accessing }
-SWClassDefinitionTranspiler class >> methodDefinitionTranspilerClass [
+{ #category : #'as yet unclassified' }
+SWClassDefinitionTranspiler class >> methodBodyTranspilerClass [
 	^ self subclassResponsibility 
 ]
 
@@ -106,14 +106,24 @@ SWClassDefinitionTranspiler >> putMemberDeclarationOf: aVariable [
 { #category : #'code generation' }
 SWClassDefinitionTranspiler >> putMethodDefinition: anExpression [
 	anExpression expression ifNil: [ ^ self ].
-	self class methodDefinitionTranspilerClass new
-		bodyTranspiler: (self class methodBodyTranspilerClass new
-			expression: anExpression;
-			pool: self pool;
-			stream: self stream;
-			yourself);
-		transpile
+	self putMethodHeader: anExpression.
+	self class methodBodyTranspilerClass new
+		expression: anExpression;
+		pool: self pool;
+		stream: self stream;
+		transpile.
+	self putMethodFooter: anExpression
 
+]
+
+{ #category : #'as yet unclassified' }
+SWClassDefinitionTranspiler >> putMethodFooter: anExpression [
+	^ self subclassResponsibility 
+]
+
+{ #category : #'as yet unclassified' }
+SWClassDefinitionTranspiler >> putMethodHeader: anExpression [
+	^ self subclassResponsibility 
 ]
 
 { #category : #api }

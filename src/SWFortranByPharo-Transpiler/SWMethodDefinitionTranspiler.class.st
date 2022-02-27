@@ -8,7 +8,7 @@ Class {
 		'bodyTranspiler',
 		'stream'
 	],
-	#category : #'SWFortranByPharo-Transpiler-Common'
+	#category : #'SWFortranByPharo-Transpiler-Olds'
 }
 
 { #category : #accessing }

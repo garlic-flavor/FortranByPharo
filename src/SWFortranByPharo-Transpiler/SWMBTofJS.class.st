@@ -312,16 +312,16 @@ SWMBTofJS >> putIfTrueIfFalse: strait [
 
 { #category : #'code generation' }
 SWMBTofJS >> putImport: anArray from: aSource [
-	self halt; flag: #toRewrite.
 	self put: 'import {'.
 	anArray do: [ :each |
-		self put: each asString
+		self put: each
 	] separatedBy: [
 		self put: ', '
 	].
 	self
-		put: '} from ';
-		putString: ('../script/', aSource, '.mjs')
+		put: '} from "../script/';
+		put:  aSource;
+		put: '.mjs"'
 ]
 
 { #category : #'code generation' }
@@ -446,6 +446,27 @@ SWMBTofJS >> putOrdinaryCallee: aNode [
 ]
 
 { #category : #'code generation' }
+SWMBTofJS >> putOrdinaryMessage [
+	|methodClass receiverClass|
+
+	methodClass := self method methodClass.
+	methodClass ifNil: [ ^ super putOrdinaryMessage ].
+	methodClass isInstanceSide ifTrue: [ ^ super putOrdinaryMessage ].
+
+	receiverClass := self expression receiverClass.
+	methodClass = receiverClass ifTrue: [ ^ super putOrdinaryMessage ].
+
+	self
+		put: methodClass instanceSide name;
+		putClassAccessor;
+		put: self mangle;
+		putClassAccessor;
+		put: 'call';
+		putArguments: self children
+
+]
+
+{ #category : #'code generation' }
 SWMBTofJS >> putReturnThisClassName [
 	self halt; flag: #toRewrite.
 	self
@@ -473,6 +494,17 @@ SWMBTofJS >> putStdOut [
 		put: 'console.log';
 		putArguments: (self expression children copyFrom: 2 to: 2)
 
+]
+
+{ #category : #'as yet unclassified' }
+SWMBTofJS >> putVariable [
+	self node name = 'self' ifTrue: [ |receiverClass|
+		receiverClass := self expression receiverClass.
+		receiverClass isClassSide ifTrue: [
+			^ self put: receiverClass instanceSide name
+		]
+	].
+	^ super putVariable
 ]
 
 { #category : #'code generation' }
