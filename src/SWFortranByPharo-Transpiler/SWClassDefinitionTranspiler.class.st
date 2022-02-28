@@ -8,7 +8,8 @@ Class {
 		'classInfo',
 		'predefinedSender',
 		'predefinedBody',
-		'stream'
+		'stream',
+		'isTranspiled'
 	],
 	#category : #'SWFortranByPharo-Transpiler-Common'
 }
@@ -38,7 +39,12 @@ SWClassDefinitionTranspiler >> classInfo: anObject [
 { #category : #accessing }
 SWClassDefinitionTranspiler >> isTranspiled [
 
-	^ classInfo isNotNil
+	^ isTranspiled ifNil: [ isTranspiled := false ]
+]
+
+{ #category : #'as yet unclassified' }
+SWClassDefinitionTranspiler >> markAsTranspiled [
+	isTranspiled := true
 ]
 
 { #category : #'public API' }
@@ -49,13 +55,18 @@ SWClassDefinitionTranspiler >> methodBodyTranspilerOf: aName is: transpiler [
 { #category : #accessing }
 SWClassDefinitionTranspiler >> predefinedBody [
 
-	^ predefinedBody
+	^ predefinedBody ifNil: [ predefinedBody := Dictionary new ]
 ]
 
 { #category : #accessing }
 SWClassDefinitionTranspiler >> predefinedBody: anObject [
 
 	predefinedBody := anObject
+]
+
+{ #category : #'as yet unclassified' }
+SWClassDefinitionTranspiler >> predefinedMethodBodyTranspiler: aSelector [
+	^ self predefinedBody at: aSelector ifAbsent: [ nil ]
 ]
 
 { #category : #accessing }
@@ -137,7 +148,23 @@ SWClassDefinitionTranspiler >> putMethodHeader: anExpression [
 { #category : #'as yet unclassified' }
 SWClassDefinitionTranspiler >> putPredefinedMethodBody: aMessageInfo [
 	aMessageInfo ifNil: [ ^ self ].
-	self halt; flag: #toImplement
+	(self predefinedMethodBodyTranspiler: aMessageInfo method selector) ifNotNil: [ :predef ||exp|
+		exp := SWExpression new
+				pool: self pool;
+				node: aMessageInfo method sourceNode;
+				messageInfo: aMessageInfo;
+				slot: self classInfo slot copy;
+				readySlot;
+				yourself.
+		self putMethodHeader: exp.
+		predef cull: (self class methodBodyTranspilerClass new
+			expression: exp;
+			pool: self pool;
+			pool: self pool;
+			yourself).
+		self putMethodFooter: exp
+	]
+
 ]
 
 { #category : #api }
@@ -158,6 +185,7 @@ SWClassDefinitionTranspiler >> stream: anObject [
 
 { #category : #'public API' }
 SWClassDefinitionTranspiler >> transpile [
+	self markAsTranspiled.
 	self targetClass isInstanceSide ifTrue: [
 		self transpileAsInstanceSide
 	] ifFalse: [

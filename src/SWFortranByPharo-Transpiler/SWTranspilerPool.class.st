@@ -42,6 +42,14 @@ SWTranspilerPool >> predefinedSenderTranspiler: aSender [
 
 ]
 
+{ #category : #'as yet unclassified' }
+SWTranspilerPool >> readyToTranspile [
+	self global payload valuesDo: [ :classInfo |
+		(self getClassInfo: classInfo targetClass)
+			classInfo: classInfo
+	]
+]
+
 { #category : #accessing }
 SWTranspilerPool >> stream [
 
@@ -67,14 +75,16 @@ SWTranspilerPool >> transpile: aClass [
 
 { #category : #'as yet unclassified' }
 SWTranspilerPool >> transpile: aMethod with: operands [
-	|ex bt|
+	|ex receiver bt|
 	ex := (self global decode: (SWSenderInfo new
 		method: aMethod;
 		operands: operands;
 		yourself)) expression.
-	self global getClassInfo: aMethod methodClass instanceSide.
-	self global getClassInfo: operands first value instanceSide.
-
+	self readyToTranspile.
+	receiver := operands first value instanceSide.
+	(receiver respondsTo: #solveDependenciesUsing:) ifTrue: [
+		receiver solveDependenciesUsing: self
+	].
 	self transpile: aMethod methodClass instanceSide.
 	self transpile: operands first value instanceSide.
 	bt := self class methodBodyTranspilerClass new

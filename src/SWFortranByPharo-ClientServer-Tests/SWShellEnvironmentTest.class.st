@@ -20,7 +20,6 @@ SWShellEnvironmentTest class >> moduleTranspilerClass [
 
 { #category : #'as yet unclassified' }
 SWShellEnvironmentTest class >> solveDependenciesUsing: transpiler [
-self error; flag: #toRemove.
 	super solveDependenciesUsing: transpiler.
 	transpiler transpile: SWShellEnvironment
 

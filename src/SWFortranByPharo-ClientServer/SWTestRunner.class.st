@@ -94,26 +94,20 @@ SWTestRunner class >> runAllTests [
 	^ self buildSuiteFromSelectors run
 ]
 
-{ #category : #'code generation' }
-SWTestRunner class >> solveDependenciesUsing: transpiler [
-	self halt; flag: #toRewirte.
-
-	transpiler
-		transpile: TestCase;
-		transpile: SWTestRunner;
-		decode: #setUp with: { self };
-		decode: #tearDown with: { self }.
- 	self methodDict select: [ :each | each selector beginsWith: 'test' ] thenDo: [ :each |
-		transpiler decode: each selector with: { self }
-	]
-
+{ #category : #'as yet unclassified' }
+SWTestRunner class >> solveDependenciesUsing: pool [
+	pool transpile: TestCase.
 
 ]
 
 { #category : #'as yet unclassified' }
-SWTestRunner class >> transpile_self: cdt [
-	cdt pool transpile: TestCase.
-
+SWTestRunner class >> transpile_TestCaseClass: ctd [
+	self halt.
+	ctd
+		methodBodyTranspilerOf: #allTestSelectors is: [ :mbt |
+			self halt.
+			mbt put: 'now printing....'; cr.
+		]
 ]
 
 { #category : #running }

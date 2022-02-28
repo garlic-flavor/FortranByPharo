@@ -65,13 +65,10 @@ SWPoolBase >> addInitializerIn: aClass receiver: receiverClass [
 		].
 		name = 'self' ifTrue: [ name := aClass instanceSide name ].
 		target := Smalltalk globals at: name asSymbol.
-		isClassSide ifTrue: [
-			target := target classSide
-		].
-		each valueWithReceiver: receiverClass instanceSide arguments: {
-			self getClassInfo: target
-		}
-	]
+		isClassSide ifTrue: [ target := target classSide ].
+		each valueWithReceiver: receiverClass instanceSide arguments: { self getClassInfo: target }.
+	].
+
 ]
 
 { #category : #api }
