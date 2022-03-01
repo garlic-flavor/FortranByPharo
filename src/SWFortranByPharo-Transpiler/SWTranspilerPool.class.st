@@ -43,7 +43,7 @@ SWTranspilerPool >> newClassInfo: aClass [
 { #category : #'as yet unclassified' }
 SWTranspilerPool >> predefinedSenderTranspiler: aSender [
 	aSender method ifNil: [ ^ nil ].
-	^ (self getClassInfo: aSender method methodClass)
+	^ (self getClassInfo: aSender receiverClass)
 		predefinedSenderTranspiler: aSender method selector
 
 
@@ -74,11 +74,12 @@ SWTranspilerPool >> transpile: aClass [
 { #category : #'as yet unclassified' }
 SWTranspilerPool >> transpile: aMethod with: operands [
 	|ex receiver bt|
+	receiver := operands first value instanceSide.
+	self global getClassInfo: receiver.
 	ex := (self global decode: (SWSenderInfo new
 		method: aMethod;
 		operands: operands;
 		yourself)) expression.
-	receiver := operands first value instanceSide.
 	self getClassInfo: receiver.
 	(receiver respondsTo: #solveDependenciesUsing:) ifTrue: [
 		receiver solveDependenciesUsing: self
@@ -113,7 +114,7 @@ SWTranspilerPool >> transpileBody: aMethod with: operands [
 { #category : #initialization }
 SWTranspilerPool >> transpile_Behavior: ct [
 	ct
-		senderTranspilerOf: #new is: [ :transpiler |  transpiler putNew ]
+		senderTranspilerOf: #new is: [ :transpiler | transpiler putNew ]
 ]
 
 { #category : #initialization }

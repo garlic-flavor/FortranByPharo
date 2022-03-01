@@ -70,7 +70,7 @@ SWModuleTranspiler >> filename [
 { #category : #accessing }
 SWModuleTranspiler >> haltAt: sender [
 	self halt; flag: #toRewrite.
-	self payload haltAt: sender
+	self pool haltAt: sender
 ]
 
 { #category : #'public API' }

@@ -268,11 +268,19 @@ SWCDTofJS >> putMethodHeader: mbt [
 		mbt put: ', '
 	].
 	mbt put: '){'; cr; incIndent.
-	mbt expression node allVariables detect: [ :each | each name = 'self' ] ifFound: [ :found |
-		mbt putSelfDeclaration 
-	]
+	mbt expression method methodClass isInstanceSide ifFalse: [ ^ self ].
+	(mbt expression node allVariables anySatisfy: [ :each | each name = 'self' ]) ifFalse: [ ^ self ].
+	mbt putSelfDeclaration 
+
 		
 
+]
+
+{ #category : #'as yet unclassified' }
+SWCDTofJS >> putMethods [
+	(self classInfo methods groupedBy: [ :eachEx | eachEx method selector ]) do: [ :each |
+		self putMethodDefinition: each values first
+	]
 ]
 
 { #category : #'as yet unclassified' }

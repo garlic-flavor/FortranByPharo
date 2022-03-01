@@ -106,6 +106,26 @@ SWShellEnvironment class >> solveDependenciesUsing: transpiler [
 		import: #(OSPlatform FileLocator) from: 'Pharo'
 ]
 
+{ #category : #'as yet unclassified' }
+SWShellEnvironment class >> transpile_self: cdt [
+	cdt
+		methodBodyTranspilerOf: #localDirectory is: [ :mbt |
+			self halt.
+"
+			newT
+				specifyReturnTypeAs: FileLocator;
+				markAsDecoded;
+				generator: [ :t |
+					t
+						put: 'return FileLocator.localDirectory()';
+						putStatementDelimiter;
+						cr
+				];
+				yourself
+	"
+		]
+]
+
 { #category : #accessing }
 SWShellEnvironment >> exeFileExtension [
 

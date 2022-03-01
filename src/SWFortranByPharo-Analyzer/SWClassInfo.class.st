@@ -218,8 +218,9 @@ SWClassInfo >> remove: aSenderInfo [
 
 { #category : #api }
 SWClassInfo >> setBreakpointOn: aName [
-	self addPredefined: aName with: [ :operands |
+	self predefined at: aName put: [ :operands |
 		self halt.
+		UndefinedObject
 	]
 
 ]

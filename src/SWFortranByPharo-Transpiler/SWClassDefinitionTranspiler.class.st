@@ -36,6 +36,18 @@ SWClassDefinitionTranspiler >> classInfo: anObject [
 	classInfo := anObject
 ]
 
+{ #category : #'as yet unclassified' }
+SWClassDefinitionTranspiler >> detectPredefinedMethodBodyFor: anExpression ifFound: foundBlock ifNone: noneBlock [
+	|method|
+	method := anExpression senderInfo method.
+	method ifNil: [ ^ noneBlock value ].
+	self predefinedBody at: method selector ifPresent: [ :pre |
+		foundBlock cull: pre
+	] ifAbsent: [
+		noneBlock value.
+	]
+]
+
 { #category : #accessing }
 SWClassDefinitionTranspiler >> isTranspiled [
 
@@ -112,8 +124,7 @@ SWClassDefinitionTranspiler >> putMember [
 			]
 		]
 	].
-	self classInfo methods do: [ :each | self putMethodDefinition: each ].
-
+	self putMethods.
 ]
 
 { #category : #'code generation' }
@@ -124,17 +135,31 @@ SWClassDefinitionTranspiler >> putMemberDeclarationOf: aVariable [
 
 { #category : #'code generation' }
 SWClassDefinitionTranspiler >> putMethodDefinition: anExpression [
-	|mbt|
-	anExpression expression ifNil: [ ^ self putPredefinedMethodBody: anExpression messageInfo ].
+	|exp mbt|
+	exp := anExpression expression ifNil: [ 
+		SWExpression new
+			pool: self pool;
+			node: anExpression messageInfo method sourceNode;
+			messageInfo: anExpression messageInfo;
+			slot: self classInfo slot copy;
+			readySlot;
+			yourself.
+	].
+
 	mbt := self class methodBodyTranspilerClass new
-		expression: anExpression;
 		pool: self pool;
 		stream: self stream;
+		expression: exp;
 		yourself.
 
 	self putMethodHeader: mbt.
-	mbt transpile.
-	self putMethodFooter: mbt
+	self detectPredefinedMethodBodyFor: anExpression ifFound: [ :pre|
+		pre cull: mbt
+	] ifNone: [ 
+		mbt transpile
+	].
+	self putMethodFooter: mbt.
+
 
 ]
 
@@ -149,7 +174,14 @@ SWClassDefinitionTranspiler >> putMethodHeader: methodBodyTranspiler [
 ]
 
 { #category : #'as yet unclassified' }
+SWClassDefinitionTranspiler >> putMethods [
+	self classInfo methods do: [ :each | self putMethodDefinition: each ].
+
+]
+
+{ #category : #'as yet unclassified' }
 SWClassDefinitionTranspiler >> putPredefinedMethodBody: aMessageInfo [
+	self error; flag: #toRemove.
 	aMessageInfo ifNil: [ ^ self ].
 	(self predefinedMethodBodyTranspiler: aMessageInfo method selector) ifNotNil: [ :predef ||exp mbt|
 		exp := SWExpression new

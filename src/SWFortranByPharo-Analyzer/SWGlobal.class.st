@@ -178,12 +178,6 @@ SWGlobal >> decode_Exception: ct [
 ]
 
 { #category : #initialization }
-SWGlobal >> decode_IntervalClass: ct [
-	ct
-		setBreakpointOn: #new
-]
-
-{ #category : #initialization }
 SWGlobal >> decode_Magnitude: ct [
 	ct
 		declareMethodAsCompareOperator: #>=;

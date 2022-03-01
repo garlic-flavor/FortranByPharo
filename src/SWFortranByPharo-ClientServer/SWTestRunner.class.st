@@ -22,7 +22,7 @@ SWTestRunner class >> decode_TestAsserter: ct [
 ]
 
 { #category : #'as yet unclassified' }
-SWTestRunner class >> decode_self: ct [
+SWTestRunner class >> decode_receiver: ct [
 	self methodDict values select: [ :m | m protocol beginsWith: 'test' ] thenDo: [ :m |
 		ct pool decode: (SWSenderInfo new
 			method: m;
@@ -98,6 +98,15 @@ SWTestRunner class >> transpile_TestCaseClass: ctd [
 				mbt atString: each selector
 			] separatedBy: [ mbt putArraySeparator ].
 			mbt putArrayFooter; putStatementDelimiter; cr
+		]
+]
+
+{ #category : #'as yet unclassified' }
+SWTestRunner class >> transpile_selfClass: cdt [
+
+	cdt
+		methodBodyTranspilerOf: #name is: [ :mbt |
+			mbt putReturnKeyword; put: ' "'; put: self name; put: '"'; putStatementDelimiter; cr
 		]
 ]
 
