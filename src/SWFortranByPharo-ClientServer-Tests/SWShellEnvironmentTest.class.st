@@ -19,6 +19,11 @@ SWShellEnvironmentTest class >> moduleTranspilerClass [
 ]
 
 { #category : #'as yet unclassified' }
+SWShellEnvironmentTest class >> projectRunnerClass [
+	^ SWPRofJS
+]
+
+{ #category : #'as yet unclassified' }
 SWShellEnvironmentTest class >> solveDependenciesUsing: transpiler [
 	super solveDependenciesUsing: transpiler.
 	transpiler transpile: SWShellEnvironment

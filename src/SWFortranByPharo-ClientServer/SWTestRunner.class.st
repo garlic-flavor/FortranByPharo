@@ -36,29 +36,13 @@ SWTestRunner class >> decode_self: ct [
 
 { #category : #running }
 SWTestRunner class >> go [
-	|module result|
-	self halt; flag: #toRewrite.
-	module := self build.
-	result := (SWPRofJS go: module).
+	|result|
+	self newModuleTranspiler.
+	self build.
+	result := (self projectRunnerClass go: moduleTranspiler).
 	(STON reader
 		on: result message readStream;
 		next) inspect
-]
-
-{ #category : #initialization }
-SWTestRunner class >> initialize_TestSuite: transpiler [
-	self halt; flag: #toRewirte.
-	transpiler
-		declareMethodReturnsReceiver: #run:
-]
-
-{ #category : #initialization }
-SWTestRunner class >> initialize_selfClass: ct [
-	self halt; flag: #toRewirte.
-	ct
-		defineMethodBody: #name as: [ :t |
-			t putReturnThisClassName
-		]
 ]
 
 { #category : #building }
@@ -89,6 +73,11 @@ SWTestRunner class >> newModuleTranspiler [
 	^ moduleTranspiler := self moduleTranspilerClass new
 ]
 
+{ #category : #'as yet unclassified' }
+SWTestRunner class >> projectRunnerClass [
+	^ self subclassResponsibility 
+]
+
 { #category : #suites }
 SWTestRunner class >> runAllTests [
 	^ self buildSuiteFromSelectors run
@@ -102,11 +91,13 @@ SWTestRunner class >> solveDependenciesUsing: pool [
 
 { #category : #'as yet unclassified' }
 SWTestRunner class >> transpile_TestCaseClass: ctd [
-	self halt.
 	ctd
 		methodBodyTranspilerOf: #allTestSelectors is: [ :mbt |
-			self halt.
-			mbt put: 'now printing....'; cr.
+			mbt putReturnKeyword; put: ' '; putArrayHeader.
+			(self methodDict values select: [ :m | m category beginsWith: 'test' ]) do: [ :each |
+				mbt atString: each selector
+			] separatedBy: [ mbt putArraySeparator ].
+			mbt putArrayFooter; putStatementDelimiter; cr
 		]
 ]
 

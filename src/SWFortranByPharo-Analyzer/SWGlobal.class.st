@@ -394,3 +394,11 @@ SWGlobal >> haltList: anObject [
 
 	haltList := anObject
 ]
+
+{ #category : #api }
+SWGlobal >> remove: aSenderInfo [
+
+	^ (self getClassInfo: aSenderInfo method methodClass)
+		remove: aSenderInfo
+
+]

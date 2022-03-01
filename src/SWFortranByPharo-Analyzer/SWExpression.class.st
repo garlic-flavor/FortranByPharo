@@ -307,7 +307,7 @@ SWExpression >> senderInfo [
 { #category : #accessing }
 SWExpression >> slot [
 
-	^ slot ifNil: [ slot := OrderedCollection new: (self node numArgs + self node temporaries size) ]
+	^ slot ifNil: [ slot := OrderedCollection new ]
 ]
 
 { #category : #accessing }

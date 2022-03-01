@@ -47,6 +47,16 @@ SWMethodBodyTranspiler >> at: anObject [
 ]
 
 { #category : #accessing }
+SWMethodBodyTranspiler >> atArray: anArrayNode [
+	self putArrayHeader.
+	self children do: [ :child |
+		self transpileChild: child
+	] separatedBy: [ self putArrayHeader ].
+	self putArrayFooter.
+
+]
+
+{ #category : #accessing }
 SWMethodBodyTranspiler >> atAssignTo: aVariable with: aValue [
 	self
 		transpileChild: self children second;
@@ -94,7 +104,7 @@ SWMethodBodyTranspiler >> atMethod: aMethodNode [
 
 { #category : #'code generation' }
 SWMethodBodyTranspiler >> atReturn: aReturnNode [
-	self put: 'return '.
+	self putReturnKeyword; put: ' '.
 	(self child: self children first)
 		isExpression: true;
 		transpile
@@ -255,6 +265,21 @@ SWMethodBodyTranspiler >> putArray: anArray [
 
 ]
 
+{ #category : #'as yet unclassified' }
+SWMethodBodyTranspiler >> putArrayFooter [
+	^ self subclassResponsibility 
+]
+
+{ #category : #'as yet unclassified' }
+SWMethodBodyTranspiler >> putArrayHeader [
+	^ self subclassResponsibility 
+]
+
+{ #category : #'as yet unclassified' }
+SWMethodBodyTranspiler >> putArraySeparator [
+	^ self subclassResponsibility 
+]
+
 { #category : #streaming }
 SWMethodBodyTranspiler >> putBasenameOn: aStream [
 	self halt; flag: #toRewrite.
@@ -270,7 +295,7 @@ SWMethodBodyTranspiler >> putBlock [
 	functionized ifTrue: [
 		self put: 'function('.
 		self node arguments do: [ :each |
-			self put: each name
+			self put: '_'; put: each name
 		] separatedBy: [ self put: ', ' ].
 		self put: '){'; cr; incIndent.
 	].
@@ -301,6 +326,30 @@ SWMethodBodyTranspiler >> putCharacter: c [
 { #category : #'code generation' }
 SWMethodBodyTranspiler >> putClassAccessor [
 	self put: '.'
+]
+
+{ #category : #'code generation' }
+SWMethodBodyTranspiler >> putClosure [
+	|sequence|
+	self put: 'function('.
+	self node arguments do: [ :each |
+		self put: '_'; put: each name
+	] separatedBy: [ self put: ', ' ].
+	self put: '){'; cr; incIndent.
+
+	self children allButLastDo: [ :child |
+		(self child: child)
+			putArgumentDeclaration
+	].
+	sequence := self children last.
+	sequence children allButLastDo: [ :child |
+		self transpileChildAsNotExpression: child
+	].
+	self putReturnKeyword; put: ' '.
+	self transpileChildAsExpression: sequence children last.
+	self putStatementDelimiter; cr; decIndent; put: '}'
+	
+
 ]
 
 { #category : #'code generation' }
@@ -417,6 +466,11 @@ SWMethodBodyTranspiler >> putParameters: anArray [
 
 ]
 
+{ #category : #'as yet unclassified' }
+SWMethodBodyTranspiler >> putReturnKeyword [
+	^ self subclassResponsibility 
+]
+
 { #category : #'code generation' }
 SWMethodBodyTranspiler >> putReturnSelf [
 	self halt; flag: #toRewrite.
@@ -429,7 +483,7 @@ SWMethodBodyTranspiler >> putSelf [
 ]
 
 { #category : #'code generation' }
-SWMethodBodyTranspiler >> putSelfDefinition [
+SWMethodBodyTranspiler >> putSelfDeclaration [
 	^ self subclassResponsibility 
 ]
 
@@ -494,6 +548,9 @@ SWMethodBodyTranspiler >> putSymbol: aByteSymbol [
 
 { #category : #'as yet unclassified' }
 SWMethodBodyTranspiler >> putVariable [
+	self expression slot detect: [ :each | each name = self node name ] ifFound: [
+		self put: '_'
+	].
 	self put: self node name
 ]
 

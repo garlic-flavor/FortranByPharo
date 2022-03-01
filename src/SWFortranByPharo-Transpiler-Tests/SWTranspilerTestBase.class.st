@@ -14,9 +14,10 @@ SWTranspilerTestBase class >> moduleTranspilerClass [
 
 { #category : #'as yet unclassified' }
 SWTranspilerTestBase >> _resultWith: arguments [
-	^ self
+	self
 		transpile: (SWTestProgram getBySelector: thisContext sender sender selector)
 		with: (arguments copyWithFirst: SWTestProgram).
+	^ module stream contents
 
 ]
 

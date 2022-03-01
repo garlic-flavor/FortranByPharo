@@ -32,16 +32,6 @@ SWMBTofJS class >> senderTranspilerClass [
 	^ SWSTofJSOld
 ]
 
-{ #category : #accessing }
-SWMBTofJS >> atArray: anArrayNode [
-	self put: '['.
-	self children do: [ :child |
-		self transpileChild: child
-	] separatedBy: [ self put: ', ' ].
-	self put: ']'.
-
-]
-
 { #category : #'as yet unclassified' }
 SWMBTofJS >> atBoolean: trueOrFalse [
 	self put: (trueOrFalse ifTrue: [ 'true' ] ifFalse: [ 'false' ])
@@ -50,10 +40,10 @@ SWMBTofJS >> atBoolean: trueOrFalse [
 { #category : #'code generation' }
 SWMBTofJS >> atCascade: aCascadeNode [
 	aCascadeNode receiver class = RBVariableNode ifTrue: [
-		self
-			putSequence;
-			preventStatementDelimiter;
-			preventNewline
+		self putSequence.
+		self isExpression ifFalse: [
+			self 	preventStatementDelimiter; preventNewline
+		]
 	] ifFalse: [|receiver original|
 		receiver := self children first children first.
 		original := self children.
@@ -101,6 +91,21 @@ SWMBTofJS >> mangledName [
 
 { #category : #'as yet unclassified' }
 SWMBTofJS >> putArgumentDeclaration [
+]
+
+{ #category : #'as yet unclassified' }
+SWMBTofJS >> putArrayFooter [
+	self put: ']'
+]
+
+{ #category : #'as yet unclassified' }
+SWMBTofJS >> putArrayHeader [
+	self put: '['
+]
+
+{ #category : #'as yet unclassified' }
+SWMBTofJS >> putArraySeparator [
+	self put: ', '
 ]
 
 { #category : #'code generation' }
@@ -184,12 +189,13 @@ SWMBTofJS >> putIfNotNil: strait [
 	self isExpression ifTrue: [|conditionNode|
 		conditionNode := self children first node.
 		conditionNode class = RBVariableNode ifTrue: [
+			self put: '('.
+			self transpileChildAsExpression: self children first.
 			self
-				put: '(';
-				put: conditionNode name;
 				put: (strait ifTrue: [ ' == ' ] ifFalse: [ ' != ' ]);
-				put: ' null ? ';
-				put: conditionNode name;
+				put: ' null ? '.
+			self transpileChildAsExpression: self children first.
+			self
 				put: ' : '.
 			(self child: self children second)
 				isExpression: true;
@@ -463,6 +469,11 @@ SWMBTofJS >> putOrdinaryMessage [
 
 ]
 
+{ #category : #'as yet unclassified' }
+SWMBTofJS >> putReturnKeyword [ 
+	self put: 'return'
+]
+
 { #category : #'code generation' }
 SWMBTofJS >> putReturnThisClassName [
 	self halt; flag: #toRewrite.
@@ -477,6 +488,11 @@ SWMBTofJS >> putSelf [
 	self halt; flag: #toRewrite.
 
 	self put: (self receiverClass isClassSide ifTrue: [ self receiverClass soleInstance name ] ifFalse: [ 'self' ])
+]
+
+{ #category : #'code generation' }
+SWMBTofJS >> putSelfDeclaration [
+	self put: 'var _self = this;'; cr
 ]
 
 { #category : #'code generation' }
@@ -501,13 +517,16 @@ SWMBTofJS >> putVariable [
 			^ self put: receiverClass instanceSide name
 		]
 	].
+	self node name = 'super' ifTrue: [
+		^ self put: 'super'
+	].
 	^ super putVariable
 ]
 
 { #category : #'code generation' }
 SWMBTofJS >> putVariableDeclaration [
 	self
-		put: 'var ';
+		put: 'var _';
 		put: self node name;
 		put: ' = null'
 ]

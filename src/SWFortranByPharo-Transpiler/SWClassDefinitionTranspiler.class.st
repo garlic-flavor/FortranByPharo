@@ -124,31 +124,34 @@ SWClassDefinitionTranspiler >> putMemberDeclarationOf: aVariable [
 
 { #category : #'code generation' }
 SWClassDefinitionTranspiler >> putMethodDefinition: anExpression [
+	|mbt|
 	anExpression expression ifNil: [ ^ self putPredefinedMethodBody: anExpression messageInfo ].
-	self putMethodHeader: anExpression.
-	self class methodBodyTranspilerClass new
+	mbt := self class methodBodyTranspilerClass new
 		expression: anExpression;
 		pool: self pool;
 		stream: self stream;
-		transpile.
-	self putMethodFooter: anExpression
+		yourself.
+
+	self putMethodHeader: mbt.
+	mbt transpile.
+	self putMethodFooter: mbt
 
 ]
 
 { #category : #'as yet unclassified' }
-SWClassDefinitionTranspiler >> putMethodFooter: anExpression [
+SWClassDefinitionTranspiler >> putMethodFooter: methodBodyTranspiler [
 	^ self subclassResponsibility 
 ]
 
 { #category : #'as yet unclassified' }
-SWClassDefinitionTranspiler >> putMethodHeader: anExpression [
+SWClassDefinitionTranspiler >> putMethodHeader: methodBodyTranspiler [
 	^ self subclassResponsibility 
 ]
 
 { #category : #'as yet unclassified' }
 SWClassDefinitionTranspiler >> putPredefinedMethodBody: aMessageInfo [
 	aMessageInfo ifNil: [ ^ self ].
-	(self predefinedMethodBodyTranspiler: aMessageInfo method selector) ifNotNil: [ :predef ||exp|
+	(self predefinedMethodBodyTranspiler: aMessageInfo method selector) ifNotNil: [ :predef ||exp mbt|
 		exp := SWExpression new
 				pool: self pool;
 				node: aMessageInfo method sourceNode;
@@ -156,13 +159,14 @@ SWClassDefinitionTranspiler >> putPredefinedMethodBody: aMessageInfo [
 				slot: self classInfo slot copy;
 				readySlot;
 				yourself.
-		self putMethodHeader: exp.
-		predef cull: (self class methodBodyTranspilerClass new
+		mbt := self class methodBodyTranspilerClass new
 			expression: exp;
 			pool: self pool;
 			pool: self pool;
-			yourself).
-		self putMethodFooter: exp
+			yourself.
+		self putMethodHeader: mbt.
+		predef cull: mbt.
+		self putMethodFooter: mbt
 	]
 
 ]

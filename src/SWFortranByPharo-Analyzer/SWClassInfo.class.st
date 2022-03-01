@@ -211,6 +211,11 @@ SWClassInfo >> predefined: anObject [
 	predefined := anObject
 ]
 
+{ #category : #removing }
+SWClassInfo >> remove: aSenderInfo [
+	^ self methods removeKey: aSenderInfo ifAbsent: [ nil ]
+]
+
 { #category : #api }
 SWClassInfo >> setBreakpointOn: aName [
 	self addPredefined: aName with: [ :operands |

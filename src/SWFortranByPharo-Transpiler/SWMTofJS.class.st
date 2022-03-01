@@ -11,3 +11,10 @@ Class {
 SWMTofJS class >> poolClass [
 	^ SWPoolOfJS
 ]
+
+{ #category : #streaming }
+SWMTofJS >> putFilenameOn: aStream [
+	aStream << 'cache/'.
+	super putFilenameOn: aStream.
+	aStream << '.mjs'
+]

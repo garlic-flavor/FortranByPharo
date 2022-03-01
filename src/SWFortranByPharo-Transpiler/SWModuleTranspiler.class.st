@@ -6,7 +6,8 @@ Class {
 	#superclass : #Object,
 	#instVars : [
 		'pool',
-		'stream'
+		'stream',
+		'senderInfo'
 	],
 	#category : #'SWFortranByPharo-Transpiler-Common'
 }
@@ -32,8 +33,6 @@ SWModuleTranspiler >> basename [
 
 { #category : #accessing }
 SWModuleTranspiler >> contents [
-	self halt; flag: #toRewrite.
-	self payload isDecoded ifFalse: [ self transpile ].
 	^ self stream contents
 ]
 
@@ -65,8 +64,7 @@ SWModuleTranspiler >> decoder: anObject [
 
 { #category : #accessing }
 SWModuleTranspiler >> filename [
-	self halt; flag: #toRewrite.
-	^ String streamContents: [ :s | self payload putFilenameOn: s ]
+	^ String streamContents: [ :s | self putFilenameOn: s ]
 ]
 
 { #category : #accessing }
@@ -92,10 +90,7 @@ SWModuleTranspiler >> logger [
 
 { #category : #accessing }
 SWModuleTranspiler >> main: aClass [
-	|method|
-
-	method := self class poolClass search: #main in: aClass classSide.
-	^ self pool transpile: method with: { aClass classSide }
+	^ self method: (self class poolClass search: #main in: aClass classSide) with: { aClass classSide }
 ]
 
 { #category : #accessing }
@@ -116,6 +111,10 @@ SWModuleTranspiler >> mainTranspiler: anObject [
 
 { #category : #accessing }
 SWModuleTranspiler >> method: aMethod with: operands [
+	self senderInfo: (SWSenderInfo new
+		method: aMethod;
+		operands: operands;
+		yourself).
 	^ self pool transpile: aMethod with: operands
 ]
 
@@ -133,6 +132,25 @@ SWModuleTranspiler >> pool [
 SWModuleTranspiler >> pool: anObject [
 
 	pool := anObject
+]
+
+{ #category : #streaming }
+SWModuleTranspiler >> putFilenameOn: aStream [
+	aStream
+		<< self senderInfo receiverClass instanceSide name;
+		<< self senderInfo method selector  asCamelCase
+]
+
+{ #category : #accessing }
+SWModuleTranspiler >> senderInfo [
+
+	^ senderInfo
+]
+
+{ #category : #accessing }
+SWModuleTranspiler >> senderInfo: anObject [
+
+	senderInfo := anObject
 ]
 
 { #category : #private }

@@ -33,6 +33,13 @@ SWTranspilerPool >> global: anObject [
 	global := anObject
 ]
 
+{ #category : #api }
+SWTranspilerPool >> newClassInfo: aClass [
+	^ (super newClassInfo: aClass)
+		classInfo: (self global getClassInfo: aClass);
+		yourself
+]
+
 { #category : #'as yet unclassified' }
 SWTranspilerPool >> predefinedSenderTranspiler: aSender [
 	aSender method ifNil: [ ^ nil ].
@@ -40,14 +47,6 @@ SWTranspilerPool >> predefinedSenderTranspiler: aSender [
 		predefinedSenderTranspiler: aSender method selector
 
 
-]
-
-{ #category : #'as yet unclassified' }
-SWTranspilerPool >> readyToTranspile [
-	self global payload valuesDo: [ :classInfo |
-		(self getClassInfo: classInfo targetClass)
-			classInfo: classInfo
-	]
 ]
 
 { #category : #accessing }
@@ -67,7 +66,6 @@ SWTranspilerPool >> transpile: aClass [
 	|cdt|
 	cdt := (self getClassInfo: aClass).
 	cdt isTranspiled ifTrue: [ ^ self ].
-	cdt classInfo: (self global getClassInfo: aClass).
 	cdt transpile
 	
 
@@ -80,19 +78,19 @@ SWTranspilerPool >> transpile: aMethod with: operands [
 		method: aMethod;
 		operands: operands;
 		yourself)) expression.
-	self readyToTranspile.
 	receiver := operands first value instanceSide.
+	self getClassInfo: receiver.
 	(receiver respondsTo: #solveDependenciesUsing:) ifTrue: [
 		receiver solveDependenciesUsing: self
 	].
+	self global remove: ex senderInfo.
 	self transpile: aMethod methodClass instanceSide.
-	self transpile: operands first value instanceSide.
+	self transpile: receiver.
 	bt := self class methodBodyTranspilerClass new
 		expression: ex;
 		pool: self;
 		yourself.
 	bt transpile.
-	^ self stream contents.
 
 ]
 

@@ -16,3 +16,30 @@ SWPoolOfJS class >> classInfoClass [
 SWPoolOfJS class >> methodBodyTranspilerClass [
 	^ SWMBTofJS
 ]
+
+{ #category : #'as yet unclassified' }
+SWPoolOfJS >> transpile_Collection: cdt [
+	cdt
+		senderTranspilerOf: #inject:into: is: [ :mbt |
+			mbt
+				transpileChild: mbt children first;
+				putClassAccessor;
+				put: 'reduce('.
+			(mbt child: mbt children third) putClosure.
+			mbt
+				put: ', ';
+				transpileChildWithBracket: mbt children second;
+				put: ')'.
+"
+			aNode := sender node.
+			transpiler
+				<< aNode receiver;
+				putClassAccessor;
+				put: 'reduce(';
+				<< (aNode arguments at: 2);
+				put: ', ';
+				<< (aNode arguments at: 1);
+				put: ')'
+"
+		]
+]

@@ -86,24 +86,6 @@ SWCDTofJS >> initialize_Boolean [
 ]
 
 { #category : #initialization }
-SWCDTofJS >> initialize_Collection [
-	self error; flag: #toRemove.
-	super initialize_Collection.
-	self
-		defineMethodSender: #inject:into: as: [ :transpiler :sender | | aNode |
-			aNode := sender node.
-			transpiler
-				<< aNode receiver;
-				putClassAccessor;
-				put: 'reduce(';
-				<< (aNode arguments at: 2);
-				put: ', ';
-				<< (aNode arguments at: 1);
-				put: ')'
-		]
-]
-
-{ #category : #initialization }
 SWCDTofJS >> initialize_Object [
 	self error; flag: #toRemove.
 	super initialize_Object.
@@ -267,29 +249,28 @@ SWCDTofJS >> putMemberDeclarationOf: aVariableTypeInfo [
 ]
 
 { #category : #'as yet unclassified' }
-SWCDTofJS >> putMethodFooter: anExpression [
-	self stream
-		decIndent;
-		putLine: '}'
+SWCDTofJS >> putMethodFooter: mbt [
+	mbt decIndent; put: '}'; cr
 ]
 
 { #category : #'as yet unclassified' }
-SWCDTofJS >> putMethodHeader: anExpression [
-	anExpression method methodClass isClassSide ifTrue: [
+SWCDTofJS >> putMethodHeader: mbt [
+	mbt expression method methodClass isClassSide ifTrue: [
 		self stream put: 'static '
 	].
-	self stream
-		put: (self class mangleClass mangle: anExpression);
+	mbt
+		put: (self class mangleClass mangle: mbt expression);
 		put: '('.
 
-	anExpression node arguments do: [ :vi |
-		self stream put: vi name
+	mbt expression node arguments do: [ :vi |
+		mbt put: '_'; put: vi name
 	] separatedBy: [
-		self stream put: ', '
+		mbt put: ', '
 	].
-	self stream
-		putLine: '){';
-		incIndent
+	mbt put: '){'; cr; incIndent.
+	mbt expression node allVariables detect: [ :each | each name = 'self' ] ifFound: [ :found |
+		mbt putSelfDeclaration 
+	]
 		
 
 ]
