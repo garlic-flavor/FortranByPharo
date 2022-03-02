@@ -183,6 +183,15 @@ SWExpression >> children: anObject [
 	children := anObject
 ]
 
+{ #category : #'as yet unclassified' }
+SWExpression >> containsAsMember: aName [
+	self slot do: [ :each |
+		each name = 'self' ifTrue: [ ^ false ].
+		each name = aName ifTrue: [ ^ true ]
+	].
+	^ false
+]
+
 { #category : #api }
 SWExpression >> decode [
 	self node dispatchTo: self.

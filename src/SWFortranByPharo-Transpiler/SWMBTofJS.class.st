@@ -69,7 +69,7 @@ SWMBTofJS >> atCascade: aCascadeNode [
 { #category : #accessing }
 SWMBTofJS >> atClosure: aBlockNode [
 	self isExpression: false.
-	self putBlock
+	self putClosure
 
 ]
 
@@ -106,6 +106,37 @@ SWMBTofJS >> putArrayHeader [
 { #category : #'as yet unclassified' }
 SWMBTofJS >> putArraySeparator [
 	self put: ', '
+]
+
+{ #category : #accessing }
+SWMBTofJS >> putBlock [
+	|functionized|
+	functionized := (self isExpression and: [ self node arguments isNotEmpty or: [ self node temporaries isNotEmpty ] ]).
+	functionized ifTrue: [
+		self put: 'function('.
+		self node arguments do: [ :each |
+			self put: each name
+		] separatedBy: [ self put: ', ' ].
+		self put: '){'; cr; incIndent.
+	].
+	self children allButLastDo: [ :child |
+		(self child: child)
+			putArgumentDeclaration
+	].
+	(self child: self children last)
+		isExpression: (functionized not and: [ self isExpression ]);
+		putSequence.
+	self expression node class = RBMethodNode ifTrue: [
+		self expression node lastIsReturn ifFalse: [
+			self putReturnKeyword; put: ' this;'; cr
+		].
+	].
+	functionized ifTrue: [
+		self
+			decIndent; put: '}()'
+	]
+	
+
 ]
 
 { #category : #'code generation' }
@@ -174,6 +205,30 @@ SWMBTofJS >> putCascade: aRBCascadeNode [
 		self << aRBCascadeNode receiver
 	]; put: ')'
 	
+]
+
+{ #category : #'code generation' }
+SWMBTofJS >> putClosure [
+	|sequence|
+	self put: 'function('.
+	self node arguments do: [ :each |
+		self put: each name
+	] separatedBy: [ self put: ', ' ].
+	self put: '){'; cr; incIndent.
+
+	self children allButLastDo: [ :child |
+		(self child: child)
+			putArgumentDeclaration
+	].
+	sequence := self children last.
+	sequence children allButLastDo: [ :child |
+		self transpileChildAsNotExpression: child
+	].
+	self putReturnKeyword; put: ' '.
+	self transpileChildAsExpression: sequence children last.
+	self putStatementDelimiter; cr; decIndent; put: '}'
+	
+
 ]
 
 { #category : #streaming }
@@ -520,13 +575,19 @@ SWMBTofJS >> putVariable [
 	self node name = 'super' ifTrue: [
 		^ self put: 'super'
 	].
+	(self expression containsAsMember: self node name) ifTrue: [|rClass|
+		rClass := self expression receiverClass.
+		self
+			put: (rClass isInstanceSide ifTrue: [ 'this' ] ifFalse: [ rClass instanceSide name ]);
+			putClassAccessor; put: '_'
+	].
 	^ super putVariable
 ]
 
 { #category : #'code generation' }
 SWMBTofJS >> putVariableDeclaration [
 	self
-		put: 'var _';
+		put: 'var ';
 		put: self node name;
 		put: ' = null'
 ]

@@ -6,6 +6,7 @@ Class {
 	#superclass : #SWPoolBase,
 	#instVars : [
 		'global',
+		'mainTranspiler',
 		'stream'
 	],
 	#category : #'SWFortranByPharo-Transpiler-Common'
@@ -31,6 +32,30 @@ SWTranspilerPool >> global [
 SWTranspilerPool >> global: anObject [
 
 	global := anObject
+]
+
+{ #category : #'code generation' }
+SWTranspilerPool >> import: symbols from: module [
+	self mainTranspiler
+		putImport: symbols from: module;
+		putStatementDelimiter;
+		cr
+]
+
+{ #category : #accessing }
+SWTranspilerPool >> mainTranspiler [
+
+	^ mainTranspiler ifNil: [
+		mainTranspiler := self class methodBodyTranspilerClass new
+			pool: self;
+			yourself
+	]
+]
+
+{ #category : #accessing }
+SWTranspilerPool >> mainTranspiler: anObject [
+
+	mainTranspiler := anObject
 ]
 
 { #category : #api }
@@ -73,26 +98,25 @@ SWTranspilerPool >> transpile: aClass [
 
 { #category : #'as yet unclassified' }
 SWTranspilerPool >> transpile: aMethod with: operands [
-	|ex receiver bt|
+	|ex receiver|
 	receiver := operands first value instanceSide.
-	self global getClassInfo: receiver.
+	(receiver respondsTo: #setUpTranspiler:) ifTrue: [
+		receiver setUpTranspiler: self
+	].
 	ex := (self global decode: (SWSenderInfo new
 		method: aMethod;
 		operands: operands;
 		yourself)) expression.
-	self getClassInfo: receiver.
-	(receiver respondsTo: #solveDependenciesUsing:) ifTrue: [
-		receiver solveDependenciesUsing: self
-	].
 	self global remove: ex senderInfo.
+
+	(receiver respondsTo: #solveDependencies:) ifTrue: [
+		receiver solveDependencies: self
+	].
 	self transpile: aMethod methodClass instanceSide.
 	self transpile: receiver.
-	bt := self class methodBodyTranspilerClass new
+	self mainTranspiler
 		expression: ex;
-		pool: self;
-		yourself.
-	bt transpile.
-
+		transpile
 ]
 
 { #category : #'as yet unclassified' }

@@ -19,6 +19,7 @@ Class {
 
 { #category : #initialization }
 SWShellEnvironment class >> decode_OSEnvironmentClass: ct [
+	self error; flag: #toRemove.
 	ct
 		declareMethodReturnsReceiversInstance: #environmentFor:
 
@@ -26,29 +27,18 @@ SWShellEnvironment class >> decode_OSEnvironmentClass: ct [
 
 { #category : #initialization }
 SWShellEnvironment class >> decode_OSPlatformClass: ct [
+	self error; flag: #toRemove.
 	ct
 		declareMethodReturnsReceiversInstance: #current
 ]
 
 { #category : #initialization }
 SWShellEnvironment class >> decode_OSSUnixSubprocess: ct [
+	self error; flag: #toRemove.
 	ct
 		declareMethodReturnsReceiver: #run;
 		declareMethodReturnsReceiver: #initialize
 
-]
-
-{ #category : #initialization }
-SWShellEnvironment class >> decode_self: transpiler [
-	transpiler
-		declareMethod: #localDirectory asReturn: FileLocator
-";
-		defineMethodBody: #localDirectory as: [ :t |
-			t
-				put: 'return FileLocator.localDirectory()';
-				putStatementDelimiter;
-				cr
-		]"
 ]
 
 { #category : #accessing }
@@ -99,31 +89,77 @@ SWShellEnvironment class >> resetDefault [
 	default := nil
 ]
 
-{ #category : #'as yet unclassified' }
-SWShellEnvironment class >> solveDependenciesUsing: transpiler [
-	transpiler
+{ #category : #initialization }
+SWShellEnvironment class >> setUpDecoder: global [
+	self error; flag: #toRemove.
+	(global getClassInfo: OSEnvironment class)
+		declareMethodReturnsReceiversInstance: #environmentFor:.
+	(global getClassInfo: OSPlatform class)
+		declareMethodReturnsReceiversInstance: #current.
+	(global getClassInfo: OSSUnixSubprocess)
+		declareMethodReturnsReceiver: #run;
+		declareMethodReturnsReceiver: #initialize.
+
+	(global getClassInfo: SWShellEnvironment)
+		declareMethod: #localDirectory asReturn: FileLocator.
+
+]
+
+{ #category : #initialization }
+SWShellEnvironment class >> setUpTranspiler: pool [
+	(pool global getClassInfo: OSEnvironment class)
+		declareMethodReturnsReceiversInstance: #environmentFor:.
+	(pool global getClassInfo: OSPlatform class)
+		declareMethodReturnsReceiversInstance: #current.
+	(pool global getClassInfo: OSSUnixSubprocess)
+		declareMethodReturnsReceiver: #run;
+		declareMethodReturnsReceiver: #initialize.
+
+	(pool global getClassInfo: SWShellEnvironment)
+		declareMethod: #localDirectory asReturn: FileLocator.
+
+	(pool getClassInfo: SWShellEnvironment)
+		methodBodyTranspilerOf: #localDirectory is: [ :mbt |
+			mbt
+				put: 'return FileLocator.localDirectory()';
+				putStatementDelimiter;
+				cr
+		].
+
+]
+
+{ #category : #private }
+SWShellEnvironment class >> solveDependencies: pool [
+	pool
 		transpile: SWGFortranCompilerAdapter;
 		import: #(OSPlatform FileLocator) from: 'Pharo'
 ]
 
 { #category : #'as yet unclassified' }
-SWShellEnvironment class >> transpile_self: cdt [
-	cdt
+SWShellEnvironment class >> solveDependenciesUsing: pool [
+	self error; flag: #toRemove.
+	(pool global getClassInfo: OSEnvironment class)
+		declareMethodReturnsReceiversInstance: #environmentFor:.
+	(pool global getClassInfo: OSPlatform class)
+		declareMethodReturnsReceiversInstance: #current.
+	(pool global getClassInfo: OSSUnixSubprocess)
+		declareMethodReturnsReceiver: #run;
+		declareMethodReturnsReceiver: #initialize.
+
+	(pool global getClassInfo: SWShellEnvironment)
+		declareMethod: #localDirectory asReturn: FileLocator.
+
+	(pool getClassInfo: SWShellEnvironment)
 		methodBodyTranspilerOf: #localDirectory is: [ :mbt |
-			self halt.
-"
-			newT
-				specifyReturnTypeAs: FileLocator;
-				markAsDecoded;
-				generator: [ :t |
-					t
-						put: 'return FileLocator.localDirectory()';
-						putStatementDelimiter;
-						cr
-				];
-				yourself
-	"
-		]
+			mbt
+				put: 'return FileLocator.localDirectory()';
+				putStatementDelimiter;
+				cr
+		].
+
+	pool
+		transpile: SWGFortranCompilerAdapter;
+		import: #(OSPlatform FileLocator) from: 'Pharo'
 ]
 
 { #category : #accessing }

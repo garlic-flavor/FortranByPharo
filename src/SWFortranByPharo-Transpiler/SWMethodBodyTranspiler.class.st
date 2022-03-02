@@ -288,32 +288,6 @@ SWMethodBodyTranspiler >> putBasenameOn: aStream [
 		<< self selector asCamelCase
 ]
 
-{ #category : #accessing }
-SWMethodBodyTranspiler >> putBlock [
-	|functionized|
-	functionized := (self isExpression and: [ self node arguments isNotEmpty or: [ self node temporaries isNotEmpty ] ]).
-	functionized ifTrue: [
-		self put: 'function('.
-		self node arguments do: [ :each |
-			self put: '_'; put: each name
-		] separatedBy: [ self put: ', ' ].
-		self put: '){'; cr; incIndent.
-	].
-	self children allButLastDo: [ :child |
-		(self child: child)
-			putArgumentDeclaration
-	].
-	(self child: self children last)
-		isExpression: (functionized not and: [ self isExpression ]);
-		putSequence.
-	functionized ifTrue: [
-		self
-			decIndent; put: '}()'
-	]
-	
-
-]
-
 { #category : #'code generation' }
 SWMethodBodyTranspiler >> putCharacter: c [
 	self halt; flag: #toRewrite.
@@ -326,30 +300,6 @@ SWMethodBodyTranspiler >> putCharacter: c [
 { #category : #'code generation' }
 SWMethodBodyTranspiler >> putClassAccessor [
 	self put: '.'
-]
-
-{ #category : #'code generation' }
-SWMethodBodyTranspiler >> putClosure [
-	|sequence|
-	self put: 'function('.
-	self node arguments do: [ :each |
-		self put: '_'; put: each name
-	] separatedBy: [ self put: ', ' ].
-	self put: '){'; cr; incIndent.
-
-	self children allButLastDo: [ :child |
-		(self child: child)
-			putArgumentDeclaration
-	].
-	sequence := self children last.
-	sequence children allButLastDo: [ :child |
-		self transpileChildAsNotExpression: child
-	].
-	self putReturnKeyword; put: ' '.
-	self transpileChildAsExpression: sequence children last.
-	self putStatementDelimiter; cr; decIndent; put: '}'
-	
-
 ]
 
 { #category : #'code generation' }
@@ -548,9 +498,7 @@ SWMethodBodyTranspiler >> putSymbol: aByteSymbol [
 
 { #category : #'as yet unclassified' }
 SWMethodBodyTranspiler >> putVariable [
-	self expression slot detect: [ :each | each name = self node name ] ifFound: [
-		self put: '_'
-	].
+
 	self put: self node name
 ]
 

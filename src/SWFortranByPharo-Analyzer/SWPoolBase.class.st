@@ -18,14 +18,17 @@ SWPoolBase class >> classInfoClass [
 
 { #category : #private }
 SWPoolBase class >> initializerFor: aClass [
-	^ (String streamContents: [ :s |
-		s
-			<< self initializersHeader;
-			<< aClass instanceSide name;
-			<< (aClass isClassSide ifTrue: [ 'Class' ] ifFalse: [ '' ]);
-			<< ':'
-	]) asSymbol.
+	^ self
+		initializerSelectorTrailed: aClass instanceSide name
+		with: (aClass isClassSide ifTrue: [ 'Class' ] ifFalse: [ '' ] )
 
+]
+
+{ #category : #'as yet unclassified' }
+SWPoolBase class >> initializerSelectorTrailed: trailer with: trailer2 [
+	^ (String streamContents: [:s |
+		s << self initializersHeader; << trailer; << trailer2; << ':'
+	]) asSymbol
 ]
 
 { #category : #constants }
@@ -53,6 +56,7 @@ SWPoolBase class >> search: selector in: aClass ifFound: foundBlock ifNone: none
 { #category : #private }
 SWPoolBase >> addInitializerIn: aClass receiver: receiverClass [
 	"invoke aClass>>#initialize_Hoge: with Hoge class transpiler."
+	self error; flag: #toRemove.
 
 	 aClass classSide methodDict values select: [ :each |
 		each selector beginsWith: self class initializersHeader
@@ -75,23 +79,31 @@ SWPoolBase >> addInitializerIn: aClass receiver: receiverClass [
 
 { #category : #api }
 SWPoolBase >> getClassInfo: aClass [
-	aClass isClassSide ifTrue: [
-		self getClassInfo: aClass instanceSide
+	^ self payload at: aClass ifAbsent: [ self newClassInfo: aClass ]
+
+]
+
+{ #category : #initialization }
+SWPoolBase >> initialize: ci [
+	|targetClass initializer|
+	targetClass := ci targetClass.
+	self initialize: ci asOf: targetClass.
+	initializer := self class
+		initializerSelectorTrailed: 'self'
+		with: (targetClass isClassSide ifTrue: [ 'Class' ] ifFalse: [ '' ]).
+	targetClass classSide methodDict at: initializer ifPresent: [ :init | 
+		init valueWithReceiver: targetClass instanceSide arguments: { ci }
 	].
-	^ self payload at: aClass ifAbsent: [|newCI|
-		newCI := self newClassInfo: aClass.
-		self readyClassInfo: newCI asOf: aClass.
-		aClass isInstanceSide ifTrue: [
-			self addInitializerIn: aClass receiver: aClass.
-		].
-		newCI
-	]
+	^ ci
 
 ]
 
 { #category : #private }
 SWPoolBase >> initialize: aClassInfo asOf: aClass [
 	| initializer |
+	aClass ifNil: [ ^ self ].
+	self initialize: aClassInfo asOf: aClass superclass.
+
 	initializer := self class initializerFor: aClass.
 	(self respondsTo: initializer) ifTrue: [ 
 		self perform: initializer with: aClassInfo ].
@@ -101,12 +113,14 @@ SWPoolBase >> initialize: aClassInfo asOf: aClass [
 { #category : #private }
 SWPoolBase >> newClassInfo: target [
 	|ci|
+	target isClassSide ifTrue: [ self getClassInfo: target instanceSide ].
 	ci := self class classInfoClass new
 		pool: self;
 		targetClass: target;
 		yourself.
 	self payload at: target put: ci.
-	^ ci
+	^ self initialize: ci.
+
 ]
 
 { #category : #accessing }
@@ -133,6 +147,7 @@ SWPoolBase >> putOn: aStream [
 
 { #category : #'as yet unclassified' }
 SWPoolBase >> readyClassInfo: aClassInfo asOf: aClass [
+	self error; flag: #toRemove.
 	aClass ifNil: [ ^ self ].
 	self readyClassInfo: aClassInfo asOf: aClass superclass.
 

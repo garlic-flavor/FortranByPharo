@@ -263,7 +263,7 @@ SWCDTofJS >> putMethodHeader: mbt [
 		put: '('.
 
 	mbt expression node arguments do: [ :vi |
-		mbt put: '_'; put: vi name
+		mbt put: vi name
 	] separatedBy: [
 		mbt put: ', '
 	].

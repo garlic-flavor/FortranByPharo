@@ -14,8 +14,6 @@ SWMTofJSTest >> test_0010_nop [
 	self resultWith: {  } equals: '/// I''m a test class for SWDecoderTest.
 class SWTestProgram extends PharoObject {
     _var1 = null;
-    _0010_nop(){
-    }
 }
 '
 ]
@@ -26,16 +24,10 @@ SWMTofJSTest >> test_0460_access_to_local_variables [
 class SWTestProgram extends PharoObject {
     _var1 = null;
     var1(){
-        return var1;
-    }
-    _0460_access_to_local_variables(){
-        var tp = null;
-        tp = new SWTestProgram();
-        tp.var1_(123);
-        return tp.var1();
+        return this._var1;
     }
     var1_(anObject){
-        var1 = anObject;
+        this._var1 = anObject;
     }
 }
 var tp = null;
