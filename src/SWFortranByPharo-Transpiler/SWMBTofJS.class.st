@@ -530,6 +530,16 @@ SWMBTofJS >> putReturnKeyword [
 ]
 
 { #category : #'code generation' }
+SWMBTofJS >> putReturnSelf [
+	self
+		putReturnKeyword;
+		put: ' ';
+		put: 'this';
+		putStatementDelimiter;
+		cr
+]
+
+{ #category : #'code generation' }
 SWMBTofJS >> putReturnThisClassName [
 	self halt; flag: #toRewrite.
 	self
@@ -547,7 +557,7 @@ SWMBTofJS >> putSelf [
 
 { #category : #'code generation' }
 SWMBTofJS >> putSelfDeclaration [
-	self put: 'var _self = this;'; cr
+	self put: 'var self = this;'; cr
 ]
 
 { #category : #'code generation' }

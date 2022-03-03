@@ -243,6 +243,8 @@ return (outer1 ? function(){
 
 { #category : #utilities }
 SWMBTofJSTest >> transpile: aMethod with: operands [
-	^ module pool transpileBody: aMethod with: operands
+	(module pool transpilerFor: aMethod with: operands)
+		transpile
+
 
 ]

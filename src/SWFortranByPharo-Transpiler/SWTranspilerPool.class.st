@@ -6,7 +6,6 @@ Class {
 	#superclass : #SWPoolBase,
 	#instVars : [
 		'global',
-		'mainTranspiler',
 		'stream'
 	],
 	#category : #'SWFortranByPharo-Transpiler-Common'
@@ -36,6 +35,7 @@ SWTranspilerPool >> global: anObject [
 
 { #category : #'code generation' }
 SWTranspilerPool >> import: symbols from: module [
+	self error; flag: #toRemove.
 	self mainTranspiler
 		putImport: symbols from: module;
 		putStatementDelimiter;
@@ -89,6 +89,7 @@ SWTranspilerPool >> stream: anObject [
 { #category : #'public API' }
 SWTranspilerPool >> transpile: aClass [
 	|cdt|
+	self halt; flag: #toRemove.
 	cdt := (self getClassInfo: aClass).
 	cdt isTranspiled ifTrue: [ ^ self ].
 	cdt transpile
@@ -97,8 +98,9 @@ SWTranspilerPool >> transpile: aClass [
 ]
 
 { #category : #'as yet unclassified' }
-SWTranspilerPool >> transpile: aMethod with: operands [
+SWTranspilerPool >> transpileAsModule: aMethod with: operands [
 	|ex receiver|
+	self error; flag: #roRemove.
 	receiver := operands first value instanceSide.
 	(receiver respondsTo: #setUpTranspiler:) ifTrue: [
 		receiver setUpTranspiler: self
@@ -117,22 +119,6 @@ SWTranspilerPool >> transpile: aMethod with: operands [
 	self mainTranspiler
 		expression: ex;
 		transpile
-]
-
-{ #category : #'as yet unclassified' }
-SWTranspilerPool >> transpileBody: aMethod with: operands [
-	|ex bt|
-	ex := (self global decode: (SWSenderInfo new
-		method: aMethod;
-		operands: operands;
-		yourself)) expression.
-	bt := self class methodBodyTranspilerClass new
-		expression: ex;
-		pool: self;
-		yourself.
-	bt transpile.
-	^ self stream contents.
-
 ]
 
 { #category : #initialization }
@@ -187,4 +173,20 @@ SWTranspilerPool >> transpile_ProtoObject: ct [
 	ct
 		senderTranspilerOf: #ifNotNil:ifNil: is: [ :bt | bt putIfNotNilIfNil: true ];
 		senderTranspilerOf: #ifNil: is: [ :bt | bt putIfNotNil: false ]
+]
+
+{ #category : #'as yet unclassified' }
+SWTranspilerPool >> transpilerFor: aMethod with: operands [
+	|sender expression|
+	sender := SWSenderInfo new
+		method: aMethod;
+		operands: operands;
+		yourself.
+	expression := (self global decode: sender) expression.
+	self global remove: sender.
+	^ self class methodBodyTranspilerClass new
+		pool: self;
+		expression: expression;
+		yourself
+
 ]

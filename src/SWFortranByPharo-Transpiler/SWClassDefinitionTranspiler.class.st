@@ -150,6 +150,7 @@ SWClassDefinitionTranspiler >> putMethodDefinition: anExpression [
 		pool: self pool;
 		stream: self stream;
 		expression: exp;
+		isExpression: true;
 		yourself.
 
 	self putMethodHeader: mbt.
@@ -241,7 +242,8 @@ SWClassDefinitionTranspiler >> transpileAsInstanceSide [
 	self stream putComment: self targetClass comment.
 	self putClassHeader.
 	self stream incIndent.
-	self pool transpile: targetClass classSide.
+	(self pool getClassInfo: targetClass classSide)
+		transpile.
 	self putMember.
 	self stream decIndent.
 	self putClassFooter.

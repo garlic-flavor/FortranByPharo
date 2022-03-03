@@ -5,9 +5,9 @@ Class {
 	#name : #SWModuleTranspiler,
 	#superclass : #Object,
 	#instVars : [
-		'pool',
 		'stream',
-		'senderInfo'
+		'pool',
+		'mainTranspiler'
 	],
 	#category : #'SWFortranByPharo-Transpiler-Common'
 }
@@ -51,20 +51,13 @@ SWModuleTranspiler >> decode: aSelector with: args [
 ]
 
 { #category : #accessing }
-SWModuleTranspiler >> decoder [
-
-	^ decoder ifNil: [ decoder := self class methodBodyProcedureClass new ]
-]
-
-{ #category : #accessing }
-SWModuleTranspiler >> decoder: anObject [
-
-	decoder := anObject
-]
-
-{ #category : #accessing }
 SWModuleTranspiler >> filename [
 	^ String streamContents: [ :s | self putFilenameOn: s ]
+]
+
+{ #category : #accessing }
+SWModuleTranspiler >> global [
+	^ self pool global
 ]
 
 { #category : #accessing }
@@ -75,8 +68,7 @@ SWModuleTranspiler >> haltAt: sender [
 
 { #category : #'public API' }
 SWModuleTranspiler >> import: anArray from: basename [
-	self halt; flag: #toRewrite.
-	self payload
+	self mainTranspiler
 		putImport: anArray from: basename;
 		putStatementDelimiter;
 		cr
@@ -96,11 +88,7 @@ SWModuleTranspiler >> main: aClass [
 { #category : #accessing }
 SWModuleTranspiler >> mainTranspiler [
 
-	^ mainTranspiler ifNil: [
-		mainTranspiler := self class methodBodyTranspilerClass new
-			decoder: self decoder;
-			yourself.
-	]
+	^ mainTranspiler
 ]
 
 { #category : #accessing }
@@ -111,11 +99,13 @@ SWModuleTranspiler >> mainTranspiler: anObject [
 
 { #category : #accessing }
 SWModuleTranspiler >> method: aMethod with: operands [
-	self senderInfo: (SWSenderInfo new
-		method: aMethod;
-		operands: operands;
-		yourself).
-	^ self pool transpile: aMethod with: operands
+	|rClass|
+	rClass := operands first value instanceSide.
+	(rClass respondsTo: #setUpTranspiler:) ifTrue: [
+		rClass setUpTranspiler: self
+	].
+	self mainTranspiler: (self pool transpilerFor: aMethod with: operands)
+
 ]
 
 { #category : #accessing }
@@ -144,13 +134,7 @@ SWModuleTranspiler >> putFilenameOn: aStream [
 { #category : #accessing }
 SWModuleTranspiler >> senderInfo [
 
-	^ senderInfo
-]
-
-{ #category : #accessing }
-SWModuleTranspiler >> senderInfo: anObject [
-
-	senderInfo := anObject
+	^ self mainTranspiler expression senderInfo
 ]
 
 { #category : #private }
@@ -184,20 +168,22 @@ SWModuleTranspiler >> stream: anObject [
 
 { #category : #'public API' }
 SWModuleTranspiler >> transpile [
-	self mainTranspiler pool addInitializerIn: self decoder receiverClass.
-	self transpile: self decoder receiverClass.
+	|rClass|
+	rClass := self mainTranspiler expression receiverClass instanceSide.
+	(rClass respondsTo: #solveDependencies:) ifTrue: [
+		rClass solveDependencies: self
+	].
+	self transpile: self mainTranspiler expression method methodClass instanceSide.
+	self transpile: rClass.
 	self mainTranspiler transpile
 
 ]
 
 { #category : #'public API' }
 SWModuleTranspiler >> transpile: aClass [
-	|ct cct|
-	ct := (self mainTranspiler pool getClassInfo: aClass instanceSide).
-	ct isTranspiled ifTrue: [ ^ self ].
-	ct decoder: (self decoder pool getClassInfo: aClass instanceSide).
-	cct := (self mainTranspiler pool getClassInfo: aClass classSide).
-	cct decoder: (self decoder pool getClassInfo: aClass classSide).
-	ct transpile.
+	|cdt|
+	cdt := (self pool getClassInfo: aClass).
+	cdt isTranspiled ifTrue: [ ^ self ].
+	cdt transpile
 
 ]

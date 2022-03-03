@@ -6,7 +6,8 @@ Class {
 	#superclass : #Object,
 	#instVars : [
 		'payload',
-		'owner'
+		'owner',
+		'haltList'
 	],
 	#category : #'SWFortranByPharo-Analyzer-Analyzer'
 }
@@ -81,6 +82,31 @@ SWPoolBase >> addInitializerIn: aClass receiver: receiverClass [
 SWPoolBase >> getClassInfo: aClass [
 	^ self payload at: aClass ifAbsent: [ self newClassInfo: aClass ]
 
+]
+
+{ #category : #modifying }
+SWPoolBase >> haltAt: aSymbol [
+	self haltAt: aSymbol switch: true
+]
+
+{ #category : #modifying }
+SWPoolBase >> haltAt: key switch: aBoolean [
+	aBoolean ifTrue: [
+		self haltList add: key
+	] ifFalse: [
+		self haltList remove: key ifAbsent: [  ]
+	]
+]
+
+{ #category : #accessing }
+SWPoolBase >> haltList [
+	^ haltList ifNil: [ haltList := Set new ]
+]
+
+{ #category : #accessing }
+SWPoolBase >> haltList: anObject [
+
+	haltList := anObject
 ]
 
 { #category : #initialization }

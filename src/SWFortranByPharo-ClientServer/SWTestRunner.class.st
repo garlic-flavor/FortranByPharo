@@ -9,8 +9,10 @@ Class {
 
 { #category : #building }
 SWTestRunner class >> build [
-	moduleTranspiler main: self.
 	^ moduleTranspiler
+		main: self;
+		transpile;
+		yourself
 
 ]
 
@@ -102,18 +104,18 @@ SWTestRunner class >> setUpDecoder: global [
 ]
 
 { #category : #initialization }
-SWTestRunner class >> setUpTranspiler: pool [
-	(pool global getClassInfo: TestAsserter)
+SWTestRunner class >> setUpTranspiler: mt [
+	(mt global getClassInfo: TestAsserter)
 		declareMethodReturnsReceiver: #assert:description:resumable:.
 
 	self methodDict values select: [ :m | m protocol beginsWith: 'test' ] thenDo: [ :m |
-		pool global decode: (SWSenderInfo new
+		mt global decode: (SWSenderInfo new
 			method: m;
 			operands: { self };
 			yourself).
 	].
 
-	(pool getClassInfo: TestCase class)
+	(mt pool getClassInfo: TestCase class)
 		methodBodyTranspilerOf: #allTestSelectors is: [ :mbt |
 			mbt putReturnKeyword; put: ' '; putArrayHeader.
 			(self methodDict values select: [ :m | m category beginsWith: 'test' ]) do: [ :each |
@@ -122,7 +124,7 @@ SWTestRunner class >> setUpTranspiler: pool [
 			mbt putArrayFooter; putStatementDelimiter; cr
 		].
 
-	(pool getClassInfo: SWTestRunner class)
+	(mt pool getClassInfo: SWTestRunner class)
 		methodBodyTranspilerOf: #name is: [ :mbt |
 			mbt putReturnKeyword; put: ' "'; put: self name; put: '"'; putStatementDelimiter; cr
 		].

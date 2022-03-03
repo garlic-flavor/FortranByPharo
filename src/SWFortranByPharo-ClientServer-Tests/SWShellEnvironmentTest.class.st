@@ -39,9 +39,10 @@ SWShellEnvironmentTest class >> setUpTranspiler: pool [
 ]
 
 { #category : #private }
-SWShellEnvironmentTest class >> solveDependencies: pool [
-	pool transpile: SWShellEnvironment.
-	super solveDependencies: pool.
+SWShellEnvironmentTest class >> solveDependencies: mt [
+	SWShellEnvironment solveDependencies: mt.
+	mt transpile: SWShellEnvironment.
+	super solveDependencies: mt.
 
 ]
 

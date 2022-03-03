@@ -106,19 +106,19 @@ SWShellEnvironment class >> setUpDecoder: global [
 ]
 
 { #category : #initialization }
-SWShellEnvironment class >> setUpTranspiler: pool [
-	(pool global getClassInfo: OSEnvironment class)
+SWShellEnvironment class >> setUpTranspiler:  mt [
+	(mt global getClassInfo: OSEnvironment class)
 		declareMethodReturnsReceiversInstance: #environmentFor:.
-	(pool global getClassInfo: OSPlatform class)
+	(mt global getClassInfo: OSPlatform class)
 		declareMethodReturnsReceiversInstance: #current.
-	(pool global getClassInfo: OSSUnixSubprocess)
+	(mt global getClassInfo: OSSUnixSubprocess)
 		declareMethodReturnsReceiver: #run;
 		declareMethodReturnsReceiver: #initialize.
 
-	(pool global getClassInfo: SWShellEnvironment)
+	(mt global getClassInfo: SWShellEnvironment)
 		declareMethod: #localDirectory asReturn: FileLocator.
 
-	(pool getClassInfo: SWShellEnvironment)
+	(mt pool getClassInfo: SWShellEnvironment)
 		methodBodyTranspilerOf: #localDirectory is: [ :mbt |
 			mbt
 				put: 'return FileLocator.localDirectory()';
@@ -129,8 +129,8 @@ SWShellEnvironment class >> setUpTranspiler: pool [
 ]
 
 { #category : #private }
-SWShellEnvironment class >> solveDependencies: pool [
-	pool
+SWShellEnvironment class >> solveDependencies: mt [
+	mt
 		transpile: SWGFortranCompilerAdapter;
 		import: #(OSPlatform FileLocator) from: 'Pharo'
 ]

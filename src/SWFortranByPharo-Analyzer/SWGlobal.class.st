@@ -4,9 +4,6 @@ I am a pool of SWClassInfo.
 Class {
 	#name : #SWGlobal,
 	#superclass : #SWPoolBase,
-	#instVars : [
-		'haltList'
-	],
 	#category : #'SWFortranByPharo-Analyzer-Analyzer'
 }
 
@@ -334,20 +331,6 @@ SWGlobal >> decode_ThreadSafeTranscript: ct [
 ]
 
 { #category : #modifying }
-SWGlobal >> haltAt: aSymbol [
-	self haltAt: aSymbol switch: true
-]
-
-{ #category : #modifying }
-SWGlobal >> haltAt: key switch: aBoolean [
-	aBoolean ifTrue: [
-		self haltList add: key
-	] ifFalse: [
-		self haltList remove: key ifAbsent: [  ]
-	]
-]
-
-{ #category : #modifying }
 SWGlobal >> haltAtGlobalAccess [
 	self haltAtGlobalAccess: true
 ]
@@ -376,17 +359,6 @@ SWGlobal >> haltAtUnresolvedSelector [
 SWGlobal >> haltAtUnresolvedSelector: aBoolean [
 	self haltAt: self class unresolvedSelectorKey switch: aBoolean
 
-]
-
-{ #category : #accessing }
-SWGlobal >> haltList [
-	^ haltList ifNil: [ haltList := Set new ]
-]
-
-{ #category : #accessing }
-SWGlobal >> haltList: anObject [
-
-	haltList := anObject
 ]
 
 { #category : #api }

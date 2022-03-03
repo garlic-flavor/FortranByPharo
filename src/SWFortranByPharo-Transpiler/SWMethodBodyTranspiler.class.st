@@ -87,7 +87,7 @@ SWMethodBodyTranspiler >> atInteger: anInteger [
 
 { #category : #accessing }
 SWMethodBodyTranspiler >> atMessage: aMessageNode [
-
+	(self pool haltList contains: aMessageNode selector) ifTrue: [ self halt ].
 	(self pool predefinedSenderTranspiler: self expression senderInfo) ifNotNil: [ :predefined |
 		predefined value: self
 	] ifNil: [
@@ -98,8 +98,15 @@ SWMethodBodyTranspiler >> atMessage: aMessageNode [
 
 { #category : #accessing }
 SWMethodBodyTranspiler >> atMethod: aMethodNode [
-	self putBlock
-
+	self children allButLastDo: [ :child |
+		(self child: child) putArgumentDeclaration
+	].
+	(self child: self children last)
+		isExpression: false;
+		putSequence.
+	(self isExpression and: [ self expression node containsReturn not ]) ifTrue: [
+		self putReturnSelf
+	]
 ]
 
 { #category : #'code generation' }
@@ -128,6 +135,8 @@ SWMethodBodyTranspiler >> atString: aString [
 
 { #category : #accessing }
 SWMethodBodyTranspiler >> atVariable: aVariableNode [
+	(self pool haltList contains: aVariableNode name) ifTrue: [ self halt ].
+
 	aVariableNode parent class = RBMethodNode ifTrue: [ ^self ].
 	aVariableNode parent class = RBSequenceNode ifTrue: [
 		^ self putVariableDeclaration
@@ -368,6 +377,16 @@ SWMethodBodyTranspiler >> putImport: anArray from: aSource [
 	^ self subclassResponsibility 
 ]
 
+{ #category : #'as yet unclassified' }
+SWMethodBodyTranspiler >> putMessageWithSelector: aSelector [
+	self
+		transpileChild: self children first;
+		putClassAccessor;
+		put: aSelector;
+		putArguments: self children allButFirst
+
+]
+
 { #category : #'code generation' }
 SWMethodBodyTranspiler >> putNew [
 	^ self subclassResponsibility
@@ -396,11 +415,7 @@ SWMethodBodyTranspiler >> putOpBinary [
 
 { #category : #'as yet unclassified' }
 SWMethodBodyTranspiler >> putOrdinaryMessage [
-	self
-		transpileChild: self children first;
-		putClassAccessor;
-		put: self mangle;
-		putArguments: self children allButFirst
+	self putMessageWithSelector: self mangle
 
 ]
 
@@ -423,8 +438,7 @@ SWMethodBodyTranspiler >> putReturnKeyword [
 
 { #category : #'code generation' }
 SWMethodBodyTranspiler >> putReturnSelf [
-	self halt; flag: #toRewrite.
-	self putStatement: (RBReturnNode value: (RBVariableNode named: 'self'))
+	^ self subclassResponsibility 
 ]
 
 { #category : #'code generation' }

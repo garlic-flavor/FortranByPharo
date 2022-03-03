@@ -43,3 +43,15 @@ SWPoolOfJS >> transpile_Collection: cdt [
 "
 		]
 ]
+
+{ #category : #'as yet unclassified' }
+SWPoolOfJS >> transpile_String: cdt [
+	cdt
+		senderTranspilerOf: #beginsWith: is: [ :mbt |
+			mbt putMessageWithSelector: 'startsWith'
+		];
+		senderTranspilerOf: #endsWith: is: [ :mbt |
+			mbt  putMessageWithSelector: 'endsWith'
+		]
+
+]
