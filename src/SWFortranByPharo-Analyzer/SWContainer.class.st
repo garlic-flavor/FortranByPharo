@@ -1,5 +1,5 @@
 "
-SWContainerType represents a container, like BlockClosure or Array, Dictionary and so on.
+SWContainer represents a container, like BlockClosure or Array, Dictionary and so on.
 "
 Class {
 	#name : #SWContainer,

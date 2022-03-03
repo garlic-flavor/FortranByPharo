@@ -7,12 +7,17 @@ Class {
 	#category : #'SWFortranByPharo-Transpiler-JS'
 }
 
-{ #category : #accessing }
+{ #category : #constants }
 SWPoolOfJS class >> classInfoClass [
 	^ SWCDTofJS
 ]
 
-{ #category : #'as yet unclassified' }
+{ #category : #constants }
+SWPoolOfJS class >> mangleClass [
+	^ SWMangleOfJS
+]
+
+{ #category : #constants }
 SWPoolOfJS class >> methodBodyTranspilerClass [
 	^ SWMBTofJS
 ]

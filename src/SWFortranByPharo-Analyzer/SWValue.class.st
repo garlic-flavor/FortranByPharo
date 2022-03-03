@@ -1,5 +1,5 @@
 "
-payload is SWType
+this payload is a SWType or a SWContainer.
 "
 Class {
 	#name : #SWValue,

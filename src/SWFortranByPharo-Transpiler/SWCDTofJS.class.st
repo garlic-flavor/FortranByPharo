@@ -12,11 +12,6 @@ SWCDTofJS class >> methodBodyTranspilerClass [
 	^ SWMBTofJS
 ]
 
-{ #category : #accessing }
-SWCDTofJS class >> methodDefinitionTranspilerClass [
-	^ SWMDTofJS
-]
-
 { #category : #initialization }
 SWCDTofJS >> initialize_Behavior [
 	self error; flag: #toRemove.
@@ -259,7 +254,7 @@ SWCDTofJS >> putMethodHeader: mbt [
 		self stream put: 'static '
 	].
 	mbt
-		put: (self class mangleClass mangle: mbt expression);
+		put: (self mangleClass mangle: mbt expression);
 		put: '('.
 
 	mbt expression node arguments do: [ :vi |

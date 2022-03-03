@@ -1,5 +1,5 @@
 "
-a base class of SWPool and SWTranspilerPool.
+a base class of SWGlobal and SWTranspilerPool.
 "
 Class {
 	#name : #SWPoolBase,
@@ -25,7 +25,7 @@ SWPoolBase class >> initializerFor: aClass [
 
 ]
 
-{ #category : #'as yet unclassified' }
+{ #category : #private }
 SWPoolBase class >> initializerSelectorTrailed: trailer with: trailer2 [
 	^ (String streamContents: [:s |
 		s << self initializersHeader; << trailer; << trailer2; << ':'
@@ -51,30 +51,6 @@ SWPoolBase class >> search: selector in: aClass ifFound: foundBlock ifNone: none
 	] ifAbsent: [
 		self search: selector in: aClass superclass ifFound: foundBlock ifNone: noneBlock
 	]
-
-]
-
-{ #category : #private }
-SWPoolBase >> addInitializerIn: aClass receiver: receiverClass [
-	"invoke aClass>>#initialize_Hoge: with Hoge class transpiler."
-	self error; flag: #toRemove.
-
-	 aClass classSide methodDict values select: [ :each |
-		each selector beginsWith: self class initializersHeader
-	] thenDo: [ :each ||name target isClassSide|
-		name := each selector copyAfter: $_.
-		isClassSide := name endsWith: 'Class:'.
-		name := isClassSide ifTrue: [
-			name allButLast: 6
-		] ifFalse: [
-			name allButLast
-		].
-		name = 'self' ifTrue: [ name := aClass instanceSide name ].
-		name = 'receiver' ifTrue: [ name := receiverClass instanceSide name ].
-		target := Smalltalk globals at: name asSymbol.
-		isClassSide ifTrue: [ target := target classSide ].
-		each valueWithReceiver: receiverClass instanceSide arguments: { self getClassInfo: target }.
-	].
 
 ]
 
@@ -109,7 +85,7 @@ SWPoolBase >> haltList: anObject [
 	haltList := anObject
 ]
 
-{ #category : #initialization }
+{ #category : #private }
 SWPoolBase >> initialize: ci [
 	|targetClass initializer|
 	targetClass := ci targetClass.
@@ -169,18 +145,4 @@ SWPoolBase >> printOn: aStream [
 { #category : #streaming }
 SWPoolBase >> putOn: aStream [
 	aStream << $#; << (self hash % 16rFFFF) printStringHex
-]
-
-{ #category : #'as yet unclassified' }
-SWPoolBase >> readyClassInfo: aClassInfo asOf: aClass [
-	self error; flag: #toRemove.
-	aClass ifNil: [ ^ self ].
-	self readyClassInfo: aClassInfo asOf: aClass superclass.
-
-	self initialize: aClassInfo asOf: aClass.
-
-	aClass isClassSide ifTrue: [ ^self ].
-	(self payload includesKey: aClass) ifTrue: [ ^ self ].
-	self newClassInfo: aClass.
-	self addInitializerIn: aClass receiver: aClassInfo targetClass
 ]

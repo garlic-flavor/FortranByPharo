@@ -1,9 +1,10 @@
 "
-I am in a SWVariableInfo.
+I am in a SWValue.
 I can be used to declare the type of a variable.
----
-    SWType declare: #nameOfVariable as: Integer.
----
+
+```
+	SWType declare: #nameOfVariable as: Integer.
+```
 
 "
 Class {

@@ -41,6 +41,14 @@ SWShellEnvironment class >> decode_OSSUnixSubprocess: ct [
 
 ]
 
+{ #category : #'as yet unclassified' }
+SWShellEnvironment class >> decode_self: cdt [
+	cdt
+		declareMethod: #localDirectory asReturn: FileLocator.
+
+
+]
+
 { #category : #accessing }
 SWShellEnvironment class >> default [
 	^ default ifNil: [ default := self newDefault ]
@@ -114,9 +122,6 @@ SWShellEnvironment class >> setUpTranspiler:  mt [
 	(mt global getClassInfo: OSSUnixSubprocess)
 		declareMethodReturnsReceiver: #run;
 		declareMethodReturnsReceiver: #initialize.
-
-	(mt global getClassInfo: SWShellEnvironment)
-		declareMethod: #localDirectory asReturn: FileLocator.
 
 	(mt pool getClassInfo: SWShellEnvironment)
 		methodBodyTranspilerOf: #localDirectory is: [ :mbt |

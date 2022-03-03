@@ -14,16 +14,6 @@ Class {
 	#category : #'SWFortranByPharo-Transpiler-Common'
 }
 
-{ #category : #constants }
-SWClassDefinitionTranspiler class >> mangleClass [
-	^ self methodBodyTranspilerClass mangleClass
-]
-
-{ #category : #'as yet unclassified' }
-SWClassDefinitionTranspiler class >> methodBodyTranspilerClass [
-	^ self subclassResponsibility 
-]
-
 { #category : #accessing }
 SWClassDefinitionTranspiler >> classInfo [
 
@@ -36,7 +26,7 @@ SWClassDefinitionTranspiler >> classInfo: anObject [
 	classInfo := anObject
 ]
 
-{ #category : #'as yet unclassified' }
+{ #category : #private }
 SWClassDefinitionTranspiler >> detectPredefinedMethodBodyFor: anExpression ifFound: foundBlock ifNone: noneBlock [
 	|method|
 	method := anExpression senderInfo method.
@@ -54,12 +44,22 @@ SWClassDefinitionTranspiler >> isTranspiled [
 	^ isTranspiled ifNil: [ isTranspiled := false ]
 ]
 
-{ #category : #'as yet unclassified' }
+{ #category : #constants }
+SWClassDefinitionTranspiler >> mangleClass [
+	^ self pool class mangleClass
+]
+
+{ #category : #modifying }
 SWClassDefinitionTranspiler >> markAsTranspiled [
 	isTranspiled := true
 ]
 
-{ #category : #'public API' }
+{ #category : #constants }
+SWClassDefinitionTranspiler >> methodBodyTranspilerClass [
+	^ self pool class methodBodyTranspilerClass
+]
+
+{ #category : #api }
 SWClassDefinitionTranspiler >> methodBodyTranspilerOf: aName is: transpiler [
 	self predefinedBody at: aName put: transpiler
 ]
@@ -76,11 +76,6 @@ SWClassDefinitionTranspiler >> predefinedBody: anObject [
 	predefinedBody := anObject
 ]
 
-{ #category : #'as yet unclassified' }
-SWClassDefinitionTranspiler >> predefinedMethodBodyTranspiler: aSelector [
-	^ self predefinedBody at: aSelector ifAbsent: [ nil ]
-]
-
 { #category : #accessing }
 SWClassDefinitionTranspiler >> predefinedSender [
 
@@ -93,7 +88,7 @@ SWClassDefinitionTranspiler >> predefinedSender: anObject [
 	predefinedSender := anObject
 ]
 
-{ #category : #'as yet unclassified' }
+{ #category : #accessing }
 SWClassDefinitionTranspiler >> predefinedSenderTranspiler: aSelector [
 	^ self predefinedSender at: aSelector ifAbsent: [ nil ]
 
@@ -108,11 +103,8 @@ SWClassDefinitionTranspiler >> putClassFooter [
 
 { #category : #'code generation' }
 SWClassDefinitionTranspiler >> putClassHeader [
-	self stream
-		put: 'class ';
-		put: targetClass name;
-		put: '{';
-		putLine
+	^ self subclassResponsibility 
+
 ]
 
 { #category : #'code generation' }
@@ -146,7 +138,7 @@ SWClassDefinitionTranspiler >> putMethodDefinition: anExpression [
 			yourself.
 	].
 
-	mbt := self class methodBodyTranspilerClass new
+	mbt := self methodBodyTranspilerClass new
 		pool: self pool;
 		stream: self stream;
 		expression: exp;
@@ -164,43 +156,19 @@ SWClassDefinitionTranspiler >> putMethodDefinition: anExpression [
 
 ]
 
-{ #category : #'as yet unclassified' }
+{ #category : #'code generation' }
 SWClassDefinitionTranspiler >> putMethodFooter: methodBodyTranspiler [
 	^ self subclassResponsibility 
 ]
 
-{ #category : #'as yet unclassified' }
+{ #category : #'code generation' }
 SWClassDefinitionTranspiler >> putMethodHeader: methodBodyTranspiler [
 	^ self subclassResponsibility 
 ]
 
-{ #category : #'as yet unclassified' }
+{ #category : #'code generation' }
 SWClassDefinitionTranspiler >> putMethods [
 	self classInfo methods do: [ :each | self putMethodDefinition: each ].
-
-]
-
-{ #category : #'as yet unclassified' }
-SWClassDefinitionTranspiler >> putPredefinedMethodBody: aMessageInfo [
-	self error; flag: #toRemove.
-	aMessageInfo ifNil: [ ^ self ].
-	(self predefinedMethodBodyTranspiler: aMessageInfo method selector) ifNotNil: [ :predef ||exp mbt|
-		exp := SWExpression new
-				pool: self pool;
-				node: aMessageInfo method sourceNode;
-				messageInfo: aMessageInfo;
-				slot: self classInfo slot copy;
-				readySlot;
-				yourself.
-		mbt := self class methodBodyTranspilerClass new
-			expression: exp;
-			pool: self pool;
-			pool: self pool;
-			yourself.
-		self putMethodHeader: mbt.
-		predef cull: mbt.
-		self putMethodFooter: mbt
-	]
 
 ]
 
@@ -220,7 +188,7 @@ SWClassDefinitionTranspiler >> stream: anObject [
 	stream := anObject
 ]
 
-{ #category : #'public API' }
+{ #category : #api }
 SWClassDefinitionTranspiler >> transpile [
 	self markAsTranspiled.
 	self targetClass isInstanceSide ifTrue: [

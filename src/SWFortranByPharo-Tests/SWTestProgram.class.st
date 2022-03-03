@@ -287,7 +287,7 @@ SWTestProgram >> _0380_ensure_shortcircuit [
 	^ 'false'
 ]
 
-{ #category : #'as yet unclassified' }
+{ #category : #'tests - source' }
 SWTestProgram >> _0390_opBinaries: a [
 	^ a + 100 * 200 - 300 / 400
 ]
@@ -311,7 +311,7 @@ SWTestProgram >> _0410_call_Transcript [
 		cr
 ]
 
-{ #category : #'as yet unclassified' }
+{ #category : #'tests - source' }
 SWTestProgram >> _0420_closure_local_variable [
 
 	[ |hoge|
@@ -321,7 +321,7 @@ SWTestProgram >> _0420_closure_local_variable [
 	]
 ]
 
-{ #category : #'as yet unclassified' }
+{ #category : #'tests - source' }
 SWTestProgram >> _0430_ifTrue_and_local_variable [
 	|outervar|
 	outervar := true.
@@ -332,7 +332,7 @@ SWTestProgram >> _0430_ifTrue_and_local_variable [
 	^ outervar
 ]
 
-{ #category : #'as yet unclassified' }
+{ #category : #'tests - source' }
 SWTestProgram >> _0440_locals: arg1 [
 	|outer1|
 	outer1 := true.
@@ -344,7 +344,7 @@ SWTestProgram >> _0440_locals: arg1 [
 	]
 ]
 
-{ #category : #'as yet unclassified' }
+{ #category : #'tests - source' }
 SWTestProgram >> _0450_locals2: arg1 [
 	|outer0 outer1 outer2 outer3|
 	outer1 := true.
@@ -356,7 +356,7 @@ SWTestProgram >> _0450_locals2: arg1 [
 	] value: 345.
 ]
 
-{ #category : #'as yet unclassified' }
+{ #category : #'tests - source' }
 SWTestProgram >> _0460_access_to_local_variables [
 	|tp|
 	tp := SWTestProgram new.
@@ -364,7 +364,7 @@ SWTestProgram >> _0460_access_to_local_variables [
 	^ tp var1
 ]
 
-{ #category : #'as yet unclassified' }
+{ #category : #'tests - source' }
 SWTestProgram >> _0470_user_specified_variable_type [
 
 	| tmp1 |
@@ -374,43 +374,43 @@ SWTestProgram >> _0470_user_specified_variable_type [
 	^ tmp1 * 2.23620679
 ]
 
-{ #category : #'as yet unclassified' }
+{ #category : #'tests - source' }
 SWTestProgram >> _1010_SWShellEnvironemt_default [
 	^ SWShellEnvironment default
 
 ]
 
-{ #category : #'as yet unclassified' }
+{ #category : #'tests - source' }
 SWTestProgram >> _1020_SWShellEnvironemtLocalDirectory [
 	^ SWShellEnvironment default localDirectory
 
 ]
 
-{ #category : #'as yet unclassified' }
+{ #category : #'tests - source' }
 SWTestProgram >> _1030_SWShell_class_execute [
 	^ SWShell execute: 'echo hoge'
 
 ]
 
-{ #category : #'as yet unclassified' }
+{ #category : #'tests - source' }
 SWTestProgram >> _1040_TestCase [
 	^ TestCase selector: 'hoge'
 ]
 
-{ #category : #'as yet unclassified' }
+{ #category : #'tests - source' }
 SWTestProgram >> _1050_ZnServerClass_default [
 
 	ZnServer startDefaultOn: 50000.
 	^ ZnServer default
 ]
 
-{ #category : #'as yet unclassified' }
+{ #category : #'tests - source' }
 SWTestProgram >> _1060_SWServerClass_starton [
 
 	^ SWServer start
 ]
 
-{ #category : #'as yet unclassified' }
+{ #category : #'tests - source' }
 SWTestProgram >> _1070_SWShellEnvironment [
 	^ self assert: (SWShellEnvironment default localDirectory fullName endsWith: 'hoge')
 ]

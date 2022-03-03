@@ -28,6 +28,7 @@ class SWTestProgram extends PharoObject {
     }
     var1_(anObject){
         this._var1 = anObject;
+        return this;
     }
 }
 var tp = null;

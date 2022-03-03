@@ -7,31 +7,6 @@ Class {
 	#category : #'SWFortranByPharo-Transpiler-JS'
 }
 
-{ #category : #accessing }
-SWMBTofJS class >> classTranspilerClass [
-	^ SWCDTofJS
-]
-
-{ #category : #constants }
-SWMBTofJS class >> mangleClass [
-	^ SWMangleOfJS 
-]
-
-{ #category : #'as yet unclassified' }
-SWMBTofJS class >> methodDefinitionTranspilerClass [
-	^ SWMDTofJS
-]
-
-{ #category : #'as yet unclassified' }
-SWMBTofJS class >> poolClass [
-	^ SWPoolOfJS
-]
-
-{ #category : #accessing }
-SWMBTofJS class >> senderTranspilerClass [
-	^ SWSTofJSOld
-]
-
 { #category : #'as yet unclassified' }
 SWMBTofJS >> atBoolean: trueOrFalse [
 	self put: (trueOrFalse ifTrue: [ 'true' ] ifFalse: [ 'false' ])
@@ -68,6 +43,7 @@ SWMBTofJS >> atCascade: aCascadeNode [
 
 { #category : #accessing }
 SWMBTofJS >> atClosure: aBlockNode [
+	self halt.
 	self isExpression: false.
 	self putClosure
 
@@ -79,14 +55,6 @@ SWMBTofJS >> atSymbol: aSymbol [
 		put: '"';
 		put: aSymbol asString;
 		put: '"'
-]
-
-{ #category : #accessing }
-SWMBTofJS >> mangledName [
-	self halt; flag: #toRewrite.
-"
-	^ self class mangleClass safeSelectorNameOf: (method class = ByteSymbol ifTrue: [ method ] ifFalse: [ self method selector ])
-"
 ]
 
 { #category : #'as yet unclassified' }
@@ -140,27 +108,6 @@ SWMBTofJS >> putBlock [
 ]
 
 { #category : #'code generation' }
-SWMBTofJS >> putBlock: aBlock [
-	self halt; flag: #toRewrite.
-
-	self
-		put: '{';
-		cr;
-		incIndent.
-	aBlock temporaries do: [ :each |
-		self putVariableDeclarationOf: each name
-	].
-	self 
-		withoutMessageNestDo: [
-			self putSequence: aBlock body
-		];
-		decIndent;
-		put: '}';
-		preventStatementDelimiter
-
-]
-
-{ #category : #'code generation' }
 SWMBTofJS >> putBlockAsExpression: aBlock [
 	self halt; flag: #toRewrite.
 
@@ -177,34 +124,6 @@ SWMBTofJS >> putBlockAsExpression: aBlock [
 { #category : #'as yet unclassified' }
 SWMBTofJS >> putBoolean: trueOrFalse [
 	self put: (trueOrFalse ifTrue: [ 'true' ] ifFalse: [ 'false' ])
-]
-
-{ #category : #'code generation' }
-SWMBTofJS >> putCascade: aRBCascadeNode [
-	|variables receiver|
-	self halt; flag: #toRewrite.
-
-	(self trySimpleCascade: aRBCascadeNode) ifTrue: [ ^ self ].
-
-	variables := (Set newFrom: aRBCascadeNode allVariables) asArray.
-	self put: '(function(_receiver_) {'; cr.
-	self stream incIndent.
-	receiver := RBVariableNode named: #_receiver_.
-	aRBCascadeNode messages doWithIndex: [ :msgNode :idx |
-		idx = aRBCascadeNode messages size ifTrue: [
-			self put: 'return '
-		].
-		self
-			putMessage: msgNode withReceiver: receiver;
-			putStatementDelimiter;
-			cr
-	].
-	self stream decIndent.
-	self put: '})('.
-	self withoutMessageNestDo: [
-		self << aRBCascadeNode receiver
-	]; put: ')'
-	
 ]
 
 { #category : #'code generation' }
@@ -229,14 +148,6 @@ SWMBTofJS >> putClosure [
 	self putStatementDelimiter; cr; decIndent; put: '}'
 	
 
-]
-
-{ #category : #streaming }
-SWMBTofJS >> putFilenameOn: aStream [
-	self halt; flag: #toRewrite.
-	aStream << 'cache/'.
-	super putBasenameOn: aStream.
-	aStream << '.mjs'
 ]
 
 { #category : #'as yet unclassified' }
@@ -485,24 +396,6 @@ SWMBTofJS >> putOpBinary: aNode [
 ]
 
 { #category : #'code generation' }
-SWMBTofJS >> putOrdinaryCallee: aNode [
-	self halt; flag: #toRewrite.
-	self stream log.
-	self methodClass ifNil: [ ^ super putOrdinaryCallee: aNode ].
-	self methodClass isClassSide ifFalse: [ ^ super putOrdinaryCallee: aNode ].
-	self methodClass = self receiverClass ifTrue: [ ^ super putOrdinaryCallee: aNode ].
-
-	self
-		put: self methodClass instanceSide name;
-		putClassAccessor;
-		put: (self class mangleClass mangle: self);
-		putClassAccessor;
-		put: 'call';
-		putArguments: ({RBVariableNode named: self receiverClass instanceSide name}, aNode arguments)
-
-]
-
-{ #category : #'code generation' }
 SWMBTofJS >> putOrdinaryMessage [
 	|methodClass receiverClass|
 
@@ -511,7 +404,7 @@ SWMBTofJS >> putOrdinaryMessage [
 	methodClass ifNil: [ ^ super putOrdinaryMessage ].
 	methodClass isInstanceSide ifTrue: [ ^ super putOrdinaryMessage ].
 
-	receiverClass := self expression receiverClass.
+	receiverClass := self receiverClass.
 	methodClass = receiverClass ifTrue: [ ^ super putOrdinaryMessage ].
 
 	self
@@ -540,15 +433,6 @@ SWMBTofJS >> putReturnSelf [
 ]
 
 { #category : #'code generation' }
-SWMBTofJS >> putReturnThisClassName [
-	self halt; flag: #toRewrite.
-	self
-		put: 'return this.name';
-		putStatementDelimiter;
-		cr
-]
-
-{ #category : #'code generation' }
 SWMBTofJS >> putSelf [
 	self halt; flag: #toRewrite.
 
@@ -557,12 +441,6 @@ SWMBTofJS >> putSelf [
 
 { #category : #'code generation' }
 SWMBTofJS >> putSelfDeclaration [
-	self put: 'var self = this;'; cr
-]
-
-{ #category : #'code generation' }
-SWMBTofJS >> putSelfDefinition [
-	self halt; flag: #toRewrite.
 	self put: 'var self = this;'; cr
 ]
 
@@ -577,7 +455,7 @@ SWMBTofJS >> putStdOut [
 { #category : #'as yet unclassified' }
 SWMBTofJS >> putVariable [
 	self node name = 'self' ifTrue: [ |receiverClass|
-		receiverClass := self expression receiverClass.
+		receiverClass := self receiverClass.
 		receiverClass isClassSide ifTrue: [
 			^ self put: receiverClass instanceSide name
 		]
@@ -586,7 +464,7 @@ SWMBTofJS >> putVariable [
 		^ self put: 'super'
 	].
 	(self expression containsAsMember: self node name) ifTrue: [|rClass|
-		rClass := self expression receiverClass.
+		rClass := self receiverClass.
 		self
 			put: (rClass isInstanceSide ifTrue: [ 'this' ] ifFalse: [ rClass instanceSide name ]);
 			putClassAccessor; put: '_'
@@ -617,27 +495,4 @@ SWMBTofJS >> put_upToEnd: aNode [
 		];
 		putClassAccessor;
 		put: 'read()'
-]
-
-{ #category : #'code generation' }
-SWMBTofJS >> trySimpleCascade: aRBCascadeNode [
-	self halt; flag: #toRewrite.
-
-	aRBCascadeNode receiver class = RBVariableNode ifFalse: [ ^ false ].
-	aRBCascadeNode isExpression ifTrue: [
-		self put: '('.
-		aRBCascadeNode messages do: [ :each |
-			self << each
-		] separatedBy: [ self put: ', ' ].
-		self put: ')'.
-	] ifFalse: [
-		aRBCascadeNode messages do: [ :each |
-			self putStatement: each
-		].
-		self
-			preventStatementDelimiter;
-			preventNewline
-	].
-	^ true
-
 ]

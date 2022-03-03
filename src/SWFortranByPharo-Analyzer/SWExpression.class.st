@@ -1,5 +1,5 @@
 "
-resolve the class of a RBNode.
+this resolves the class of the result of a RBNode.
 "
 Class {
 	#name : #SWExpression,
@@ -15,7 +15,7 @@ Class {
 	#category : #'SWFortranByPharo-Analyzer-Analyzer'
 }
 
-{ #category : #adding }
+{ #category : #private }
 SWExpression >> addToSlot: aName as: aType [
 	self slot addLast: (SWVariable new
 		<< aType;
@@ -44,7 +44,7 @@ SWExpression >> atAssignTo: aLValue with: aRValue [
 
 ]
 
-{ #category : #accessing }
+{ #category : #'dispatching-callback' }
 SWExpression >> atBoolean: aBoolean [
 	self result << aBoolean class
 ]
@@ -183,7 +183,7 @@ SWExpression >> children: anObject [
 	children := anObject
 ]
 
-{ #category : #'as yet unclassified' }
+{ #category : #testing }
 SWExpression >> containsAsMember: aName [
 	self slot do: [ :each |
 		each name = 'self' ifTrue: [ ^ false ].
@@ -257,7 +257,7 @@ SWExpression >> node: anObject [
 	node := anObject
 ]
 
-{ #category : #api }
+{ #category : #modifying }
 SWExpression >> operands: operands [
 	self messageInfo operands: operands.
 	self readySlot.

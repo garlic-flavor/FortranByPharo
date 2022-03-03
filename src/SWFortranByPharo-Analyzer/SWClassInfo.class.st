@@ -1,10 +1,6 @@
 "
-SWClass represents a class in this analyzing system.
+SWClass represents a Pharo class in SWGlobal.
 
-SWClass is an argument of #initializeInstanceSideTranspiler: and #initializeClassSideTranspiler:.
-In these methods, some SWClass>>#define*** methods are called to supply informations to help analyzation and transpilation.
-
-A Writer of a transpiler, may make subclass of SWClass, and override #newTranspiler*** methods to suit.
 "
 Class {
 	#name : #SWClassInfo,
@@ -159,7 +155,7 @@ SWClassInfo >> declareMethodReturnsSecondArgument: aName [
 
 ]
 
-{ #category : #private }
+{ #category : #api }
 SWClassInfo >> decode: aSenderInfo [
 	^ self methods at: aSenderInfo ifAbsent: [
 		self predefined at: aSenderInfo method selector ifPresent: [ :pre | |messageInfo|
@@ -211,7 +207,7 @@ SWClassInfo >> predefined: anObject [
 	predefined := anObject
 ]
 
-{ #category : #removing }
+{ #category : #api }
 SWClassInfo >> remove: aSenderInfo [
 	^ self methods removeKey: aSenderInfo ifAbsent: [ nil ]
 ]

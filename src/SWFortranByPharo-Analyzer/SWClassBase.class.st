@@ -13,7 +13,7 @@ Class {
 
 { #category : #accessing }
 SWClassBase >> pool [
-	"A SWPool object"
+	"A SWPoolBase object"
 	^ pool
 ]
 

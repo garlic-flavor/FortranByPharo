@@ -1,5 +1,6 @@
 "
 I have an information about a variable.
+
 about, its type, const or not, and other properties.
 "
 Class {

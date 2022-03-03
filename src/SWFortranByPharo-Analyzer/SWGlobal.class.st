@@ -33,13 +33,13 @@ SWGlobal class >> unresolvedSelectorKey [
 
 ]
 
-{ #category : #accessing }
+{ #category : #'dispatching-callback' }
 SWGlobal >> atGlobalAccess [
 	(self haltList includes: self class globalAccessKey) ifTrue: [ self halt ].
 
 ]
 
-{ #category : #accessing }
+{ #category : #'dispatching-callback' }
 SWGlobal >> atPragma [
 	(self haltList includes: self class pragmaKey) ifTrue: [ self halt ]
 ]
@@ -54,8 +54,8 @@ SWGlobal >> decode: aSenderInfo [
 
 { #category : #api }
 SWGlobal >> decode: aSelector with: operands [
-	(self haltList includes: aSelector) ifTrue: [ self halt ].
 	^ self class search: aSelector in: operands first value ifFound: [ :foundMethod |
+		(self haltList includes: aSelector) ifTrue: [ self halt ].
 		(self haltList includes: foundMethod) ifTrue: [ self halt ].
 		self decode: (SWSenderInfo new
 			method: foundMethod;
@@ -180,8 +180,8 @@ SWGlobal >> decode_Magnitude: ct [
 		declareMethodAsCompareOperator: #>=;
 		declareMethodAsCompareOperator: #<=;
 		declareMethodAsCompareOperator: #>;
-		declareMethodAsCompareOperator: #<";
-		defineMethodAsCompareOperator: #="
+		declareMethodAsCompareOperator: #<;
+		declareMethodAsCompareOperator: #=
 
 ]
 
@@ -361,7 +361,7 @@ SWGlobal >> haltAtUnresolvedSelector: aBoolean [
 
 ]
 
-{ #category : #api }
+{ #category : #removing }
 SWGlobal >> remove: aSenderInfo [
 
 	^ (self getClassInfo: aSenderInfo method methodClass)

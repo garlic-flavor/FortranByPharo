@@ -13,34 +13,6 @@ Class {
 	#category : #'SWFortranByPharo-Transpiler-Common'
 }
 
-{ #category : #constants }
-SWMethodBodyTranspiler class >> mangleClass [
-	^ self subclassResponsibility 
-]
-
-{ #category : #'as yet unclassified' }
-SWMethodBodyTranspiler class >> methodDefinitionTranspilerClass [ 
-	^ self subclassResponsibility
-]
-
-{ #category : #'instance creation' }
-SWMethodBodyTranspiler class >> new: decoder [
-	^ self new
-		decoder: decoder;
-		yourself
-]
-
-{ #category : #'as yet unclassified' }
-SWMethodBodyTranspiler class >> poolClass [
-	^ SWTranspilerPool
-]
-
-{ #category : #accessing }
-SWMethodBodyTranspiler class >> senderTranspilerClass [
-	self halt; flag: #toRewrite.
-	^ SWSenderTranspiler
-]
-
 { #category : #'code generation' }
 SWMethodBodyTranspiler >> at: anObject [
 	self halt.
@@ -48,10 +20,11 @@ SWMethodBodyTranspiler >> at: anObject [
 
 { #category : #accessing }
 SWMethodBodyTranspiler >> atArray: anArrayNode [
+	self halt.
 	self putArrayHeader.
 	self children do: [ :child |
 		self transpileChild: child
-	] separatedBy: [ self putArrayHeader ].
+	] separatedBy: [ self putArraySeparator ].
 	self putArrayFooter.
 
 ]
@@ -121,7 +94,7 @@ SWMethodBodyTranspiler >> atReturn: aReturnNode [
 { #category : #'code generation' }
 SWMethodBodyTranspiler >> atSequence: aSequenceNode [
 	self halt.
-	self transpileChildrenWithDelimiter
+
 
 ]
 
@@ -201,7 +174,7 @@ SWMethodBodyTranspiler >> isExpression: anObject [
 
 { #category : #'as yet unclassified' }
 SWMethodBodyTranspiler >> mangle [
-	^ self class mangleClass mangle: self expression
+	^ self pool class mangleClass mangle: self expression
 ]
 
 { #category : #accessing }
@@ -260,20 +233,6 @@ SWMethodBodyTranspiler >> putArguments: arguments [
 
 ]
 
-{ #category : #'code generation' }
-SWMethodBodyTranspiler >> putArray: anArray [
-	self halt; flag: #toRewrite.
-
-	self put: '['.
-	anArray do: [:each |
-		self << each
-	] separatedBy: [
-		self put: ', '
-	].
-	self put: ']'.
-
-]
-
 { #category : #'as yet unclassified' }
 SWMethodBodyTranspiler >> putArrayFooter [
 	^ self subclassResponsibility 
@@ -287,14 +246,6 @@ SWMethodBodyTranspiler >> putArrayHeader [
 { #category : #'as yet unclassified' }
 SWMethodBodyTranspiler >> putArraySeparator [
 	^ self subclassResponsibility 
-]
-
-{ #category : #streaming }
-SWMethodBodyTranspiler >> putBasenameOn: aStream [
-	self halt; flag: #toRewrite.
-	aStream
-		<< self receiverClass instanceSide name;
-		<< self selector asCamelCase
 ]
 
 { #category : #'code generation' }
@@ -347,24 +298,9 @@ SWMethodBodyTranspiler >> putCode: code with: anAssociationArray [
 
 ]
 
-{ #category : #streaming }
-SWMethodBodyTranspiler >> putFilenameOn: aStream [
-	^ self subclassResponsibility 
-]
-
-{ #category : #'code generation' }
-SWMethodBodyTranspiler >> putIfFalse: aNode [
-	^ self subclassResponsibility 
-]
-
 { #category : #'as yet unclassified' }
 SWMethodBodyTranspiler >> putIfNotNilIfNil: strait [
 	^ self subclassResponsibility 
-]
-
-{ #category : #'code generation' }
-SWMethodBodyTranspiler >> putIfTrue [
-	^ self subclassResponsibility
 ]
 
 { #category : #'code generation' }
@@ -443,6 +379,7 @@ SWMethodBodyTranspiler >> putReturnSelf [
 
 { #category : #'code generation' }
 SWMethodBodyTranspiler >> putSelf [
+	self halt; flag: #toRemove.
 	^ self subclassResponsibility 
 ]
 
@@ -478,36 +415,8 @@ SWMethodBodyTranspiler >> putSequence [
 ]
 
 { #category : #'code generation' }
-SWMethodBodyTranspiler >> putSequenceWithReturn: aSequence [
-	self error; flag: #toRemove.
-	self withoutMessageNestDo: [
-		aSequence statements doWithIndex: [ :each :index |
-			((aSequence isLast: each) and: [ each class ~= RBReturnNode ]) ifTrue: [
-				self
-					node:each;
-					atReturn: self decoder;
-					putReturn: each;
-					putStatementDelimiter;
-					cr
-			] ifFalse: [
-				self putStatement: each
-			]
-		]
-	]
-]
-
-{ #category : #'code generation' }
 SWMethodBodyTranspiler >> putStatementDelimiter [
 	self stream putDelimiter
-]
-
-{ #category : #'code generation' }
-SWMethodBodyTranspiler >> putSymbol: aByteSymbol [
-	self halt; flag: #toRewrite.
-	self stream
-		put: '"';
-		put: aByteSymbol asString;
-		put: '"'
 ]
 
 { #category : #'as yet unclassified' }
@@ -528,8 +437,7 @@ SWMethodBodyTranspiler >> putYourself [
 
 { #category : #accessing }
 SWMethodBodyTranspiler >> receiverClass [
-	self error; flag: #toRemove.
-	^ self decoder receiverClass
+	^ self expression receiverClass
 ]
 
 { #category : #accessing }
@@ -592,27 +500,5 @@ SWMethodBodyTranspiler >> transpileChildren [
 	self children do: [ :child |
 		self transpileChild: child
 	].
-
-]
-
-{ #category : #'as yet unclassified' }
-SWMethodBodyTranspiler >> transpileChildrenWithDelimiter [
-	self error; flag: #toRemove.
-	self isExpression ifTrue: [
-		1 < self children size ifTrue: [ self put: '(' ].
-		self children do: [ :child |
-			self transpileChild: child
-		] separatedBy: [
-			self put: ', '; cr
-		].
-		1 < self children size ifTrue: [ self put: ')' ].
-	] ifFalse: [
-		self children do: [ :child |
-			self
-				transpileChild: child;
-				putStatementDelimiter;
-				cr
-		].
-	]
 
 ]

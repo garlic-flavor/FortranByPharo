@@ -1,5 +1,5 @@
 "
-a Stack of SWVariableTypeInfo.
+a stack of SWVariable.
 "
 Class {
 	#name : #SWSlot,
@@ -7,7 +7,7 @@ Class {
 	#category : #'SWFortranByPharo-Analyzer-Slot'
 }
 
-{ #category : #accessing }
+{ #category : #constants }
 SWSlot class >> elementClass [
 	^ SWVariable
 ]
@@ -19,7 +19,7 @@ SWSlot >> addAll: anArray [
 	]
 ]
 
-{ #category : #'instance creation' }
+{ #category : #private }
 SWSlot >> allocate: size [
 	[ self size < size ] whileTrue: [
 		self push
@@ -48,7 +48,7 @@ SWSlot >> pop [
 	^ self removeLast
 ]
 
-{ #category : #affecting }
+{ #category : #removing }
 SWSlot >> pop: itemsCount [
 	^ self removeLast: itemsCount
 ]

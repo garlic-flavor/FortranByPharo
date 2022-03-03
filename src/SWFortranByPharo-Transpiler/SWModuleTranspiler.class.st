@@ -26,28 +26,8 @@ SWModuleTranspiler class >> poolClass [
 ]
 
 { #category : #accessing }
-SWModuleTranspiler >> basename [
-	self halt; flag: #toRewrite.
-	^ String streamContents: [ :s | self payload putBasenameOn: s ]
-]
-
-{ #category : #accessing }
 SWModuleTranspiler >> contents [
 	^ self stream contents
-]
-
-{ #category : #api }
-SWModuleTranspiler >> decode [
-	self decoder pool addInitializerIn: self decoder receiverClass.
-	self decoder decode.
-
-]
-
-{ #category : #'public API' }
-SWModuleTranspiler >> decode: aSelector with: args [
-	self halt; flag: #toRewrite.
-
-	^ self pool newSenderOf: aSelector super: false with: (SWSlotOld newFrom: args)
 ]
 
 { #category : #accessing }
@@ -60,24 +40,12 @@ SWModuleTranspiler >> global [
 	^ self pool global
 ]
 
-{ #category : #accessing }
-SWModuleTranspiler >> haltAt: sender [
-	self halt; flag: #toRewrite.
-	self pool haltAt: sender
-]
-
 { #category : #'public API' }
 SWModuleTranspiler >> import: anArray from: basename [
 	self mainTranspiler
 		putImport: anArray from: basename;
 		putStatementDelimiter;
 		cr
-]
-
-{ #category : #accessing }
-SWModuleTranspiler >> logger [
-	self halt; flag: #toRewrite.
-	^ self payload logger
 ]
 
 { #category : #accessing }
@@ -137,24 +105,6 @@ SWModuleTranspiler >> senderInfo [
 	^ self mainTranspiler expression senderInfo
 ]
 
-{ #category : #private }
-SWModuleTranspiler >> solveDependencies [
-	self halt; flag: #toRewrite.
-	self solveDependencies: self payload receiverClass
-
-]
-
-{ #category : #private }
-SWModuleTranspiler >> solveDependencies: aClass [
-	|tClass solver|
-	self halt; flag: #toRewrite.
-	solver := #solveDependenciesUsing:.
-	tClass := aClass instanceSide.
-	(tClass respondsTo: solver) ifTrue: [
-		tClass perform: solver with: self
-	]
-]
-
 { #category : #accessing }
 SWModuleTranspiler >> stream [
 	^ stream ifNil: [ stream := SWTranspilerStream  new ]
@@ -169,7 +119,7 @@ SWModuleTranspiler >> stream: anObject [
 { #category : #'public API' }
 SWModuleTranspiler >> transpile [
 	|rClass|
-	rClass := self mainTranspiler expression receiverClass instanceSide.
+	rClass := self mainTranspiler receiverClass instanceSide.
 	(rClass respondsTo: #solveDependencies:) ifTrue: [
 		rClass solveDependencies: self
 	].

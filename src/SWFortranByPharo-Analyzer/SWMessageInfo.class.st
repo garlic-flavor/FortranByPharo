@@ -1,5 +1,5 @@
 "
-SWSender is a selector with its operands.
+operands and its result of a message.
 "
 Class {
 	#name : #SWMessageInfo,

@@ -1,5 +1,5 @@
 "
-I generate mangled name from a class.
+I generate mangled name from a SWSenderInfo.
 "
 Class {
 	#name : #SWMangle,
