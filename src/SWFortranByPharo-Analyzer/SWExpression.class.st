@@ -94,9 +94,9 @@ SWExpression >> atMessage: aMessageNode [
 	self decodeChildren.
 	(aMessageNode selector = #declare:as: and: [ self children first result = SWType class ])ifTrue: [
 		self userSpecifyVariableType: aMessageNode
-	] ifFalse: [
-		self atOrdinaryMessage: aMessageNode
-	]
+	].
+	self atOrdinaryMessage: aMessageNode
+
 ]
 
 { #category : #'dispatching-callback' }

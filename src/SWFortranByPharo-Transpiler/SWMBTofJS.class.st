@@ -43,7 +43,6 @@ SWMBTofJS >> atCascade: aCascadeNode [
 
 { #category : #accessing }
 SWMBTofJS >> atClosure: aBlockNode [
-	self halt.
 	self isExpression: false.
 	self putClosure
 
@@ -151,6 +150,24 @@ SWMBTofJS >> putClosure [
 ]
 
 { #category : #'as yet unclassified' }
+SWMBTofJS >> putEnsure [
+	self isExpression ifTrue: [
+		self put: 'function() { try { '; cr; incIndent; put: 'return '.
+		(self child: self children first)
+			isExpression: true;
+			putBlock.
+		self putStatementDelimiter; cr; decIndent; put: '} finally {'; cr; incIndent.
+		(self child: self children second)
+			isExpression: false;
+			putBlock.
+		self putStatementDelimiter; cr; decIndent; put: '}}()'
+	] ifFalse: [
+		self halt.
+	]
+
+]
+
+{ #category : #'as yet unclassified' }
 SWMBTofJS >> putIfNotNil: strait [
 	self isExpression ifTrue: [|conditionNode|
 		conditionNode := self children first node.
@@ -172,7 +189,6 @@ SWMBTofJS >> putIfNotNil: strait [
 		]
 
 	] ifFalse: [
-		self halt.
 		self put: 'if('.
 		strait ifFalse: [ self put: '!' ].
 		(self child: self children first)
@@ -331,58 +347,6 @@ SWMBTofJS >> putOnDo [
 		self decIndent; put: '}'; preventStatementDelimiter 
 	]
 
-"
-	|receiver|
-	receiver := aNode receiver.
-	aNode isExpression ifTrue: [	
-		self halt; flag: #toImplement.
-		receiver := receiver copy.
-		receiver body addReturn.
-	].
-
-	self
-		put: 'try';
-		<< receiver;
-		put: 'catch'.
-	aNode arguments second arguments ifNotEmpty: [
-		self putArguments: aNode arguments second arguments
-	].
-	self
-		<< aNode arguments second		
-"
-"
-	aNode isExpression ifTrue: [
-		transpiler put: '(function(){'
-	].
-	transpiler
-		put: 'try {'; cr;
-		incIndent.
-	aNode isExpression ifTrue: [
-		transpiler putSequenceWithReturn: aNode receiver
-	] ifFalse: [
-		transpiler putSequence: aNode receiver
-	].
-	transpiler
-		decIndent;
-		put: '} catch'.
-	(aNode arguments at: 2) arguments ifNotEmpty: [
-		transpiler putArguments: (aNode arguments at: 2) arguments
-	].
-	transpiler
-		put: ' {'; cr;
-		incIndent.
-	aNode isExpression ifTrue: [
-		transpiler putSequenceWithReturn: (aNode arguments at: 2)
-	] ifFalse: [
-		transpiler putSequence: (aNode arguments at: 2)
-	].
-	transpiler
-		decIndent;
-		put: '}'.
-	aNode isExpression ifTrue: [
-		transpiler put: '})()'
-	]
-"
 ]
 
 { #category : #'code generation' }

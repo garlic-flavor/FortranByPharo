@@ -7,23 +7,6 @@ Class {
 	#category : #'SWFortranByPharo-ClientServer-Shell'
 }
 
-{ #category : #initialization }
-SWShell class >> decode_OSEnvironmentClass: transpiler [
-	transpiler
-		declareMethodReturnsReceiversInstance: #current
-]
-
-{ #category : #initialization }
-SWShell class >> decode_OSSUnixSubprocess: transpiler [
-	transpiler
-		declareMethod: #createADefaultWriteStream asReturn: WriteStream";
-		declareMethod: #shellCommand asReturn: String;
-		declareMethodReturnsReceiver: #shell:command:;
-		declareMethod: #waitForExit asReturn: SmallInteger;
-		declareMethod: #isSuccess asReturn: Boolean;
-		declareMethodReturnsReceiver: #initialize"
-]
-
 { #category : #execution }
 SWShell class >> execute: command [
 	"I execute 'exe' with 'list', then return its result."
@@ -65,7 +48,7 @@ SWShell class >> filePathOf: aName [
 	|path|
 	path := SWShellEnvironment default localDirectory / aName.
 	(SWShellEnvironment default localDirectory contains: path) ifFalse: [
-		self error: aName, ' is in out of the local directory.'
+		self error: aName, ' is out of the local directory.'
 	].
 	path parent ensureCreateDirectory.
 	^ path
@@ -126,9 +109,26 @@ SWShell class >> put: target contents: contents [
 	^ file
 ]
 
+{ #category : #initialization }
+SWShell class >> setUpTranspiler: pool [
+	SWShellEnvironment setUpTranspiler: pool.
+
+	(pool global getClassInfo: OSEnvironment class)
+		declareMethodReturnsReceiversInstance: #current.
+
+	(pool global getClassInfo: OSSUnixSubprocess)
+		declareMethod: #createADefaultWriteStream asReturn: WriteStream";
+		declareMethod: #shellCommand asReturn: String;
+		declareMethodReturnsReceiver: #shell:command:;
+		declareMethod: #waitForExit asReturn: SmallInteger;
+		declareMethod: #isSuccess asReturn: Boolean;
+		declareMethodReturnsReceiver: #initialize"
+]
+
 { #category : #'as yet unclassified' }
-SWShell class >> solveDependenciesUsing: transpiler [
-	transpiler
+SWShell class >> solveDependencies: mt [
+	SWShellEnvironment solveDependencies: mt.
+	mt
 		transpile: SWShellEnvironment;
 		import: #(OSSUnixSubprocess) from: 'OSSUnixSubprocess'
 ]

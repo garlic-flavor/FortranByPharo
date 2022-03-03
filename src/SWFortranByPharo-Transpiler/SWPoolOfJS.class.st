@@ -50,13 +50,23 @@ SWPoolOfJS >> transpile_Collection: cdt [
 ]
 
 { #category : #'as yet unclassified' }
+SWPoolOfJS >> transpile_FileLocator: ctd [
+	ctd
+		senderTranspilerOf: #/ is: [ :mbt |
+			mbt putMessageWithSelector: #joinPath_
+		]
+]
+
+{ #category : #'as yet unclassified' }
+SWPoolOfJS >> transpile_PositionableStream: cdt [
+	cdt
+		senderTranspilerOf: #upToEnd is: [ :mbt | mbt putMessageWithSelector: 'read' ]
+]
+
+{ #category : #'as yet unclassified' }
 SWPoolOfJS >> transpile_String: cdt [
 	cdt
-		senderTranspilerOf: #beginsWith: is: [ :mbt |
-			mbt putMessageWithSelector: 'startsWith'
-		];
-		senderTranspilerOf: #endsWith: is: [ :mbt |
-			mbt  putMessageWithSelector: 'endsWith'
-		]
-
+		senderTranspilerOf: #beginsWith: is: [ :mbt | mbt putMessageWithSelector: 'startsWith' ];
+		senderTranspilerOf: #endsWith: is: [ :mbt | mbt  putMessageWithSelector: 'endsWith' ];
+		senderTranspilerOf: #, is: [ :mbt | mbt putOpBinaryWith: #+ ]
 ]

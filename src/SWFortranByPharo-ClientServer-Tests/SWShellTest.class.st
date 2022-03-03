@@ -3,7 +3,7 @@ A SWShellTest is a test class for testing the behavior of SWShell
 "
 Class {
 	#name : #SWShellTest,
-	#superclass : #SWTestRunner,
+	#superclass : #SWTestRunnerJS,
 	#category : #'SWFortranByPharo-ClientServer-Tests-Shell'
 }
 
@@ -14,23 +14,28 @@ SWShellTest class >> go [
 ]
 
 { #category : #'as yet unclassified' }
-SWShellTest class >> moduleTranspilerClass [
-	^ SWMTofJS
+SWShellTest class >> setUpTranspiler: mt [
+	SWShell setUpTranspiler: mt.
+	super setUpTranspiler: mt
+
 ]
 
 { #category : #'as yet unclassified' }
-SWShellTest class >> solveDependenciesUsing: transpiler [
-	super solveDependenciesUsing: transpiler.
-	transpiler
-		transpile: SWShell
+SWShellTest class >> solveDependencies: mt [
+	SWShell solveDependencies: mt.
+	mt transpile: SWShell.
+	super solveDependencies: mt.
+
 ]
 
 { #category : #building }
 SWShellTest class >> tryBuild [
 	<script>
-	|mt|
-	mt := self newModuleTranspiler.
-	mt transpile inspect
+	self newModuleTranspiler.
+
+	self build.
+	self inspectResult.
+
 ]
 
 { #category : #tests }
@@ -44,5 +49,5 @@ SWShellTest >> testExecution [
 { #category : #tests }
 SWShellTest >> testFilePathOf [
 
-	self assert: (SWShell filePathOf: '/ruby') basename equals: 'ruby'
+	self assert: (SWShell filePathOf: 'script') basename equals: 'script'
 ]

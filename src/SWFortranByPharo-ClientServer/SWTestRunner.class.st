@@ -16,27 +16,6 @@ SWTestRunner class >> build [
 
 ]
 
-{ #category : #initialization }
-SWTestRunner class >> decode_TestAsserter: ct [
-	self error; flag: #toRemove.
-	ct
-		declareMethodReturnsReceiver: #assert:description:resumable:
-]
-
-{ #category : #'as yet unclassified' }
-SWTestRunner class >> decode_receiver: ct [
-	self error; flag: #toRemove.
-	self methodDict values select: [ :m | m protocol beginsWith: 'test' ] thenDo: [ :m |
-		ct pool decode: (SWSenderInfo new
-			method: m;
-			operands: { self };
-			yourself).
-	].
-	ct pool decode: #setUp with: { self }.
-	ct pool decode: #tearDown with: { self }.
-
-]
-
 { #category : #running }
 SWTestRunner class >> go [
 	|result|
@@ -87,23 +66,6 @@ SWTestRunner class >> runAllTests [
 ]
 
 { #category : #initialization }
-SWTestRunner class >> setUpDecoder: global [
-	self error; flag: #toRemove.
-	(global getClassInfo: TestAsserter)
-		declareMethodReturnsReceiver: #assert:description:resumable:.
-
-	self methodDict values select: [ :m | m protocol beginsWith: 'test' ] thenDo: [ :m |
-		global decode: (SWSenderInfo new
-			method: m;
-			operands: { self };
-			yourself).
-	].
-	global decode: #setUp with: { self }.
-	global decode: #tearDown with: { self }.
-
-]
-
-{ #category : #initialization }
 SWTestRunner class >> setUpTranspiler: mt [
 	(mt global getClassInfo: TestAsserter)
 		declareMethodReturnsReceiver: #assert:description:resumable:.
@@ -133,58 +95,18 @@ SWTestRunner class >> setUpTranspiler: mt [
 ]
 
 { #category : #private }
-SWTestRunner class >> solveDependencies: pool [
-	pool global decode: #setUp with: { self }.
-	pool global decode: #tearDown with: { self }.
-	pool transpile: TestCase.
+SWTestRunner class >> solveDependencies: mt [
+	mt global decode: #setUp with: { self }.
+	mt global decode: #tearDown with: { self }.
+	mt transpile: TestCase.
+	mt transpile: SWTestRunner.
 ]
 
-{ #category : #'as yet unclassified' }
-SWTestRunner class >> solveDependenciesUsing: pool [
-	self error; flag: #toRemove.
-	(pool global getClassInfo: TestAsserter)
-		declareMethodReturnsReceiver: #assert:description:resumable:.
-
-	self methodDict values select: [ :m | m protocol beginsWith: 'test' ] thenDo: [ :m |
-		pool global decode: (SWSenderInfo new
-			method: m;
-			operands: { self };
-			yourself).
-	].
-	pool global decode: #setUp with: { self }.
-	pool global decode: #tearDown with: { self }.
-
-"
-	ctd
-		methodBodyTranspilerOf: #allTestSelectors is: [ :mbt |
-			mbt putReturnKeyword; put: ' '; putArrayHeader.
-			(self methodDict values select: [ :m | m category beginsWith: 'test' ]) do: [ :each |
-				mbt atString: each selector
-			] separatedBy: [ mbt putArraySeparator ].
-			mbt putArrayFooter; putStatementDelimiter; cr
-		]
-"
-	pool transpile: TestCase.
-
-	(pool getClassInfo: SWTestRunner class)
-		methodBodyTranspilerOf: #name is: [ :mbt |
-			mbt putReturnKeyword; put: ' "'; put: self name; put: '"'; putStatementDelimiter; cr
-		].
-
-
-]
-
-{ #category : #'as yet unclassified' }
-SWTestRunner class >> transpile_TestCaseClass: ctd [
-	self error; flag: #toRemove.
-	ctd
-		methodBodyTranspilerOf: #allTestSelectors is: [ :mbt |
-			mbt putReturnKeyword; put: ' '; putArrayHeader.
-			(self methodDict values select: [ :m | m category beginsWith: 'test' ]) do: [ :each |
-				mbt atString: each selector
-			] separatedBy: [ mbt putArraySeparator ].
-			mbt putArrayFooter; putStatementDelimiter; cr
-		]
+{ #category : #building }
+SWTestRunner class >> tryBuild [
+	self newModuleTranspiler.
+	self build.
+	self inspectResult.
 ]
 
 { #category : #running }

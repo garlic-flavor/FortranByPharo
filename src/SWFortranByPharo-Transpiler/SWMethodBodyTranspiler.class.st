@@ -20,7 +20,6 @@ SWMethodBodyTranspiler >> at: anObject [
 
 { #category : #accessing }
 SWMethodBodyTranspiler >> atArray: anArrayNode [
-	self halt.
 	self putArrayHeader.
 	self children do: [ :child |
 		self transpileChild: child
@@ -53,6 +52,11 @@ SWMethodBodyTranspiler >> atClosure: aBlockNode [
 	^ self subclassResponsibility 
 ]
 
+{ #category : #accessing }
+SWMethodBodyTranspiler >> atFloat: aFloat [
+	self put: aFloat asString
+]
+
 { #category : #'code generation' }
 SWMethodBodyTranspiler >> atInteger: anInteger [
 	self put: anInteger asString
@@ -60,7 +64,7 @@ SWMethodBodyTranspiler >> atInteger: anInteger [
 
 { #category : #accessing }
 SWMethodBodyTranspiler >> atMessage: aMessageNode [
-	(self pool haltList contains: aMessageNode selector) ifTrue: [ self halt ].
+	(self pool haltList includes: aMessageNode selector) ifTrue: [ self halt ].
 	(self pool predefinedSenderTranspiler: self expression senderInfo) ifNotNil: [ :predefined |
 		predefined value: self
 	] ifNil: [
@@ -108,7 +112,7 @@ SWMethodBodyTranspiler >> atString: aString [
 
 { #category : #accessing }
 SWMethodBodyTranspiler >> atVariable: aVariableNode [
-	(self pool haltList contains: aVariableNode name) ifTrue: [ self halt ].
+	(self pool haltList includes: aVariableNode name) ifTrue: [ self halt ].
 
 	aVariableNode parent class = RBMethodNode ifTrue: [ ^self ].
 	aVariableNode parent class = RBSequenceNode ifTrue: [
@@ -299,6 +303,11 @@ SWMethodBodyTranspiler >> putCode: code with: anAssociationArray [
 ]
 
 { #category : #'as yet unclassified' }
+SWMethodBodyTranspiler >> putEnsure [
+	^ self subclassResponsibility 
+]
+
+{ #category : #'as yet unclassified' }
 SWMethodBodyTranspiler >> putIfNotNilIfNil: strait [
 	^ self subclassResponsibility 
 ]
@@ -340,10 +349,16 @@ SWMethodBodyTranspiler >> putOnDo [
 
 { #category : #'code generation' }
 SWMethodBodyTranspiler >> putOpBinary [
+	self putOpBinaryWith: self node selector
+
+]
+
+{ #category : #'code generation' }
+SWMethodBodyTranspiler >> putOpBinaryWith: anOp [
 	self
 		transpileChildWithBracket: self children first;
 		put: ' ';
-		put: self node selector;
+		put: anOp;
 		put: ' ';
 		transpileChildWithBracket: self children second
 
@@ -395,7 +410,7 @@ SWMethodBodyTranspiler >> putSequence [
 		1 < self children size ifTrue: [ self put: '(' ].
 		self children allButLastDo: [ :child |
 			(self child: child)
-				isExpression: false;
+				isExpression: true;
 				transpile.
 			self put: ', '; cr
 		].

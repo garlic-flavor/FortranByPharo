@@ -75,7 +75,8 @@ SWTranspilerPool >> transpile_Behavior: ct [
 { #category : #initialization }
 SWTranspilerPool >> transpile_BlockClosure: ct [
 	ct
-		senderTranspilerOf: #on:do: is: [ :bt | bt putOnDo ]
+		senderTranspilerOf: #on:do: is: [ :bt | bt putOnDo ];
+		senderTranspilerOf: #ensure: is: [ :bt | bt putEnsure ]
 ]
 
 { #category : #initialization }
@@ -108,16 +109,16 @@ SWTranspilerPool >> transpile_Number: ct [
 { #category : #initialization }
 SWTranspilerPool >> transpile_Object: ct [
 	ct
-		senderTranspilerOf: #yourself is: [ :transpiler |
-			transpiler putYourself
-		]
+		senderTranspilerOf: #yourself is: [ :mbt |	mbt putYourself ]
+
 ]
 
 { #category : #initialization }
 SWTranspilerPool >> transpile_ProtoObject: ct [
 	ct
 		senderTranspilerOf: #ifNotNil:ifNil: is: [ :bt | bt putIfNotNilIfNil: true ];
-		senderTranspilerOf: #ifNil: is: [ :bt | bt putIfNotNil: false ]
+		senderTranspilerOf: #ifNil: is: [ :bt | bt putIfNotNil: false ];
+		senderTranspilerOf: #ifNotNil: is: [ :bt | bt putIfNotNil: true ]
 ]
 
 { #category : #api }

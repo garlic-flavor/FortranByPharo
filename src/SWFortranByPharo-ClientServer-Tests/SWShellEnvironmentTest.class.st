@@ -3,7 +3,7 @@ A SWShellEnvironmentTest is a test class for testing the behavior of SWShellEnvi
 "
 Class {
 	#name : #SWShellEnvironmentTest,
-	#superclass : #SWTestRunner,
+	#superclass : #SWTestRunnerJS,
 	#category : #'SWFortranByPharo-ClientServer-Tests-Shell'
 }
 
@@ -13,28 +13,10 @@ SWShellEnvironmentTest class >> go [
 	super go
 ]
 
-{ #category : #'as yet unclassified' }
-SWShellEnvironmentTest class >> moduleTranspilerClass [
-	^ SWMTofJS
-]
-
-{ #category : #'as yet unclassified' }
-SWShellEnvironmentTest class >> projectRunnerClass [
-	^ SWPRofJS
-]
-
-{ #category : #initialization }
-SWShellEnvironmentTest class >> setUpDecoder: global [
-	self error; flag: #toRemove.
-	SWShellEnvironment setUpDecoder: global.
-	super setUpDecoder: global.
-
-]
-
 { #category : #initialization }
 SWShellEnvironmentTest class >> setUpTranspiler: pool [
 	SWShellEnvironment setUpTranspiler: pool.
-	super setUpTranspiler: pool.
+	super setUpTranspiler: pool
 
 ]
 
@@ -46,21 +28,10 @@ SWShellEnvironmentTest class >> solveDependencies: mt [
 
 ]
 
-{ #category : #'as yet unclassified' }
-SWShellEnvironmentTest class >> solveDependenciesUsing: transpiler [
-	self error; flag: #toRemove.
-	super solveDependenciesUsing: transpiler.
-	SWShellEnvironment solveDependenciesUsing: transpiler.
-	transpiler transpile: SWShellEnvironment
-
-]
-
 { #category : #building }
 SWShellEnvironmentTest class >> tryBuild [
 	<script>
-	self newModuleTranspiler.
-	self build.
-	self inspectResult.
+	super tryBuild
 ]
 
 { #category : #test }

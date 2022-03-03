@@ -241,6 +241,14 @@ return (outer1 ? function(){
 '
 ]
 
+{ #category : #tests }
+SWMBTofJSTest >> test_0470_user_specified_variable_type [
+	self resultWith: {  } equals: 'var tmp1 = null;
+tmp1 = 3.14159265358979;
+return tmp1 * 2.23620679;
+'
+]
+
 { #category : #utilities }
 SWMBTofJSTest >> transpile: aMethod with: operands [
 	(module pool transpilerFor: aMethod with: operands)
