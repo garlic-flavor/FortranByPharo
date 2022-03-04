@@ -86,6 +86,11 @@ SWMethodBodyTranspiler >> atMethod: aMethodNode [
 	]
 ]
 
+{ #category : #accessing }
+SWMethodBodyTranspiler >> atNil [
+	^ self subclassResponsibility 
+]
+
 { #category : #'code generation' }
 SWMethodBodyTranspiler >> atReturn: aReturnNode [
 	self putReturnKeyword; put: ' '.
@@ -252,6 +257,15 @@ SWMethodBodyTranspiler >> putArraySeparator [
 	^ self subclassResponsibility 
 ]
 
+{ #category : #'as yet unclassified' }
+SWMethodBodyTranspiler >> putAtIfAbsent [
+]
+
+{ #category : #'as yet unclassified' }
+SWMethodBodyTranspiler >> putAtPut [
+	^ self subclassResponsibility 
+]
+
 { #category : #'code generation' }
 SWMethodBodyTranspiler >> putCharacter: c [
 	self halt; flag: #toRewrite.
@@ -338,11 +352,6 @@ SWMethodBodyTranspiler >> putNew [
 ]
 
 { #category : #'as yet unclassified' }
-SWMethodBodyTranspiler >> putNil [
-	self subclassResponsibility 
-]
-
-{ #category : #'as yet unclassified' }
 SWMethodBodyTranspiler >> putOnDo [
 	^ self subclassResponsibility 
 ]
@@ -395,6 +404,11 @@ SWMethodBodyTranspiler >> putReturnSelf [
 { #category : #'code generation' }
 SWMethodBodyTranspiler >> putSelf [
 	self halt; flag: #toRemove.
+	^ self subclassResponsibility 
+]
+
+{ #category : #'as yet unclassified' }
+SWMethodBodyTranspiler >> putSelfClass [
 	^ self subclassResponsibility 
 ]
 

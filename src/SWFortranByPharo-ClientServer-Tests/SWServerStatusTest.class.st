@@ -3,7 +3,7 @@ A SWServerStatusTest is a test class for testing the behavior of SWServerStatus
 "
 Class {
 	#name : #SWServerStatusTest,
-	#superclass : #SWTestRunner,
+	#superclass : #SWTestRunnerJS,
 	#instVars : [
 		'status'
 	],
@@ -16,25 +16,26 @@ SWServerStatusTest class >> go [
 	super go
 ]
 
-{ #category : #accessing }
-SWServerStatusTest class >> moduleTranspilerClass [
-	^ SWMTofJS
+{ #category : #initialization }
+SWServerStatusTest class >> setUpTranspiler: mt [
+	SWServerStatus setUpTranspiler: mt.
+	super setUpTranspiler: mt
 ]
 
 { #category : #accessing }
-SWServerStatusTest class >> solveDependenciesUsing: transpiler [
-	super solveDependenciesUsing: transpiler.
-	transpiler
-		transpile: SWServerStatus
+SWServerStatusTest class >> solveDependencies: mt [
+	SWServerStatus solveDependencies: mt.
+	mt transpile: SWServerStatus.
+	super solveDependencies: mt
+
 ]
 
 { #category : #building }
 SWServerStatusTest class >> tryBuild [
 	<script>
-	|mt|
-	mt := self newModuleTranspiler.
-	mt payload haltAt: #class.
-	mt transpile inspect.
+	self tryBuild: [
+		moduleTranspiler pool haltAt: #anySatisfy:
+	]
 ]
 
 { #category : #running }

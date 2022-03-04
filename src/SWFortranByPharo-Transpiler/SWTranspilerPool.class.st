@@ -90,6 +90,14 @@ SWTranspilerPool >> transpile_Boolean: ct [
 
 ]
 
+{ #category : #'as yet unclassified' }
+SWTranspilerPool >> transpile_Dictionary: cdt [
+	cdt
+		senderTranspilerOf: #at:put: is: [ :mbt | mbt putAtPut ];
+		senderTranspilerOf: #at:ifAbsent: is: [ :mbt | mbt putAtIfAbsent ]
+
+]
+
 { #category : #initialization }
 SWTranspilerPool >> transpile_Magnitude: ct [
 	ct
@@ -109,7 +117,9 @@ SWTranspilerPool >> transpile_Number: ct [
 { #category : #initialization }
 SWTranspilerPool >> transpile_Object: ct [
 	ct
-		senderTranspilerOf: #yourself is: [ :mbt |	mbt putYourself ]
+		senderTranspilerOf: #yourself is: [ :mbt |	mbt putYourself ];
+		senderTranspilerOf: #= is: [ :mbt | mbt putOpBinary ];
+		senderTranspilerOf: #~= is: [ :mbt | mbt putOpBinaryWith: '!=' ]
 
 ]
 
@@ -118,7 +128,9 @@ SWTranspilerPool >> transpile_ProtoObject: ct [
 	ct
 		senderTranspilerOf: #ifNotNil:ifNil: is: [ :bt | bt putIfNotNilIfNil: true ];
 		senderTranspilerOf: #ifNil: is: [ :bt | bt putIfNotNil: false ];
-		senderTranspilerOf: #ifNotNil: is: [ :bt | bt putIfNotNil: true ]
+		senderTranspilerOf: #ifNotNil: is: [ :bt | bt putIfNotNil: true ];
+		senderTranspilerOf: #class is: [ :bt | bt putSelfClass ];
+		senderTranspilerOf: #flag: is: [ :bt | bt stream putComment: bt node children last value; preventDelimiter; preventNewline  ]
 ]
 
 { #category : #api }

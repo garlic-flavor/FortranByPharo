@@ -23,6 +23,12 @@ SWPoolOfJS class >> methodBodyTranspilerClass [
 ]
 
 { #category : #'as yet unclassified' }
+SWPoolOfJS >> transpile_Array: cdt [
+	cdt
+		senderTranspilerOf: #anySatisfy: is: [ :mbt | mbt putMessageWithSelector: 'find' ]
+]
+
+{ #category : #'as yet unclassified' }
 SWPoolOfJS >> transpile_Collection: cdt [
 	cdt
 		senderTranspilerOf: #inject:into: is: [ :mbt |

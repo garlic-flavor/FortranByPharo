@@ -165,7 +165,7 @@ SWGlobal >> decode_Dictionary: ct [
 { #category : #initialization }
 SWGlobal >> decode_DictionaryClass: ct [
 	ct
-		declareMethodReturnsReceiversClass: #fromSton:
+		declareMethodReturnsReceiversInstance: #fromSton:
 ]
 
 { #category : #initialization }

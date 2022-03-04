@@ -17,30 +17,6 @@ Class {
 	#category : #'SWFortranByPharo-ClientServer-Shell'
 }
 
-{ #category : #initialization }
-SWShellEnvironment class >> decode_OSEnvironmentClass: ct [
-	self error; flag: #toRemove.
-	ct
-		declareMethodReturnsReceiversInstance: #environmentFor:
-
-]
-
-{ #category : #initialization }
-SWShellEnvironment class >> decode_OSPlatformClass: ct [
-	self error; flag: #toRemove.
-	ct
-		declareMethodReturnsReceiversInstance: #current
-]
-
-{ #category : #initialization }
-SWShellEnvironment class >> decode_OSSUnixSubprocess: ct [
-	self error; flag: #toRemove.
-	ct
-		declareMethodReturnsReceiver: #run;
-		declareMethodReturnsReceiver: #initialize
-
-]
-
 { #category : #'as yet unclassified' }
 SWShellEnvironment class >> decode_self: cdt [
 	cdt
@@ -53,24 +29,6 @@ SWShellEnvironment class >> decode_self: cdt [
 SWShellEnvironment class >> default [
 	^ default ifNil: [ default := self newDefault ]
 
-]
-
-{ #category : #initialization }
-SWShellEnvironment class >> initializeInstanceSideTranspiler: transpiler [
-	self error; flag: #toReimplement.
-	transpiler
-		declareMethod: #localDirectory as: [ :newT |
-			newT
-				specifyReturnTypeAs: FileLocator;
-				markAsDecoded;
-				generator: [ :t |
-					t
-						put: 'return FileLocator.localDirectory()';
-						putStatementDelimiter;
-						cr
-				];
-				yourself
-		]
 ]
 
 { #category : #'instance creation' }
@@ -98,22 +56,6 @@ SWShellEnvironment class >> resetDefault [
 ]
 
 { #category : #initialization }
-SWShellEnvironment class >> setUpDecoder: global [
-	self error; flag: #toRemove.
-	(global getClassInfo: OSEnvironment class)
-		declareMethodReturnsReceiversInstance: #environmentFor:.
-	(global getClassInfo: OSPlatform class)
-		declareMethodReturnsReceiversInstance: #current.
-	(global getClassInfo: OSSUnixSubprocess)
-		declareMethodReturnsReceiver: #run;
-		declareMethodReturnsReceiver: #initialize.
-
-	(global getClassInfo: SWShellEnvironment)
-		declareMethod: #localDirectory asReturn: FileLocator.
-
-]
-
-{ #category : #initialization }
 SWShellEnvironment class >> setUpTranspiler:  mt [
 	(mt global getClassInfo: OSEnvironment class)
 		declareMethodReturnsReceiversInstance: #environmentFor:.
@@ -136,33 +78,6 @@ SWShellEnvironment class >> setUpTranspiler:  mt [
 { #category : #private }
 SWShellEnvironment class >> solveDependencies: mt [
 	mt
-		transpile: SWGFortranCompilerAdapter;
-		import: #(OSPlatform FileLocator) from: 'Pharo'
-]
-
-{ #category : #'as yet unclassified' }
-SWShellEnvironment class >> solveDependenciesUsing: pool [
-	self error; flag: #toRemove.
-	(pool global getClassInfo: OSEnvironment class)
-		declareMethodReturnsReceiversInstance: #environmentFor:.
-	(pool global getClassInfo: OSPlatform class)
-		declareMethodReturnsReceiversInstance: #current.
-	(pool global getClassInfo: OSSUnixSubprocess)
-		declareMethodReturnsReceiver: #run;
-		declareMethodReturnsReceiver: #initialize.
-
-	(pool global getClassInfo: SWShellEnvironment)
-		declareMethod: #localDirectory asReturn: FileLocator.
-
-	(pool getClassInfo: SWShellEnvironment)
-		methodBodyTranspilerOf: #localDirectory is: [ :mbt |
-			mbt
-				put: 'return FileLocator.localDirectory()';
-				putStatementDelimiter;
-				cr
-		].
-
-	pool
 		transpile: SWGFortranCompilerAdapter;
 		import: #(OSPlatform FileLocator) from: 'Pharo'
 ]

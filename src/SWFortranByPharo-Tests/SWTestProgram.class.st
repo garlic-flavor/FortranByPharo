@@ -192,6 +192,12 @@ SWTestProgram >> _0260_ifNil_expression: needle [
 ]
 
 { #category : #'tests - source' }
+SWTestProgram >> _0261_ifNil_expression2: needle [
+	^ needle asTime ifNil: [ 123 ]
+	
+]
+
+{ #category : #'tests - source' }
 SWTestProgram >> _0270_ifNil_shortcircuit: needle [
 	needle ifNil: [ ^ 123 ].
 	^ 'notnil'
@@ -374,6 +380,21 @@ SWTestProgram >> _0470_user_specified_variable_type [
 	^ tmp1 * 2.23620679
 ]
 
+{ #category : #'as yet unclassified' }
+SWTestProgram >> _0480_flag [
+	self flag: #toImplement
+]
+
+{ #category : #'as yet unclassified' }
+SWTestProgram >> _0490_at_put: dict [
+	dict at: 'hello' put: 'world'
+]
+
+{ #category : #'as yet unclassified' }
+SWTestProgram >> _0500_at_ifAbsent: dict [
+	^ dict at: 'hello' ifAbsent: [ 'world' ]
+]
+
 { #category : #'tests - source' }
 SWTestProgram >> _1010_SWShellEnvironemt_default [
 	^ SWShellEnvironment default
@@ -413,6 +434,11 @@ SWTestProgram >> _1060_SWServerClass_starton [
 { #category : #'tests - source' }
 SWTestProgram >> _1070_SWShellEnvironment [
 	^ self assert: (SWShellEnvironment default localDirectory fullName endsWith: 'hoge')
+]
+
+{ #category : #'as yet unclassified' }
+SWTestProgram >> _9001_ston: reader [
+	^ STON mapClass fromSton: reader
 ]
 
 { #category : #accessing }

@@ -134,6 +134,14 @@ SWMBTofJSTest >> test_0260_ifNil_expression [
 ]
 
 { #category : #tests }
+SWMBTofJSTest >> test_0261_ifNil_expression2 [
+	self resultWith: { Object } equals: 'return function(_receiver_){
+    return (_receiver_ !=  null ? _receiver_ : 123);
+}(needle.asTime());
+'
+]
+
+{ #category : #tests }
 SWMBTofJSTest >> test_0290_SWStd_print [
 	self resultWith: {  } equals: 'return console.log("hoge!");
 '
@@ -246,6 +254,25 @@ SWMBTofJSTest >> test_0470_user_specified_variable_type [
 	self resultWith: {  } equals: 'var tmp1 = null;
 tmp1 = 3.14159265358979;
 return tmp1 * 2.23620679;
+'
+]
+
+{ #category : #tests }
+SWMBTofJSTest >> test_0480_flag [
+
+	self resultWith: {  } equals: '/// toImplement
+'
+]
+
+{ #category : #'as yet unclassified' }
+SWMBTofJSTest >> test_0490_at_put [
+	self resultWith: { Dictionary } equals: 'dict["hello"] = "world";
+'
+]
+
+{ #category : #tests }
+SWMBTofJSTest >> test_0500_at_ifAbsent [
+	self resultWith: { Dictionary } equals: 'return dict["hello"] || "world";
 '
 ]
 

@@ -70,6 +70,9 @@ SWTestRunner class >> setUpTranspiler: mt [
 	(mt global getClassInfo: TestAsserter)
 		declareMethodReturnsReceiver: #assert:description:resumable:.
 
+	mt global decode: #setUp with: { self }.
+	mt global decode: #tearDown with: { self }.
+
 	self methodDict values select: [ :m | m protocol beginsWith: 'test' ] thenDo: [ :m |
 		mt global decode: (SWSenderInfo new
 			method: m;
@@ -96,15 +99,19 @@ SWTestRunner class >> setUpTranspiler: mt [
 
 { #category : #private }
 SWTestRunner class >> solveDependencies: mt [
-	mt global decode: #setUp with: { self }.
-	mt global decode: #tearDown with: { self }.
 	mt transpile: TestCase.
 	mt transpile: SWTestRunner.
 ]
 
 { #category : #building }
 SWTestRunner class >> tryBuild [
+	self tryBuild: [  ]
+]
+
+{ #category : #building }
+SWTestRunner class >> tryBuild: initializer [
 	self newModuleTranspiler.
+	initializer value.
 	self build.
 	self inspectResult.
 ]

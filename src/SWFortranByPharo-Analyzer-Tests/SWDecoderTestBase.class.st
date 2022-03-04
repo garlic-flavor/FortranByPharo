@@ -18,9 +18,9 @@ SWDecoderTestBase >> decode: selector with: args [
 
 { #category : #util }
 SWDecoderTestBase >> resultWith: args [
-	|messageInfo result|
-	messageInfo := self decode: thisContext sender selector with: args.
-	result := messageInfo result.
+	|expression result|
+	expression := self decode: thisContext sender selector with: args.
+	result := expression messageInfo result.
 	self halt.
 ]
 

@@ -49,6 +49,11 @@ SWMBTofJS >> atClosure: aBlockNode [
 ]
 
 { #category : #accessing }
+SWMBTofJS >> atNil [
+	self put: 'null'
+]
+
+{ #category : #accessing }
 SWMBTofJS >> atSymbol: aSymbol [
 	self
 		put: '"';
@@ -73,6 +78,28 @@ SWMBTofJS >> putArrayHeader [
 { #category : #'as yet unclassified' }
 SWMBTofJS >> putArraySeparator [
 	self put: ', '
+]
+
+{ #category : #'as yet unclassified' }
+SWMBTofJS >> putAtIfAbsent [
+	self
+		transpileChildAsExpression: self children first;
+		put: '['; transpileChildAsExpression: self children second; put: '] || '.
+	(self child: self children third)
+		isExpression: true;
+		putBlock
+		
+]
+
+{ #category : #'as yet unclassified' }
+SWMBTofJS >> putAtPut [
+	self
+		transpileChild: self children first;
+		put: '[';
+		transpileChildAsExpression: self children second;
+		put: '] = ';
+		transpileChildAsExpression: self children third
+	
 ]
 
 { #category : #accessing }
@@ -169,25 +196,26 @@ SWMBTofJS >> putEnsure [
 
 { #category : #'as yet unclassified' }
 SWMBTofJS >> putIfNotNil: strait [
-	self isExpression ifTrue: [|conditionNode|
+	self isExpression ifTrue: [|conditionNode closured receiver|
 		conditionNode := self children first node.
-		conditionNode class = RBVariableNode ifTrue: [
-			self put: '('.
-			self transpileChildAsExpression: self children first.
-			self
-				put: (strait ifTrue: [ ' == ' ] ifFalse: [ ' != ' ]);
-				put: ' null ? '.
-			self transpileChildAsExpression: self children first.
-			self
-				put: ' : '.
-			(self child: self children second)
-				isExpression: true;
-				putBlock.
-			self  put: ')'
-		] ifFalse: [
-			self halt.
-		]
+		closured := conditionNode class ~= RBVariableNode.
+		receiver := closured ifTrue: [ [ self put: '_receiver_' ] ] ifFalse: [ [ self transpileChildAsExpression: self children first ] ].
 
+		closured ifTrue: [ self put: 'function(_receiver_){'; cr; incIndent; put: 'return ' ].
+		self put: '('.
+		receiver value.
+		self put: (strait ifTrue: [ ' == ' ] ifFalse: [ ' != ' ]); put: ' null ? '.
+		receiver value.
+		self put: ' : '.
+		(self child: self children second)
+			isExpression: true;
+			putBlock.
+		self  put: ')'.
+		closured ifTrue: [
+			self
+				putStatementDelimiter; cr; decIndent;
+				put: '}('; transpileChildAsExpression: self children first; put: ')'
+		]
 	] ifFalse: [
 		self put: 'if('.
 		strait ifFalse: [ self put: '!' ].
@@ -312,15 +340,9 @@ SWMBTofJS >> putImport: anArray from: aSource [
 SWMBTofJS >> putNew [
 	self
 		put: 'new ';
-		transpileChild: self children first;
+		transpileChildWithBracket: self children first;
 		putArguments: self children allButFirst
 
-]
-
-{ #category : #'as yet unclassified' }
-SWMBTofJS >> putNil [
-	self halt; flag: #toRewrite.
-	self put: 'null'
 ]
 
 { #category : #enumerating }
@@ -403,6 +425,11 @@ SWMBTofJS >> putSelf [
 	self put: (self receiverClass isClassSide ifTrue: [ self receiverClass soleInstance name ] ifFalse: [ 'self' ])
 ]
 
+{ #category : #'as yet unclassified' }
+SWMBTofJS >> putSelfClass [
+	self put: self expression receiverClass instanceSide name
+]
+
 { #category : #'code generation' }
 SWMBTofJS >> putSelfDeclaration [
 	self put: 'var self = this;'; cr
@@ -448,15 +475,4 @@ SWMBTofJS >> putVariableDeclaration [
 SWMBTofJS >> putYourself [
 	self transpileChild: self children first
 
-]
-
-{ #category : #'as yet unclassified' }
-SWMBTofJS >> put_upToEnd: aNode [
-	self error; flag: #toRemove.
-	self
-		withoutMessageNestDo: [
-			self << aNode receiver
-		];
-		putClassAccessor;
-		put: 'read()'
 ]

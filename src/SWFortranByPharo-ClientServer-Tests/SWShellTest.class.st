@@ -31,10 +31,7 @@ SWShellTest class >> solveDependencies: mt [
 { #category : #building }
 SWShellTest class >> tryBuild [
 	<script>
-	self newModuleTranspiler.
-
-	self build.
-	self inspectResult.
+	super tryBuild
 
 ]
 
