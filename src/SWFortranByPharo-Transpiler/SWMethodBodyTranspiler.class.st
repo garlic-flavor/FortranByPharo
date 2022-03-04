@@ -8,7 +8,8 @@ Class {
 		'expression',
 		'stream',
 		'pool',
-		'isExpression'
+		'isExpression',
+		'declarationStream'
 	],
 	#category : #'SWFortranByPharo-Transpiler-Common'
 }
@@ -48,6 +49,11 @@ SWMethodBodyTranspiler >> atCascade: aCascadeNode [
 ]
 
 { #category : #accessing }
+SWMethodBodyTranspiler >> atCharacter: aChar [
+	^ self subclassResponsibility 
+]
+
+{ #category : #accessing }
 SWMethodBodyTranspiler >> atClosure: aBlockNode [
 	^ self subclassResponsibility 
 ]
@@ -78,9 +84,11 @@ SWMethodBodyTranspiler >> atMethod: aMethodNode [
 	self children allButLastDo: [ :child |
 		(self child: child) putArgumentDeclaration
 	].
-	(self child: self children last)
-		isExpression: false;
-		putSequence.
+	self preserveDeclaration: [
+		(self child: self children last)
+			isExpression: false;
+			putSequence.
+	].
 	(self isExpression and: [ self expression node containsReturn not ]) ifTrue: [
 		self putReturnSelf
 	]
@@ -96,8 +104,8 @@ SWMethodBodyTranspiler >> atReturn: aReturnNode [
 	self putReturnKeyword; put: ' '.
 	(self child: self children first)
 		isExpression: true;
-		transpile
-		
+		transpile.
+
 ]
 
 { #category : #'code generation' }
@@ -132,6 +140,7 @@ SWMethodBodyTranspiler >> child: anExpression [
 	^ self class new
 		expression: anExpression;
 		stream: self stream;
+		declarationStream: self declarationStream;
 		pool: self pool;
 		yourself
 ]
@@ -150,6 +159,18 @@ SWMethodBodyTranspiler >> cr [
 { #category : #'code generation - protected' }
 SWMethodBodyTranspiler >> decIndent [
 	self stream decIndent
+]
+
+{ #category : #accessing }
+SWMethodBodyTranspiler >> declarationStream [
+
+	^ declarationStream
+]
+
+{ #category : #accessing }
+SWMethodBodyTranspiler >> declarationStream: anObject [
+
+	declarationStream := anObject
 ]
 
 { #category : #accessing }
@@ -182,6 +203,14 @@ SWMethodBodyTranspiler >> isExpression: anObject [
 ]
 
 { #category : #'as yet unclassified' }
+SWMethodBodyTranspiler >> makeNewVariable: type [
+	|var|
+	var := self expression addToSlot: (self newVariableName: nil) as: type.
+	self putVariableDeclaration: var name.
+	^ var
+]
+
+{ #category : #'as yet unclassified' }
 SWMethodBodyTranspiler >> mangle [
 	^ self pool class mangleClass mangle: self expression
 ]
@@ -189,6 +218,18 @@ SWMethodBodyTranspiler >> mangle [
 { #category : #accessing }
 SWMethodBodyTranspiler >> method [
 	^ self expression method
+]
+
+{ #category : #'as yet unclassified' }
+SWMethodBodyTranspiler >> newVariableName: prev [
+	|counter name|
+	counter := prev ifNil: [ 0 ].
+	name := String streamContents: [ :s | s << 'temp_'; << counter asString ].
+
+	^ (self expression slot anySatisfy: [ :each | each name = name  ]) ifTrue: [
+		self newVariableName: counter + 1
+	] ifFalse: [ name ].
+
 ]
 
 { #category : #accessing }
@@ -206,6 +247,16 @@ SWMethodBodyTranspiler >> pool [
 SWMethodBodyTranspiler >> pool: anObject [
 
 	pool := anObject
+]
+
+{ #category : #'as yet unclassified' }
+SWMethodBodyTranspiler >> preserveDeclaration: aBlock [
+	self declarationStream: self stream.
+	self stream: self stream subStream.
+	aBlock value.
+	self declarationStream append: self stream.
+	self stream: self declarationStream.
+
 ]
 
 { #category : #'code generation - protected' }
@@ -337,6 +388,11 @@ SWMethodBodyTranspiler >> putImport: anArray from: aSource [
 ]
 
 { #category : #'as yet unclassified' }
+SWMethodBodyTranspiler >> putLocalsDeclaration [
+	^ self subclassResponsibility 
+]
+
+{ #category : #'as yet unclassified' }
 SWMethodBodyTranspiler >> putMessageWithSelector: aSelector [
 	self
 		transpileChild: self children first;
@@ -456,6 +512,13 @@ SWMethodBodyTranspiler >> putVariable [
 
 { #category : #'code generation' }
 SWMethodBodyTranspiler >> putVariableDeclaration [
+	self
+		putVariableDeclaration: self node name;
+		preventStatementDelimiter; preventNewline
+]
+
+{ #category : #'code generation' }
+SWMethodBodyTranspiler >> putVariableDeclaration: aName [
 	^ self subclassResponsibility 
 ]
 

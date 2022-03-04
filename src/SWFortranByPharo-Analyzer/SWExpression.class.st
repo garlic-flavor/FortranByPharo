@@ -17,7 +17,7 @@ Class {
 
 { #category : #private }
 SWExpression >> addToSlot: aName as: aType [
-	self slot addLast: (SWVariable new
+	^ self slot addLast: (SWVariable new
 		<< aType;
 		name: aName;
 		yourself)

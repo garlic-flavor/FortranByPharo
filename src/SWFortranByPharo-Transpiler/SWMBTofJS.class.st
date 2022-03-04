@@ -19,25 +19,29 @@ SWMBTofJS >> atCascade: aCascadeNode [
 		self isExpression ifFalse: [
 			self 	preventStatementDelimiter; preventNewline
 		]
-	] ifFalse: [|receiver original|
+	] ifFalse: [|receiver temp|
 		receiver := self children first children first.
-		original := self children.
-		self put: 'function(_receiver_){'; cr; incIndent; put: 'return ('; cr; incIndent.
+		temp := self makeNewVariable: receiver result.
+		self put: '('; put: temp name; put: ' = '; transpileChildAsExpression: receiver; put: ', '; cr; incIndent.
 		self children do: [:child|
 			child children at: 1 put: (SWExpression new
-				node: (RBVariableNode named: #_receiver_ );
+				node: (RBVariableNode named: temp name);
 				result: receiver result;
 				yourself).
 			(self child: child)
 				transpile.
 		] separatedBy: [ self put: ', '; cr ].
-		
-		self put: ');'; cr; decIndent; decIndent; put: '}('.
-		(self child: receiver)
-			isExpression: true;
-			transpile.
-		self put: ')'
+		self put: ')'; decIndent
 	]
+
+]
+
+{ #category : #accessing }
+SWMBTofJS >> atCharacter: aChar [
+	self
+		put: '"';
+		put: aChar;
+		put: '"'
 
 ]
 
@@ -63,6 +67,7 @@ SWMBTofJS >> atSymbol: aSymbol [
 
 { #category : #'as yet unclassified' }
 SWMBTofJS >> putArgumentDeclaration [
+
 ]
 
 { #category : #'as yet unclassified' }
@@ -117,13 +122,15 @@ SWMBTofJS >> putBlock [
 		(self child: child)
 			putArgumentDeclaration
 	].
-	(self child: self children last)
-		isExpression: (functionized not and: [ self isExpression ]);
-		putSequence.
-	self expression node class = RBMethodNode ifTrue: [
-		self expression node lastIsReturn ifFalse: [
-			self putReturnKeyword; put: ' this;'; cr
-		].
+	self preserveDeclaration: [
+		(self child: self children last)
+			isExpression: (functionized not and: [ self isExpression ]);
+			putSequence.
+		self expression node class = RBMethodNode ifTrue: [
+			self expression node lastIsReturn ifFalse: [
+				self putReturnKeyword; put: ' this;'; cr
+			]
+		]
 	].
 	functionized ifTrue: [
 		self
@@ -155,6 +162,7 @@ SWMBTofJS >> putBoolean: trueOrFalse [
 { #category : #'code generation' }
 SWMBTofJS >> putClosure [
 	|sequence|
+	self node containsReturn ifTrue: [ self error: 'A return statement inside a closure differs when it is in Pharo or in ECMAScript.' ].
 	self put: 'function('.
 	self node arguments do: [ :each |
 		self put: each name
@@ -464,11 +472,14 @@ SWMBTofJS >> putVariable [
 ]
 
 { #category : #'code generation' }
-SWMBTofJS >> putVariableDeclaration [
-	self
+SWMBTofJS >> putVariableDeclaration: name [
+	self declarationStream
 		put: 'var ';
-		put: self node name;
-		put: ' = null'
+		put: name;
+		put: ' = null';
+		putDelimiter;
+		putLine.
+
 ]
 
 { #category : #'as yet unclassified' }

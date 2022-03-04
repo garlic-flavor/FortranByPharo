@@ -41,17 +41,6 @@ SWPoolOfJS >> transpile_Collection: cdt [
 				put: ', ';
 				transpileChildWithBracket: mbt children second;
 				put: ')'.
-"
-			aNode := sender node.
-			transpiler
-				<< aNode receiver;
-				putClassAccessor;
-				put: 'reduce(';
-				<< (aNode arguments at: 2);
-				put: ', ';
-				<< (aNode arguments at: 1);
-				put: ')'
-"
 		]
 ]
 

@@ -22,8 +22,13 @@ Class {
 }
 
 { #category : #accessing }
+SWTranspilerStream >> append: stream [
+	self payload nextPutAll: stream contents.
+]
+
+{ #category : #accessing }
 SWTranspilerStream >> contents [
-	^ payload contents
+	^ self payload contents
 ]
 
 { #category : #api }
@@ -64,7 +69,6 @@ SWTranspilerStream >> incIndent [
 { #category : #initialization }
 SWTranspilerStream >> initialize [
 	super initialize.
-	payload := String new writeStream.
 	indent := 0.
 	isNewline := false.
 	preventNewline := false.
@@ -72,7 +76,7 @@ SWTranspilerStream >> initialize [
 
 { #category : #testing }
 SWTranspilerStream >> isNotEmpty [
-
+	self error; flag: #toRemove.
 	^ payload isNotNil and: [ payload isEmpty not ]
 ]
 
@@ -112,6 +116,18 @@ SWTranspilerStream >> newline: anObject [
 	newline := anObject
 ]
 
+{ #category : #accessing }
+SWTranspilerStream >> payload [
+
+	^ payload ifNil: [ payload := String new writeStream ]
+]
+
+{ #category : #accessing }
+SWTranspilerStream >> payload: anObject [
+
+	payload := anObject
+]
+
 { #category : #api }
 SWTranspilerStream >> preventDelimiter [
 	preventDelimiter := true
@@ -125,7 +141,7 @@ SWTranspilerStream >> preventNewline [
 { #category : #api }
 SWTranspilerStream >> put: code [
 	self putIndent.
-	payload nextPutAll: code.
+	self payload nextPutAll: code.
 ]
 
 { #category : #api }
@@ -156,14 +172,14 @@ SWTranspilerStream >> putDelimiter [
 	preventDelimiter ifNotNil: [
 		preventDelimiter := nil
 	] ifNil: [
-		payload << self delimiter
+		self payload << self delimiter
 	]
 ]
 
 { #category : #private }
 SWTranspilerStream >> putIndent [
 	isNewline ifFalse: [ ^ self ].
-	payload nextPutAll: (' ' repeat: {0. (self tabWidth * indent)} max).
+	self payload nextPutAll: (' ' repeat: {0. (self tabWidth * indent)} max).
 	isNewline := false.
 
 ]
@@ -173,7 +189,7 @@ SWTranspilerStream >> putLine [
 	preventNewline
 		ifTrue: [ preventNewline := false ]
 		ifFalse: [
-			payload << self newline.
+			self payload << self newline.
 			isNewline := true.
 		].
 
@@ -196,6 +212,13 @@ SWTranspilerStream >> singleLineHeaderOfComment [
 SWTranspilerStream >> singleLineHeaderOfComment: anObject [
 
 	singleLineHeaderOfComment := anObject
+]
+
+{ #category : #'instance creation' }
+SWTranspilerStream >> subStream [
+	^ self copy
+		payload: nil;
+		yourself
 ]
 
 { #category : #accessing }

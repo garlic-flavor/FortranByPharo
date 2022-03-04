@@ -191,13 +191,12 @@ SWMBTofJSTest >> test_0390_opBinaries [
 
 { #category : #tests }
 SWMBTofJSTest >> test_0400_cascading [
-	self resultWith: { String } equals: 'return function(_receiver_){
-    return (
-        _receiver_.failed(), 
-        _receiver_.message_("hogehoge"), 
-        _receiver_.uri_(uri), 
-        _receiver_);
-}(new SWServerStatus()).toString();
+	self resultWith: { String } equals: 'var temp_0 = null;
+return (temp_0 = new SWServerStatus(), 
+    temp_0.failed(), 
+    temp_0.message_("hogehoge"), 
+    temp_0.uri_(uri), 
+    temp_0).toString();
 '
 ]
 

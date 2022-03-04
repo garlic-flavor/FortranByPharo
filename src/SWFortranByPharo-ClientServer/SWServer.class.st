@@ -15,7 +15,7 @@ Class {
 
 { #category : #accessing }
 SWServer class >> build [
-	^ self moduleTranspiler
+	^ (SWMTofJS main: self)
 		transpile;
 		yourself
 
@@ -25,9 +25,7 @@ SWServer class >> build [
 SWServer class >> buildThenInspect [
 	<script>
 	|module|
-	module := self moduleTranspiler.
-	module logger enabled: true.
-	module transpile.
+	module := self build.
 	module contents inspect.
 
 ]
@@ -123,12 +121,6 @@ SWServer class >> main [
 		import: #(ZnServer ZnWebSocketDelegate SWWebSocketDelegate ZnResponse ZnEntity ZnStatusLine ZnHeaders) from: 'ZnServer'.
 
 	self new startOn: 50000
-]
-
-{ #category : #accessing }
-SWServer class >> moduleTranspiler [
-	^ SWMTofJS newFrom: self.
-
 ]
 
 { #category : #accessing }
