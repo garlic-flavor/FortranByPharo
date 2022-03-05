@@ -441,6 +441,12 @@ SWTestProgram >> _9001_ston: reader [
 	^ STON mapClass fromSton: reader
 ]
 
+{ #category : #'as yet unclassified' }
+SWTestProgram >> _9002_ZnUrl_queryAt_ifPresent: url [
+	url queryAt: 'name' ifPresent: [ :name | ^ name ].
+
+]
+
 { #category : #accessing }
 SWTestProgram >> var1 [
 

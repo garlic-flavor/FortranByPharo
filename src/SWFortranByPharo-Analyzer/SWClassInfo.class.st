@@ -156,6 +156,14 @@ SWClassInfo >> declareMethodReturnsSecondArgument: aName [
 ]
 
 { #category : #api }
+SWClassInfo >> declareMethodReturnsSecondArgumentsElement: aName [
+	self predefined at: aName put: [ :operands |
+		operands third elementType
+	]
+
+]
+
+{ #category : #api }
 SWClassInfo >> decode: aSenderInfo [
 	^ self methods at: aSenderInfo ifAbsent: [
 		self predefined at: aSenderInfo method selector ifPresent: [ :pre | |messageInfo|

@@ -1,13 +1,8 @@
 Class {
 	#name : #SWMTofJSTest,
-	#superclass : #SWTranspilerTestBase,
+	#superclass : #SWTranspilerTestBaseJS,
 	#category : #'SWFortranByPharo-Transpiler-Tests-JS'
 }
-
-{ #category : #accessing }
-SWMTofJSTest class >> moduleTranspilerClass [
-	^ SWMTofJS
-]
 
 { #category : #tests }
 SWMTofJSTest >> test_0010_nop [

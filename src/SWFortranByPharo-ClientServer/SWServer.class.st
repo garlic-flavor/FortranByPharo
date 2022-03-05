@@ -15,9 +15,17 @@ Class {
 
 { #category : #accessing }
 SWServer class >> build [
-	^ (SWMTofJS main: self)
-		transpile;
-		yourself
+	^ self build: [ :transpiler | ]
+
+]
+
+{ #category : #accessing }
+SWServer class >> build: initBlock [
+	|transpiler|
+	transpiler := SWMTofJS main: self.
+	initBlock cull: transpiler.
+	transpiler transpile.
+	^ transpiler
 
 ]
 
@@ -128,7 +136,9 @@ SWServer class >> put [
 	<script>
 	|module runner|
 	self start.
-	module := self build.
+	module := self build: [ :mt |
+
+	].
 	runner := SWPRofJS new.
 	runner put: module.
 	self stop.
@@ -139,6 +149,18 @@ SWServer class >> put [
 { #category : #'as yet unclassified' }
 SWServer class >> relPathOf: path [
 	^ path relativeTo: SWShellEnvironment default localDirectory
+]
+
+{ #category : #initialization }
+SWServer class >> setUpTranspiler: mt [
+	(mt global getClassInfo: ZnRequest)
+		declareMethod: #uri asReturn: ZnUrl.
+	(mt global getClassInfo: ZnUrl)
+		declareMethodReturnsSecondArgumentsElement: #queryAt:ifPresent:.
+	
+	(mt pool getClassInfo: ZnUrl)
+		senderTranspilerOf: #queryAt:ifPresent: is: [ :mbt | mbt putQueryAtIfPresent ]
+
 ]
 
 { #category : #'as yet unclassified' }
@@ -158,8 +180,9 @@ SWServer class >> start [
 
 { #category : #accessing }
 SWServer class >> stop [
-	<script>
+	<sampleInstance>
 	ZnServer default stop.
+	^ self testRunning.
 ]
 
 { #category : #testing }

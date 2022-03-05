@@ -412,6 +412,20 @@ SWMBTofJS >> putOrdinaryMessage [
 ]
 
 { #category : #'as yet unclassified' }
+SWMBTofJS >> putQueryAtIfPresent [
+	|presentBlock|
+	presentBlock := self children third.
+	self put: '{ '; incIndent;
+		put: 'var '; transpileChild: presentBlock children first; put: ' = '; transpileChildAsExpression: self children first;
+		put: '.at('; transpileChildAsExpression: self children second; put: ')'; putStatementDelimiter; cr;
+		put: 'if ('; transpileChild: presentBlock children first; put: ' != null) {'; cr; incIndent.
+	(self child: presentBlock children second)
+ 		putSequence.
+	self decIndent; put: '}'; cr; decIndent; put: '}'; preventStatementDelimiter.
+
+]
+
+{ #category : #'as yet unclassified' }
 SWMBTofJS >> putReturnKeyword [ 
 	self put: 'return'
 ]
