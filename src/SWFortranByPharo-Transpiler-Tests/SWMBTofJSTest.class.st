@@ -57,7 +57,13 @@ SWMBTofJSTest >> test_0060_ifTrue_ifFalse [
 
 { #category : #tests }
 SWMBTofJSTest >> test_0070_ifTrue_ifFalse_expression [
-	self resultWith: { Boolean } equals: 'return needle ? 123 : "False";
+	self resultWith: { Boolean } equals: 'var t_0 = null;
+If(needle){
+    t_0 = 123;
+} else {
+    t_0 = 123;
+}
+return t_0;
 '
 ]
 
@@ -118,13 +124,23 @@ SWMBTofJSTest >> test_0160_ifNotNil_ifNil [
 
 { #category : #tests }
 SWMBTofJSTest >> test_0170_ifNotNil_ifNil_expression [
-	self resultWith: { Object } equals: 'return needle != null  ? 123 : "Nil";
+	self resultWith: { Object } equals: 'var t_0 = null;
+if(needle != null ){
+    t_0 = 123;
+} else {
+    t_0 = "Nil";
+}
+return t_0;
 '
 ]
 
 { #category : #tests }
 SWMBTofJSTest >> test_0260_ifNil_expression [
-	self resultWith: { Object } equals: 'return needle != null ? needle : 123;
+	self resultWith: { Object } equals: 'var t_0 = null;
+if(needle == null )  {
+    t_0 = 123;
+}
+return t_0;
 '
 ]
 

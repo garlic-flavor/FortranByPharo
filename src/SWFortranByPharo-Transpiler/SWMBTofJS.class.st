@@ -150,11 +150,73 @@ SWMBTofJS >> putBlockAsExpression [
 
 { #category : #'as yet unclassified' }
 SWMBTofJS >> putBlockBody [
-	self put: '{'; cr; incIndent;
+	self halt.
+	self parentStream: self stream;
 		putVariableDeclarations;
 		putSequence;
 		decIndent; put: '}'
 
+]
+
+{ #category : #'as yet unclassified' }
+SWMBTofJS >> putBlockBody: anExpression [
+	|child|
+	self put: '{'; cr; incIndent.
+	child := self copy
+		expression: anExpression;
+		isExpression: false;
+		parentStream: self stream;
+		declarationStream: self stream subStream;
+		stream: self stream subStream;
+		putVariableDeclarations;
+		putSequence.
+	self stream
+		append: child declarationStream;
+		append: child stream.
+	self decIndent; put: '}'
+
+		
+]
+
+{ #category : #'as yet unclassified' }
+SWMBTofJS >> putBlockBody: anExpression assignTo: aVarName [
+	|child|
+	self put: '{'; cr; incIndent.
+	child := self copy
+		expression: anExpression;
+		isExpression: false;
+		parentStream: self stream;
+		declarationStream: self stream subStream;
+		stream: self stream subStream;
+		putVariableDeclarations;
+		putSequenceAssignTo: aVarName.
+	self stream
+		append: child declarationStream;
+		append: child stream.
+	self decIndent; put: '}'
+
+		
+]
+
+{ #category : #'as yet unclassified' }
+SWMBTofJS >> putBlockBody: anExpression with: args assignTo: aVarName [
+	|child|
+	self halt.
+	self put: '{'; cr; incIndent.
+	child := self copy
+		expression: anExpression;
+		isExpression: false;
+		parentStream: self stream;
+		declarationStream: self stream subStream;
+		stream: self stream subStream;
+		putVariableDeclarations;
+		putSequenceAssignTo: aVarName.
+	self stream
+		append: child declarationStream;
+		append: child stream.
+	self decIndent; put: '}'
+
+		
 ]
 
 { #category : #'as yet unclassified' }
@@ -164,6 +226,19 @@ SWMBTofJS >> putBlockBodyAsExpression [
 		putSequenceAsExpression
 
 
+]
+
+{ #category : #'as yet unclassified' }
+SWMBTofJS >> putBlockBodyAssignTo: varName [
+	self put: '{'; cr; incIndent;
+		preserveDeclaration: [
+			self putVariableDeclarations.
+			self children allButFirstDo: [ :child |
+				self putStatement: child
+			].
+			self put: varName; put: ' = '; transpileChildAsExpressionWithoutBracket: self children last
+		];
+		cr; decIndent; put: '}'
 ]
 
 { #category : #'as yet unclassified' }
@@ -295,7 +370,8 @@ SWMBTofJS >> putIfNotNil: strait [
 
 { #category : #'as yet unclassified' }
 SWMBTofJS >> putIfNotNilAsExpression: strait [
-	|receiver|
+	|receiver res|
+	res := self makeNewVariable: self expression result.
 	self children first node class = RBVariableNode ifTrue: [
 		receiver := self children first node name
 	] ifFalse: [
@@ -305,11 +381,19 @@ SWMBTofJS >> putIfNotNilAsExpression: strait [
 				putStatementDelimiter; cr
 		]
 	].
-	self put: receiver;
-		put: (strait ifTrue: [ ' == null' ] ifFalse: [ ' != null' ]);
-		put: ' ? '; put: receiver; put: ' : '.
-	(self child: self children second)
-		putBlockBodyAsExpression
+	self preserveCurrentStatement: [
+		self put: 'if(';
+			put: receiver;
+			put: (strait ifTrue: [ ' != null' ] ifFalse: [ ' == null' ]);
+			put: ' )  '.
+		strait ifTrue: [
+			self putBlockBody: self children second with: { receiver } assignTo: res name
+		] ifFalse: [
+			self putBlockBody: self children second assignTo: res name
+		].
+		self cr
+	].
+	self put: res name
 
 ]
 
@@ -362,29 +446,32 @@ SWMBTofJS >> putIfNotNilIfNil: strait [
 
 { #category : #'as yet unclassified' }
 SWMBTofJS >> putIfNotNilIfNilAsExpression: strait [
-	self transpileChildAsExpression: self children first.
-	self put: (strait ifTrue: [ ' != null ' ] ifFalse: [ ' == null'  ]).
-	self put: ' ? '.
-	(self child: self children second)
-		putBlockBodyAsExpression.
-	self 	put: ' : '.
-	(self child: self children third)
-		putBlockBodyAsExpression.
+	|res|
+	res := self makeNewVariable: self expression result.
+	self preserveCurrentStatement: [
+		self put: 'if(';
+			transpileChildAsExpression: self children first;
+			put: (strait ifTrue: [ ' != null ' ] ifFalse: [ ' == null'  ]);
+			put: ')';
+			putBlockBody: self children second assignTo: res name;
+			put: ' else ';
+			putBlockBody: self children third assignTo: res name;
+			cr
+	].
+	self put: res name
 
 ]
 
 { #category : #'as yet unclassified' }
 SWMBTofJS >> putIfNotNilIfNilAsNotExpression: strait [
-	self put: 'if('.
-	self transpileChildAsExpression: self children first.
-	self put: (strait ifTrue: [ ' != null' ] ifFalse: [ ' == null'  ]).
-	self put: ')'.
-	(self child: self children second)
-		putBlockBody.
-	self put: ' else '.
-	(self child: self children third)
-		putBlockBody.
-	self preventStatementDelimiter
+	self put: 'if(';
+		transpileChildAsExpression: self children first;
+		put: (strait ifTrue: [ ' != null' ] ifFalse: [ ' == null'  ]);
+		put: ')';
+		putBlockBody: self children second;
+		put: ' else ';
+		putBlockBody: self children third;
+		preventStatementDelimiter
 
 ]
 
@@ -423,11 +510,10 @@ SWMBTofJS >> putIfTrueAsExpression: strait [
 SWMBTofJS >> putIfTrueAsNotExpression: strait [
 	self put: 'if('.
 	strait ifFalse: [ self put: '!' ].
-	self transpileChildAsExpression: self children first.
-	self put: ')'.
-	(self child: self children second)
-		putBlockBodyWithLocalScope.
-	self preventStatementDelimiter
+	self transpileChildAsExpression: self children first;
+		put: ')';
+		putBlockBody: self children second;
+		preventStatementDelimiter
 
 ]
 
@@ -443,15 +529,19 @@ SWMBTofJS >> putIfTrueIfFalse: strait [
 
 { #category : #'as yet unclassified' }
 SWMBTofJS >> putIfTrueIfFalseAsExpression: strait [
-
+	|res|
+	res := self makeNewVariable: self expression result.
+	self preserveCurrentStatement: [
+		self put: 'If('.
 		strait ifFalse: [ self put: '!' ].
-		self transpileChildAsExpression: self children first.
-		self put: ' ? '.
-		(self child: self children second)
-			putBlockBodyAsExpression.
-		self 	put: ' : '.
-		(self child: self children third)
-			putBlockBodyAsExpression.
+		self transpileChildAsExpression: self children first;
+			put: ')';
+			putBlockBody: self children second assignTo: res name;
+			put: ' else ';
+			putBlockBody: self children second assignTo: res name;
+			cr.
+	].
+	self put: res name
 
 ]
 
@@ -459,14 +549,12 @@ SWMBTofJS >> putIfTrueIfFalseAsExpression: strait [
 SWMBTofJS >> putIfTrueIfFalseAsNotExpression: strait [
 	self put: 'if('.
 	strait ifFalse: [ self put: '!' ].
-	self transpileChildAsExpression: self children first.
-	self put: ')'.
-	(self child: self children second)
-		putBlockBody.
-	self put: ' else '.
-	(self child: self children third)
-		putBlockBody.
-	self preventStatementDelimiter
+	self transpileChildAsExpression: self children first;
+		put: ')';
+		putBlockBody: self children second;
+		put: ' else ';
+		putBlockBody: self children third;
+		preventStatementDelimiter
 
 ]
 
@@ -571,15 +659,16 @@ SWMBTofJS >> putOrdinaryMessage [
 
 { #category : #'as yet unclassified' }
 SWMBTofJS >> putQueryAtIfPresent [
-	|presentBlock|
-	presentBlock := self children third.
-	self put: '{ '; incIndent;
-		put: 'var '; transpileChild: presentBlock children first; put: ' = '; transpileChildAsExpression: self children first;
-		put: '.at('; transpileChildAsExpression: self children second; put: ')'; putStatementDelimiter; cr;
-		put: 'if ('; transpileChild: presentBlock children first; put: ' != null) {'; cr; incIndent.
-	(self child: presentBlock children second)
- 		putSequence.
-	self decIndent; put: '}'; cr; decIndent; put: '}'; preventStatementDelimiter.
+	|rVal|
+	self isExpression ifTrue: [ self error ].
+	rVal := self makeNewVariable: self expression result.
+	self put: rVal name; put: ' = '; transpileChildAsExpression: self children first;
+		put: '.at('; transpileChildAsExpression: self children second;  put: ')'; putStatementDelimiter; cr;
+		put: 'if('; put: rVal name; put: ' != null){'; cr; incIndent;
+		put: 'var '; put: self children third arguments first name; put: ' = '; put: rVal name; putStatementDelimiter; cr.
+	(self child: self children third)
+		putSequence.
+	self decIndent; put: '}'; preventStatementDelimiter
 
 ]
 
@@ -613,6 +702,16 @@ SWMBTofJS >> putSelfClass [
 { #category : #'code generation' }
 SWMBTofJS >> putSelfDeclaration [
 	self put: 'var self = this;'; cr
+]
+
+{ #category : #'as yet unclassified' }
+SWMBTofJS >> putSequenceAssignTo: aVarName [
+	self children allButLastDo: [ :child |
+		self putStatement: child
+	].
+	self put: aVarName; put: ' = '; putStatementAsExpression: self children last;
+		putStatementDelimiter; cr
+
 ]
 
 { #category : #'as yet unclassified' }

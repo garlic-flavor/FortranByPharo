@@ -21,7 +21,7 @@ SWMethodBodyTranspiler >> at: anObject [
 	self halt.
 ]
 
-{ #category : #accessing }
+{ #category : #'dispatching-callback' }
 SWMethodBodyTranspiler >> atArray: anArrayNode [
 	self putArrayHeader.
 	self children do: [ :child |
@@ -31,26 +31,26 @@ SWMethodBodyTranspiler >> atArray: anArrayNode [
 
 ]
 
-{ #category : #accessing }
+{ #category : #'dispatching-callback' }
 SWMethodBodyTranspiler >> atAssign: anAssignNode [
 	self
 		transpileChild: self children second;
 		put: ' = ';
-		transpileChild: self children first
+		transpileChildAsExpressionWithoutBracket: self children first
 
 ]
 
-{ #category : #accessing }
+{ #category : #'dispatching-callback' }
 SWMethodBodyTranspiler >> atBlock: aBlockNode [
 	^ self subclassResponsibility 
 ]
 
-{ #category : #accessing }
+{ #category : #'dispatching-callback' }
 SWMethodBodyTranspiler >> atBoolean: trueOrFalse [
 	^ self subclassResponsibility 
 ]
 
-{ #category : #accessing }
+{ #category : #'dispatching-callback' }
 SWMethodBodyTranspiler >> atCascade: aCascadeNode [
 	self isExpression ifTrue: [
 		self putCascadeAsExpression
@@ -59,17 +59,17 @@ SWMethodBodyTranspiler >> atCascade: aCascadeNode [
 	]
 ]
 
-{ #category : #accessing }
+{ #category : #'dispatching-callback' }
 SWMethodBodyTranspiler >> atCharacter: aChar [
 	^ self subclassResponsibility 
 ]
 
-{ #category : #accessing }
+{ #category : #'dispatching-callback' }
 SWMethodBodyTranspiler >> atClosure: aBlockNode [
 	^ self subclassResponsibility 
 ]
 
-{ #category : #accessing }
+{ #category : #'dispatching-callback' }
 SWMethodBodyTranspiler >> atFloat: aFloat [
 	self put: aFloat asString
 ]
@@ -79,7 +79,7 @@ SWMethodBodyTranspiler >> atInteger: anInteger [
 	self put: anInteger asString
 ]
 
-{ #category : #accessing }
+{ #category : #'dispatching-callback' }
 SWMethodBodyTranspiler >> atLiteralValue:  aLiteralValueNode [
 	aLiteralValueNode value ifNotNil: [ :val |
 		val dispatchTo: self
@@ -89,7 +89,7 @@ SWMethodBodyTranspiler >> atLiteralValue:  aLiteralValueNode [
 
 ]
 
-{ #category : #accessing }
+{ #category : #'dispatching-callback' }
 SWMethodBodyTranspiler >> atMessage: aMessageNode [
 	(self pool haltList includes: aMessageNode selector) ifTrue: [ self halt ].
 	(self pool predefinedSenderTranspiler: self expression senderInfo) ifNotNil: [ :predefined |
@@ -100,7 +100,7 @@ SWMethodBodyTranspiler >> atMessage: aMessageNode [
 
 ]
 
-{ #category : #accessing }
+{ #category : #'dispatching-callback' }
 SWMethodBodyTranspiler >> atMethod: aMethodNode [
 	self halt.
 	self children allButLastDo: [ :child |
@@ -116,7 +116,7 @@ SWMethodBodyTranspiler >> atMethod: aMethodNode [
 	]
 ]
 
-{ #category : #accessing }
+{ #category : #'dispatching-callback' }
 SWMethodBodyTranspiler >> atNil [
 	^ self subclassResponsibility 
 ]
@@ -134,7 +134,7 @@ SWMethodBodyTranspiler >> atSequence: aSequenceNode [
 
 ]
 
-{ #category : #accessing }
+{ #category : #'dispatching-callback' }
 SWMethodBodyTranspiler >> atString: aString [
 	self
 		put: '"';
@@ -142,7 +142,7 @@ SWMethodBodyTranspiler >> atString: aString [
 		put: '"'
 ]
 
-{ #category : #accessing }
+{ #category : #'dispatching-callback' }
 SWMethodBodyTranspiler >> atVariable: aVariableNode [
 	(self pool haltList includes: aVariableNode name) ifTrue: [ self halt ].
 	self putVariable
@@ -175,7 +175,7 @@ SWMethodBodyTranspiler >> decIndent [
 { #category : #accessing }
 SWMethodBodyTranspiler >> declarationStream [
 
-	^ declarationStream ifNil: [ declarationStream := self stream ]
+	^ declarationStream
 ]
 
 { #category : #accessing }
@@ -282,11 +282,10 @@ SWMethodBodyTranspiler >> preserveCurrentStatement: aBlock [
 
 { #category : #'as yet unclassified' }
 SWMethodBodyTranspiler >> preserveDeclaration: aBlock [
-	self declarationStream: self stream.
-	self stream: self stream subStream.
+self halt.	
+	self declarationStream: self parentStream subStream.
 	aBlock value.
-	self declarationStream append: self stream.
-	self stream: self declarationStream.
+	self parentStream append: self declarationStream
 
 ]
 
@@ -305,7 +304,7 @@ SWMethodBodyTranspiler >> put: anObject [
 	self stream put: anObject asString
 ]
 
-{ #category : #'as yet unclassified' }
+{ #category : #'code generation' }
 SWMethodBodyTranspiler >> putArgumentDeclaration [
 	^ self subclassResponsibility 
 ]
@@ -324,37 +323,37 @@ SWMethodBodyTranspiler >> putArguments: arguments [
 
 ]
 
-{ #category : #'as yet unclassified' }
+{ #category : #'code generation' }
 SWMethodBodyTranspiler >> putArrayFooter [
 	^ self subclassResponsibility 
 ]
 
-{ #category : #'as yet unclassified' }
+{ #category : #'code generation' }
 SWMethodBodyTranspiler >> putArrayHeader [
 	^ self subclassResponsibility 
 ]
 
-{ #category : #'as yet unclassified' }
+{ #category : #'code generation' }
 SWMethodBodyTranspiler >> putArraySeparator [
 	^ self subclassResponsibility 
 ]
 
-{ #category : #'as yet unclassified' }
+{ #category : #'code generation' }
 SWMethodBodyTranspiler >> putAtIfAbsent [
 	^ self subclassResponsibility 
 ]
 
-{ #category : #'as yet unclassified' }
+{ #category : #'code generation' }
 SWMethodBodyTranspiler >> putAtPut [
 	^ self subclassResponsibility 
 ]
 
-{ #category : #'as yet unclassified' }
+{ #category : #'code generation' }
 SWMethodBodyTranspiler >> putCascadeAsExpression [
 	^ self subclassResponsibility 
 ]
 
-{ #category : #'as yet unclassified' }
+{ #category : #'code generation' }
 SWMethodBodyTranspiler >> putCascadeAsNotExpression [
 	^ self subclassResponsibility 
 ]
@@ -409,17 +408,17 @@ SWMethodBodyTranspiler >> putCode: code with: anAssociationArray [
 
 ]
 
-{ #category : #'as yet unclassified' }
+{ #category : #'code generation' }
 SWMethodBodyTranspiler >> putEnsure [
 	^ self subclassResponsibility 
 ]
 
-{ #category : #'as yet unclassified' }
+{ #category : #'code generation' }
 SWMethodBodyTranspiler >> putExpressionDelimiter [
 	^ self subclassResponsibility 
 ]
 
-{ #category : #'as yet unclassified' }
+{ #category : #'code generation' }
 SWMethodBodyTranspiler >> putIfNotNilIfNil: strait [
 	^ self subclassResponsibility 
 ]
@@ -434,12 +433,12 @@ SWMethodBodyTranspiler >> putImport: anArray from: aSource [
 	^ self subclassResponsibility 
 ]
 
-{ #category : #'as yet unclassified' }
+{ #category : #'code generation' }
 SWMethodBodyTranspiler >> putLocalsDeclaration [
 	^ self subclassResponsibility 
 ]
 
-{ #category : #'as yet unclassified' }
+{ #category : #'code generation' }
 SWMethodBodyTranspiler >> putMessageWithSelector: aSelector [
 	self
 		transpileChildAsExpression: self children first;
@@ -454,12 +453,12 @@ SWMethodBodyTranspiler >> putNew [
 	^ self subclassResponsibility
 ]
 
-{ #category : #'as yet unclassified' }
+{ #category : #'code generation' }
 SWMethodBodyTranspiler >> putNil [
 	^ self subclassResponsibility 
 ]
 
-{ #category : #'as yet unclassified' }
+{ #category : #'code generation' }
 SWMethodBodyTranspiler >> putOnDo [
 	^ self subclassResponsibility 
 ]
@@ -481,7 +480,7 @@ SWMethodBodyTranspiler >> putOpBinaryWith: anOp [
 
 ]
 
-{ #category : #'as yet unclassified' }
+{ #category : #'code generation' }
 SWMethodBodyTranspiler >> putOrdinaryMessage [
 	self putMessageWithSelector: self mangle
 
@@ -499,7 +498,7 @@ SWMethodBodyTranspiler >> putParameters: anArray [
 
 ]
 
-{ #category : #'as yet unclassified' }
+{ #category : #'code generation' }
 SWMethodBodyTranspiler >> putReturnKeyword [
 	^ self subclassResponsibility 
 ]
@@ -515,7 +514,7 @@ SWMethodBodyTranspiler >> putSelf [
 	^ self subclassResponsibility 
 ]
 
-{ #category : #'as yet unclassified' }
+{ #category : #'code generation' }
 SWMethodBodyTranspiler >> putSelfClass [
 	^ self subclassResponsibility 
 ]
@@ -544,11 +543,33 @@ SWMethodBodyTranspiler >> putSequenceAsExpression [
 
 ]
 
-{ #category : #'as yet unclassified' }
+{ #category : #'code generation' }
 SWMethodBodyTranspiler >> putStatement: anExpression [
-	self stream nextPutAll: ((self transpileSubChild: anExpression)
+	|child|
+	child := self copy
+		expression: anExpression;
+		isExpression: false;
+		parentStream: self stream;
+		stream: self stream subStream;
+		transpile;
 		putStatementDelimiter;
-		cr) stream contents
+		cr;
+		yourself.
+	self stream append: child stream
+
+]
+
+{ #category : #'code generation' }
+SWMethodBodyTranspiler >> putStatementAsExpression: anExpression [
+	|child|
+	child := self copy
+		expression: anExpression;
+		isExpression: true;
+		parentStream: self stream;
+		stream: self stream subStream;
+		transpile;
+		yourself.
+	self stream append: child stream
 
 ]
 
@@ -557,7 +578,7 @@ SWMethodBodyTranspiler >> putStatementDelimiter [
 	self stream putDelimiter
 ]
 
-{ #category : #'as yet unclassified' }
+{ #category : #'code generation' }
 SWMethodBodyTranspiler >> putVariable [
 
 	self put: self node name
@@ -583,7 +604,7 @@ SWMethodBodyTranspiler >> putVariableDeclarations [
 
 ]
 
-{ #category : #'as yet unclassified' }
+{ #category : #'code generation' }
 SWMethodBodyTranspiler >> putYourself [
 	^ self subclassResponsibility 
 ]
@@ -595,8 +616,7 @@ SWMethodBodyTranspiler >> receiverClass [
 
 { #category : #accessing }
 SWMethodBodyTranspiler >> stream [
-	^ stream ifNil: [ stream := SWTranspilerStream new ]
-
+	^ stream
 ]
 
 { #category : #accessing }
@@ -636,19 +656,20 @@ SWMethodBodyTranspiler >> transpile [
 
 { #category : #'public API' }
 SWMethodBodyTranspiler >> transpileAsMain [
-	self temp.
-	self stream: self parentStream.
-	self putVariableDeclarations.
-	self preserveDeclaration: [
-		self putSequence.
-	]
-
-
+	self temp;
+		declarationStream: self parentStream subStream;
+		stream: self parentStream subStream;
+		putVariableDeclarations;
+		putSequence.
+	self parentStream
+		append: self declarationStream;
+		append: self stream
 ]
 
 { #category : #'as yet unclassified' }
-SWMethodBodyTranspiler >> transpileChild: aDecoder [
-	^ (self child: aDecoder)
+SWMethodBodyTranspiler >> transpileChild: anExpression [
+	^ self copy
+		expression: anExpression;
 		isExpression: self isExpression;
 		transpile;
 		yourself
@@ -656,11 +677,12 @@ SWMethodBodyTranspiler >> transpileChild: aDecoder [
 ]
 
 { #category : #'as yet unclassified' }
-SWMethodBodyTranspiler >> transpileChildAsExpression: aDecoder [
+SWMethodBodyTranspiler >> transpileChildAsExpression: anExpression [
 	|needsBracket|
-	needsBracket := aDecoder node class = RBMessageNode.
+	needsBracket := anExpression node class = RBMessageNode.
 	needsBracket ifTrue: [ self put: '(' ].
-	(self child: aDecoder)
+	self copy
+		expression:  anExpression;
 		isExpression: true;
 		transpile.
 	needsBracket ifTrue: [ self put: ')' ].
@@ -668,8 +690,9 @@ SWMethodBodyTranspiler >> transpileChildAsExpression: aDecoder [
 ]
 
 { #category : #'as yet unclassified' }
-SWMethodBodyTranspiler >> transpileChildAsExpressionWithoutBracket: aDecoder [
-	(self child: aDecoder)
+SWMethodBodyTranspiler >> transpileChildAsExpressionWithoutBracket: anExpression [
+	self copy
+		expression: anExpression;
 		isExpression: true;
 		transpile.
 

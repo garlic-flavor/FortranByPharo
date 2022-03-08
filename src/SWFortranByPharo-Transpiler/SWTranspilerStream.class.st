@@ -11,8 +11,8 @@ Class {
 		'isNewline',
 		'newline',
 		'delimiter',
-		'preventNewline',
-		'preventDelimiter',
+		'isPreventNewline',
+		'isPreventDelimiter',
 		'firstLineHeaderOfComment',
 		'middleLineHeaderOfComment',
 		'lastLineOfComment',
@@ -24,6 +24,10 @@ Class {
 { #category : #accessing }
 SWTranspilerStream >> append: stream [
 	self payload nextPutAll: stream contents.
+	self indent: stream indent;
+		isNewline: stream isNewline;
+		isPreventNewline: stream isPreventNewline;
+		isPreventDelimiter: stream isPreventDelimiter
 ]
 
 { #category : #accessing }
@@ -66,18 +70,66 @@ SWTranspilerStream >> incIndent [
 	indent := indent + 1.
 ]
 
+{ #category : #accessing }
+SWTranspilerStream >> indent [
+
+	^ indent
+]
+
+{ #category : #accessing }
+SWTranspilerStream >> indent: anObject [
+
+	indent := anObject
+]
+
 { #category : #initialization }
 SWTranspilerStream >> initialize [
 	super initialize.
 	indent := 0.
 	isNewline := false.
-	preventNewline := false.
+	isPreventNewline := false.
+]
+
+{ #category : #accessing }
+SWTranspilerStream >> isNewline [
+
+	^ isNewline
+]
+
+{ #category : #accessing }
+SWTranspilerStream >> isNewline: anObject [
+
+	isNewline := anObject
 ]
 
 { #category : #testing }
 SWTranspilerStream >> isNotEmpty [
 	self error; flag: #toRemove.
 	^ payload isNotNil and: [ payload isEmpty not ]
+]
+
+{ #category : #accessing }
+SWTranspilerStream >> isPreventDelimiter [
+
+	^ isPreventDelimiter
+]
+
+{ #category : #accessing }
+SWTranspilerStream >> isPreventDelimiter: anObject [
+
+	^ isPreventDelimiter := anObject
+]
+
+{ #category : #accessing }
+SWTranspilerStream >> isPreventNewline [
+
+	^ isPreventNewline
+]
+
+{ #category : #accessing }
+SWTranspilerStream >> isPreventNewline: anObject [
+
+	isPreventNewline := anObject
 ]
 
 { #category : #accessing }
@@ -117,11 +169,6 @@ SWTranspilerStream >> newline: anObject [
 ]
 
 { #category : #accessing }
-SWTranspilerStream >> nextPutAll: val [
-	self payload nextPutAll: val
-]
-
-{ #category : #accessing }
 SWTranspilerStream >> payload [
 
 	^ payload ifNil: [ payload := String new writeStream ]
@@ -135,12 +182,12 @@ SWTranspilerStream >> payload: anObject [
 
 { #category : #api }
 SWTranspilerStream >> preventDelimiter [
-	preventDelimiter := true
+	isPreventDelimiter := true
 ]
 
 { #category : #api }
 SWTranspilerStream >> preventNewline [
-	preventNewline := true
+	isPreventNewline := true
 ]
 
 { #category : #api }
@@ -174,8 +221,8 @@ SWTranspilerStream >> putComment: aComment [
 
 { #category : #api }
 SWTranspilerStream >> putDelimiter [
-	preventDelimiter ifNotNil: [
-		preventDelimiter := nil
+	isPreventDelimiter ifNotNil: [
+		isPreventDelimiter := nil
 	] ifNil: [
 		self payload << self delimiter
 	]
@@ -191,8 +238,8 @@ SWTranspilerStream >> putIndent [
 
 { #category : #api }
 SWTranspilerStream >> putLine [
-	preventNewline
-		ifTrue: [ preventNewline := false ]
+	isPreventNewline
+		ifTrue: [ isPreventNewline := false ]
 		ifFalse: [
 			self payload << self newline.
 			isNewline := true.
