@@ -125,7 +125,7 @@ SWModuleTranspiler >> transpile [
 	].
 	self transpile: self mainTranspiler expression method methodClass instanceSide.
 	self transpile: rClass.
-	self mainTranspiler transpile
+	self mainTranspiler transpileAsMain
 
 ]
 

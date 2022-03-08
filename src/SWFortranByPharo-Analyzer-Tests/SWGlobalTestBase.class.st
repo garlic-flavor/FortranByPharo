@@ -1,5 +1,5 @@
 Class {
-	#name : #SWDecoderTestBase,
+	#name : #SWGlobalTestBase,
 	#superclass : #TestCase,
 	#instVars : [
 		'global'
@@ -8,7 +8,7 @@ Class {
 }
 
 { #category : #private }
-SWDecoderTestBase >> decode: selector with: args [
+SWGlobalTestBase >> decode: selector with: args [
 	^ global decode: (SWSenderInfo new
 		method: (SWTestProgram getBySelector: selector);
 		operands: (args copyWithFirst: SWTestProgram);
@@ -17,7 +17,7 @@ SWDecoderTestBase >> decode: selector with: args [
 ]
 
 { #category : #util }
-SWDecoderTestBase >> resultWith: args [
+SWGlobalTestBase >> resultWith: args [
 	|expression result|
 	expression := self decode: thisContext sender selector with: args.
 	result := expression messageInfo result.
@@ -25,7 +25,7 @@ SWDecoderTestBase >> resultWith: args [
 ]
 
 { #category : #util }
-SWDecoderTestBase >> resultWith: args equals: type [
+SWGlobalTestBase >> resultWith: args equals: type [
 	|decoded messageInfo|
 	decoded := self decode: thisContext sender selector with: args.
 	messageInfo := decoded messageInfo.
@@ -34,7 +34,7 @@ SWDecoderTestBase >> resultWith: args equals: type [
 ]
 
 { #category : #running }
-SWDecoderTestBase >> setUp [
+SWGlobalTestBase >> setUp [
 	super setUp.
 	global := SWGlobal new
 

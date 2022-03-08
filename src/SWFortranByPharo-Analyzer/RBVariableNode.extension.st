@@ -1,7 +1,7 @@
 Extension { #name : #RBVariableNode }
 
 { #category : #'*SWFortranByPharo-Analyzer' }
-RBVariableNode >> dispatchTo: transpiler [
-	^ transpiler atVariable: self
+RBVariableNode >> dispatchTo: dispatcher [
+	^ dispatcher atVariable: self
 
 ]

@@ -1,7 +1,7 @@
 Extension { #name : #RBCascadeNode }
 
 { #category : #'*SWFortranByPharo-Analyzer' }
-RBCascadeNode >> dispatchTo: transpiler [
-	^ transpiler atCascade: self
+RBCascadeNode >> dispatchTo: dispatcher [
+	^ dispatcher atCascade: self
 
 ]

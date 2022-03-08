@@ -39,7 +39,7 @@ SWPoolOfJS >> transpile_Collection: cdt [
 			(mbt child: mbt children third) putClosure.
 			mbt
 				put: ', ';
-				transpileChildWithBracket: mbt children second;
+				transpileChildAsExpression: mbt children second;
 				put: ')'.
 		]
 ]
@@ -50,6 +50,13 @@ SWPoolOfJS >> transpile_FileLocator: ctd [
 		senderTranspilerOf: #/ is: [ :mbt |
 			mbt putMessageWithSelector: #joinPath_
 		]
+]
+
+{ #category : #'as yet unclassified' }
+SWPoolOfJS >> transpile_Object: cdt [
+	cdt
+		senderTranspilerOf: #asString is: [ :mbt | mbt putMessageWithSelector: 'toString' ]
+
 ]
 
 { #category : #'as yet unclassified' }

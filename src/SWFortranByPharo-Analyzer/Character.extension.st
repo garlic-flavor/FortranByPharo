@@ -1,7 +1,7 @@
 Extension { #name : #Character }
 
 { #category : #'*SWFortranByPharo-Analyzer' }
-Character >> dispatchTo: transpiler [
-	^ transpiler atCharacter: self
+Character >> dispatchTo: dispatcher [
+	^ dispatcher atCharacter: self
 
 ]

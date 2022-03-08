@@ -1,7 +1,7 @@
 Extension { #name : #RBBlockNode }
 
 { #category : #'*SWFortranByPharo-Analyzer' }
-RBBlockNode >> dispatchTo: transpiler [
-	^ transpiler atClosure: self
+RBBlockNode >> dispatchTo: dispatcher [
+	^ dispatcher atBlock: self
 
 ]

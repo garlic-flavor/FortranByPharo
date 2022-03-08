@@ -1,8 +1,8 @@
 Extension { #name : #RBSequenceNode }
 
 { #category : #'*SWFortranByPharo-Analyzer' }
-RBSequenceNode >> dispatchTo: traverser [
-	traverser atSequence: self
+RBSequenceNode >> dispatchTo: dispatcher [
+	^ dispatcher atSequence: self
 ]
 
 { #category : #'*SWFortranByPharo-Analyzer' }

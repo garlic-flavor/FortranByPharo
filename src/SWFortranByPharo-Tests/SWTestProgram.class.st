@@ -251,6 +251,16 @@ SWTestProgram >> _0330_try_catch [
 ]
 
 { #category : #'tests - source' }
+SWTestProgram >> _0331_try_catch2 [
+
+	[  
+		1 + 2
+	] on: Exception do: [:e |
+		self error: e asString
+	]
+]
+
+{ #category : #'tests - source' }
 SWTestProgram >> _0340_try_catch_expression [
 
 	^ [  
@@ -444,6 +454,39 @@ SWTestProgram >> _9001_ston: reader [
 { #category : #'as yet unclassified' }
 SWTestProgram >> _9002_ZnUrl_queryAt_ifPresent: url [
 	url queryAt: 'name' ifPresent: [ :name | ^ name ].
+
+]
+
+{ #category : #'as yet unclassified' }
+SWTestProgram >> _9003_cascading_2 [
+	^ Dictionary new
+		at: 'world' put: (Set new
+			add: 'hello';
+			add: 'good-bye';
+			yourself);
+		yourself
+
+
+]
+
+{ #category : #'as yet unclassified' }
+SWTestProgram >> _9004_cascading_3: needle [
+	^ needle ifTrue: [
+		Dictionary new
+			at: 'world' put: (Set new
+				add: 'hello';
+				add: 'good-bye';
+				yourself);
+			yourself
+	] ifFalse: [
+		Dictionary new
+			at: 'heaven' put: (Set new
+				add: 'lost';
+				add: 'hell';
+				yourself)
+			yourself
+	]
+
 
 ]
 

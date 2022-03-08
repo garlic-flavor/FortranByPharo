@@ -1,6 +1,6 @@
 Extension { #name : #Float }
 
 { #category : #'*SWFortranByPharo-Analyzer' }
-Float >> dispatchTo: transpiler [
-	^ transpiler atFloat: self
+Float >> dispatchTo: dispatcher [
+	^ dispatcher atFloat: self
 ]

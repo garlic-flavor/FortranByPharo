@@ -117,6 +117,11 @@ SWTranspilerStream >> newline: anObject [
 ]
 
 { #category : #accessing }
+SWTranspilerStream >> nextPutAll: val [
+	self payload nextPutAll: val
+]
+
+{ #category : #accessing }
 SWTranspilerStream >> payload [
 
 	^ payload ifNil: [ payload := String new writeStream ]

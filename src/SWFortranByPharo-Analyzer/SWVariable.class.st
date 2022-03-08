@@ -16,16 +16,34 @@ Class {
 }
 
 { #category : #'instance creation' }
+SWVariable class >> named: aNewname [
+	^ self new: nil named: aNewname with: nil
+]
+
+{ #category : #'instance creation' }
 SWVariable class >> new: aType [
-	^ self new: aType with: nil 
+	^ self new: aType named: nil with: nil 
+]
+
+{ #category : #'instance creation' }
+SWVariable class >> new: aType named: aNewname [
+	^ self new: aType named: aNewname with: nil
+		
+]
+
+{ #category : #'instance creation' }
+SWVariable class >> new: aType named: aNewname with: aPriority [
+	^ self new
+		<< aType;
+		name: aNewname;
+		priority: aPriority;
+		yourself.
+		
 ]
 
 { #category : #'instance creation' }
 SWVariable class >> new: aType with: aPriority [
-	^ self new
-		<< aType;
-		priority: aPriority;
-		yourself.
+	^ self new: aType named: nil with: aPriority
 
 ]
 

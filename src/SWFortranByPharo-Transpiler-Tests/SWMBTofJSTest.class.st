@@ -124,15 +124,15 @@ SWMBTofJSTest >> test_0170_ifNotNil_ifNil_expression [
 
 { #category : #tests }
 SWMBTofJSTest >> test_0260_ifNil_expression [
-	self resultWith: { Object } equals: 'return (needle !=  null ? needle : 123);
+	self resultWith: { Object } equals: 'return (needle != null ? needle : 123);
 '
 ]
 
 { #category : #tests }
 SWMBTofJSTest >> test_0261_ifNil_expression2 [
-	self resultWith: { Object } equals: 'return function(_receiver_){
-    return (_receiver_ !=  null ? _receiver_ : 123);
-}(needle.asTime());
+	self resultWith: { Object } equals: 'var t_0 = null;
+t_0 = needle.asTime();
+return (t_0 != null ? t_0 : 123);
 '
 ]
 
@@ -144,7 +144,7 @@ SWMBTofJSTest >> test_0290_SWStd_print [
 
 { #category : #tests }
 SWMBTofJSTest >> test_0300_recursive_message_call [
-	self resultWith: { SmallInteger } equals: 'return (0 < arg1 ? arg1 + (self._0300_recursive_message_call_(arg1 - 1)) : 0);
+	self resultWith: { SmallInteger } equals: 'return (0 < arg1) ? (arg1 + (self._0300_recursive_message_call_(arg1 - 1))) : 0;
 '
 ]
 
@@ -164,6 +164,16 @@ SWMBTofJSTest >> test_0330_try_catch [
     1 + 2;
 } catch {
     self.error();
+}
+'
+]
+
+{ #category : #tests }
+SWMBTofJSTest >> test_0331_try_catch2 [
+	self resultWith: {  } equals: 'try {
+    1 + 2;
+} catch (e){
+    self.error_(e.toString());
 }
 '
 ]
@@ -244,6 +254,11 @@ return (outer1 ? function(){
 ]
 
 { #category : #tests }
+SWMBTofJSTest >> test_0450_locals2 [
+	self resultWith: { String }
+]
+
+{ #category : #tests }
 SWMBTofJSTest >> test_0470_user_specified_variable_type [
 	self resultWith: {  } equals: 'var tmp1 = null;
 tmp1 = 3.14159265358979;
@@ -273,7 +288,7 @@ SWMBTofJSTest >> test_0500_at_ifAbsent [
 { #category : #utilities }
 SWMBTofJSTest >> transpile: aMethod with: operands [
 	(module pool transpilerFor: aMethod with: operands)
-		transpile
+		transpileAsMain
 
 
 ]

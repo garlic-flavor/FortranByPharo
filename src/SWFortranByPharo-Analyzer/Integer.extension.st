@@ -1,6 +1,6 @@
 Extension { #name : #Integer }
 
 { #category : #'*SWFortranByPharo-Analyzer' }
-Integer >> dispatchTo: transpiler [
-	^ transpiler atInteger: self
+Integer >> dispatchTo: dispatcher [
+	^ dispatcher atInteger: self
 ]

@@ -9,18 +9,42 @@ Class {
 		'slot',
 		'result',
 		'messageInfo',
+		'arguments',
+		'locals',
 		'children',
 		'pool'
 	],
 	#category : #'SWFortranByPharo-Analyzer-Analyzer'
 }
 
-{ #category : #private }
+{ #category : #modifying }
 SWExpression >> addToSlot: aName as: aType [
 	^ self slot addLast: (SWVariable new
 		<< aType;
 		name: aName;
 		yourself)
+]
+
+{ #category : #accessing }
+SWExpression >> arguments [
+
+	^ arguments
+]
+
+{ #category : #accessing }
+SWExpression >> arguments: anObject [
+
+	arguments := anObject
+]
+
+{ #category : #private }
+SWExpression >> assignTo: aLValue with: aRValue [
+	self decodeChildren.
+	self result << self children first result.
+	self slot detect: [ :each | each name = aLValue name ] ifFound: [ :var |
+		var << self result.		
+	].
+
 ]
 
 { #category : #'dispatching-callback' }
@@ -31,16 +55,25 @@ SWExpression >> at: anObject [
 { #category : #'dispatching-callback' }
 SWExpression >> atArray: anArrayNode [
 	self decodeChildren.
+	self flag: #toImplement.
 	self result << Array
 ]
 
 { #category : #'dispatching-callback' }
-SWExpression >> atAssignTo: aLValue with: aRValue [
-	self decodeChildren.
-	self result << self children first result.
-	self slot detect: [ :each | each name = aLValue name ] ifFound: [ :var |
-		var << self result.		
-	].
+SWExpression >> atAssign: anAssignNode [
+	self assignTo: anAssignNode variable with: anAssignNode value
+
+]
+
+{ #category : #'dispatching-callback' }
+SWExpression >> atBlock: aBlockNode [
+
+	self slot: self slot copy.
+	self readyArgsAndLocals.
+	self result << ((SWContainer new: BlockClosure)
+		elementType: self decodeStatements;
+		yourself)
+
 
 ]
 
@@ -61,24 +94,6 @@ SWExpression >> atCharacter: aCharacter [
 ]
 
 { #category : #'dispatching-callback' }
-SWExpression >> atClosure: aBlockNode [
-	|outerScope res|
-	outerScope := self slot copy.
-	aBlockNode argumentNames do: [ :name |
-		self addToSlot: name as: nil
-	].
-	aBlockNode temporaries do: [ :temp |
-		self addToSlot: temp name as: nil
-	].
-	res := ((SWContainer new: BlockClosure)
-		elementType: self decodeChildren;
-		yourself).
-	self result << res.
-	self slot: outerScope
-
-]
-
-{ #category : #'dispatching-callback' }
 SWExpression >> atFloat: aFloat [
 	self result << aFloat class
 ]
@@ -90,48 +105,38 @@ SWExpression >> atInteger: anInteger [
 ]
 
 { #category : #'dispatching-callback' }
+SWExpression >> atLiteralArray: aLiteralArrayNode [
+	self atArray: aLiteralArrayNode
+]
+
+{ #category : #'dispatching-callback' }
+SWExpression >> atLiteralValue: aLiteral [
+	aLiteral value ifNotNil: [ :val |
+		val dispatchTo: self
+	] ifNil: [
+		self result << UndefinedObject
+	]
+
+]
+
+{ #category : #'dispatching-callback' }
 SWExpression >> atMessage: aMessageNode [
 	self decodeChildren.
 	(aMessageNode selector = #declare:as: and: [ self children first result = SWType class ])ifTrue: [
 		self userSpecifyVariableType: aMessageNode
 	].
-	self atOrdinaryMessage: aMessageNode
-
-]
-
-{ #category : #'dispatching-callback' }
-SWExpression >> atMethod: traverser [
-	self decodeChildren.
-	self messageInfo hasResult ifFalse: [
-		self messageInfo result << self messageInfo operands first
-	]
-]
-
-{ #category : #'dispatching-callback' }
-SWExpression >> atNil [
-	self result << UndefinedObject
-]
-
-{ #category : #private }
-SWExpression >> atOrdinaryMessage: aMessageNode [
 
 	self messageInfo: (self pool decode: aMessageNode selector with: (self children collect: [ :each | each result ])) messageInfo.
 	self result << self messageInfo result
-"
-	operands := self children collect: [ :each | each result ].		
-	method := self class search: aMessageNode selector in: operands first value.
-	self sender: (SWSender new
-		operands: operands;
-		method: method;
-		yourself).
-	method ifNil: [
-		self logger log: [ 'An unknown method detected: ', aMessageNode selector ].
-		(self haltList includes: self class unresolvedSelectorKey)  ifTrue: [ self halt ].
-	] ifNotNil: [
-		self result << (self pool getResult: self sender).
-	]
-"
 
+]
+
+{ #category : #'dispatching-callback' }
+SWExpression >> atMethod: aMethodNode [
+	self decodeStatements.
+	self messageInfo hasResult ifFalse: [
+		self messageInfo result << self messageInfo operands first
+	]
 ]
 
 { #category : #'dispatching-callback' }
@@ -200,11 +205,10 @@ SWExpression >> decode [
 
 { #category : #private }
 SWExpression >> decodeChild: aNode [
-	^ self class new
+	^ self copy
 		node: aNode;
-		messageInfo: self messageInfo;
-		slot: self slot copy;
-		pool: self pool;
+		result: nil;
+		children: nil;
 		decode;
 		yourself.
 ]
@@ -217,9 +221,29 @@ SWExpression >> decodeChildren [
 	^ self children ifNotEmpty: [ self children last result ] ifEmpty: [ nil ]
 ]
 
+{ #category : #private }
+SWExpression >> decodeStatements [
+	self children: (self node statements collect: [ :child |
+		self decodeChild: child
+	]).
+	^ self children ifNotEmpty: [ self children last result ] ifEmpty: [ nil ]
+]
+
 { #category : #accessing }
 SWExpression >> expression [
 	^ self
+]
+
+{ #category : #accessing }
+SWExpression >> locals [
+
+	^ locals
+]
+
+{ #category : #accessing }
+SWExpression >> locals: anObject [
+
+	locals := anObject
 ]
 
 { #category : #accessing }
@@ -277,18 +301,29 @@ SWExpression >> pool: anObject [
 ]
 
 { #category : #private }
+SWExpression >> readyArgsAndLocals [
+	self arguments: (self node argumentNames collect: [ :name |
+		SWVariable named: name
+	]).
+	self locals: (self node temporaryNames collect: [ :name |
+		SWVariable named: name
+	]).
+	self slot
+		addAllLast: self arguments;
+		addAllLast: self locals
+	
+]
+
+{ #category : #private }
 SWExpression >> readySlot [
 	|receiver|
 	receiver := self messageInfo operands first.
-	self addToSlot: 'self' as: receiver.
-	self addToSlot: 'super' as: receiver superclass.
-	self node argumentNames  with: (self messageInfo operands allButFirst) do: [ :name :type |
-		self addToSlot: name as: type
-	].
-	self node temporaries do: [ :each |
-		self addToSlot: each name as: nil
-	].
-
+	self addToSlot: 'self' as: receiver;
+		addToSlot: 'super' as: receiver superclass;
+		readyArgsAndLocals.
+	self arguments with: self messageInfo operands allButFirst do: [ :arg :type |
+		arg << type
+	]
 ]
 
 { #category : #accessing }
