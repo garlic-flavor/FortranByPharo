@@ -57,7 +57,7 @@ SWMBTofJSTest >> test_0060_ifTrue_ifFalse [
 
 { #category : #tests }
 SWMBTofJSTest >> test_0070_ifTrue_ifFalse_expression [
-	self resultWith: { Boolean } equals: 'return (needle ? 123 : "False");
+	self resultWith: { Boolean } equals: 'return needle ? 123 : "False";
 '
 ]
 
@@ -118,13 +118,13 @@ SWMBTofJSTest >> test_0160_ifNotNil_ifNil [
 
 { #category : #tests }
 SWMBTofJSTest >> test_0170_ifNotNil_ifNil_expression [
-	self resultWith: { Object } equals: 'return (needle != null  ? 123 : "Nil");
+	self resultWith: { Object } equals: 'return needle != null  ? 123 : "Nil";
 '
 ]
 
 { #category : #tests }
 SWMBTofJSTest >> test_0260_ifNil_expression [
-	self resultWith: { Object } equals: 'return (needle != null ? needle : 123);
+	self resultWith: { Object } equals: 'return needle != null ? needle : 123;
 '
 ]
 
@@ -132,7 +132,7 @@ SWMBTofJSTest >> test_0260_ifNil_expression [
 SWMBTofJSTest >> test_0261_ifNil_expression2 [
 	self resultWith: { Object } equals: 'var t_0 = null;
 t_0 = needle.asTime();
-return (t_0 != null ? t_0 : 123);
+return t_0 != null ? t_0 : 123;
 '
 ]
 
@@ -180,11 +180,13 @@ SWMBTofJSTest >> test_0331_try_catch2 [
 
 { #category : #tests }
 SWMBTofJSTest >> test_0340_try_catch_expression [
-	self resultWith: {  } equals: 'return function(){ try {
-    return 1 + 2;
-} catch {
-    return self.error();
-}}();
+	self resultWith: {  } equals: 'var t_0 = null;
+try {
+    t_0 = (1 + 2);
+} catch(){
+    self.error();
+}
+return t_0;
 '
 ]
 
@@ -196,12 +198,13 @@ SWMBTofJSTest >> test_0390_opBinaries [
 
 { #category : #tests }
 SWMBTofJSTest >> test_0400_cascading [
-	self resultWith: { String } equals: 'var temp_0 = null;
-return (temp_0 = new SWServerStatus(), 
-    temp_0.failed(), 
-    temp_0.message_("hogehoge"), 
-    temp_0.uri_(uri), 
-    temp_0).toString();
+
+	self resultWith: { String } equals: 'var t_0 = null;
+t_0 = new SWServerStatus();
+t_0.failed();
+t_0.message_("hogehoge");
+t_0.uri_(uri);
+return (t_0).toString();
 '
 ]
 
@@ -240,22 +243,32 @@ return outervar;
 { #category : #tests }
 SWMBTofJSTest >> test_0440_locals [
 	self resultWith: { SmallInteger } equals: 'var outer1 = null;
+var inner = null;
+var inner = null;
+var inner2 = null;
 outer1 = true;
-return (outer1 ? function(){
-    var inner = null;
-    inner = 234;
-}() : function(){
-    var inner = null;
-    var inner2 = null;
-    inner = 345;
-    inner2 = "hello";
-}());
+return outer1 ? inner = 234 : (inner = 345, 
+    inner2 = "hello");
 '
 ]
 
 { #category : #tests }
 SWMBTofJSTest >> test_0450_locals2 [
-	self resultWith: { String }
+	self resultWith: { String } equals: 'var outer0 = null;
+var outer1 = null;
+var outer2 = null;
+var outer3 = null;
+outer1 = true;
+(function(arg2){
+    var inner1 = null;
+    var t_0 = null;
+    if(outer1){
+        var inner2 = null;
+        t_0 = (inner1 = "hoge", 
+            return inner2 = 234);
+    };
+})(345);
+'
 ]
 
 { #category : #tests }

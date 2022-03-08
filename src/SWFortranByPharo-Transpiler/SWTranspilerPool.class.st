@@ -76,7 +76,8 @@ SWTranspilerPool >> transpile_Behavior: ct [
 SWTranspilerPool >> transpile_BlockClosure: ct [
 	ct
 		senderTranspilerOf: #on:do: is: [ :bt | bt putOnDo ];
-		senderTranspilerOf: #ensure: is: [ :bt | bt putEnsure ]
+		senderTranspilerOf: #ensure: is: [ :bt | bt putEnsure ];
+		senderTranspilerOf: #value: is: [ :bt | bt putCall ]
 ]
 
 { #category : #initialization }

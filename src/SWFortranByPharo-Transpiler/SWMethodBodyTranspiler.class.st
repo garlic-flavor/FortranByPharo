@@ -52,7 +52,11 @@ SWMethodBodyTranspiler >> atBoolean: trueOrFalse [
 
 { #category : #accessing }
 SWMethodBodyTranspiler >> atCascade: aCascadeNode [
-	^ self subclassResponsibility 
+	self isExpression ifTrue: [
+		self putCascadeAsExpression
+	] ifFalse: [
+		self putCascadeAsNotExpression
+	]
 ]
 
 { #category : #accessing }
@@ -345,6 +349,16 @@ SWMethodBodyTranspiler >> putAtPut [
 	^ self subclassResponsibility 
 ]
 
+{ #category : #'as yet unclassified' }
+SWMethodBodyTranspiler >> putCascadeAsExpression [
+	^ self subclassResponsibility 
+]
+
+{ #category : #'as yet unclassified' }
+SWMethodBodyTranspiler >> putCascadeAsNotExpression [
+	^ self subclassResponsibility 
+]
+
 { #category : #'code generation' }
 SWMethodBodyTranspiler >> putCharacter: c [
 	self halt; flag: #toRewrite.
@@ -428,7 +442,7 @@ SWMethodBodyTranspiler >> putLocalsDeclaration [
 { #category : #'as yet unclassified' }
 SWMethodBodyTranspiler >> putMessageWithSelector: aSelector [
 	self
-		transpileChild: self children first;
+		transpileChildAsExpression: self children first;
 		putClassAccessor;
 		put: aSelector;
 		putArguments: self children allButFirst

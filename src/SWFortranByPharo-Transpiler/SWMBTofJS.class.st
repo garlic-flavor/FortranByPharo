@@ -9,39 +9,17 @@ Class {
 
 { #category : #accessing }
 SWMBTofJS >> atBlock: aBlockNode [
-	self halt.
-	self isExpression: false.
-	self putClosure
+	self isExpression ifTrue: [
+		self put: '(function'; putArgsAndBody; put: ')'
+	] ifFalse: [
+		self halt.
+	]
 
 ]
 
 { #category : #'as yet unclassified' }
 SWMBTofJS >> atBoolean: trueOrFalse [
 	self put: (trueOrFalse ifTrue: [ 'true' ] ifFalse: [ 'false' ])
-]
-
-{ #category : #'code generation' }
-SWMBTofJS >> atCascade: aCascadeNode [
-	aCascadeNode receiver class = RBVariableNode ifTrue: [
-		self putSequence.
-		self isExpression ifFalse: [
-			self 	preventStatementDelimiter; preventNewline
-		]
-	] ifFalse: [|receiver temp|
-		receiver := self children first children first.
-		temp := self makeNewVariable: receiver result.
-		self put: '('; put: temp name; put: ' = '; transpileChildAsExpression: receiver; put: ', '; cr; incIndent.
-		self children do: [:child|
-			child children at: 1 put: (SWExpression new
-				node: (RBVariableNode named: temp name);
-				result: receiver result;
-				yourself).
-			(self child: child)
-				transpile.
-		] separatedBy: [ self put: ', '; cr ].
-		self put: ')'; decIndent
-	]
-
 ]
 
 { #category : #accessing }
@@ -69,7 +47,7 @@ SWMBTofJS >> atSymbol: aSymbol [
 { #category : #'as yet unclassified' }
 SWMBTofJS >> putArgsAndBody [
 	self putArgumentDeclaration: self node arguments;
-		putBlockBody
+		putBlockBodyWithLocalScope
 
 ]
 
@@ -109,8 +87,7 @@ SWMBTofJS >> putAtIfAbsent [
 		transpileChildAsExpression: self children first;
 		put: '['; transpileChildAsExpression: self children second; put: '] || '.
 	(self child: self children third)
-		isExpression: true;
-		putBlock
+		putBlockBodyAsExpression
 		
 ]
 
@@ -175,7 +152,7 @@ SWMBTofJS >> putBlockAsExpression [
 SWMBTofJS >> putBlockBody [
 	self put: '{'; cr; incIndent;
 		putVariableDeclarations;
-		preserveDeclaration: [ self putSequence ];
+		putSequence;
 		decIndent; put: '}'
 
 ]
@@ -190,8 +167,72 @@ SWMBTofJS >> putBlockBodyAsExpression [
 ]
 
 { #category : #'as yet unclassified' }
+SWMBTofJS >> putBlockBodyWithLocalScope [
+	self put: '{'; cr; incIndent;
+		preserveDeclaration: [
+			self putVariableDeclarations;
+				putSequence
+		];
+		decIndent; put: '}'
+
+]
+
+{ #category : #'as yet unclassified' }
 SWMBTofJS >> putBoolean: trueOrFalse [
 	self put: (trueOrFalse ifTrue: [ 'true' ] ifFalse: [ 'false' ])
+]
+
+{ #category : #'as yet unclassified' }
+SWMBTofJS >> putCall [
+	self transpileChildAsExpression: self children first;
+		putArguments: self children allButFirst
+]
+
+{ #category : #'code generation' }
+SWMBTofJS >> putCascadeAsExpression [
+	self node receiver class = RBVariableNode ifTrue: [
+		self halt.
+		self putSequenceAsExpression.
+	] ifFalse: [|receiver rval rexp last|
+		receiver := self children first children first.
+		rval := self makeNewVariable: receiver result.
+		rexp := SWExpression new
+			node: (RBVariableNode named: rval name);
+			result: receiver result;
+			yourself.
+		self preserveCurrentStatement: [
+			self put: rval name; put: ' = '; transpileChildAsExpressionWithoutBracket: receiver; putStatementDelimiter; cr.
+			self children allButLastDo: [ :child |
+				child children at: 1 put: rexp.
+				self putStatement: child
+			]
+		].
+		last := self children last.
+		last children at:1 put: rexp.
+		self transpileChildAsExpression: last
+	]
+]
+
+{ #category : #'code generation' }
+SWMBTofJS >> putCascadeAsNotExpression [
+	self node receiver class = RBVariableNode ifTrue: [
+		self putSequence; preventStatementDelimiter; preventNewline
+	] ifFalse: [|rcv tmp|
+		self halt.
+		rcv := self children first children first.
+		tmp := self makeNewVariable: rcv result.
+		self put: '('; put: tmp name; put: ' = '; transpileChildAsExpression: rcv; put: ', '; cr; incIndent.
+		self children do: [:child|
+			child children at: 1 put: (SWExpression new
+				node: (RBVariableNode named: tmp name);
+				result: rcv result;
+				yourself).
+			(self child: child)
+				transpile.
+		] separatedBy: [ self put: ', '; cr ].
+		self put: ')'; decIndent
+	]
+
 ]
 
 { #category : #'code generation' }
@@ -359,19 +400,21 @@ SWMBTofJS >> putIfTrue: strait [
 
 { #category : #'code generation' }
 SWMBTofJS >> putIfTrueAsExpression: strait [
-	self isExpression ifTrue: [
-		self halt.
-	] ifFalse: [
+	|res|
+	res := self makeNewVariable: self children second result.
+	self preserveCurrentStatement: [
 		self put: 'if('.
 		strait ifFalse: [ self put: '!' ].
-		(self child: self children first)
-			isExpression: true;
-			transpile.
-		self put: '){'; cr; incIndent.
-		(self child: self children second)
-			isExpression: false;
-			putBlock.
-		self decIndent; put: '}'; preventStatementDelimiter
+		self transpileChildAsExpression: self children first;
+			put: '){'; cr; incIndent;
+			preserveDeclaration: [
+				(self child: self children second)
+					putVariableDeclarations;
+					put: res name; put: ' = ';
+					putSequenceAsExpression;
+					putStatementDelimiter; cr
+			];
+			decIndent; put: '}'; preventStatementDelimiter
 	]
 
 ]
@@ -383,7 +426,7 @@ SWMBTofJS >> putIfTrueAsNotExpression: strait [
 	self transpileChildAsExpression: self children first.
 	self put: ')'.
 	(self child: self children second)
-		putBlockBody.
+		putBlockBodyWithLocalScope.
 	self preventStatementDelimiter
 
 ]
@@ -462,16 +505,18 @@ SWMBTofJS >> putOnDo [
 
 { #category : #enumerating }
 SWMBTofJS >> putOnDoAsExpression [
-	self halt; flag: #toRewrite.
-	self put: 'function(){ try {'; cr; incIndent; put: 'return '.
-	(self child: self children first)
-		isExpression: true;
-		putBlock.
-	self putStatementDelimiter; cr; decIndent; put: '} catch {'; cr; incIndent; put: 'return '.
-	(self child: self children third)
-		isExpression: true;
-		putBlock.
-	self putStatementDelimiter; cr; decIndent; put: '}}()'
+	|result|
+	result := self makeNewVariable: self children first result elementType.
+	self preserveCurrentStatement: [
+		self put: 'try {'; cr; incIndent; put: result name; put: ' = '.
+		(self child: self children first)
+			putSequenceAsExpression.
+		self putStatementDelimiter; cr; decIndent; put: '} catch'.
+		(self child: self children third)
+			putArgsAndBody.
+		self cr.
+	].
+	self put: result name
 
 ]
 
@@ -479,14 +524,14 @@ SWMBTofJS >> putOnDoAsExpression [
 SWMBTofJS >> putOnDoAsNotExpression [
 	self put: 'try '.
 	(self child: self children first)
-		putBlockBody.
+			putBlockBodyWithLocalScope.
 	self put: ' catch '.
 	self children third arguments isNotEmpty ifTrue: [
 		(self child: self children third)
 			putArgsAndBody
 	] ifFalse: [
 		(self child: self children third)
-			putBlockBody.
+			putBlockBodyWithLocalScope.
 	].
 	self preventStatementDelimiter 
 

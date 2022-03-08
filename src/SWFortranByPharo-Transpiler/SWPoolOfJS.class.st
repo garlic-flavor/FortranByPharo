@@ -54,6 +54,7 @@ SWPoolOfJS >> transpile_FileLocator: ctd [
 
 { #category : #'as yet unclassified' }
 SWPoolOfJS >> transpile_Object: cdt [
+	super transpile_Object: cdt.
 	cdt
 		senderTranspilerOf: #asString is: [ :mbt | mbt putMessageWithSelector: 'toString' ]
 
