@@ -245,7 +245,7 @@ SWCDTofJS >> putMemberDeclarationOf: aVariableTypeInfo [
 
 { #category : #'as yet unclassified' }
 SWCDTofJS >> putMethodFooter: mbt [
-	mbt decIndent; put: '}'; cr
+
 ]
 
 { #category : #'as yet unclassified' }
@@ -253,20 +253,7 @@ SWCDTofJS >> putMethodHeader: mbt [
 	mbt expression method methodClass isClassSide ifTrue: [
 		self stream put: 'static '
 	].
-	mbt
-		put: (self mangleClass mangle: mbt expression);
-		put: '('.
-
-	mbt expression node arguments do: [ :vi |
-		mbt put: vi name
-	] separatedBy: [
-		mbt put: ', '
-	].
-	mbt put: '){'; cr; incIndent.
-	mbt expression method methodClass isInstanceSide ifFalse: [ ^ self ].
-	(mbt expression node allVariables anySatisfy: [ :each | each name = 'self' ]) ifFalse: [ ^ self ].
-	mbt putSelfDeclaration 
-
+	mbt put: (self mangleClass mangle: mbt expression)
 		
 
 ]

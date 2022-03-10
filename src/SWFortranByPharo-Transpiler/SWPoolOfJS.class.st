@@ -39,7 +39,7 @@ SWPoolOfJS >> transpile_Collection: cdt [
 			(mbt child: mbt children third) putClosure.
 			mbt
 				put: ', ';
-				transpileChildAsExpression: mbt children second;
+				transpileChild: mbt children second;
 				put: ')'.
 		]
 ]

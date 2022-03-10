@@ -61,7 +61,7 @@ SWMBTofJSTest >> test_0070_ifTrue_ifFalse_expression [
 If(needle){
     t_0 = 123;
 } else {
-    t_0 = 123;
+    t_0 = "False";
 }
 return t_0;
 '
@@ -147,8 +147,12 @@ return t_0;
 { #category : #tests }
 SWMBTofJSTest >> test_0261_ifNil_expression2 [
 	self resultWith: { Object } equals: 'var t_0 = null;
-t_0 = needle.asTime();
-return t_0 != null ? t_0 : 123;
+var t_1 = null;
+t_1 = needle.asTime();
+if(t_1 == null )  {
+    t_0 = 123;
+}
+return t_0;
 '
 ]
 
@@ -160,7 +164,13 @@ SWMBTofJSTest >> test_0290_SWStd_print [
 
 { #category : #tests }
 SWMBTofJSTest >> test_0300_recursive_message_call [
-	self resultWith: { SmallInteger } equals: 'return (0 < arg1) ? (arg1 + (self._0300_recursive_message_call_(arg1 - 1))) : 0;
+	self resultWith: { SmallInteger } equals: 'var t_0 = null;
+If(0 < arg1){
+    t_0 = arg1 + (self._0300_recursive_message_call_(arg1 - 1));
+} else {
+    t_0 = 0;
+}
+return t_0;
 '
 ]
 
@@ -198,8 +208,8 @@ SWMBTofJSTest >> test_0331_try_catch2 [
 SWMBTofJSTest >> test_0340_try_catch_expression [
 	self resultWith: {  } equals: 'var t_0 = null;
 try {
-    t_0 = (1 + 2);
-} catch(){
+    t_0 = 1 + 2;
+}catch{
     self.error();
 }
 return t_0;
@@ -220,7 +230,7 @@ t_0 = new SWServerStatus();
 t_0.failed();
 t_0.message_("hogehoge");
 t_0.uri_(uri);
-return (t_0).toString();
+return t_0.toString();
 '
 ]
 
@@ -259,12 +269,18 @@ return outervar;
 { #category : #tests }
 SWMBTofJSTest >> test_0440_locals [
 	self resultWith: { SmallInteger } equals: 'var outer1 = null;
-var inner = null;
-var inner = null;
-var inner2 = null;
+var t_0 = null;
 outer1 = true;
-return outer1 ? inner = 234 : (inner = 345, 
-    inner2 = "hello");
+If(outer1){
+    var inner = null;
+    t_0 = inner = 234;
+} else {
+    var inner = null;
+    var inner2 = null;
+    inner = 345;
+    t_0 = inner2 = "hello";
+}
+return t_0;
 '
 ]
 
@@ -277,12 +293,12 @@ var outer3 = null;
 outer1 = true;
 (function(arg2){
     var inner1 = null;
-    var t_0 = null;
     if(outer1){
         var inner2 = null;
-        t_0 = (inner1 = "hoge", 
-            return inner2 = 234);
-    };
+        inner1 = "hoge";
+        inner2 = 234;
+    }
+    return inner1;
 })(345);
 '
 ]
@@ -310,7 +326,12 @@ SWMBTofJSTest >> test_0490_at_put [
 
 { #category : #tests }
 SWMBTofJSTest >> test_0500_at_ifAbsent [
-	self resultWith: { Dictionary } equals: 'return dict["hello"] || "world";
+	self resultWith: { Dictionary } equals: 'var t_0 = null;
+t_0 = dict["hello"];
+if (t_0== null){
+    t_0 = "world";
+}
+return t_0;
 '
 ]
 

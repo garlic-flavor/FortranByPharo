@@ -367,8 +367,9 @@ SWTestProgram >> _0450_locals2: arg1 [
 	[ :arg2| |inner1|
 		outer1 ifTrue: [|inner2|
 			inner1 := 'hoge'.
-			^ inner2 := 234.
+			 inner2 := 234.
 		].
+		inner1
 	] value: 345.
 ]
 
@@ -483,7 +484,7 @@ SWTestProgram >> _9004_cascading_3: needle [
 			at: 'heaven' put: (Set new
 				add: 'lost';
 				add: 'hell';
-				yourself)
+				yourself);
 			yourself
 	]
 

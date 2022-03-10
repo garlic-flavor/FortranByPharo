@@ -10,11 +10,19 @@ Class {
 		'pool',
 		'isExpression',
 		'declarationStream',
-		'parentStream',
+		'previousStream',
 		'temp'
 	],
 	#category : #'SWFortranByPharo-Transpiler-Common'
 }
+
+{ #category : #accessing }
+SWMethodBodyTranspiler >> append: aChild [
+	self stream
+		append: aChild declarationStream;
+		append: aChild previousStream;
+		append: aChild stream
+]
 
 { #category : #'code generation' }
 SWMethodBodyTranspiler >> at: anObject [
@@ -36,7 +44,7 @@ SWMethodBodyTranspiler >> atAssign: anAssignNode [
 	self
 		transpileChild: self children second;
 		put: ' = ';
-		transpileChildAsExpressionWithoutBracket: self children first
+		transpileChildWithoutBracket: self children first
 
 ]
 
@@ -61,11 +69,6 @@ SWMethodBodyTranspiler >> atCascade: aCascadeNode [
 
 { #category : #'dispatching-callback' }
 SWMethodBodyTranspiler >> atCharacter: aChar [
-	^ self subclassResponsibility 
-]
-
-{ #category : #'dispatching-callback' }
-SWMethodBodyTranspiler >> atClosure: aBlockNode [
 	^ self subclassResponsibility 
 ]
 
@@ -102,28 +105,22 @@ SWMethodBodyTranspiler >> atMessage: aMessageNode [
 
 { #category : #'dispatching-callback' }
 SWMethodBodyTranspiler >> atMethod: aMethodNode [
-	self halt.
-	self children allButLastDo: [ :child |
-		(self child: child) putArgumentDeclaration
-	].
-	self preserveDeclaration: [
-		(self child: self children last)
-			isExpression: false;
-			putSequence.
-	].
-	(self isExpression and: [ self expression node containsReturn not ]) ifTrue: [
-		self putReturnSelf
-	]
-]
-
-{ #category : #'dispatching-callback' }
-SWMethodBodyTranspiler >> atNil [
-	^ self subclassResponsibility 
+	|child|
+	self putArgumentDeclaration: self expression arguments.
+	self put: '{'; cr; incIndent;
+		putSelfDeclaration.
+	child := (self subChild: self expression)
+		isExpression: false;
+		putVariableDeclarations;
+		putSequence.
+	self append: child.
+	self expression node containsReturn ifFalse: [ self putReturnSelf ].
+	self decIndent; put: '}'; cr
 ]
 
 { #category : #'code generation' }
 SWMethodBodyTranspiler >> atReturn: aReturnNode [
-	self putReturnKeyword; put: ' '; transpileChildAsExpressionWithoutBracket: (self children first)
+	self putReturnKeyword; put: ' '; transpileChildWithoutBracket: (self children first)
 
 ]
 
@@ -248,18 +245,6 @@ SWMethodBodyTranspiler >> node [
 ]
 
 { #category : #accessing }
-SWMethodBodyTranspiler >> parentStream [
-
-	^ parentStream ifNil: [ parentStream := self pool stream ]
-]
-
-{ #category : #accessing }
-SWMethodBodyTranspiler >> parentStream: anObject [
-
-	parentStream := anObject
-]
-
-{ #category : #accessing }
 SWMethodBodyTranspiler >> pool [
 
 	^ pool
@@ -275,18 +260,9 @@ SWMethodBodyTranspiler >> pool: anObject [
 SWMethodBodyTranspiler >> preserveCurrentStatement: aBlock [
 	|original|
 	original := self stream.
-	self stream: self parentStream.
+	self stream: self previousStream.
 	aBlock value.
 	self stream: original
-]
-
-{ #category : #'as yet unclassified' }
-SWMethodBodyTranspiler >> preserveDeclaration: aBlock [
-self halt.	
-	self declarationStream: self parentStream subStream.
-	aBlock value.
-	self parentStream append: self declarationStream
-
 ]
 
 { #category : #'code generation - protected' }
@@ -299,13 +275,25 @@ SWMethodBodyTranspiler >> preventStatementDelimiter [
 	self stream preventDelimiter
 ]
 
+{ #category : #accessing }
+SWMethodBodyTranspiler >> previousStream [
+
+	^ previousStream
+]
+
+{ #category : #accessing }
+SWMethodBodyTranspiler >> previousStream: anObject [
+
+	previousStream := anObject
+]
+
 { #category : #'code generation' }
 SWMethodBodyTranspiler >> put: anObject [
 	self stream put: anObject asString
 ]
 
-{ #category : #'code generation' }
-SWMethodBodyTranspiler >> putArgumentDeclaration [
+{ #category : #'as yet unclassified' }
+SWMethodBodyTranspiler >> putArgumentDeclaration: anArrayOfNode [
 	^ self subclassResponsibility 
 ]
 
@@ -314,7 +302,7 @@ SWMethodBodyTranspiler >> putArguments: arguments [
 
 	self put: '('.
 	arguments do: [ :each |
-		self transpileChildAsExpressionWithoutBracket: each
+		self transpileChildWithoutBracket: each
 	] separatedBy: [
 		self put: ', '
 	].
@@ -359,32 +347,8 @@ SWMethodBodyTranspiler >> putCascadeAsNotExpression [
 ]
 
 { #category : #'code generation' }
-SWMethodBodyTranspiler >> putCharacter: c [
-	self halt; flag: #toRewrite.
-	self
-		put: '"';
-		put: c asString;
-		put: '"'.
-]
-
-{ #category : #'code generation' }
 SWMethodBodyTranspiler >> putClassAccessor [
 	self put: '.'
-]
-
-{ #category : #'code generation' }
-SWMethodBodyTranspiler >> putClosure: aNode [
-	|tran|
-	self halt; flag: #toRewrite.
-	tran := self senders at: aNode.
-	tran transpile.
-
-]
-
-{ #category : #'code generation' }
-SWMethodBodyTranspiler >> putCode: code [
-	self halt; flag: #toRewrite.
-	^ self putCode: code with: {  }
 ]
 
 { #category : #'code generation' }
@@ -434,14 +398,9 @@ SWMethodBodyTranspiler >> putImport: anArray from: aSource [
 ]
 
 { #category : #'code generation' }
-SWMethodBodyTranspiler >> putLocalsDeclaration [
-	^ self subclassResponsibility 
-]
-
-{ #category : #'code generation' }
 SWMethodBodyTranspiler >> putMessageWithSelector: aSelector [
 	self
-		transpileChildAsExpression: self children first;
+		transpileChild: self children first;
 		putClassAccessor;
 		put: aSelector;
 		putArguments: self children allButFirst
@@ -472,29 +431,17 @@ SWMethodBodyTranspiler >> putOpBinary [
 { #category : #'code generation' }
 SWMethodBodyTranspiler >> putOpBinaryWith: anOp [
 	self
-		transpileChildAsExpression: self children first;
+		transpileChild: self children first;
 		put: ' ';
 		put: anOp;
 		put: ' ';
-		transpileChildAsExpression: self children second
+		transpileChild: self children second
 
 ]
 
 { #category : #'code generation' }
 SWMethodBodyTranspiler >> putOrdinaryMessage [
 	self putMessageWithSelector: self mangle
-
-]
-
-{ #category : #'code generation' }
-SWMethodBodyTranspiler >> putParameters: anArray [
-	self halt; flag: #toRewrite.
-
-	anArray do: [:each |
-		self put: each asString
-	] separatedBy: [
-		self put: ', '
-	]
 
 ]
 
@@ -533,23 +480,12 @@ SWMethodBodyTranspiler >> putSequence [
 ]
 
 { #category : #'code generation' }
-SWMethodBodyTranspiler >> putSequenceAsExpression [
-
-	1 < self children size ifTrue: [ self put: '('; incIndent ].
-	self children do: [ :child |
-		self transpileChildAsExpression: child
-	] separatedBy: [ self putExpressionDelimiter; cr ].
-	1 < self children size ifTrue: [ self decIndent; put: ')' ].
-
-]
-
-{ #category : #'code generation' }
 SWMethodBodyTranspiler >> putStatement: anExpression [
 	|child|
 	child := self copy
 		expression: anExpression;
 		isExpression: false;
-		parentStream: self stream;
+		previousStream: self stream;
 		stream: self stream subStream;
 		transpile;
 		putStatementDelimiter;
@@ -565,7 +501,7 @@ SWMethodBodyTranspiler >> putStatementAsExpression: anExpression [
 	child := self copy
 		expression: anExpression;
 		isExpression: true;
-		parentStream: self stream;
+		previousStream: self stream;
 		stream: self stream subStream;
 		transpile;
 		yourself.
@@ -616,7 +552,7 @@ SWMethodBodyTranspiler >> receiverClass [
 
 { #category : #accessing }
 SWMethodBodyTranspiler >> stream [
-	^ stream
+	^ stream ifNil: [ stream := self pool stream ]
 ]
 
 { #category : #accessing }
@@ -630,7 +566,8 @@ SWMethodBodyTranspiler >> stream: anObject [
 SWMethodBodyTranspiler >> subChild: anExpression [
 	^ self copy
 		expression: anExpression;
-		parentStream: self stream;
+		declarationStream: self stream subStream;
+		previousStream: self stream subStream;
 		stream: self stream subStream;
 		yourself
 ]
@@ -656,28 +593,19 @@ SWMethodBodyTranspiler >> transpile [
 
 { #category : #'public API' }
 SWMethodBodyTranspiler >> transpileAsMain [
-	self temp;
-		declarationStream: self parentStream subStream;
-		stream: self parentStream subStream;
+	|child|
+	self temp.
+	child := (self subChild: self expression)
+		isExpression: false;
 		putVariableDeclarations;
-		putSequence.
-	self parentStream
-		append: self declarationStream;
-		append: self stream
+		putSequence;
+		yourself.
+	self append: child
+
 ]
 
 { #category : #'as yet unclassified' }
 SWMethodBodyTranspiler >> transpileChild: anExpression [
-	^ self copy
-		expression: anExpression;
-		isExpression: self isExpression;
-		transpile;
-		yourself
-
-]
-
-{ #category : #'as yet unclassified' }
-SWMethodBodyTranspiler >> transpileChildAsExpression: anExpression [
 	|needsBracket|
 	needsBracket := anExpression node class = RBMessageNode.
 	needsBracket ifTrue: [ self put: '(' ].
@@ -690,35 +618,10 @@ SWMethodBodyTranspiler >> transpileChildAsExpression: anExpression [
 ]
 
 { #category : #'as yet unclassified' }
-SWMethodBodyTranspiler >> transpileChildAsExpressionWithoutBracket: anExpression [
+SWMethodBodyTranspiler >> transpileChildWithoutBracket: anExpression [
 	self copy
 		expression: anExpression;
 		isExpression: true;
 		transpile.
-
-]
-
-{ #category : #'as yet unclassified' }
-SWMethodBodyTranspiler >> transpileChildAsNotExpression: aDecoder [
-	(self child: aDecoder)
-		isExpression: false;
-		transpile
-
-]
-
-{ #category : #'as yet unclassified' }
-SWMethodBodyTranspiler >> transpileChildren [
-	self children do: [ :child |
-		self transpileChild: child
-	].
-
-]
-
-{ #category : #'as yet unclassified' }
-SWMethodBodyTranspiler >> transpileSubChild: anExpression [
-	^ (self subChild: anExpression)
-		isExpression: self isExpression;
-		transpile;
-		yourself
 
 ]

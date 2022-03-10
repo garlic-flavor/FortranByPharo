@@ -10,7 +10,8 @@ Class {
 { #category : #accessing }
 SWMBTofJS >> atBlock: aBlockNode [
 	self isExpression ifTrue: [
-		self put: '(function'; putArgsAndBody; put: ')'
+		aBlockNode containsReturn ifTrue: [ self error: 'A return inside a closure behaves differently.' ].
+		self put: '(function'; putArgsAndBodyAndReturn: self expression; put: ')'
 	] ifFalse: [
 		self halt.
 	]
@@ -32,11 +33,6 @@ SWMBTofJS >> atCharacter: aChar [
 ]
 
 { #category : #accessing }
-SWMBTofJS >> atNil [
-	self put: 'null'
-]
-
-{ #category : #accessing }
 SWMBTofJS >> atSymbol: aSymbol [
 	self
 		put: '"';
@@ -45,9 +41,16 @@ SWMBTofJS >> atSymbol: aSymbol [
 ]
 
 { #category : #'as yet unclassified' }
-SWMBTofJS >> putArgsAndBody [
-	self putArgumentDeclaration: self node arguments;
-		putBlockBodyWithLocalScope
+SWMBTofJS >> putArgsAndBody: anExpression [
+	self putArgumentDeclaration: anExpression arguments;
+		putBlock: anExpression
+
+]
+
+{ #category : #'as yet unclassified' }
+SWMBTofJS >> putArgsAndBodyAndReturn: anExpression [
+	self putArgumentDeclaration: anExpression arguments;
+		putBlockBodyAndReturn: anExpression
 
 ]
 
@@ -83,12 +86,15 @@ SWMBTofJS >> putArraySeparator [
 
 { #category : #'as yet unclassified' }
 SWMBTofJS >> putAtIfAbsent [
-	self
-		transpileChildAsExpression: self children first;
-		put: '['; transpileChildAsExpression: self children second; put: '] || '.
-	(self child: self children third)
-		putBlockBodyAsExpression
-		
+	|res|
+	res := self makeNewVariable: self expression result.
+	self preserveCurrentStatement: [
+		self put: res name; put: ' = '; transpileChild: self children first;
+		put: '[';  transpileChild: self children second; put: ']'; putStatementDelimiter; cr;
+		put: 'if ('; put: res name; put: '== null)';  putBlockBody: self children third assignTo: res name; cr
+	].
+	self put: res name
+
 ]
 
 { #category : #'as yet unclassified' }
@@ -96,82 +102,27 @@ SWMBTofJS >> putAtPut [
 	self
 		transpileChild: self children first;
 		put: '[';
-		transpileChildAsExpression: self children second;
+		transpileChild: self children second;
 		put: '] = ';
-		transpileChildAsExpression: self children third
+		transpileChild: self children third
 	
-]
-
-{ #category : #accessing }
-SWMBTofJS >> putBlock [
-	|functionized|
-	functionized := (self isExpression and: [ self node arguments isNotEmpty or: [ self node temporaries isNotEmpty ] ]).
-	functionized ifTrue: [
-		self put: 'function('.
-		self node arguments do: [ :each |
-			self put: each name
-		] separatedBy: [ self put: ', ' ].
-		self put: '){'; cr; incIndent.
-	].
-	self children allButLastDo: [ :child |
-		(self child: child)
-			putArgumentDeclaration
-	].
-	self preserveDeclaration: [
-		(self child: self children last)
-			isExpression: (functionized not and: [ self isExpression ]);
-			putSequence.
-		self expression node class = RBMethodNode ifTrue: [
-			self expression node lastIsReturn ifFalse: [
-				self putReturnKeyword; put: ' this;'; cr
-			]
-		]
-	].
-	functionized ifTrue: [
-		self
-			decIndent; put: '}()'
-	]
-	
-
-]
-
-{ #category : #'code generation' }
-SWMBTofJS >> putBlockAsExpression [
-	self children allButLastDo: [ :child |
-		(self child: child)
-			putArgumentDeclaration
-	].
-	(self child: self children last)
-		isExpression: true;
-		putSequence.
-	
-
 ]
 
 { #category : #'as yet unclassified' }
-SWMBTofJS >> putBlockBody [
-	self halt.
-	self parentStream: self stream;
-		putVariableDeclarations;
-		putSequence;
-		decIndent; put: '}'
-
-]
-
-{ #category : #'as yet unclassified' }
-SWMBTofJS >> putBlockBody: anExpression [
+SWMBTofJS >> putBlock: anExpression [
 	|child|
 	self put: '{'; cr; incIndent.
 	child := self copy
 		expression: anExpression;
 		isExpression: false;
-		parentStream: self stream;
+		previousStream: self stream subStream;
 		declarationStream: self stream subStream;
 		stream: self stream subStream;
 		putVariableDeclarations;
 		putSequence.
 	self stream
 		append: child declarationStream;
+		append: child previousStream;
 		append: child stream.
 	self decIndent; put: '}'
 
@@ -185,13 +136,14 @@ SWMBTofJS >> putBlockBody: anExpression assignTo: aVarName [
 	child := self copy
 		expression: anExpression;
 		isExpression: false;
-		parentStream: self stream;
+		previousStream: self stream subStream;
 		declarationStream: self stream subStream;
 		stream: self stream subStream;
 		putVariableDeclarations;
 		putSequenceAssignTo: aVarName.
 	self stream
 		append: child declarationStream;
+		append: child previousStream;
 		append: child stream.
 	self decIndent; put: '}'
 
@@ -206,13 +158,34 @@ SWMBTofJS >> putBlockBody: anExpression with: args assignTo: aVarName [
 	child := self copy
 		expression: anExpression;
 		isExpression: false;
-		parentStream: self stream;
+		previousStream: self stream;
 		declarationStream: self stream subStream;
 		stream: self stream subStream;
 		putVariableDeclarations;
 		putSequenceAssignTo: aVarName.
 	self stream
 		append: child declarationStream;
+		append: child stream.
+	self decIndent; put: '}'
+
+		
+]
+
+{ #category : #'as yet unclassified' }
+SWMBTofJS >> putBlockBodyAndReturn: anExpression [
+	|child|
+	self put: '{'; cr; incIndent.
+	child := self copy
+		expression: anExpression;
+		isExpression: false;
+		previousStream: self stream subStream;
+		declarationStream: self stream subStream;
+		stream: self stream subStream;
+		putVariableDeclarations;
+		putSequenceAndReturn.
+	self stream
+		append: child declarationStream;
+		append: child previousStream;
 		append: child stream.
 	self decIndent; put: '}'
 
@@ -236,7 +209,7 @@ SWMBTofJS >> putBlockBodyAssignTo: varName [
 			self children allButFirstDo: [ :child |
 				self putStatement: child
 			].
-			self put: varName; put: ' = '; transpileChildAsExpressionWithoutBracket: self children last
+			self put: varName; put: ' = '; transpileChildWithoutBracket: self children last
 		];
 		cr; decIndent; put: '}'
 ]
@@ -259,7 +232,7 @@ SWMBTofJS >> putBoolean: trueOrFalse [
 
 { #category : #'as yet unclassified' }
 SWMBTofJS >> putCall [
-	self transpileChildAsExpression: self children first;
+	self transpileChild: self children first;
 		putArguments: self children allButFirst
 ]
 
@@ -276,7 +249,7 @@ SWMBTofJS >> putCascadeAsExpression [
 			result: receiver result;
 			yourself.
 		self preserveCurrentStatement: [
-			self put: rval name; put: ' = '; transpileChildAsExpressionWithoutBracket: receiver; putStatementDelimiter; cr.
+			self put: rval name; put: ' = '; transpileChildWithoutBracket: receiver; putStatementDelimiter; cr.
 			self children allButLastDo: [ :child |
 				child children at: 1 put: rexp.
 				self putStatement: child
@@ -284,7 +257,7 @@ SWMBTofJS >> putCascadeAsExpression [
 		].
 		last := self children last.
 		last children at:1 put: rexp.
-		self transpileChildAsExpression: last
+		self transpileChildWithoutBracket: last
 	]
 ]
 
@@ -296,7 +269,7 @@ SWMBTofJS >> putCascadeAsNotExpression [
 		self halt.
 		rcv := self children first children first.
 		tmp := self makeNewVariable: rcv result.
-		self put: '('; put: tmp name; put: ' = '; transpileChildAsExpression: rcv; put: ', '; cr; incIndent.
+		self put: '('; put: tmp name; put: ' = '; transpileChild: rcv; put: ', '; cr; incIndent.
 		self children do: [:child|
 			child children at: 1 put: (SWExpression new
 				node: (RBVariableNode named: tmp name);
@@ -329,7 +302,7 @@ SWMBTofJS >> putClosure [
 		self transpileChildAsNotExpression: child
 	].
 	self putReturnKeyword; put: ' '.
-	self transpileChildAsExpression: sequence children last.
+	self transpileChild: sequence children last.
 	self putStatementDelimiter; cr; decIndent; put: '}'
 	
 
@@ -337,6 +310,7 @@ SWMBTofJS >> putClosure [
 
 { #category : #'as yet unclassified' }
 SWMBTofJS >> putEnsure [
+	self halt.
 	self isExpression ifTrue: [
 		self put: 'function() { try { '; cr; incIndent; put: 'return '.
 		(self child: self children first)
@@ -377,7 +351,7 @@ SWMBTofJS >> putIfNotNilAsExpression: strait [
 	] ifFalse: [
 		receiver := (self makeNewVariable: self children first result) name.
 		self preserveCurrentStatement: [
-			self put: receiver; put: ' = '; transpileChildAsExpressionWithoutBracket: self children first;
+			self put: receiver; put: ' = '; transpileChildWithoutBracket: self children first;
 				putStatementDelimiter; cr
 		]
 	].
@@ -402,7 +376,7 @@ SWMBTofJS >> putIfNotNilAsNotExpression: strait [
 	self isExpression ifTrue: [|conditionNode closured receiver|
 		conditionNode := self children first node.
 		closured := conditionNode class ~= RBVariableNode.
-		receiver := closured ifTrue: [ [ self put: '_receiver_' ] ] ifFalse: [ [ self transpileChildAsExpression: self children first ] ].
+		receiver := closured ifTrue: [ [ self put: '_receiver_' ] ] ifFalse: [ [ self transpileChild: self children first ] ].
 
 		closured ifTrue: [ self put: 'function(_receiver_){'; cr; incIndent; put: 'return ' ].
 		self put: '('.
@@ -417,7 +391,7 @@ SWMBTofJS >> putIfNotNilAsNotExpression: strait [
 		closured ifTrue: [
 			self
 				putStatementDelimiter; cr; decIndent;
-				put: '}('; transpileChildAsExpression: self children first; put: ')'
+				put: '}('; transpileChild: self children first; put: ')'
 		]
 	] ifFalse: [
 		self put: 'if('.
@@ -450,7 +424,7 @@ SWMBTofJS >> putIfNotNilIfNilAsExpression: strait [
 	res := self makeNewVariable: self expression result.
 	self preserveCurrentStatement: [
 		self put: 'if(';
-			transpileChildAsExpression: self children first;
+			transpileChild: self children first;
 			put: (strait ifTrue: [ ' != null ' ] ifFalse: [ ' == null'  ]);
 			put: ')';
 			putBlockBody: self children second assignTo: res name;
@@ -465,12 +439,12 @@ SWMBTofJS >> putIfNotNilIfNilAsExpression: strait [
 { #category : #'as yet unclassified' }
 SWMBTofJS >> putIfNotNilIfNilAsNotExpression: strait [
 	self put: 'if(';
-		transpileChildAsExpression: self children first;
+		transpileChild: self children first;
 		put: (strait ifTrue: [ ' != null' ] ifFalse: [ ' == null'  ]);
 		put: ')';
-		putBlockBody: self children second;
+		putBlock: self children second;
 		put: ' else ';
-		putBlockBody: self children third;
+		putBlock: self children third;
 		preventStatementDelimiter
 
 ]
@@ -492,7 +466,7 @@ SWMBTofJS >> putIfTrueAsExpression: strait [
 	self preserveCurrentStatement: [
 		self put: 'if('.
 		strait ifFalse: [ self put: '!' ].
-		self transpileChildAsExpression: self children first;
+		self transpileChild: self children first;
 			put: '){'; cr; incIndent;
 			preserveDeclaration: [
 				(self child: self children second)
@@ -510,9 +484,9 @@ SWMBTofJS >> putIfTrueAsExpression: strait [
 SWMBTofJS >> putIfTrueAsNotExpression: strait [
 	self put: 'if('.
 	strait ifFalse: [ self put: '!' ].
-	self transpileChildAsExpression: self children first;
+	self transpileChild: self children first;
 		put: ')';
-		putBlockBody: self children second;
+		putBlock: self children second;
 		preventStatementDelimiter
 
 ]
@@ -534,11 +508,11 @@ SWMBTofJS >> putIfTrueIfFalseAsExpression: strait [
 	self preserveCurrentStatement: [
 		self put: 'If('.
 		strait ifFalse: [ self put: '!' ].
-		self transpileChildAsExpression: self children first;
+		self transpileChildWithoutBracket: self children first;
 			put: ')';
 			putBlockBody: self children second assignTo: res name;
 			put: ' else ';
-			putBlockBody: self children second assignTo: res name;
+			putBlockBody: self children third assignTo: res name;
 			cr.
 	].
 	self put: res name
@@ -549,11 +523,11 @@ SWMBTofJS >> putIfTrueIfFalseAsExpression: strait [
 SWMBTofJS >> putIfTrueIfFalseAsNotExpression: strait [
 	self put: 'if('.
 	strait ifFalse: [ self put: '!' ].
-	self transpileChildAsExpression: self children first;
+	self transpileChildWithoutBracket: self children first;
 		put: ')';
-		putBlockBody: self children second;
+		putBlock: self children second;
 		put: ' else ';
-		putBlockBody: self children third;
+		putBlock: self children third;
 		preventStatementDelimiter
 
 ]
@@ -576,9 +550,14 @@ SWMBTofJS >> putImport: anArray from: aSource [
 SWMBTofJS >> putNew [
 	self
 		put: 'new ';
-		transpileChildAsExpression: self children first;
+		transpileChild: self children first;
 		putArguments: self children allButFirst
 
+]
+
+{ #category : #accessing }
+SWMBTofJS >> putNil [
+	self put: 'null'
 ]
 
 { #category : #enumerating }
@@ -596,13 +575,14 @@ SWMBTofJS >> putOnDoAsExpression [
 	|result|
 	result := self makeNewVariable: self children first result elementType.
 	self preserveCurrentStatement: [
-		self put: 'try {'; cr; incIndent; put: result name; put: ' = '.
-		(self child: self children first)
-			putSequenceAsExpression.
-		self putStatementDelimiter; cr; decIndent; put: '} catch'.
-		(self child: self children third)
-			putArgsAndBody.
-		self cr.
+		self put: 'try ';
+			putBlockBody: self children first assignTo: result name;
+			put: 'catch'.
+		self children third arguments isNotEmpty ifTrue: [
+			self putArgumentDeclaration: self children third arguments
+		].
+		self putBlock: self children third;
+			cr
 	].
 	self put: result name
 
@@ -610,18 +590,14 @@ SWMBTofJS >> putOnDoAsExpression [
 
 { #category : #enumerating }
 SWMBTofJS >> putOnDoAsNotExpression [
-	self put: 'try '.
-	(self child: self children first)
-			putBlockBodyWithLocalScope.
-	self put: ' catch '.
+	self put: 'try ';
+		putBlock: self children first;
+		put: ' catch '.
 	self children third arguments isNotEmpty ifTrue: [
-		(self child: self children third)
-			putArgsAndBody
-	] ifFalse: [
-		(self child: self children third)
-			putBlockBodyWithLocalScope.
+		self putArgumentDeclaration: self children third arguments
 	].
-	self preventStatementDelimiter 
+	self putBlock: self children third;
+		preventStatementDelimiter 
 
 ]
 
@@ -658,17 +634,34 @@ SWMBTofJS >> putOrdinaryMessage [
 ]
 
 { #category : #'as yet unclassified' }
+SWMBTofJS >> putPresentBlock: anExpression with: arg [
+	|child|
+	self put: '{'; cr; incIndent;
+		put: 'var '; put: anExpression arguments first name; put: ' = '; put: arg; putStatementDelimiter; cr.
+	child := self copy
+		expression: anExpression;
+		isExpression: false;
+		previousStream: self stream;
+		declarationStream: self stream subStream;
+		stream: self stream subStream;
+		putVariableDeclarations;
+		putSequence.
+	self stream
+		append: child declarationStream;
+		append: child stream.
+	self decIndent; put: '}'
+
+]
+
+{ #category : #'as yet unclassified' }
 SWMBTofJS >> putQueryAtIfPresent [
 	|rVal|
 	self isExpression ifTrue: [ self error ].
 	rVal := self makeNewVariable: self expression result.
-	self put: rVal name; put: ' = '; transpileChildAsExpression: self children first;
-		put: '.at('; transpileChildAsExpression: self children second;  put: ')'; putStatementDelimiter; cr;
-		put: 'if('; put: rVal name; put: ' != null){'; cr; incIndent;
-		put: 'var '; put: self children third arguments first name; put: ' = '; put: rVal name; putStatementDelimiter; cr.
-	(self child: self children third)
-		putSequence.
-	self decIndent; put: '}'; preventStatementDelimiter
+	self put: rVal name; put: ' = '; transpileChild: self children first;
+		put: '.at('; transpileChild: self children second;  put: ')'; putStatementDelimiter; cr;
+		put: 'if('; put: rVal name; put: ' != null)'; putPresentBlock: self children third with: rVal name;
+		preventStatementDelimiter
 
 ]
 
@@ -701,7 +694,21 @@ SWMBTofJS >> putSelfClass [
 
 { #category : #'code generation' }
 SWMBTofJS >> putSelfDeclaration [
+
+	self method methodClass isInstanceSide ifFalse: [ ^ self ].
+	(self node allVariables anySatisfy: [ :each | each name = 'self' ]) ifFalse: [ ^ self ].
+
 	self put: 'var self = this;'; cr
+]
+
+{ #category : #'as yet unclassified' }
+SWMBTofJS >> putSequenceAndReturn [
+	self children allButLastDo: [ :child |
+		self putStatement: child
+	].
+	self put: 'return '; putStatementAsExpression: self children last;
+		putStatementDelimiter; cr
+
 ]
 
 { #category : #'as yet unclassified' }
@@ -709,7 +716,7 @@ SWMBTofJS >> putSequenceAssignTo: aVarName [
 	self children allButLastDo: [ :child |
 		self putStatement: child
 	].
-	self put: aVarName; put: ' = '; putStatementAsExpression: self children last;
+	self put: aVarName; put: ' = '; transpileChildWithoutBracket: self children last;
 		putStatementDelimiter; cr
 
 ]
