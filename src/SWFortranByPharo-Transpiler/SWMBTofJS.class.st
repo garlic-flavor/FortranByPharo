@@ -669,11 +669,17 @@ SWMBTofJS >> putSelfDeclaration [
 
 { #category : #'as yet unclassified' }
 SWMBTofJS >> putSequenceAndReturn [
+	|lastchild|
 	self children allButLastDo: [ :child |
 		self putStatement: child
 	].
-	self put: 'return '; putStatementAsExpression: self children last;
-		putStatementDelimiter; cr
+	lastchild := self copy
+		previousStream: self stream;
+		stream: self stream subStream;
+		putReturnKeyword; put: ' '; transpileChildWithoutBracket: self children last;
+		putStatementDelimiter; cr;
+		yourself.
+	self stream append: lastchild stream
 
 ]
 
