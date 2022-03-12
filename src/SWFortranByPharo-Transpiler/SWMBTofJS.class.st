@@ -117,12 +117,7 @@ SWMBTofJS >> putAtPut [
 SWMBTofJS >> putBlock: anExpression [
 	|child|
 	self put: '{'; cr; incIndent.
-	child := self copy
-		expression: anExpression;
-		isExpression: false;
-		previousStream: self stream subStream;
-		declarationStream: self stream subStream;
-		stream: self stream subStream;
+	child := (self scopeChild: anExpression)
 		putVariableDeclarations;
 		putSequence.
 	self stream
@@ -398,18 +393,18 @@ SWMBTofJS >> putIfNotNilIfNil: strait [
 { #category : #'as yet unclassified' }
 SWMBTofJS >> putIfNotNilIfNilAsExpression: strait [
 	|res|
-	res := self makeNewVariable: self expression result.
+	res := (self makeNewVariable: self expression result) node name.
 	self preserveCurrentStatement: [
 		self put: 'if(';
 			transpileChild: self children first;
 			put: (strait ifTrue: [ ' != null ' ] ifFalse: [ ' == null'  ]);
 			put: ')';
-			putBlock: self children second assignTo: res node name;
+			putBlock: self children second assignTo: res;
 			put: ' else ';
-			putBlock: self children third assignTo: res node name;
+			putBlock: self children third assignTo: res;
 			cr
 	].
-	self put: res node name
+	self put: res
 
 ]
 
@@ -439,6 +434,7 @@ SWMBTofJS >> putIfTrue: strait [
 { #category : #'code generation' }
 SWMBTofJS >> putIfTrueAsExpression: strait [
 	|res|
+	self halt.
 	res := self makeNewVariable: self children second result.
 	self preserveCurrentStatement: [
 		self put: 'if('.
@@ -673,9 +669,7 @@ SWMBTofJS >> putSequenceAndReturn [
 	self children allButLastDo: [ :child |
 		self putStatement: child
 	].
-	lastchild := self copy
-		previousStream: self stream;
-		stream: self stream subStream;
+	lastchild := (self statementChild: self expression)
 		putReturnKeyword; put: ' '; transpileChildWithoutBracket: self children last;
 		putStatementDelimiter; cr;
 		yourself.
@@ -689,9 +683,7 @@ SWMBTofJS >> putSequenceAssignTo: aVarName [
 	self children allButLastDo: [ :child |
 		self putStatement: child
 	].
-	lastchild := self copy
-		previousStream: self stream;
-		stream: self stream subStream;
+	lastchild := (self statementChild: self expression)
 		put: aVarName; put: ' = '; transpileChildWithoutBracket: self children last;
 		putStatementDelimiter; cr;
 		yourself.

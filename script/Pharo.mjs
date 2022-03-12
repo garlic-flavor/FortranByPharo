@@ -185,6 +185,9 @@ String.prototype.trimLeft_ = function(aBlock) {
 String.prototype.asString = function() {
   return this;
 };
+String.prototype.asSymbol = function() {
+  return this;
+};
 
 export class SequenceableCollection {
   static streamContents_(aBlock) {

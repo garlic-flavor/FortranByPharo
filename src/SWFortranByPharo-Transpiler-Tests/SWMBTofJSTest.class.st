@@ -58,7 +58,7 @@ SWMBTofJSTest >> test_0060_ifTrue_ifFalse [
 { #category : #tests }
 SWMBTofJSTest >> test_0070_ifTrue_ifFalse_expression [
 	self resultWith: { Boolean } equals: 'var t_0 = null;
-If(needle){
+if(needle){
     t_0 = 123;
 } else {
     t_0 = "False";
@@ -167,7 +167,7 @@ SWMBTofJSTest >> test_0290_SWStd_print [
 { #category : #tests }
 SWMBTofJSTest >> test_0300_recursive_message_call [
 	self resultWith: { SmallInteger } equals: 'var t_0 = null;
-If(0 < arg1){
+if(0 < arg1){
     t_0 = arg1 + (self._0300_recursive_message_call_(arg1 - 1));
 } else {
     t_0 = 0;
@@ -273,7 +273,7 @@ SWMBTofJSTest >> test_0440_locals [
 	self resultWith: { SmallInteger } equals: 'var outer1 = null;
 var t_0 = null;
 outer1 = true;
-If(outer1){
+if(outer1){
     var inner = null;
     t_0 = inner = 234;
 } else {

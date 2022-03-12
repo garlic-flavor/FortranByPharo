@@ -32,7 +32,7 @@ return t_0;
 { #category : #tests }
 SWMBTofJSTest2 >> test_9004_cascading_3 [
 	self resultWith: { Boolean } equals: 'var t_0 = null;
-If(needle){
+if(needle){
     var t_1 = null;
     var t_2 = null;
     t_1 = new Dictionary();
@@ -57,7 +57,26 @@ return t_0;
 
 { #category : #tests }
 SWMBTofJSTest2 >> test_9005_cascading_4 [
-	self resultWith: { OSSUnixSubprocess }
+	self resultWith: { OSSUnixSubprocess } equals: 'var t_0 = null;
+try {
+    var t_1 = null;
+    process.workingDirectory_(SWShellEnvironment.default().localDirectory().fullName());
+    process.redirectStdout();
+    process.redirectStderr();
+    process.runAndWait();
+    if(process.isSuccess()){
+        t_1 = process.stdoutStream().upToEnd();
+    } else {
+        t_1 = self.error_(process.stderrStream().upToEnd());
+    }
+    t_0 = t_1;
+} finally {
+    if(process != null){
+        process.closeAndCleanStreams();
+    }
+}
+return t_0;
+'
 ]
 
 { #category : #utilities }

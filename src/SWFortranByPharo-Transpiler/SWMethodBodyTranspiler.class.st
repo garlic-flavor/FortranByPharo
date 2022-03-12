@@ -109,8 +109,7 @@ SWMethodBodyTranspiler >> atMethod: aMethodNode [
 	self putArgumentDeclaration: self expression arguments.
 	self put: '{'; cr; incIndent;
 		putSelfDeclaration.
-	child := (self subChild: self expression)
-		isExpression: false;
+	child := (self scopeChild: self expression)
 		putVariableDeclarations;
 		putSequence.
 	self append: child.
@@ -150,6 +149,7 @@ SWMethodBodyTranspiler >> atVariable: aVariableNode [
 SWMethodBodyTranspiler >> child: anExpression [
 	^ self copy
 		expression: anExpression;
+		isExpression: true;
 		yourself
 ]
 
@@ -487,28 +487,10 @@ SWMethodBodyTranspiler >> putSequence [
 { #category : #'code generation' }
 SWMethodBodyTranspiler >> putStatement: anExpression [
 	|child|
-	child := self copy
-		expression: anExpression;
-		isExpression: false;
-		previousStream: self stream;
-		stream: self stream subStream;
+	child := (self statementChild: anExpression)
 		transpile;
 		putStatementDelimiter;
 		cr;
-		yourself.
-	self stream append: child stream
-
-]
-
-{ #category : #'code generation' }
-SWMethodBodyTranspiler >> putStatementAsExpression: anExpression [
-	|child|
-	child := self copy
-		expression: anExpression;
-		isExpression: true;
-		previousStream: self stream;
-		stream: self stream subStream;
-		transpile;
 		yourself.
 	self stream append: child stream
 
@@ -555,6 +537,27 @@ SWMethodBodyTranspiler >> receiverClass [
 	^ self expression receiverClass
 ]
 
+{ #category : #'as yet unclassified' }
+SWMethodBodyTranspiler >> scopeChild: anExpression [
+	^ self copy
+		expression: anExpression;
+		isExpression: false;
+		declarationStream: self stream subStream;
+		previousStream: self stream subStream;
+		stream: self stream subStream;
+		yourself
+]
+
+{ #category : #'as yet unclassified' }
+SWMethodBodyTranspiler >> statementChild: anExpression [
+	^ self copy
+		expression: anExpression;
+		isExpression: false;
+		previousStream: self stream;
+		stream: self stream subStream;
+		yourself.
+]
+
 { #category : #accessing }
 SWMethodBodyTranspiler >> stream [
 	^ stream ifNil: [ stream := self pool stream ]
@@ -565,16 +568,6 @@ SWMethodBodyTranspiler >> stream: anObject [
 
 	stream := anObject.
 
-]
-
-{ #category : #accessing }
-SWMethodBodyTranspiler >> subChild: anExpression [
-	^ self copy
-		expression: anExpression;
-		declarationStream: self stream subStream;
-		previousStream: self stream subStream;
-		stream: self stream subStream;
-		yourself
 ]
 
 { #category : #accessing }
@@ -600,8 +593,7 @@ SWMethodBodyTranspiler >> transpile [
 SWMethodBodyTranspiler >> transpileAsMain [
 	|child|
 	self temp.
-	child := (self subChild: self expression)
-		isExpression: false;
+	child := (self scopeChild: self expression)
 		putVariableDeclarations;
 		putSequence;
 		yourself.
@@ -614,19 +606,13 @@ SWMethodBodyTranspiler >> transpileChild: anExpression [
 	|needsBracket|
 	needsBracket := anExpression node class = RBMessageNode.
 	needsBracket ifTrue: [ self put: '(' ].
-	self copy
-		expression:  anExpression;
-		isExpression: true;
-		transpile.
+	self transpileChildWithoutBracket: anExpression.
 	needsBracket ifTrue: [ self put: ')' ].
 
 ]
 
 { #category : #'as yet unclassified' }
 SWMethodBodyTranspiler >> transpileChildWithoutBracket: anExpression [
-	self copy
-		expression: anExpression;
-		isExpression: true;
-		transpile.
+	(self child: anExpression) transpile
 
 ]
