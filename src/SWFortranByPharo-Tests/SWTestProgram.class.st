@@ -491,6 +491,21 @@ SWTestProgram >> _9004_cascading_3: needle [
 
 ]
 
+{ #category : #'as yet unclassified' }
+SWTestProgram >> _9005_cascading_4: process [
+	^ [
+		process
+			workingDirectory: SWShellEnvironment default localDirectory fullName;
+			redirectStdout;
+			redirectStderr;
+			runAndWait.
+		process isSuccess
+				ifTrue: [ process stdoutStream upToEnd ]
+				ifFalse: [ self error: process stderrStream upToEnd ].
+	] ensure: [ process ifNotNil: [ process closeAndCleanStreams ] ]
+
+]
+
 { #category : #accessing }
 SWTestProgram >> var1 [
 

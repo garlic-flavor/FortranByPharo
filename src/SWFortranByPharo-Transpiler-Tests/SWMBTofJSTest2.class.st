@@ -55,6 +55,11 @@ return t_0;
 '
 ]
 
+{ #category : #tests }
+SWMBTofJSTest2 >> test_9005_cascading_4 [
+	self resultWith: { OSSUnixSubprocess }
+]
+
 { #category : #utilities }
 SWMBTofJSTest2 >> transpile: aMethod with: operands [
 	(module pool transpilerFor: aMethod with: operands)
