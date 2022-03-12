@@ -147,7 +147,10 @@ SWClassDefinitionTranspiler >> putMethodDefinition: anExpression [
 
 	self putMethodHeader: mbt.
 	self detectPredefinedMethodBodyFor: anExpression ifFound: [ :pre|
-		pre cull: mbt
+		mbt putArgumentDeclaration: mbt expression arguments;
+			put: '{'; cr; incIndent.
+		pre cull: mbt.
+		mbt decIndent; put: '}'; cr
 	] ifNone: [ 
 		mbt transpile
 	].

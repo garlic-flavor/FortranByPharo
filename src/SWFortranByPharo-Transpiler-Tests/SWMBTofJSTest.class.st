@@ -137,7 +137,8 @@ return t_0;
 { #category : #tests }
 SWMBTofJSTest >> test_0260_ifNil_expression [
 	self resultWith: { Object } equals: 'var t_0 = null;
-if(needle == null )  {
+t_0 = needle;
+if(t_0 == null )  {
     t_0 = 123;
 }
 return t_0;
@@ -149,7 +150,8 @@ SWMBTofJSTest >> test_0261_ifNil_expression2 [
 	self resultWith: { Object } equals: 'var t_0 = null;
 var t_1 = null;
 t_1 = needle.asTime();
-if(t_1 == null )  {
+t_0 = t_1;
+if(t_0 == null )  {
     t_0 = 123;
 }
 return t_0;

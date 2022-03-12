@@ -215,7 +215,12 @@ SWMethodBodyTranspiler >> makeNewVariable: type [
 	|var|
 	var := self expression addToSlot: (self newVariableName) as: type.
 	self putVariableDeclarationOf: var name.
-	^ var
+	^ self expression copy
+		node: (RBVariableNode named: var name);
+		result: var;
+		children: nil;
+		yourself
+
 ]
 
 { #category : #'as yet unclassified' }
@@ -400,7 +405,7 @@ SWMethodBodyTranspiler >> putImport: anArray from: aSource [
 { #category : #'code generation' }
 SWMethodBodyTranspiler >> putMessageWithSelector: aSelector [
 	self
-		transpileChild: self children first;
+		transpileChildWithoutBracket: self children first;
 		putClassAccessor;
 		put: aSelector;
 		putArguments: self children allButFirst

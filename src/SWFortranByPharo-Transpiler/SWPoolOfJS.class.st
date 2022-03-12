@@ -35,12 +35,9 @@ SWPoolOfJS >> transpile_Collection: cdt [
 			mbt
 				transpileChild: mbt children first;
 				putClassAccessor;
-				put: 'reduce('.
-			(mbt child: mbt children third) putClosure.
-			mbt
-				put: ', ';
-				transpileChild: mbt children second;
-				put: ')'.
+				put: 'reduce(';
+				transpileChildWithoutBracket: mbt children third; put: ', ';
+				transpileChildWithoutBracket: mbt children second; put: ')'
 		]
 ]
 
