@@ -147,6 +147,54 @@ SWServer class >> put [
 ]
 
 { #category : #'as yet unclassified' }
+SWServer class >> putQueryAtIfAbsent: mbt [
+	mbt isExpression ifTrue: [
+		self putQueryAtIfAbsentAsExpression: mbt
+	] ifFalse: [
+		self putQueryAtIfAbsentAsNotExpression: mbt
+	]
+
+]
+
+{ #category : #'as yet unclassified' }
+SWServer class >> putQueryAtIfAbsentAsExpression: mbt [
+	|rVal|
+	rVal := (mbt makeNewVariable: mbt expression result) node name.
+	mbt preserveCurrentStatement: [
+		mbt put: rVal; put: ' = '; transpileChild: mbt children first;
+			put: '.queryAt('; transpileChild: mbt children second;  put: ')'; putStatementDelimiter; cr;
+			put: 'if('; put: rVal; put: ' == null)'; putBlock: mbt children third assignTo: rVal;
+			preventStatementDelimiter
+	].
+	mbt put: rVal
+
+]
+
+{ #category : #'as yet unclassified' }
+SWServer class >> putQueryAtIfAbsentAsNotExpression: mbt [
+	|rVal|
+	self halt.
+	rVal := mbt makeNewVariable: mbt expression result.
+	mbt put: rVal node name; put: ' = '; transpileChild: mbt children first;
+		put: '.queryAt('; transpileChild: mbt children second;  put: ')'; putStatementDelimiter; cr;
+		put: 'if('; put: rVal node name; put: ' != null)'; putPresentBlock: mbt children third with: rVal node name;
+		preventStatementDelimiter
+
+]
+
+{ #category : #'as yet unclassified' }
+SWServer class >> putQueryAtIfPresent: mbt [
+	|rVal|
+	mbt isExpression ifTrue: [ self error ].
+	rVal := mbt makeNewVariable: mbt expression result.
+	mbt put: rVal node name; put: ' = '; transpileChild: mbt children first;
+		put: '.queryAt('; transpileChild: mbt children second;  put: ')'; putStatementDelimiter; cr;
+		put: 'if('; put: rVal node name; put: ' != null)'; putPresentBlock: mbt children third with: rVal node name;
+		preventStatementDelimiter
+
+]
+
+{ #category : #'as yet unclassified' }
 SWServer class >> relPathOf: path [
 	^ path relativeTo: SWShellEnvironment default localDirectory
 ]
@@ -159,15 +207,23 @@ SWServer class >> setUpTranspiler: mt [
 		declareMethodReturnsSecondArgumentsElement: #queryAt:ifPresent:.
 	
 	(mt pool getClassInfo: ZnUrl)
-		senderTranspilerOf: #queryAt:ifPresent: is: [ :mbt | mbt putQueryAtIfPresent ]
+		senderTranspilerOf: #queryAt:ifPresent: is: [ :mbt | self putQueryAtIfPresent: mbt ];
+		senderTranspilerOf: #queryAt:ifAbsent: is: [ :mbt | self putQueryAtIfAbsent: mbt ].
+
+	(mt pool getClassInfo: ZnHeaders)
+		senderTranspilerOf: #at:put: is: [ :mbt | mbt putAtPut  ].
+
+	SWShell setUpTranspiler: mt.
+	SWServerStatus setUpTranspiler: mt.
 
 ]
 
 { #category : #'as yet unclassified' }
-SWServer class >> solveDependenciesUsing: transpiler [
+SWServer class >> solveDependencies: transpiler [
+	SWShell solveDependencies: transpiler.
+	SWServerStatus solveDependencies: transpiler.
 	transpiler
 		transpile: SWShell;
-		transpile: SWShellEnvironment;
 		transpile: SWServerStatus
 ]
 

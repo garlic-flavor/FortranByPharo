@@ -249,20 +249,18 @@ SWMBTofJS >> putCascadeAsExpressionWithTemp [
 SWMBTofJS >> putCascadeAsNotExpression [
 	self node receiver class = RBVariableNode ifTrue: [
 		self putSequence; preventStatementDelimiter; preventNewline
-	] ifFalse: [|rcv tmp|
-		self halt.
-		rcv := self children first children first.
-		tmp := self makeNewVariable: rcv result.
-		self put: '('; put: tmp name; put: ' = '; transpileChild: rcv; put: ', '; cr; incIndent.
-		self children do: [:child|
-			child children at: 1 put: (SWExpression new
-				node: (RBVariableNode named: tmp name);
-				result: rcv result;
-				yourself).
-			(self child: child)
-				transpile.
-		] separatedBy: [ self put: ', '; cr ].
-		self put: ')'; decIndent
+	] ifFalse: [|receiver rval rexp last|
+		receiver := self children first children first.
+		rval := self makeNewVariable: receiver result.
+		rexp := SWExpression new
+			node: (RBVariableNode named: rval node name);
+			result: receiver result;
+			yourself.
+		self put: rval node name; put: ' = '; transpileChildWithoutBracket: receiver; putStatementDelimiter; cr.
+		self children do: [ :child |
+			child children at: 1 put: rexp.
+			self putStatement: child
+		].
 	]
 
 ]
@@ -612,18 +610,6 @@ SWMBTofJS >> putPresentBlock: anExpression with: arg [
 		append: child declarationStream;
 		append: child stream.
 	self decIndent; put: '}'
-
-]
-
-{ #category : #'as yet unclassified' }
-SWMBTofJS >> putQueryAtIfPresent [
-	|rVal|
-	self isExpression ifTrue: [ self error ].
-	rVal := self makeNewVariable: self expression result.
-	self put: rVal node name; put: ' = '; transpileChild: self children first;
-		put: '.at('; transpileChild: self children second;  put: ')'; putStatementDelimiter; cr;
-		put: 'if('; put: rVal node name; put: ' != null)'; putPresentBlock: self children third with: rVal node name;
-		preventStatementDelimiter
 
 ]
 

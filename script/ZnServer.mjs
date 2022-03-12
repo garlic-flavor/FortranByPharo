@@ -148,13 +148,10 @@ export class ZnUri {
     }
     return this._query;
   }
-  queryAt_(key) {
+  queryAt(key) {
     return this.query()[key];
   }
 
-  queryAt_ifAbsent_(key, aBlock) {
-    return this.query()[key] || aBlock();
-  }
   toString() {
     return this._url;
   }

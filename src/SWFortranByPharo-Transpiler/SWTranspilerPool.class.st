@@ -119,7 +119,7 @@ SWTranspilerPool >> transpile_Number: ct [
 SWTranspilerPool >> transpile_Object: ct [
 	ct
 		senderTranspilerOf: #yourself is: [ :mbt |	mbt putYourself ];
-		senderTranspilerOf: #= is: [ :mbt | mbt putOpBinary ];
+		senderTranspilerOf: #= is: [ :mbt | mbt putOpBinaryWith: '==' ];
 		senderTranspilerOf: #~= is: [ :mbt | mbt putOpBinaryWith: '!=' ]
 
 ]
@@ -132,6 +132,13 @@ SWTranspilerPool >> transpile_ProtoObject: ct [
 		senderTranspilerOf: #ifNotNil: is: [ :bt | bt putIfNotNil: true ];
 		senderTranspilerOf: #class is: [ :bt | bt putSelfClass ];
 		senderTranspilerOf: #flag: is: [ :bt | bt stream putComment: bt node children last value; preventDelimiter; preventNewline  ]
+]
+
+{ #category : #'as yet unclassified' }
+SWTranspilerPool >> transpile_Stream: ct [
+	ct
+		senderTranspilerOf: #<< is: [ :mbt | mbt putMessageWithSelector: 'write' ]
+
 ]
 
 { #category : #api }
