@@ -94,9 +94,8 @@ SWModuleTranspiler >> pool: anObject [
 
 { #category : #streaming }
 SWModuleTranspiler >> putFilenameOn: aStream [
-	aStream
-		<< self senderInfo receiverClass instanceSide name;
-		<< self senderInfo method selector  asCamelCase
+	self senderInfo putBasenameOn: aStream
+
 ]
 
 { #category : #accessing }

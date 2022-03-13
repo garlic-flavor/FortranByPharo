@@ -21,6 +21,11 @@ Class {
 	#category : #'SWFortranByPharo-Transpiler-Common'
 }
 
+{ #category : #streaming }
+SWTranspilerStream >> << anObject [
+	self put: anObject asString
+]
+
 { #category : #accessing }
 SWTranspilerStream >> append: stream [
 	self payload nextPutAll: stream contents.

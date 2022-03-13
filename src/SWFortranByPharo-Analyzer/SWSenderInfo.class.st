@@ -71,6 +71,13 @@ SWSenderInfo >> printOn: aStream [
 	self putOn: aStream
 ]
 
+{ #category : #'as yet unclassified' }
+SWSenderInfo >> putBasenameOn: aStream [
+	aStream
+		<< self receiverClass instanceSide name;
+		<< self method selector  asCamelCase
+]
+
 { #category : #streaming }
 SWSenderInfo >> putOn: aStream [
 	method ifNil: [

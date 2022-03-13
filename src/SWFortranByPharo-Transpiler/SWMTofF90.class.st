@@ -8,13 +8,13 @@ Class {
 }
 
 { #category : #'as yet unclassified' }
-SWMTofF90 class >> methodBodyTranspilerClass [
-	^ SWMBTofF90
+SWMTofF90 class >> poolClass [
+	^ SWPoolOfF90
 ]
 
 { #category : #'as yet unclassified' }
 SWMTofF90 >> transpilePayload [
-
+	self error; flag: #toRemove.
 	self stream
 		put: 'program ';
 		put: self basename;
