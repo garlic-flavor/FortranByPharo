@@ -516,6 +516,14 @@ SWMBTofJS >> putImport: anArray from: aSource [
 		put: '.mjs"'
 ]
 
+{ #category : #'as yet unclassified' }
+SWMBTofJS >> putIsArray [
+	self
+		put: 'Array.isArray(';
+		transpileChildWithoutBracket: self children first;
+		put: ')'
+]
+
 { #category : #'code generation' }
 SWMBTofJS >> putNew [
 	self

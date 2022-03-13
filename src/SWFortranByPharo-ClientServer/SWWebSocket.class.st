@@ -10,6 +10,12 @@ Class {
 	#category : #'SWFortranByPharo-ClientServer-Server'
 }
 
+{ #category : #initialization }
+SWWebSocket class >> setUpTranspiler: mt [
+	(mt global getClassInfo: SWWebSocket)
+		declareMethod: #uri asReturn: ZnUrl
+]
+
 { #category : #accessing }
 SWWebSocket >> uri [
 

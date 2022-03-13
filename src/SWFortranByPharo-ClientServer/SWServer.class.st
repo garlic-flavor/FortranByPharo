@@ -208,13 +208,15 @@ SWServer class >> setUpTranspiler: mt [
 	
 	(mt pool getClassInfo: ZnUrl)
 		senderTranspilerOf: #queryAt:ifPresent: is: [ :mbt | self putQueryAtIfPresent: mbt ];
-		senderTranspilerOf: #queryAt:ifAbsent: is: [ :mbt | self putQueryAtIfAbsent: mbt ].
+		senderTranspilerOf: #queryAt:ifAbsent: is: [ :mbt | self putQueryAtIfAbsent: mbt ];
+		senderTranspilerOf: #queryAt: is: [ :mbt | mbt putMessageWithSelector: #queryAt ].
 
 	(mt pool getClassInfo: ZnHeaders)
 		senderTranspilerOf: #at:put: is: [ :mbt | mbt putAtPut  ].
 
 	SWShell setUpTranspiler: mt.
 	SWServerStatus setUpTranspiler: mt.
+	SWWebSocket setUpTranspiler: mt.
 
 ]
 
