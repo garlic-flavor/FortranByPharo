@@ -343,12 +343,66 @@ SWMethodBodyTranspiler >> putAtPut [
 
 { #category : #'code generation' }
 SWMethodBodyTranspiler >> putCascadeAsExpression [
-	^ self subclassResponsibility 
+	self node receiver class = RBVariableNode ifTrue: [
+		self putCascadeAsExpressionSimple
+	] ifFalse: [
+		self putCascadeAsExpressionWithTemp
+	]
+]
+
+{ #category : #'code generation' }
+SWMethodBodyTranspiler >> putCascadeAsExpressionSimple [
+	self preserveCurrentStatement: [
+		self children allButLastDo: [ :child |
+			self putStatement: child
+		]
+	].
+	self transpileChildWithoutBracket: self children last
+
+]
+
+{ #category : #'code generation' }
+SWMethodBodyTranspiler >> putCascadeAsExpressionWithTemp [
+	|receiverExp receiver|
+	self halt.
+	receiverExp := self children first children first.
+	receiver := self makeNewVariable: receiverExp result.
+	self children do: [ :child | child children at: 1 put: receiver ].
+	self children addFirst: (receiverExp copy
+		node: (RBAssignmentNode variable: (RBVariableNode named: receiver result name) value: receiverExp node);
+		children: { receiverExp. receiver };
+		yourself).
+	self preserveCurrentStatement: [
+		self children allButLastDo: [ :child | self putStatement: child ]
+	].
+	self transpileChildWithoutBracket: self children last
 ]
 
 { #category : #'code generation' }
 SWMethodBodyTranspiler >> putCascadeAsNotExpression [
-	^ self subclassResponsibility 
+	self node receiver class = RBVariableNode ifTrue: [
+		self putCascadeAsNotExpressionSimple
+	] ifFalse: [
+		self putCascadeAsNotExpressionWithTemp
+	]
+]
+
+{ #category : #'as yet unclassified' }
+SWMethodBodyTranspiler >> putCascadeAsNotExpressionSimple [
+	self putSequence; preventStatementDelimiter; preventNewline
+]
+
+{ #category : #'as yet unclassified' }
+SWMethodBodyTranspiler >> putCascadeAsNotExpressionWithTemp [
+	|receiverExp receiver|
+	self halt.
+	receiverExp := self children first children first.
+	receiver := self makeNewVariable: receiverExp result.
+	self children do: [ :child |  child children at: 1 put: receiver ].
+	self children addFirst: (receiverExp copy
+		node: (RBAssignmentNode variable: (RBVariableNode named: receiver result name) value: receiverExp node);
+		yourself).
+	self putSequence
 ]
 
 { #category : #'code generation' }

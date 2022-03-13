@@ -8,18 +8,18 @@ Class {
 }
 
 { #category : #api }
-SWMangleOfF90 class >> mangle: selector [
+SWMangleOfF90 class >> mangle: anExpression [
 
 	^ String streamContents: [ :s ||owner|
-		owner := (selector method methodClass).
+		owner := (anExpression method methodClass).
 		owner isClassSide ifTrue: [ 
 			s << owner soleInstance name; << 'C'
 		] ifFalse: [
 			s << owner name; << '_'
 		].
 		s
-			<< (self safeSelectorNameOf: selector method selector);
-			<< (selector operands collect: [ :v |
+			<< (self safeSelectorNameOf: anExpression method selector);
+			<< (anExpression messageInfo operands collect: [ :v |
 				self typeNameOf: v type value
 			])
 	]

@@ -204,68 +204,6 @@ SWMBTofJS >> putCall [
 ]
 
 { #category : #'code generation' }
-SWMBTofJS >> putCascadeAsExpression [
-	self node receiver class = RBVariableNode ifTrue: [
-		self putCascadeAsExpressionSimple
-	] ifFalse: [
-		self putCascadeAsExpressionWithTemp
-	]
-]
-
-{ #category : #'code generation' }
-SWMBTofJS >> putCascadeAsExpressionSimple [
-	self preserveCurrentStatement: [
-		self children allButLastDo: [ :child |
-			self putStatement: child
-		]
-	].
-	self transpileChildWithoutBracket: self children last
-
-]
-
-{ #category : #'code generation' }
-SWMBTofJS >> putCascadeAsExpressionWithTemp [
-	|receiver rval rexp last|
-	receiver := self children first children first.
-	rval := self makeNewVariable: receiver result.
-	rexp := SWExpression new
-		node: (RBVariableNode named: rval node name);
-		result: receiver result;
-		yourself.
-	self preserveCurrentStatement: [
-		self put: rval node name; put: ' = '; transpileChildWithoutBracket: receiver; putStatementDelimiter; cr.
-		self children allButLastDo: [ :child |
-			child children at: 1 put: rexp.
-			self putStatement: child
-		]
-	].
-	last := self children last.
-	last children at:1 put: rexp.
-	self transpileChildWithoutBracket: last
-
-]
-
-{ #category : #'code generation' }
-SWMBTofJS >> putCascadeAsNotExpression [
-	self node receiver class = RBVariableNode ifTrue: [
-		self putSequence; preventStatementDelimiter; preventNewline
-	] ifFalse: [|receiver rval rexp last|
-		receiver := self children first children first.
-		rval := self makeNewVariable: receiver result.
-		rexp := SWExpression new
-			node: (RBVariableNode named: rval node name);
-			result: receiver result;
-			yourself.
-		self put: rval node name; put: ' = '; transpileChildWithoutBracket: receiver; putStatementDelimiter; cr.
-		self children do: [ :child |
-			child children at: 1 put: rexp.
-			self putStatement: child
-		].
-	]
-
-]
-
-{ #category : #'code generation' }
 SWMBTofJS >> putClosure [
 	|sequence|
 	self node containsReturn ifTrue: [ self error: 'A return statement inside a closure differs when it is in Pharo or in ECMAScript.' ].

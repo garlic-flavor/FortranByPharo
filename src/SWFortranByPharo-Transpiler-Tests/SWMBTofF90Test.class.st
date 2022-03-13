@@ -7,18 +7,15 @@ Class {
 { #category : #tests }
 SWMBTofF90Test >> test_0010_nop [
 	self resultWith: {  } equals: 'program SWTestProgram_0010_nop
-end program
+end program SWTestProgram_0010_nop
 '
 ]
 
 { #category : #tests }
-SWMBTofF90Test >> test_0410_Transcript [
-	|transpiler result|
-	transpiler := self transpileNo: 39 with: {  }.
-	result := transpiler stream contents.
-	self assert: result equals: 'print *, "Hello, good-bye!";
-print *, '''';
-print *, '''';
+SWMBTofF90Test >> test_9006_method_call [
+	self resultWith: {  } equals: 'program SWTestProgram_9006_stdout
+    print *, "hoge!";
+end program SWTestProgram_9006_stdout
 '
 ]
 

@@ -506,6 +506,11 @@ SWTestProgram >> _9005_cascading_4: process [
 
 ]
 
+{ #category : #'tests - source' }
+SWTestProgram >> _9006_stdout [
+	SWStd print: 'hoge!'
+]
+
 { #category : #accessing }
 SWTestProgram >> var1 [
 

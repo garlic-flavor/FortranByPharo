@@ -65,14 +65,6 @@ SWShellEnvironment class >> setUpTranspiler:  mt [
 		declareMethodReturnsReceiver: #run;
 		declareMethodReturnsReceiver: #initialize.
 
-	(mt pool getClassInfo: SWShellEnvironment)
-		methodBodyTranspilerOf: #localDirectory is: [ :mbt |
-			mbt
-				put: 'return FileLocator.localDirectory()';
-				putStatementDelimiter;
-				cr
-		].
-
 ]
 
 { #category : #private }
@@ -80,6 +72,18 @@ SWShellEnvironment class >> solveDependencies: mt [
 	mt
 		transpile: SWGFortranCompilerAdapter;
 		import: #(OSPlatform FileLocator) from: 'Pharo'
+]
+
+{ #category : #'as yet unclassified' }
+SWShellEnvironment class >> transpile_self: cdt [
+	cdt
+		methodBodyTranspilerOf: #localDirectory is: [ :mbt |
+			mbt
+				put: 'return FileLocator.localDirectory()';
+				putStatementDelimiter;
+				cr
+		].
+
 ]
 
 { #category : #accessing }

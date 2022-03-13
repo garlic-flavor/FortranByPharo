@@ -8,7 +8,7 @@ Class {
 SWMBTofJSTest2 >> test_9002_ZnUrl_queryAt_ifPresent [
 	SWServer setUpTranspiler: module.
 	self resultWith: { ZnUrl } equals: 'var t_0 = null;
-t_0 = url.at("name");
+t_0 = url.queryAt("name");
 if(t_0 != null){
     var name = t_0;
     return name;
