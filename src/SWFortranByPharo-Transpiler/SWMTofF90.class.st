@@ -13,6 +13,30 @@ SWMTofF90 class >> poolClass [
 ]
 
 { #category : #'as yet unclassified' }
+SWMTofF90 >> exeFilename [
+	^ String streamContents: [ :s | self putExeFilenameOn: s ]
+]
+
+{ #category : #'as yet unclassified' }
+SWMTofF90 >> putExeFilenameOn: aStream [
+	aStream << 'cache/'.
+	self putBasenameOn: aStream.
+	aStream << '.out'
+]
+
+{ #category : #streaming }
+SWMTofF90 >> putFilenameOn: aStream [
+	aStream << 'cache/'.
+	self putBasenameOn: aStream.
+	aStream << '.f90'
+]
+
+{ #category : #'public API' }
+SWMTofF90 >> transpile: aClass [
+	self flag: #toImplement.
+]
+
+{ #category : #'as yet unclassified' }
 SWMTofF90 >> transpilePayload [
 	self error; flag: #toRemove.
 	self stream

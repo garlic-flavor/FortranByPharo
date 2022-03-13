@@ -93,8 +93,14 @@ SWModuleTranspiler >> pool: anObject [
 ]
 
 { #category : #streaming }
-SWModuleTranspiler >> putFilenameOn: aStream [
+SWModuleTranspiler >> putBasenameOn: aStream [
 	self senderInfo putBasenameOn: aStream
+
+]
+
+{ #category : #streaming }
+SWModuleTranspiler >> putFilenameOn: aStream [
+	^ self subclassResponsibility 
 
 ]
 
