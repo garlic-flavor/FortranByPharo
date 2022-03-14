@@ -364,7 +364,6 @@ SWMethodBodyTranspiler >> putCascadeAsExpressionSimple [
 { #category : #'code generation' }
 SWMethodBodyTranspiler >> putCascadeAsExpressionWithTemp [
 	|receiverExp receiver|
-	self halt.
 	receiverExp := self children first children first.
 	receiver := self makeNewVariable: receiverExp result.
 	self children do: [ :child | child children at: 1 put: receiver ].
