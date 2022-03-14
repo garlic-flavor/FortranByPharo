@@ -32,11 +32,6 @@ SWSlot >> at: index [
 	^ super at: index
 ]
 
-{ #category : #accessing }
-SWSlot >> atOffset: offset [
-	^ self at: offset + 1
-]
-
 { #category : #copying }
 SWSlot >> copyFrom: from to: to [
 	self allocate: to.

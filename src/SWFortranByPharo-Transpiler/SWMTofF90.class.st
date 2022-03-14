@@ -31,6 +31,15 @@ SWMTofF90 >> putFilenameOn: aStream [
 	aStream << '.f90'
 ]
 
+{ #category : #accessing }
+SWMTofF90 >> stream [
+	^ stream ifNil: [
+		stream := SWTranspilerStream new
+			delimiter: '';
+			yourself
+	]
+]
+
 { #category : #'public API' }
 SWMTofF90 >> transpile: aClass [
 	self flag: #toImplement.

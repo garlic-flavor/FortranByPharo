@@ -24,3 +24,11 @@ SWMangleOfF90 class >> mangle: anExpression [
 			])
 	]
 ]
+
+{ #category : #'as yet unclassified' }
+SWMangleOfF90 class >> transpiledTypeNameOf: aType [
+	aType = Integer ifTrue: [
+		^ 'Integer'
+	].
+	self error; flag: #toImplement.
+]
