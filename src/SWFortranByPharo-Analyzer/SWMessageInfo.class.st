@@ -15,6 +15,11 @@ SWMessageInfo >> hasResult [
 	^ result isNotNil
 ]
 
+{ #category : #testing }
+SWMessageInfo >> isSubroutine [
+	^ self result value = self method methodClass
+]
+
 { #category : #accessing }
 SWMessageInfo >> messageInfo [
 	^ self

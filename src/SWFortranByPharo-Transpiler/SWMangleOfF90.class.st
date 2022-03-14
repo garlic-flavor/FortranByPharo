@@ -30,5 +30,8 @@ SWMangleOfF90 class >> transpiledTypeNameOf: aType [
 	aType = Integer ifTrue: [
 		^ 'Integer'
 	].
+	aType = SmallInteger ifTrue: [
+		^ 'Integer'
+	].
 	self error; flag: #toImplement.
 ]

@@ -36,27 +36,25 @@ SWMTofF90 >> stream [
 	^ stream ifNil: [
 		stream := SWTranspilerStream new
 			delimiter: '';
+			firstLineHeaderOfComment: '!';
+			middleLineHeaderOfComment: '!';
+			lastLineOfComment: '!';
+			singleLineHeaderOfComment: '!';
 			yourself
 	]
 ]
 
 { #category : #'public API' }
-SWMTofF90 >> transpile: aClass [
-	self flag: #toImplement.
-]
+SWMTofF90 >> transpile [
+	self solveDependencies.
 
-{ #category : #'as yet unclassified' }
-SWMTofF90 >> transpilePayload [
-	self error; flag: #toRemove.
-	self stream
-		put: 'program ';
-		put: self basename;
-		putLine;
-		incIndent.
-	super transpilePayload.
-	self stream
-		decIndent;
-		put: 'end program ';
-		put: self basename;
-		putLine
+	self stream put: 'program '.
+	self putBasenameOn: self stream.
+	self stream putLine; incIndent; put: 'implicit none'; putLine.
+	self mainTranspiler transpileAsMain.
+	self stream decIndent; putLine: 'contains'; incIndent.
+	self transpile: self mainTranspiler expression method methodClass.
+	self stream decIndent; put: 'end program '.
+	self putBasenameOn: self stream.
+	self stream putLine
 ]

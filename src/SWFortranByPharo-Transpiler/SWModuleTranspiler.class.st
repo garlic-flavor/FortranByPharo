@@ -110,6 +110,16 @@ SWModuleTranspiler >> senderInfo [
 	^ self mainTranspiler expression senderInfo
 ]
 
+{ #category : #'as yet unclassified' }
+SWModuleTranspiler >> solveDependencies [
+	|rClass|
+	rClass := self mainTranspiler receiverClass instanceSide.
+	(rClass respondsTo: #solveDependencies:) ifTrue: [
+		rClass solveDependencies: self
+	].
+
+]
+
 { #category : #accessing }
 SWModuleTranspiler >> stream [
 	^ stream ifNil: [ stream := SWTranspilerStream  new ]
@@ -123,13 +133,9 @@ SWModuleTranspiler >> stream: anObject [
 
 { #category : #'public API' }
 SWModuleTranspiler >> transpile [
-	|rClass|
-	rClass := self mainTranspiler receiverClass instanceSide.
-	(rClass respondsTo: #solveDependencies:) ifTrue: [
-		rClass solveDependencies: self
-	].
+	self solveDependencies.
 	self transpile: self mainTranspiler expression method methodClass instanceSide.
-	self transpile: rClass.
+	self transpile: self mainTranspiler receiverClass instanceSide.
 	self mainTranspiler transpileAsMain
 
 ]

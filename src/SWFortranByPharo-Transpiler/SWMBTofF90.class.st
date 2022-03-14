@@ -7,6 +7,38 @@ Class {
 	#category : #'SWFortranByPharo-Transpiler-F90'
 }
 
+{ #category : #accessing }
+SWMBTofF90 >> atMethod: aMethodNode [
+	|child|
+	self putArgumentDeclaration: self expression arguments.
+	child := (self scopeChild: self expression)
+		putVariableDeclarations;
+		putSequence.
+	self append: child.
+
+]
+
+{ #category : #'as yet unclassified' }
+SWMBTofF90 >> putArgumentDeclaration: anArrayOfVariable [
+	anArrayOfVariable do: [ :var |
+		self put: (self pool class mangleClass transpiledTypeNameOf: var value); put: ' '; put: var name; cr
+	]
+
+]
+
+{ #category : #'code generation' }
+SWMBTofF90 >> putMessageWithSelector: aSelector [
+	self expression messageInfo operands first value = self expression messageInfo method methodClass ifTrue: [
+		self expression messageInfo isSubroutine ifTrue: [
+			self put: 'call '; put: aSelector; putArguments: self children allButFirst
+		] ifFalse: [
+			self halt
+		]
+	] ifFalse: [
+		self halt
+	]
+]
+
 { #category : #'as yet unclassified' }
 SWMBTofF90 >> putStdOut [
 	self children second result value = Array ifTrue: [
@@ -30,15 +62,4 @@ SWMBTofF90 >> putVariableDeclarationOf: aName [
 	].
 	self put: typeName; put: ' '; put: aName; cr.
 
-]
-
-{ #category : #'public API' }
-SWMBTofF90 >> transpileAsMain [
-	self put: 'program '.
-	self expression senderInfo putBasenameOn: self stream.
-	self cr; incIndent; put: 'implicit none'; cr.
-	super transpileAsMain.
-	self decIndent; put: 'end program '.
-	self expression senderInfo putBasenameOn: self stream.
-	self cr
 ]

@@ -147,10 +147,9 @@ SWClassDefinitionTranspiler >> putMethodDefinition: anExpression [
 
 	self putMethodHeader: mbt.
 	self detectPredefinedMethodBodyFor: anExpression ifFound: [ :pre|
-		mbt putArgumentDeclaration: mbt expression arguments;
-			put: '{'; cr; incIndent.
+		self putPredefinedMethodHeader: mbt.
 		pre cull: mbt.
-		mbt decIndent; put: '}'; cr
+		self putPredefinedMethodFooter: mbt
 	] ifNone: [ 
 		mbt transpile
 	].
@@ -173,6 +172,16 @@ SWClassDefinitionTranspiler >> putMethodHeader: methodBodyTranspiler [
 SWClassDefinitionTranspiler >> putMethods [
 	self classInfo methods do: [ :each | self putMethodDefinition: each ].
 
+]
+
+{ #category : #'as yet unclassified' }
+SWClassDefinitionTranspiler >> putPredefinedMethodFooter: mbt [
+	^ self subclassResponsibility 
+]
+
+{ #category : #'as yet unclassified' }
+SWClassDefinitionTranspiler >> putPredefinedMethodHeader: mbt [
+	^ self subclassResponsibility 
 ]
 
 { #category : #api }

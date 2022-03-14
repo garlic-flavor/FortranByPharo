@@ -266,6 +266,19 @@ SWCDTofJS >> putMethods [
 ]
 
 { #category : #'as yet unclassified' }
+SWCDTofJS >> putPredefinedMethodFooter: mbt [
+	mbt decIndent; put: '}'; cr
+
+]
+
+{ #category : #'as yet unclassified' }
+SWCDTofJS >> putPredefinedMethodHeader: mbt [
+	mbt putArgumentDeclaration: mbt expression arguments;
+		put: '{'; cr; incIndent.
+
+]
+
+{ #category : #'as yet unclassified' }
 SWCDTofJS >> put_ensure_: transpiler with: aNode [
 	self error; flag: #toRemove.
 
