@@ -289,7 +289,7 @@ Date.prototype.prettyPrint = function() {
 //-----------------------------------------------------------------------------
 export class SWFile {
   constructor(path) {
-    this._path = path;
+    this._stream = fs.createWriteStream(path);
   }
 
   truncate() {
@@ -299,10 +299,11 @@ export class SWFile {
   }
 
   write(contents) {
-    fs.writeFileSync(this._path, contents);
+    this._stream.write(contents);
   }
 
   destroy() {
+    this._stream.end();
   }
 }
 

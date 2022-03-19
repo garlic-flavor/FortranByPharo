@@ -35,8 +35,15 @@ export class ZnServer {
     var s = this.server();
     s.on('request', function(req, res) {
       if (req.method === 'PUT') {
+        var contents = '';
+        req.on('connection', (res, socket, head) => {
+          contents = '';
+        });
         req.on('data', function(chunk) {
-          req.contents = chunk.toString();
+          contents += chunk.toString();
+        });
+        req.on('end', function() {
+          req.contents = contents;
           self.delegate().request(req, res);
         });
       } else {
@@ -178,6 +185,10 @@ export class ZnRequest {
   }
   entity() {
     return ZnEntity.text_(this._original.contents);
+  }
+  toString() {
+    return 'complete ' + this._original.complete.toString() + '\n' + this._original.rawHeaders.toString();
+    
   }
 }
 

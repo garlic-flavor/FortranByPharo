@@ -21,6 +21,13 @@ Class {
 SWShellEnvironment class >> decode_self: cdt [
 	cdt
 		declareMethod: #localDirectory asReturn: FileLocator.
+	(cdt pool getClassInfo: OSEnvironment class)
+		declareMethodReturnsReceiversInstance: #environmentFor:.
+	(cdt pool getClassInfo: OSPlatform class)
+		declareMethodReturnsReceiversInstance: #current.
+	(cdt pool getClassInfo: OSSUnixSubprocess)
+		declareMethodReturnsReceiver: #run;
+		declareMethodReturnsReceiver: #initialize.
 
 ]
 
@@ -56,6 +63,7 @@ SWShellEnvironment class >> resetDefault [
 
 { #category : #initialization }
 SWShellEnvironment class >> setUpTranspiler:  mt [
+"
 	(mt global getClassInfo: OSEnvironment class)
 		declareMethodReturnsReceiversInstance: #environmentFor:.
 	(mt global getClassInfo: OSPlatform class)
@@ -63,7 +71,7 @@ SWShellEnvironment class >> setUpTranspiler:  mt [
 	(mt global getClassInfo: OSSUnixSubprocess)
 		declareMethodReturnsReceiver: #run;
 		declareMethodReturnsReceiver: #initialize.
-
+"
 
 ]
 

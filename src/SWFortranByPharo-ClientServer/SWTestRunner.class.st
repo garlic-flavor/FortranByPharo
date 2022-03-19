@@ -16,11 +16,22 @@ SWTestRunner class >> build [
 
 ]
 
+{ #category : #initialization }
+SWTestRunner class >> decode_self: cdt [
+	(cdt pool getClassInfo: TestAsserter)
+		declareMethodReturnsReceiver: #assert:description:resumable:.
+
+	cdt pool decode: #setUp with: { self }.
+	cdt pool decode: #tearDown with: { self }.
+
+]
+
 { #category : #running }
 SWTestRunner class >> go [
 	|result|
 	self newModuleTranspiler.
 	self build.
+	self inspectResult.
 	result := (self projectRunnerClass go: moduleTranspiler).
 	(STON reader
 		on: result message readStream;
@@ -67,18 +78,16 @@ SWTestRunner class >> runAllTests [
 
 { #category : #initialization }
 SWTestRunner class >> setUpTranspiler: mt [
-	(mt global getClassInfo: TestAsserter)
-		declareMethodReturnsReceiver: #assert:description:resumable:.
-
-	mt global decode: #setUp with: { self }.
-	mt global decode: #tearDown with: { self }.
-
 	self methodDict values select: [ :m | m protocol beginsWith: 'test' ] thenDo: [ :m |
 		mt global decode: (SWSenderInfo new
 			method: m;
 			operands: { self };
 			yourself).
 	].
+	(mt pool getClassInfo: SWTestRunner class)
+		methodBodyTranspilerOf: #name is: [ :mbt |
+			mbt putReturnKeyword; put: ' "'; put: self name; put: '"'; putStatementDelimiter; cr
+		].
 
 	(mt pool getClassInfo: TestCase class)
 		methodBodyTranspilerOf: #allTestSelectors is: [ :mbt |
@@ -87,11 +96,6 @@ SWTestRunner class >> setUpTranspiler: mt [
 				mbt atString: each selector
 			] separatedBy: [ mbt putArraySeparator ].
 			mbt putArrayFooter; putStatementDelimiter; cr
-		].
-
-	(mt pool getClassInfo: SWTestRunner class)
-		methodBodyTranspilerOf: #name is: [ :mbt |
-			mbt putReturnKeyword; put: ' "'; put: self name; put: '"'; putStatementDelimiter; cr
 		].
 
 

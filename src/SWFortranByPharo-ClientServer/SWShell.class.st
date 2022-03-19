@@ -7,6 +7,21 @@ Class {
 	#category : #'SWFortranByPharo-ClientServer-Shell'
 }
 
+{ #category : #'as yet unclassified' }
+SWShell class >> decode_self: cdt [
+	(cdt pool getClassInfo: OSEnvironment class)
+		declareMethodReturnsReceiversInstance: #current.
+
+	(cdt pool getClassInfo: OSSUnixSubprocess)
+		declareMethod: #createADefaultWriteStream asReturn: WriteStream";
+		declareMethod: #shellCommand asReturn: String;
+		declareMethodReturnsReceiver: #shell:command:;
+		declareMethod: #waitForExit asReturn: SmallInteger;
+		declareMethod: #isSuccess asReturn: Boolean;
+		declareMethodReturnsReceiver: #initialize"
+
+]
+
 { #category : #execution }
 SWShell class >> execute: command [
 	"I execute 'exe' with 'list', then return its result."
@@ -111,18 +126,20 @@ SWShell class >> put: target contents: contents [
 
 { #category : #initialization }
 SWShell class >> setUpTranspiler: pool [
+"
 	SWShellEnvironment setUpTranspiler: pool.
 
 	(pool global getClassInfo: OSEnvironment class)
 		declareMethodReturnsReceiversInstance: #current.
 
 	(pool global getClassInfo: OSSUnixSubprocess)
-		declareMethod: #createADefaultWriteStream asReturn: WriteStream";
+		declareMethod: #createADefaultWriteStream asReturn: WriteStream"";
 		declareMethod: #shellCommand asReturn: String;
 		declareMethodReturnsReceiver: #shell:command:;
 		declareMethod: #waitForExit asReturn: SmallInteger;
 		declareMethod: #isSuccess asReturn: Boolean;
 		declareMethodReturnsReceiver: #initialize"
+""
 ]
 
 { #category : #'as yet unclassified' }

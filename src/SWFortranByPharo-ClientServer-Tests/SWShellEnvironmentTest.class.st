@@ -7,6 +7,12 @@ Class {
 	#category : #'SWFortranByPharo-ClientServer-Tests-Shell'
 }
 
+{ #category : #'as yet unclassified' }
+SWShellEnvironmentTest class >> decode_self: cdt [
+	cdt pool getClassInfo: SWShellEnvironment class.
+
+]
+
 { #category : #running }
 SWShellEnvironmentTest class >> go [
 	<script>
