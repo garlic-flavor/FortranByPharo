@@ -22,7 +22,6 @@ SWShellEnvironment class >> decode_self: cdt [
 	cdt
 		declareMethod: #localDirectory asReturn: FileLocator.
 
-
 ]
 
 { #category : #accessing }
@@ -64,6 +63,7 @@ SWShellEnvironment class >> setUpTranspiler:  mt [
 	(mt global getClassInfo: OSSUnixSubprocess)
 		declareMethodReturnsReceiver: #run;
 		declareMethodReturnsReceiver: #initialize.
+
 
 ]
 
