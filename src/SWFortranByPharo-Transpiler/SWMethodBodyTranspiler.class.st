@@ -394,12 +394,14 @@ SWMethodBodyTranspiler >> putCascadeAsNotExpressionSimple [
 { #category : #'as yet unclassified' }
 SWMethodBodyTranspiler >> putCascadeAsNotExpressionWithTemp [
 	|receiverExp receiver|
-	self halt.
+
 	receiverExp := self children first children first.
 	receiver := self makeNewVariable: receiverExp result.
+
 	self children do: [ :child |  child children at: 1 put: receiver ].
 	self children addFirst: (receiverExp copy
 		node: (RBAssignmentNode variable: (RBVariableNode named: receiver result name) value: receiverExp node);
+		children: { receiverExp. receiver };
 		yourself).
 	self putSequence
 ]
