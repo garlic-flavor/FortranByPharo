@@ -364,7 +364,7 @@ SWTestProgram >> _0440_locals: arg1 [
 SWTestProgram >> _0450_locals2: arg1 [
 	|outer0 outer1 outer2 outer3|
 	outer1 := true.
-	[ :arg2| |inner1|
+	^ [ :arg2| |inner1|
 		outer1 ifTrue: [|inner2|
 			inner1 := 'hoge'.
 			 inner2 := 234.

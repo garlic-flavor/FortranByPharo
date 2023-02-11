@@ -169,7 +169,7 @@ SWGlobalTest >> test_0440_locals [
 
 { #category : #tests }
 SWGlobalTest >> test_0450_locals2 [
-	self resultWith: { String } equals: SmallInteger
+	self resultWith: { String } equals: ByteString
 
 ]
 
