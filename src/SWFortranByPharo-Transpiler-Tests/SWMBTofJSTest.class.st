@@ -339,8 +339,7 @@ return t_0;
 
 { #category : #utilities }
 SWMBTofJSTest >> transpile: aMethod with: operands [
-	(module pool transpilerFor: aMethod with: operands)
-		transpileAsMain
+	^ self transpileBody: aMethod with: operands
 
 
 ]

@@ -20,7 +20,7 @@ SWModuleTranspiler class >> main: aClass [
 
 ]
 
-{ #category : #'as yet unclassified' }
+{ #category : #accessing }
 SWModuleTranspiler class >> poolClass [
 	^ self subclassResponsibility 
 ]
@@ -110,7 +110,7 @@ SWModuleTranspiler >> senderInfo [
 	^ self mainTranspiler expression senderInfo
 ]
 
-{ #category : #'as yet unclassified' }
+{ #category : #analyzing }
 SWModuleTranspiler >> solveDependencies [
 	|rClass|
 	rClass := self mainTranspiler receiverClass instanceSide.

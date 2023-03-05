@@ -7,17 +7,17 @@ Class {
 	#category : #'SWFortranByPharo-Transpiler-F90'
 }
 
-{ #category : #'as yet unclassified' }
+{ #category : #accessing }
 SWMTofF90 class >> poolClass [
 	^ SWPoolOfF90
 ]
 
-{ #category : #'as yet unclassified' }
+{ #category : #accessing }
 SWMTofF90 >> exeFilename [
 	^ String streamContents: [ :s | self putExeFilenameOn: s ]
 ]
 
-{ #category : #'as yet unclassified' }
+{ #category : #streaming }
 SWMTofF90 >> putExeFilenameOn: aStream [
 	aStream << 'cache/'.
 	self putBasenameOn: aStream.

@@ -174,12 +174,12 @@ SWClassDefinitionTranspiler >> putMethods [
 
 ]
 
-{ #category : #'as yet unclassified' }
+{ #category : #'code generation' }
 SWClassDefinitionTranspiler >> putPredefinedMethodFooter: mbt [
 	^ self subclassResponsibility 
 ]
 
-{ #category : #'as yet unclassified' }
+{ #category : #'code generation' }
 SWClassDefinitionTranspiler >> putPredefinedMethodHeader: mbt [
 	^ self subclassResponsibility 
 ]

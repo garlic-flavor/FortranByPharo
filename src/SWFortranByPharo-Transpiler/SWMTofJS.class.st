@@ -7,7 +7,7 @@ Class {
 	#category : #'SWFortranByPharo-Transpiler-JS'
 }
 
-{ #category : #'as yet unclassified' }
+{ #category : #accessing }
 SWMTofJS class >> poolClass [
 	^ SWPoolOfJS
 ]

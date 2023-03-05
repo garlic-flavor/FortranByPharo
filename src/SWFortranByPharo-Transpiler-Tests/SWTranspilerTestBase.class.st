@@ -48,3 +48,17 @@ SWTranspilerTestBase >> setUp [
 SWTranspilerTestBase >> transpile: aMethod with: operands [
 	^ self subclassResponsibility 
 ]
+
+{ #category : #utilities }
+SWTranspilerTestBase >> transpileBody: aMethod with: operands [
+	^ (module pool transpilerFor: aMethod with: operands)
+		transpileAsMain
+
+]
+
+{ #category : #utilities }
+SWTranspilerTestBase >> transpileModule: aMethod with: operands [
+	^ (module method: aMethod with: operands)
+		transpile
+
+]
