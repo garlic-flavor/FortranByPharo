@@ -11,7 +11,7 @@ Class {
 }
 
 { #category : #initialization }
-SWWebSocket class >> setUpTranspiler: mt [
+SWWebSocket class >> setupTranspiler: mt [
 	(mt global getClassInfo: SWWebSocket)
 		declareMethod: #uri asReturn: ZnUrl
 ]

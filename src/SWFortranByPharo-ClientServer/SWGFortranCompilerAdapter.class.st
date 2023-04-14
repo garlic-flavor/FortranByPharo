@@ -94,7 +94,7 @@ SWGFortranCompilerAdapter >> contents: anObject [
 { #category : #accessing }
 SWGFortranCompilerAdapter >> env [
 
-	^ env ifNil: [ env := SWShellEnvironment default ]
+	^ env ifNil: [ env := SWOS default ]
 ]
 
 { #category : #accessing }

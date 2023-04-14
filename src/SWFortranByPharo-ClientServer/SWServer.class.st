@@ -109,8 +109,8 @@ SWServer class >> default [
 SWServer class >> filePathOf: aName [
 	|path|
 self error; flag: #toRemove.
-	path := SWShellEnvironment default localDirectory joinPath: (aName asString trimLeft: [ :c | c = $/ ]).
-	(SWShellEnvironment default localDirectory contains: path) ifFalse: [
+	path := SWOS default localDirectory joinPath: (aName asString trimLeft: [ :c | c = $/ ]).
+	(SWOS default localDirectory contains: path) ifFalse: [
 		self error: aName, ' is in out of the local directory.'
 	].
 	^ path
@@ -196,11 +196,11 @@ SWServer class >> putQueryAtIfPresent: mbt [
 
 { #category : #'as yet unclassified' }
 SWServer class >> relPathOf: path [
-	^ path relativeTo: SWShellEnvironment default localDirectory
+	^ path relativeTo: SWOS default localDirectory
 ]
 
 { #category : #initialization }
-SWServer class >> setUpTranspiler: mt [
+SWServer class >> setupTranspiler: mt [
 	(mt global getClassInfo: ZnRequest)
 		declareMethod: #uri asReturn: ZnUrl.
 	(mt global getClassInfo: ZnUrl)
@@ -214,9 +214,9 @@ SWServer class >> setUpTranspiler: mt [
 	(mt pool getClassInfo: ZnHeaders)
 		senderTranspilerOf: #at:put: is: [ :mbt | mbt putAtPut  ].
 
-	SWShell setUpTranspiler: mt.
-	SWServerStatus setUpTranspiler: mt.
-	SWWebSocket setUpTranspiler: mt.
+	SWShell setupTranspiler: mt.
+	SWServerStatus setupTranspiler: mt.
+	SWWebSocket setupTranspiler: mt.
 
 ]
 
@@ -260,7 +260,7 @@ SWServer >> addFileHeaderInfoOf: file to: headers [
 { #category : #accessing }
 SWServer >> env [
 
-	^ env ifNil: [ env := SWShellEnvironment default ]
+	^ env ifNil: [ env := SWOS default ]
 ]
 
 { #category : #accessing }

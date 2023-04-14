@@ -14,9 +14,9 @@ SWShellTest class >> go [
 ]
 
 { #category : #'as yet unclassified' }
-SWShellTest class >> setUpTranspiler: mt [
-	SWShell setUpTranspiler: mt.
-	super setUpTranspiler: mt
+SWShellTest class >> setupTranspiler: mt [
+	SWShell setupTranspiler: mt.
+	super setupTranspiler: mt
 
 ]
 

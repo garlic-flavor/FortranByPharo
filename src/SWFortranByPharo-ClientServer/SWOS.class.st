@@ -2,7 +2,7 @@
 This contains the information about development environment.
 "
 Class {
-	#name : #SWShellEnvironment,
+	#name : #SWOS,
 	#superclass : #Object,
 	#instVars : [
 		'exeFileExtension',
@@ -18,7 +18,7 @@ Class {
 }
 
 { #category : #'as yet unclassified' }
-SWShellEnvironment class >> decode_self: cdt [
+SWOS class >> decode_self: cdt [
 	cdt
 		declareMethod: #localDirectory asReturn: FileLocator.
 	(cdt pool getClassInfo: OSEnvironment class)
@@ -32,13 +32,13 @@ SWShellEnvironment class >> decode_self: cdt [
 ]
 
 { #category : #accessing }
-SWShellEnvironment class >> default [
+SWOS class >> default [
 	^ default ifNil: [ default := self newDefault ]
 
 ]
 
 { #category : #'instance creation' }
-SWShellEnvironment class >> newDefault [
+SWOS class >> newDefault [
 	OSPlatform current isMacOS ifTrue: [ 
 		^ self newMacDefault
 	].
@@ -47,7 +47,7 @@ SWShellEnvironment class >> newDefault [
 ]
 
 { #category : #'instance creation' }
-SWShellEnvironment class >> newMacDefault [
+SWOS class >> newMacDefault [
 	^ self new
 		fortranCompilerAdapterClass: SWGFortranCompilerAdapter;
 		exeFileExtension: #out;
@@ -56,13 +56,13 @@ SWShellEnvironment class >> newMacDefault [
 ]
 
 { #category : #initialization }
-SWShellEnvironment class >> resetDefault [
+SWOS class >> resetDefault [
 	<script>
 	default := nil
 ]
 
 { #category : #initialization }
-SWShellEnvironment class >> setUpTranspiler:  mt [
+SWOS class >> setupTranspiler:  mt [
 "
 	(mt global getClassInfo: OSEnvironment class)
 		declareMethodReturnsReceiversInstance: #environmentFor:.
@@ -76,14 +76,14 @@ SWShellEnvironment class >> setUpTranspiler:  mt [
 ]
 
 { #category : #private }
-SWShellEnvironment class >> solveDependencies: mt [
+SWOS class >> solveDependencies: mt [
 	mt
 		transpile: SWGFortranCompilerAdapter;
 		import: #(OSPlatform FileLocator) from: 'Pharo'
 ]
 
 { #category : #'as yet unclassified' }
-SWShellEnvironment class >> transpile_self: cdt [
+SWOS class >> transpile_self: cdt [
 	cdt
 		methodBodyTranspilerOf: #localDirectory is: [ :mbt |
 			mbt
@@ -95,31 +95,31 @@ SWShellEnvironment class >> transpile_self: cdt [
 ]
 
 { #category : #accessing }
-SWShellEnvironment >> exeFileExtension [
+SWOS >> exeFileExtension [
 
 	^ exeFileExtension
 ]
 
 { #category : #accessing }
-SWShellEnvironment >> exeFileExtension: anObject [
+SWOS >> exeFileExtension: anObject [
 
 	exeFileExtension := anObject
 ]
 
 { #category : #accessing }
-SWShellEnvironment >> fortranCompilerAdapterClass [
+SWOS >> fortranCompilerAdapterClass [
 
 	^ fortranCompilerAdapterClass
 ]
 
 { #category : #accessing }
-SWShellEnvironment >> fortranCompilerAdapterClass: anObject [
+SWOS >> fortranCompilerAdapterClass: anObject [
 
 	fortranCompilerAdapterClass := anObject
 ]
 
 { #category : #origins }
-SWShellEnvironment >> localDirectory [
+SWOS >> localDirectory [
 	^ localDirectory ifNil: [
 		localDirectory := ((IceRepository repositories detect: [ :each |
 			each name = self packageName
@@ -128,25 +128,25 @@ SWShellEnvironment >> localDirectory [
 ]
 
 { #category : #accessing }
-SWShellEnvironment >> objFileExtension [
+SWOS >> objFileExtension [
 
 	^ objFileExtension
 ]
 
 { #category : #accessing }
-SWShellEnvironment >> objFileExtension: anObject [
+SWOS >> objFileExtension: anObject [
 
 	objFileExtension := anObject
 ]
 
 { #category : #accessing }
-SWShellEnvironment >> packageName [
+SWOS >> packageName [
 
 	^ packageName ifNil: [ packageName := 'FortranByPharo' ]
 ]
 
 { #category : #accessing }
-SWShellEnvironment >> packageName: anObject [
+SWOS >> packageName: anObject [
 
 	packageName := anObject.
 	localDirectory := nil

@@ -69,8 +69,8 @@ SWModuleTranspiler >> mainTranspiler: anObject [
 SWModuleTranspiler >> method: aMethod with: operands [
 	|rClass|
 	rClass := operands first value instanceSide.
-	(rClass respondsTo: #setUpTranspiler:) ifTrue: [
-		rClass setUpTranspiler: self
+	(rClass respondsTo: #setupTranspiler:) ifTrue: [
+		rClass setupTranspiler: self
 	].
 	self mainTranspiler: (self pool transpilerFor: aMethod with: operands)
 

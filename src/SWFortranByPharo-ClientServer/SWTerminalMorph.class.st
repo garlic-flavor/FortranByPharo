@@ -3,9 +3,10 @@ Class {
 	#superclass : #StandardWindow,
 	#instVars : [
 		'textMorph',
-		'io'
+		'input',
+		'err'
 	],
-	#category : #'SWFortranByPharo-ClientServer-Tests'
+	#category : #'SWFortranByPharo-ClientServer-Shell'
 }
 
 { #category : #accessing }
@@ -33,6 +34,15 @@ SWTerminalMorph class >> startThenInspect [
 		inspect
 ]
 
+{ #category : #accessing }
+SWTerminalMorph >> errStream [
+	^ err ifNil: [
+		err := SWStream new
+			>> [:val | self putLine: val ];
+			yourself
+	]
+]
+
 { #category : #private }
 SWTerminalMorph >> getLastLine [
 	|buf|
@@ -51,38 +61,39 @@ SWTerminalMorph >> initialize [
 	self putPrompt1.
 ]
 
-{ #category : #accessing }
-SWTerminalMorph >> io [
+{ #category : #'instance creation' }
+SWTerminalMorph >> inputStream [
+	^ input ifNil: [
+		input := SWStream new
+			>> [ :val | self putLine: val ];
+			yourself
+	]
 
-	^ io ifNil: [ self io: SWIO newSelfSupplied ]
 ]
 
-{ #category : #accessing }
-SWTerminalMorph >> io: anObject [
-
-	io := anObject.
-	io toRightStream >> [ :val |
-		textMorph
-			appendText: val;
-			appendText: self class lineSep
-	].
-	io errStream >> [ :val |
-		textMorph
-			appendText: val;
-			appendText: self class lineSep
-	].
-	
-	^ io
+{ #category : #'instance creation' }
+SWTerminalMorph >> newIO [
+	^ SWIO new
+		inputStream: self inputStream;
+		outputStream: self inputStream;
+		errStream: self errStream;
+		yourself
 ]
 
 { #category : #'as yet unclassified' }
 SWTerminalMorph >> onEnter [
-	|res|
-	res := Behavior evaluate: self getLastLine.
 	[
-		self io toLeftStream << res asString.
+		self inputStream << (Behavior evaluate: self getLastLine) asString.
 		self putPrompt1
 	] fork
+
+]
+
+{ #category : #api }
+SWTerminalMorph >> putLine: line [
+	textMorph
+		appendText: line;
+		appendText: self class lineSep
 
 ]
 

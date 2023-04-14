@@ -408,13 +408,13 @@ SWTestProgram >> _0500_at_ifAbsent: dict [
 
 { #category : #'tests - source' }
 SWTestProgram >> _1010_SWShellEnvironemt_default [
-	^ SWShellEnvironment default
+	^ SWOS default
 
 ]
 
 { #category : #'tests - source' }
 SWTestProgram >> _1020_SWShellEnvironemtLocalDirectory [
-	^ SWShellEnvironment default localDirectory
+	^ SWOS default localDirectory
 
 ]
 
@@ -444,7 +444,7 @@ SWTestProgram >> _1060_SWServerClass_starton [
 
 { #category : #'tests - source' }
 SWTestProgram >> _1070_SWShellEnvironment [
-	^ self assert: (SWShellEnvironment default localDirectory fullName endsWith: 'hoge')
+	^ self assert: (SWOS default localDirectory fullName endsWith: 'hoge')
 ]
 
 { #category : #'as yet unclassified' }
@@ -495,7 +495,7 @@ SWTestProgram >> _9004_cascading_3: needle [
 SWTestProgram >> _9005_cascading_4: process [
 	^ [
 		process
-			workingDirectory: SWShellEnvironment default localDirectory fullName;
+			workingDirectory: SWOS default localDirectory fullName;
 			redirectStdout;
 			redirectStderr;
 			runAndWait.

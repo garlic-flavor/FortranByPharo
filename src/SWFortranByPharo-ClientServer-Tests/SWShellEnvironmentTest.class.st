@@ -9,7 +9,7 @@ Class {
 
 { #category : #'as yet unclassified' }
 SWShellEnvironmentTest class >> decode_self: cdt [
-	cdt pool getClassInfo: SWShellEnvironment class.
+	cdt pool getClassInfo: SWOS class.
 
 ]
 
@@ -20,16 +20,16 @@ SWShellEnvironmentTest class >> go [
 ]
 
 { #category : #initialization }
-SWShellEnvironmentTest class >> setUpTranspiler: pool [
-	SWShellEnvironment setUpTranspiler: pool.
-	super setUpTranspiler: pool
+SWShellEnvironmentTest class >> setupTranspiler: pool [
+	SWOS setupTranspiler: pool.
+	super setupTranspiler: pool
 
 ]
 
 { #category : #private }
 SWShellEnvironmentTest class >> solveDependencies: mt [
-	SWShellEnvironment solveDependencies: mt.
-	mt transpile: SWShellEnvironment.
+	SWOS solveDependencies: mt.
+	mt transpile: SWOS.
 	super solveDependencies: mt.
 
 ]
@@ -43,11 +43,11 @@ SWShellEnvironmentTest class >> tryBuild [
 { #category : #test }
 SWShellEnvironmentTest >> testExeFileExtension [
 	OSPlatform current isMacOS ifTrue: [
-		self assert: SWShellEnvironment default exeFileExtension equals: #out
+		self assert: SWOS default exeFileExtension equals: #out
 	].
 ]
 
 { #category : #tests }
 SWShellEnvironmentTest >> testLocalDirectory [
-	self assert: (SWShellEnvironment default localDirectory fullName endsWith: 'FortranByPharo')
+	self assert: (SWOS default localDirectory fullName endsWith: 'FortranByPharo')
 ]

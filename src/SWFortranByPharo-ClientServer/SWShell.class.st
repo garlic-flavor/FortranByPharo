@@ -47,7 +47,7 @@ SWShell class >> executeProcess: process [
 	SWType declare: #return as: String.
 	^ [
 		process
-			workingDirectory: SWShellEnvironment default localDirectory fullName;
+			workingDirectory: SWOS default localDirectory fullName;
 			redirectStdout;
 			redirectStderr;
 			runAndWait.
@@ -61,8 +61,8 @@ SWShell class >> executeProcess: process [
 { #category : #converting }
 SWShell class >> filePathOf: aName [
 	|path|
-	path := SWShellEnvironment default localDirectory / aName.
-	(SWShellEnvironment default localDirectory contains: path) ifFalse: [
+	path := SWOS default localDirectory / aName.
+	(SWOS default localDirectory contains: path) ifFalse: [
 		self error: aName, ' is out of the local directory.'
 	].
 	path parent ensureCreateDirectory.
@@ -125,7 +125,7 @@ SWShell class >> put: target contents: contents [
 ]
 
 { #category : #initialization }
-SWShell class >> setUpTranspiler: pool [
+SWShell class >> setupTranspiler: pool [
 "
 	SWShellEnvironment setUpTranspiler: pool.
 
@@ -144,8 +144,8 @@ SWShell class >> setUpTranspiler: pool [
 
 { #category : #'as yet unclassified' }
 SWShell class >> solveDependencies: mt [
-	SWShellEnvironment solveDependencies: mt.
+	SWOS solveDependencies: mt.
 	mt
-		transpile: SWShellEnvironment;
+		transpile: SWOS;
 		import: #(OSSUnixSubprocess) from: 'OSSUnixSubprocess'
 ]

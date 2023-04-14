@@ -77,7 +77,7 @@ SWTestRunner class >> runAllTests [
 ]
 
 { #category : #initialization }
-SWTestRunner class >> setUpTranspiler: mt [
+SWTestRunner class >> setupTranspiler: mt [
 	self methodDict values select: [ :m | m protocol beginsWith: 'test' ] thenDo: [ :m |
 		mt global decode: (SWSenderInfo new
 			method: m;

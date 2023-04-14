@@ -17,9 +17,9 @@ SWServerStatusTest class >> go [
 ]
 
 { #category : #initialization }
-SWServerStatusTest class >> setUpTranspiler: mt [
-	SWServerStatus setUpTranspiler: mt.
-	super setUpTranspiler: mt
+SWServerStatusTest class >> setupTranspiler: mt [
+	SWServerStatus setupTranspiler: mt.
+	super setupTranspiler: mt
 ]
 
 { #category : #accessing }

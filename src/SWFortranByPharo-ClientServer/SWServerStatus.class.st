@@ -62,7 +62,7 @@ SWServerStatus class >> readFrom: aSocket [
 ]
 
 { #category : #initialization }
-SWServerStatus class >> setUpTranspiler: mt [
+SWServerStatus class >> setupTranspiler: mt [
 ]
 
 { #category : #'code generation' }

@@ -6,7 +6,7 @@ Class {
 
 { #category : #tests }
 SWGlobalTest2 >> test_1010_SWShellEnvironment_default [
-	self resultWith: { } equals: SWShellEnvironment
+	self resultWith: { } equals: SWOS
 ]
 
 { #category : #tests }

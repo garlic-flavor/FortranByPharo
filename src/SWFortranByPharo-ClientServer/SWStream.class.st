@@ -1,7 +1,7 @@
 Class {
 	#name : #SWStream,
 	#superclass : #SharedQueue,
-	#category : #'SWFortranByPharo-ClientServer-Tests'
+	#category : #'SWFortranByPharo-ClientServer-Shell'
 }
 
 { #category : #streaming }
