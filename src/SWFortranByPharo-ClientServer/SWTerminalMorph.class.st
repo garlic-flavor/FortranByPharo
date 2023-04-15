@@ -4,6 +4,7 @@ Class {
 	#instVars : [
 		'textMorph',
 		'input',
+		'key',
 		'err'
 	],
 	#category : #'SWFortranByPharo-ClientServer-Shell'
@@ -43,6 +44,13 @@ SWTerminalMorph >> errStream [
 	]
 ]
 
+{ #category : #execution }
+SWTerminalMorph >> execute: command [
+	^ SWShellProcess new
+		io: self newIO;
+		execute: command
+]
+
 { #category : #private }
 SWTerminalMorph >> getLastLine [
 	|buf|
@@ -61,20 +69,46 @@ SWTerminalMorph >> initialize [
 	self putPrompt1.
 ]
 
+{ #category : #accessing }
+SWTerminalMorph >> input: line [
+	textMorph appendText: line.
+	self onEnter.
+	textMorph appendText: self class lineSep.
+
+]
+
 { #category : #'instance creation' }
 SWTerminalMorph >> inputStream [
 	^ input ifNil: [
 		input := SWStream new
-			>> [ :val | self putLine: val ];
+			>> [ :val ||text|
+				text := textMorph text.
+				(text endsWith: self class prompt1) ifTrue: [
+					textMorph setText: (text allButLast: (self class prompt1 size)).
+				].
+				self
+					putLine: val;
+					putPrompt1
+			];
 			yourself
 	]
 
 ]
 
+{ #category : #'as yet unclassified' }
+SWTerminalMorph >> keyStream [
+	^ key ifNil: [ key := self inputStream ]
+]
+
+{ #category : #'as yet unclassified' }
+SWTerminalMorph >> keyStream: anObject [
+	key := anObject
+]
+
 { #category : #'instance creation' }
 SWTerminalMorph >> newIO [
 	^ SWIO new
-		inputStream: self inputStream;
+		inputStream: self keyStream;
 		outputStream: self inputStream;
 		errStream: self errStream;
 		yourself
@@ -83,7 +117,7 @@ SWTerminalMorph >> newIO [
 { #category : #'as yet unclassified' }
 SWTerminalMorph >> onEnter [
 	[
-		self inputStream << (Behavior evaluate: self getLastLine) asString.
+		self keyStream << (Behavior evaluate: self getLastLine) asString.
 		self putPrompt1
 	] fork
 

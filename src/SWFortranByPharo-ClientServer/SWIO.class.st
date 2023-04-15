@@ -47,6 +47,11 @@ SWIO >> inputStream: anObject [
 ]
 
 { #category : #accessing }
+SWIO >> nextPut: anObject [
+	self outputStream nextPut: anObject
+]
+
+{ #category : #accessing }
 SWIO >> outputStream [
 	^ output ifNil: [ output := SWStream new ]
 	

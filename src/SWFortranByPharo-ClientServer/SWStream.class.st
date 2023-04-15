@@ -7,7 +7,6 @@ Class {
 { #category : #streaming }
 SWStream >> << anObject [
 	self nextPut: anObject.
-	Processor yield.
 
 ]
 
@@ -18,4 +17,11 @@ SWStream >> >> aBlock [
 			aBlock value: self next
 		] repeat
 	] fork
+]
+
+{ #category : #accessing }
+SWStream >> nextPut: anObject [
+	super nextPut: anObject.
+	Processor yield.
+
 ]
