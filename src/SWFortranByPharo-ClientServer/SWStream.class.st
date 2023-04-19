@@ -4,24 +4,26 @@ Class {
 	#category : #'SWFortranByPharo-ClientServer-Shell'
 }
 
-{ #category : #streaming }
-SWStream >> << anObject [
-	self nextPut: anObject.
-
+{ #category : #'stop conditions' }
+SWStream >> cr [
+	^ self nextPut: Character cr
 ]
 
-{ #category : #'bit manipulation' }
-SWStream >> >> aBlock [
-	[
-		[
-			aBlock value: self next
-		] repeat
-	] fork
+{ #category : #'as yet unclassified' }
+SWStream >> readLine [
+	| elements |
+	elements := OrderedCollection new.
+	[ self atEnd ] whileFalse: [|c|
+		c := self next.
+		(c asInteger = Character cr asInteger) ifTrue: [ ^ String newFrom: elements ].
+		elements add: c.
+	].
+	^ String newFrom: elements
 ]
 
-{ #category : #accessing }
-SWStream >> nextPut: anObject [
-	super nextPut: anObject.
-	Processor yield.
-
+{ #category : #'as yet unclassified' }
+SWStream >> waitDone [
+	^ [
+		monitor critical: [ items isEmpty ]
+	] whileFalse: [ Processor yield ]
 ]
