@@ -23,7 +23,7 @@ SWTerminalMorph class >> prompt1 [
 { #category : #'tests - execution' }
 SWTerminalMorph class >> start [
 	<script>
-	self new openInWorld
+	^ self new openInWorld
 
 ]
 
@@ -35,20 +35,37 @@ SWTerminalMorph class >> startThenInspect [
 		inspect
 ]
 
+{ #category : #running }
+SWTerminalMorph >> attach: aProcess [
+	aProcess io
+		outputStream: self inputStream;
+		errStream: self errStream.
+	self keyStream: aProcess io inputStream.
+
+]
+
+{ #category : #'as yet unclassified' }
+SWTerminalMorph >> detach [
+	self keyStream: nil
+]
+
 { #category : #accessing }
 SWTerminalMorph >> errStream [
 	^ err ifNil: [
 		err := SWStream new
-			>> [:val | self putLine: val ];
+			onEachLineDo: [:val | self putLine: val ];
 			yourself
 	]
 ]
 
 { #category : #execution }
 SWTerminalMorph >> execute: command [
-	^ SWShellProcess new
-		io: self newIO;
-		execute: command
+	|p|
+	p := SWShellProcess new.
+	self attach: p.
+	p execute: command.
+	self detach.
+
 ]
 
 { #category : #private }
@@ -67,6 +84,7 @@ SWTerminalMorph >> initialize [
 	textMorph announcer when: RubReturnEntered send: #value to: [ self onEnter. false ].
 	self addMorph: textMorph fullFrame: (LayoutFrame identity).
 	self putPrompt1.
+
 ]
 
 { #category : #accessing }
@@ -75,20 +93,21 @@ SWTerminalMorph >> input: line [
 	self onEnter.
 	textMorph appendText: self class lineSep.
 
+
 ]
 
 { #category : #'instance creation' }
 SWTerminalMorph >> inputStream [
 	^ input ifNil: [
 		input := SWStream new
-			>> [ :val ||text|
+			onEachLineDo: [ :val ||text|
 				text := textMorph text.
 				(text endsWith: self class prompt1) ifTrue: [
 					textMorph setText: (text allButLast: (self class prompt1 size)).
 				].
 				self
 					putLine: val;
-					putPrompt1
+					putPrompt1.
 			];
 			yourself
 	]
@@ -105,21 +124,9 @@ SWTerminalMorph >> keyStream: anObject [
 	key := anObject
 ]
 
-{ #category : #'instance creation' }
-SWTerminalMorph >> newIO [
-	^ SWIO new
-		inputStream: self keyStream;
-		outputStream: self inputStream;
-		errStream: self errStream;
-		yourself
-]
-
 { #category : #'as yet unclassified' }
 SWTerminalMorph >> onEnter [
-	[
-		self keyStream << (Behavior evaluate: self getLastLine) asString.
-		self putPrompt1
-	] fork
+	self keyStream << (Behavior evaluate: self getLastLine) asString.
 
 ]
 

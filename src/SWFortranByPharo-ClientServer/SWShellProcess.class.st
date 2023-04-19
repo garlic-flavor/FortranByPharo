@@ -14,9 +14,10 @@ SWShellProcess class >> redirect: aStream to: aQueue [
 		[
 			m critical: [
 				m waitWhile: [ aStream atEnd ].
-				aQueue nextPut: aStream upToEnd
-			]
-		] repeat
+				aQueue << aStream upToEnd
+			].
+			aStream closed.
+		] whileFalse
 	] fork
 ]
 
@@ -55,10 +56,10 @@ SWShellProcess >> executeProcess: process [
 	^ process
 		runAndWaitOnExitDo: [ :p :out :err |
 			out ifNotEmpty: [
-				self io outputStream nextPutAll: (out splitOn: String cr)
+				self io outputStream << out
 			].
 			err ifNotEmpty: [
-				self io errStream nextPutAll: (err splitOn: String cr)
+				self io errStream << err
 			]
 		];
 		isSuccess

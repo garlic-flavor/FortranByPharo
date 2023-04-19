@@ -16,7 +16,8 @@ SWIO >> << anObject [
 
 { #category : #'bit manipulation' }
 SWIO >> >> aBlock [
-	self inputStream >> aBlock
+	^ self inputStream onEachLineDo: aBlock
+
 ]
 
 { #category : #accessing }
