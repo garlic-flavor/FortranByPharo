@@ -14,16 +14,3 @@ SWPipeReader >> next [
 		]
 	]
 ]
-
-{ #category : #accessing }
-SWPipeReader >> nextLine [
-	|buf|
-	buf := OrderedCollection new.
-	[|c|
-		self isEmpty ifTrue: [ ^ String newFromArray: buf ].
-		c := self next.
-		c asInteger = self class lineSep asInteger ifTrue: [ ^ String newFromArray: buf ].
-		buf add: c
-	] repeat
-
-]

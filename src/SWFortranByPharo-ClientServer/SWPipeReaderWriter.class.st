@@ -35,6 +35,19 @@ SWPipeReaderWriter >> atEnd [
 	^ self isEmpty
 ]
 
+{ #category : #'open/close' }
+SWPipeReaderWriter >> close [
+	semaphoreForDone initSignals.
+	semaphoreForWait initSignals.
+	semaphoreForAccess initSignals.
+	collection := nil.
+]
+
+{ #category : #testing }
+SWPipeReaderWriter >> closed [
+	^ collection isNil and: [ semaphoreForAccess isNil ]
+]
+
 { #category : #accessing }
 SWPipeReaderWriter >> collection [
 

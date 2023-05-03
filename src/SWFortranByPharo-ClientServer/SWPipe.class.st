@@ -1,56 +1,34 @@
 Class {
 	#name : #SWPipe,
-	#superclass : #Object,
+	#superclass : #Stream,
 	#instVars : [
 		'reader',
 		'writer',
 		'semaphoreForRead',
 		'semaphoreForWrite',
 		'semaphoreForAccess',
-		'errReader',
-		'errWriter',
-		'semaphoreForErrorRead',
-		'semaphoreForErrorAccess',
-		'stdStream',
-		'errStream'
+		'stdStream'
 	],
 	#category : #'SWFortranByPharo-ClientServer-Shell'
 }
 
-{ #category : #accessing }
-SWPipe >> errReader [
+{ #category : #'instance creation' }
+SWPipe class >> new [
+	^ self basicNew
+]
 
-	^ errReader ifNil: [
-		errReader := SWPipeReader new
-			collection: self errStream;
-			semaphoreForWait: semaphoreForErrorRead;
-			semaphoreForAccess: semaphoreForAccess;
-			yourself
-	]
+{ #category : #testing }
+SWPipe >> atEnd [
+	"Answer whether the receiver can access any more objects."
+
+	^ self readStream atEnd
 ]
 
 { #category : #accessing }
-SWPipe >> errStream [
+SWPipe >> contents [
+	"Answer all of the contents of the receiver."
 
-	^ errStream ifNil: [ errStream := OrderedCollection new ]
-]
-
-{ #category : #accessing }
-SWPipe >> errStream: anObject [
-
-	errStream := anObject
-]
-
-{ #category : #accessing }
-SWPipe >> errWriter [
-
-	^ errWriter ifNil: [
-		errWriter := SWPipeWriter new
-			collection: self errStream;
-			semaphoreForDone: semaphoreForErrorRead;
-			semaphoreForAccess: semaphoreForErrorAccess;
-			yourself
-	]
+	^ self readStream contents
 ]
 
 { #category : #initialization }
@@ -60,13 +38,26 @@ SWPipe >> initialize [
 	semaphoreForRead := Semaphore new.
 	semaphoreForWrite := Semaphore forMutualExclusion.
 	semaphoreForAccess := Semaphore forMutualExclusion.
-	semaphoreForErrorRead := Semaphore new.
-	semaphoreForErrorAccess := Semaphore forMutualExclusion.
 	
 ]
 
 { #category : #accessing }
-SWPipe >> reader [
+SWPipe >> next [
+	"Answer the next object accessible by the receiver."
+
+	^ self readStream next
+]
+
+{ #category : #accessing }
+SWPipe >> nextPut: anObject [
+	"Insert the argument, anObject, as the next object accessible by the
+	receiver. Answer anObject."
+
+	self writeStream nextPut: anObject
+]
+
+{ #category : #accessing }
+SWPipe >> readStream [
 
 	^ reader ifNil: [
 		reader := SWPipeReader new
@@ -91,7 +82,7 @@ SWPipe >> stdStream: anObject [
 ]
 
 { #category : #accessing }
-SWPipe >> writer [
+SWPipe >> writeStream [
 
 	^ writer ifNil: [
 		writer := SWPipeWriter new

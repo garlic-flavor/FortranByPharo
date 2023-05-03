@@ -4,6 +4,14 @@ This implements shell execution using OSSubprocess.
 Class {
 	#name : #SWShell,
 	#superclass : #Object,
+	#instVars : [
+		'processes',
+		'pipes',
+		'semaphores',
+		'reader',
+		'writer',
+		'errWriter'
+	],
 	#category : #'SWFortranByPharo-ClientServer-Shell'
 }
 
@@ -148,4 +156,117 @@ SWShell class >> solveDependencies: mt [
 	mt
 		transpile: SWOS;
 		import: #(OSSUnixSubprocess) from: 'OSSUnixSubprocess'
+]
+
+{ #category : #comparing }
+SWShell >> < inputStream [
+	self readStream: inputStream readStream
+]
+
+{ #category : #comparing }
+SWShell >> > outputStream [
+	self writeStream: outputStream writeStream
+]
+
+{ #category : #accessing }
+SWShell >> errWriteStream [
+
+	^ errWriter ifNil: [ errWriter := self writeStream ]
+]
+
+{ #category : #accessing }
+SWShell >> errWriteStream: anObject [
+
+	errWriter := anObject
+]
+
+{ #category : #accessing }
+SWShell >> pipes [
+
+	^ pipes ifNil: [ pipes := OrderedCollection new ]
+]
+
+{ #category : #accessing }
+SWShell >> pipes: anObject [
+
+	pipes := anObject
+]
+
+{ #category : #accessing }
+SWShell >> processes [
+
+	^ processes ifNil: [ processes := OrderedCollection new ]
+]
+
+{ #category : #accessing }
+SWShell >> processes: anObject [
+
+	processes := anObject
+]
+
+{ #category : #accessing }
+SWShell >> readStream [
+
+	^ reader ifNil: [ reader := String empty readStream ]
+]
+
+{ #category : #accessing }
+SWShell >> readStream: anObject [
+
+	reader := anObject
+]
+
+{ #category : #running }
+SWShell >> run [
+	|leftpipe rightpipe|
+	leftpipe := SWPipe new
+		stdStream: self readStream;
+		yourself.
+	rightpipe := SWPipe new.
+	self processes allButLastDo: [ :process|
+		[
+			process value: leftpipe readStream value: rightpipe writeStream value: self errWriteStream.
+		] fork.
+		leftpipe := rightpipe
+	].
+	rightpipe := SWPipe new
+		stdStream: self writeStream;
+		yourself.
+	[
+		processes last value: leftpipe readStream value: rightpipe writeStream value: self errWriteStream
+	] fork
+]
+
+{ #category : #running }
+SWShell >> runAndWait [
+	self halt.
+]
+
+{ #category : #accessing }
+SWShell >> semaphores [
+
+	^ semaphores ifNil: [ semaphores := OrderedCollection new ]
+]
+
+{ #category : #accessing }
+SWShell >> semaphores: anObject [
+
+	semaphores := anObject
+]
+
+{ #category : #accessing }
+SWShell >> writeStream [
+
+	^ writer ifNil: [ writer := String new writeStream ]
+]
+
+{ #category : #accessing }
+SWShell >> writeStream: anObject [
+
+	writer := anObject
+]
+
+{ #category : #'logical operations' }
+SWShell >> | aBlock [
+	self processes add: aBlock
 ]

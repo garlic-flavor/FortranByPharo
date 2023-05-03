@@ -47,3 +47,21 @@ SWPipeTest >> test_BasicsForked [
 	done wait.
 	self assert: readed equals: msg.
 ]
+
+{ #category : #tests }
+SWPipeTest >> test_pipe [
+	|tm|
+	tm := SWTerminalMorph new.
+	SWShell new
+		| [ :stdin :stdout :stderr |
+			stdout << 'hello, '; cr
+		];
+		| [ :stdin :stdout :stderr |
+			stdin wait.
+			stdout << stdin nextLine; << 'world'; cr.
+			stderr << 'this is not an error.'; cr.
+		] redirectErrToOut;
+		< tm;
+		> tm;
+		runAndWait
+]
