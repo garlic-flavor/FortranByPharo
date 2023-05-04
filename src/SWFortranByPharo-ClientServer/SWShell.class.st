@@ -8,9 +8,9 @@ Class {
 		'processes',
 		'pipes',
 		'semaphores',
-		'reader',
-		'writer',
-		'errWriter'
+		'leftMostPipe',
+		'rightMostPipe',
+		'errWriteStream'
 	],
 	#category : #'SWFortranByPharo-ClientServer-Shell'
 }
@@ -160,24 +160,37 @@ SWShell class >> solveDependencies: mt [
 
 { #category : #comparing }
 SWShell >> < inputStream [
-	self readStream: inputStream readStream
+	self leftMostPipe: inputStream readStream
+
 ]
 
 { #category : #comparing }
 SWShell >> > outputStream [
-	self writeStream: outputStream writeStream
+	self rightMostPipe: outputStream writeStream
 ]
 
 { #category : #accessing }
 SWShell >> errWriteStream [
 
-	^ errWriter ifNil: [ errWriter := self writeStream ]
+	^ errWriteStream ifNil: [ errWriteStream := self writeStream ]
 ]
 
 { #category : #accessing }
 SWShell >> errWriteStream: anObject [
 
-	errWriter := anObject
+	errWriteStream := anObject
+]
+
+{ #category : #accessing }
+SWShell >> leftMostPipe [
+
+	^ leftMostPipe
+]
+
+{ #category : #accessing }
+SWShell >> leftMostPipe: anObject [
+
+	leftMostPipe := anObject
 ]
 
 { #category : #accessing }
@@ -207,33 +220,31 @@ SWShell >> processes: anObject [
 { #category : #accessing }
 SWShell >> readStream [
 
-	^ reader ifNil: [ reader := String empty readStream ]
+	^ self rightMostPipe ifNotNil: [ self rightMostPipe readStream ]
 ]
 
 { #category : #accessing }
-SWShell >> readStream: anObject [
+SWShell >> rightMostPipe [
 
-	reader := anObject
+	^ rightMostPipe
+]
+
+{ #category : #accessing }
+SWShell >> rightMostPipe: anObject [
+
+	rightMostPipe := anObject
 ]
 
 { #category : #running }
 SWShell >> run [
-	|leftpipe rightpipe|
-	leftpipe := SWPipe new
-		stdStream: self readStream;
-		yourself.
-	rightpipe := SWPipe new.
-	self processes allButLastDo: [ :process|
-		[
-			process value: leftpipe readStream value: rightpipe writeStream value: self errWriteStream.
-		] fork.
-		leftpipe := rightpipe
-	].
-	rightpipe := SWPipe new
-		stdStream: self writeStream;
+	|io|
+	io := SWIO new
+		stdin: self leftMostPipe readStream;
+		stdout: self rightMostPipe writeStream;
+		stderr: self errWriteStream;
 		yourself.
 	[
-		processes last value: leftpipe readStream value: rightpipe writeStream value: self errWriteStream
+		self processes first value: io
 	] fork
 ]
 
@@ -257,13 +268,7 @@ SWShell >> semaphores: anObject [
 { #category : #accessing }
 SWShell >> writeStream [
 
-	^ writer ifNil: [ writer := String new writeStream ]
-]
-
-{ #category : #accessing }
-SWShell >> writeStream: anObject [
-
-	writer := anObject
+	^ self leftMostPipe ifNotNil: [ self leftMostPipe writeStream ]
 ]
 
 { #category : #'logical operations' }

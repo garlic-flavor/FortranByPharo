@@ -15,16 +15,15 @@ SWTerminalMorph class >> start [
 	<script>
 	|m|
 	m := self new openInWorld.
-	"
 	SWShell new
 		< m;
 		> m;
-		| [ :stdin :stdout :stderr |
-			[
-				stdout << Behavior evaluate: stdin upToEnd
-			] repeat
+		| [ :io |
+			io >> [ :val |
+				io << (Behavior evaluate: val) asString; done
+			]
 		];
-		run."
+		run.
 	^ m
 
 ]
@@ -39,7 +38,7 @@ SWTerminalMorph class >> startThenInspect [
 
 { #category : #'open/close' }
 SWTerminalMorph >> delete [
-	self halt.
+
 	reader close.
 	writer close.
 	super delete
@@ -50,13 +49,13 @@ SWTerminalMorph >> initialize [
 	super initialize.
 
 	reader := SWPipe new.
-	writer := SWPipe new.
-	[[
-		writer readStream wait.
-		outputMorph
-			appendText: writer readStream upToEnd;
-			appendText: String cr
-	] repeat] fork.
+	writer := SWPipe new
+		>> [ :buf |
+			outputMorph
+				appendText: buf;
+				appendText: String cr
+		];
+		yourself.
 
 	outputMorph := (self newTextEditorFor: NewValueHolder new getText: #value setText: #value:)
 		beReadOnly.
@@ -81,7 +80,15 @@ SWTerminalMorph >> onEnter [
 		appendText: ' % ';
 		appendText: text;
 		appendText: String cr.
-	reader writeStream << text.
+"
+	writer writeStream
+		<< ' % ';
+		<< text;
+		done.
+"
+	reader writeStream
+		<< text;
+		done.
 	inputMorph setText: ''.
 ]
 

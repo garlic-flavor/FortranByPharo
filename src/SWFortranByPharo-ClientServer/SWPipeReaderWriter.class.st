@@ -42,11 +42,12 @@ SWPipeReaderWriter >> close [
 	semaphoreForWait initSignals.
 	semaphoreForAccess initSignals.
 	collection := nil.
+	semaphoreForAccess := nil. "flag for closed."
 ]
 
 { #category : #testing }
 SWPipeReaderWriter >> closed [
-	^ collection isNil and: [ semaphoreForAccess isNil ]
+	^ collection isNil or: [ semaphoreForAccess isNil ]
 ]
 
 { #category : #accessing }
@@ -124,4 +125,15 @@ SWPipeReaderWriter >> wait [
 	semaphoreForDone ifNotNil: [
 		semaphoreForDone initSignals
 	]
+]
+
+{ #category : #'as yet unclassified' }
+SWPipeReaderWriter >> waitDone [
+	semaphoreForDone ifNotNil: [
+		semaphoreForDone wait
+	].
+	semaphoreForWait ifNotNil: [
+		semaphoreForWait initSignals
+	].
+
 ]

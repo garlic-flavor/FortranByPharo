@@ -19,6 +19,12 @@ SWPipe class >> new [
 		yourself
 ]
 
+{ #category : #'bit manipulation' }
+SWPipe >> >> aBlock [
+	self readStream >> aBlock
+
+]
+
 { #category : #testing }
 SWPipe >> atEnd [
 	"Answer whether the receiver can access any more objects."
@@ -33,6 +39,12 @@ SWPipe >> close [
 	semaphoreForRead terminateProcess.
 	semaphoreForWrite terminateProcess.
 	semaphoreForAccess terminateProcess.
+	semaphoreForAccess := nil. "flag for closing."
+]
+
+{ #category : #testing }
+SWPipe >> closed [
+	^ semaphoreForAccess isNil
 ]
 
 { #category : #accessing }

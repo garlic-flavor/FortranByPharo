@@ -4,6 +4,16 @@ Class {
 	#category : #'SWFortranByPharo-ClientServer-Shell'
 }
 
+{ #category : #'bit manipulation' }
+SWPipeReader >> >> aBlock [
+	[ [
+		self wait.
+		aBlock value: (String streamContents: [:s | s << self upToEnd ]).
+		self waitDone.
+		self closed.
+	] whileFalse ] fork
+]
+
 { #category : #accessing }
 SWPipeReader >> next [
 	^ semaphoreForAccess critical: [
