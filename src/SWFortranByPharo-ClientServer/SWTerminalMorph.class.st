@@ -5,8 +5,7 @@ Class {
 		'outputMorph',
 		'inputMorph',
 		'reader',
-		'writer',
-		'errWriter'
+		'writer'
 	],
 	#category : #'SWFortranByPharo-ClientServer-Shell'
 }
@@ -16,6 +15,7 @@ SWTerminalMorph class >> start [
 	<script>
 	|m|
 	m := self new openInWorld.
+	"
 	SWShell new
 		< m;
 		> m;
@@ -24,7 +24,7 @@ SWTerminalMorph class >> start [
 				stdout << Behavior evaluate: stdin upToEnd
 			] repeat
 		];
-		run.
+		run."
 	^ m
 
 ]
@@ -37,61 +37,31 @@ SWTerminalMorph class >> startThenInspect [
 		inspect
 ]
 
-{ #category : #running }
-SWTerminalMorph >> attach: aProcess [
-	self halt; flag: #toRemove.
-	aProcess io
-		outputStream: self inputStream;
-		errStream: self errStream.
-	self keyStream: aProcess io inputStream.
-
-]
-
-{ #category : #'as yet unclassified' }
-SWTerminalMorph >> detach [
-	self flag: #toRemove; halt.
-	self keyStream: nil
-]
-
-{ #category : #accessing }
-SWTerminalMorph >> errStream [
-	self flag: #toRewrite; halt.
-	^ err ifNil: [
-		err := SWPipe new
-			onEachLineDo: [:val | self putLine: val ];
-			yourself
-	]
-]
-
-{ #category : #execution }
-SWTerminalMorph >> execute: command [
-	|p|
-	self flag: #toRewrite; halt.
-	p := SWShell new.
-	self attach: p.
-	p execute: command.
-	self detach.
-
-]
-
-{ #category : #private }
-SWTerminalMorph >> getLastLine [
-	|buf|
-	self flag: #toRewrite; halt.
-	buf := textMorph getText asString trimRight.
-	buf := buf allButFirst: (buf findLastOccurrenceOfString: self class lineSep startingAt: 1).
-	(buf beginsWith: self class prompt1) ifTrue: [ buf := buf allButFirst: self class prompt1 size ].
-	^ buf
+{ #category : #'open/close' }
+SWTerminalMorph >> delete [
+	self halt.
+	reader close.
+	writer close.
+	super delete
 ]
 
 { #category : #initialization }
 SWTerminalMorph >> initialize [
 	super initialize.
 
+	reader := SWPipe new.
+	writer := SWPipe new.
+	[[
+		writer readStream wait.
+		outputMorph
+			appendText: writer readStream upToEnd;
+			appendText: String cr
+	] repeat] fork.
+
 	outputMorph := (self newTextEditorFor: NewValueHolder new getText: #value setText: #value:)
 		beReadOnly.
 	inputMorph := (self newTextEditorFor: NewValueHolder new getText: #value setText: #value).
-	inputMorph announcer when: RubReturnEntered send: #value to: [ self onEnter. false ].
+	inputMorph announcer when: RubReturnEntered send: #value: to: [ :ann | self onEnter. ann accepted: true ].
 	self
 		addMorph: outputMorph fullFrame:
 			(LayoutFrame identity
@@ -100,82 +70,27 @@ SWTerminalMorph >> initialize [
 		addMorph: inputMorph fullFrame:
 			(LayoutFrame identity
 				topFraction: 0.5;
-				topOffset: 45)
-
-]
-
-{ #category : #accessing }
-SWTerminalMorph >> input: line [
-	self flag: #toRewrite; halt.
-
-	textMorph appendText: line.
-	self onEnter.
-	textMorph appendText: self class lineSep.
-
-
-]
-
-{ #category : #'instance creation' }
-SWTerminalMorph >> inputStream [
-	self flag: #toRewrite; halt.
-
-	^ input ifNil: [
-		input := SWPipe new
-			onEachLineDo: [ :val ||text|
-				text := textMorph text.
-				(text endsWith: self class prompt1) ifTrue: [
-					textMorph setText: (text allButLast: (self class prompt1 size)).
-				].
-				self
-					putLine: val;
-					putPrompt1.
-			];
-			yourself
-	]
-
-]
-
-{ #category : #'as yet unclassified' }
-SWTerminalMorph >> keyStream [
-	self flag: #toRewrite; halt.
-
-	^ key ifNil: [ key := self inputStream ]
-]
-
-{ #category : #'as yet unclassified' }
-SWTerminalMorph >> keyStream: anObject [
-	self flag: #toRewrite; halt.
-	key := anObject
+				topOffset: 45).
 ]
 
 { #category : #'as yet unclassified' }
 SWTerminalMorph >> onEnter [
-	self readStream fillLine.
-
-]
-
-{ #category : #api }
-SWTerminalMorph >> putLine: line [
-	self flag: #toRewrite; halt.
-	textMorph
-		appendText: line;
-		appendText: self class lineSep
-
+	|text|
+	text := inputMorph text.
+	outputMorph
+		appendText: ' % ';
+		appendText: text;
+		appendText: String cr.
+	reader writeStream << text.
+	inputMorph setText: ''.
 ]
 
 { #category : #accessing }
 SWTerminalMorph >> readStream [
-	^ reader ifNil: [
-		reader := SWTerminalMorphReader new
-			morph: inputMorph;
-			yourself
-	]
+	^ reader
 ]
 
 { #category : #writing }
 SWTerminalMorph >> writeStream [
-	^ writer ifNil: [
-		writer := SWTerminalMorphWriter new
-			morph: outputMorph;
-			yourself ]
+	^ writer
 ]

@@ -15,6 +15,8 @@ Class {
 { #category : #'instance creation' }
 SWPipe class >> new [
 	^ self basicNew
+		initialize;
+		yourself
 ]
 
 { #category : #testing }
@@ -22,6 +24,15 @@ SWPipe >> atEnd [
 	"Answer whether the receiver can access any more objects."
 
 	^ self readStream atEnd
+]
+
+{ #category : #'open/close' }
+SWPipe >> close [
+	reader ifNotNil: [ reader close ].
+	writer ifNotNil: [ writer close ].
+	semaphoreForRead terminateProcess.
+	semaphoreForWrite terminateProcess.
+	semaphoreForAccess terminateProcess.
 ]
 
 { #category : #accessing }

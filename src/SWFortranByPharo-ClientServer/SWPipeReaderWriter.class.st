@@ -26,6 +26,7 @@ SWPipeReaderWriter class >> lineSep [
 { #category : #'instance creation' }
 SWPipeReaderWriter class >> new [
 	^ self basicNew
+
 ]
 
 { #category : #testing }
