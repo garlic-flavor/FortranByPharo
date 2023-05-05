@@ -5,12 +5,13 @@ Class {
 	#name : #SWShell,
 	#superclass : #Object,
 	#instVars : [
+		'scripts',
 		'processes',
 		'pipes',
-		'semaphores',
 		'leftMostPipe',
 		'rightMostPipe',
-		'errWriteStream'
+		'errWriteStream',
+		'semaphore'
 	],
 	#category : #'SWFortranByPharo-ClientServer-Shell'
 }
@@ -169,6 +170,22 @@ SWShell >> > outputStream [
 	self rightMostPipe: outputStream writeStream
 ]
 
+{ #category : #'initialize-release' }
+SWShell >> close [
+	processes
+		do: [ :p | p terminate ];
+		removeAll.
+	pipes
+		do: [ :p | p close ];
+		removeAll.
+	scripts removeAll.
+]
+
+{ #category : #testing }
+SWShell >> closed [
+	^ scripts isEmpty
+]
+
 { #category : #accessing }
 SWShell >> errWriteStream [
 
@@ -181,10 +198,19 @@ SWShell >> errWriteStream: anObject [
 	errWriteStream := anObject
 ]
 
+{ #category : #initialization }
+SWShell >> initialize [
+	super initialize.
+	pipes := OrderedCollection new.
+	processes := OrderedCollection new.
+	scripts := OrderedCollection new.
+	semaphore := Semaphore new.
+]
+
 { #category : #accessing }
 SWShell >> leftMostPipe [
 
-	^ leftMostPipe
+	^ leftMostPipe ifNil: [ leftMostPipe := pipes add: SWPipe new ]
 ]
 
 { #category : #accessing }
@@ -193,40 +219,34 @@ SWShell >> leftMostPipe: anObject [
 	leftMostPipe := anObject
 ]
 
-{ #category : #accessing }
-SWShell >> pipes [
+{ #category : #'instance creation' }
+SWShell >> newPipe [
+	^ pipes add: SWPipe new.
 
-	^ pipes ifNil: [ pipes := OrderedCollection new ]
 ]
 
-{ #category : #accessing }
-SWShell >> pipes: anObject [
-
-	pipes := anObject
-]
-
-{ #category : #accessing }
-SWShell >> processes [
-
-	^ processes ifNil: [ processes := OrderedCollection new ]
-]
-
-{ #category : #accessing }
-SWShell >> processes: anObject [
-
-	processes := anObject
+{ #category : #enumerating }
+SWShell >> newProcessDo: aBlock from: leftpipe to: rightpipe [
+	processes add: [
+		aBlock value: (SWIO new
+			stdin: leftpipe readStream;
+			stdout: rightpipe writeStream;
+			stderr: self errWriteStream;
+			yourself).
+		semaphore signal
+	] fork
 ]
 
 { #category : #accessing }
 SWShell >> readStream [
 
-	^ self rightMostPipe ifNotNil: [ self rightMostPipe readStream ]
+	^ self rightMostPipe readStream
 ]
 
 { #category : #accessing }
 SWShell >> rightMostPipe [
 
-	^ rightMostPipe
+	^ rightMostPipe ifNil: [ rightMostPipe := pipes add: SWPipe new ]
 ]
 
 { #category : #accessing }
@@ -237,41 +257,37 @@ SWShell >> rightMostPipe: anObject [
 
 { #category : #running }
 SWShell >> run [
-	|io|
-	io := SWIO new
-		stdin: self leftMostPipe readStream;
-		stdout: self rightMostPipe writeStream;
-		stderr: self errWriteStream;
-		yourself.
-	[
-		self processes first value: io
-	] fork
+	|leftpipe rightpipe|
+	scripts ifEmpty: [ ^ self ].
+	semaphore initSignals.
+	leftpipe := self leftMostPipe.
+	scripts allButLastDo: [ :p |
+		rightpipe := self newPipe.
+		self newProcessDo: p from: leftpipe to: rightpipe.
+		leftpipe := rightpipe.
+	].
+	rightpipe := self rightMostPipe.
+	self newProcessDo: scripts last from: leftpipe to: rightpipe.
+
 ]
 
 { #category : #running }
 SWShell >> runAndWait [
-	self halt.
+	self run; wait
 ]
 
-{ #category : #accessing }
-SWShell >> semaphores [
-
-	^ semaphores ifNil: [ semaphores := OrderedCollection new ]
-]
-
-{ #category : #accessing }
-SWShell >> semaphores: anObject [
-
-	semaphores := anObject
+{ #category : #waiting }
+SWShell >> wait [
+	processes do: [ :p | semaphore wait ]
 ]
 
 { #category : #accessing }
 SWShell >> writeStream [
 
-	^ self leftMostPipe ifNotNil: [ self leftMostPipe writeStream ]
+	^ self leftMostPipe writeStream
 ]
 
 { #category : #'logical operations' }
 SWShell >> | aBlock [
-	self processes add: aBlock
+	scripts add: aBlock
 ]
