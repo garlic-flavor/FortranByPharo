@@ -91,7 +91,7 @@ SWGlobalTest >> test_0260_ifNil_expression2 [
 
 { #category : #tests }
 SWGlobalTest >> test_0290_method_call [
-	self resultWith: { } equals: SWStd class
+	self resultWith: { } equals: SWStd_OLD class
 
 ]
 

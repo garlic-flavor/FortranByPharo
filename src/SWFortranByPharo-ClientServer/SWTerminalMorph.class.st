@@ -5,7 +5,8 @@ Class {
 		'outputMorph',
 		'inputMorph',
 		'reader',
-		'writer'
+		'writer',
+		'io'
 	],
 	#category : #'SWFortranByPharo-ClientServer-Shell'
 }
@@ -23,6 +24,11 @@ SWTerminalMorph class >> start [
 				io << (Behavior evaluate: val) asString; done
 			]
 		];
+		| [ :io |
+			io >> [ :val |
+				io << 'hoge! '; << val; << ' hoge!'; done
+			]
+		];
 		run.
 	^ m
 
@@ -34,6 +40,11 @@ SWTerminalMorph class >> startThenInspect [
 	self new
 		openInWorld;
 		inspect
+]
+
+{ #category : #accessing }
+SWTerminalMorph >> contents [
+	^ outputMorph text
 ]
 
 { #category : #'open/close' }
@@ -70,6 +81,21 @@ SWTerminalMorph >> initialize [
 			(LayoutFrame identity
 				topFraction: 0.5;
 				topOffset: 45).
+]
+
+{ #category : #'as yet unclassified' }
+SWTerminalMorph >> io [
+	^ io ifNil: [ io := SWStd new
+		in: reader readStream;
+		out: writer writeStream;
+		err: writer writeStream;
+		yourself
+	]
+]
+
+{ #category : #accessing }
+SWTerminalMorph >> io: anObject [
+	io := anObject
 ]
 
 { #category : #'as yet unclassified' }

@@ -46,7 +46,7 @@ SWTestRunner class >> inspectResult [
 
 { #category : #accessing }
 SWTestRunner class >> main [
-	SWStd import: #(PharoObject TestAsserter TestSuite) from: 'Pharo'.
+	SWStd_OLD import: #(PharoObject TestAsserter TestSuite) from: 'Pharo'.
 	self runAllTests
 
 ]

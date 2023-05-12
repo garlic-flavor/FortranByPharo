@@ -228,7 +228,7 @@ SWShell >> newPipe [
 { #category : #enumerating }
 SWShell >> newProcessDo: aBlock from: leftpipe to: rightpipe [
 	processes add: [
-		aBlock value: (SWIO new
+		aBlock value: (SWStd new
 			stdin: leftpipe readStream;
 			stdout: rightpipe writeStream;
 			stderr: self errWriteStream;

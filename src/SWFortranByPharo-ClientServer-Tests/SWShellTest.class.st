@@ -48,3 +48,18 @@ SWShellTest >> testFilePathOf [
 
 	self assert: (SWShell filePathOf: 'script') basename equals: 'script'
 ]
+
+{ #category : #tests }
+SWShellTest >> testPipe [
+	|s|
+	s := SWShell new
+		| [ :io | io << 'hoge!'; done ];
+		| [ :io |
+			io stdin wait.
+			io << 'hello, '; << io stdin upToEnd; << ' world!'; done
+		];
+		runAndWait.
+	self assert: (String streamContents: [:st | st << s readStream upToEnd ]) equals:
+		'hello, hoge! world!'.
+	s close.
+]

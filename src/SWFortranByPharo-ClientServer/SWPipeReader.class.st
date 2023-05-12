@@ -24,3 +24,8 @@ SWPipeReader >> next [
 		]
 	]
 ]
+
+{ #category : #accessing }
+SWPipeReader >> readStream [
+	^ self
+]

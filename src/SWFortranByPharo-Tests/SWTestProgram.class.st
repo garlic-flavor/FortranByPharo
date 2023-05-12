@@ -213,7 +213,7 @@ SWTestProgram >> _0280_ifNil_accessor [
 
 { #category : #'tests - source' }
 SWTestProgram >> _0290_method_call [
-	^ SWStd print: 'hoge!'
+	^ SWStd_OLD print: 'hoge!'
 ]
 
 { #category : #'tests - source' }
@@ -508,7 +508,7 @@ SWTestProgram >> _9005_cascading_4: process [
 
 { #category : #'tests - source' }
 SWTestProgram >> _9006_stdout [
-	SWStd print: 'hoge!'
+	SWStd_OLD print: 'hoge!'
 ]
 
 { #category : #accessing }

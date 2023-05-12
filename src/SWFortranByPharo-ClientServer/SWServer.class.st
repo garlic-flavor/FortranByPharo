@@ -124,7 +124,7 @@ SWServer class >> isRunning [
 
 { #category : #api }
 SWServer class >> main [
-	SWStd
+	SWStd_OLD
 		import: #(PharoObject Transcript Exception) from: 'Pharo';
 		import: #(ZnServer ZnWebSocketDelegate SWWebSocketDelegate ZnResponse ZnEntity ZnStatusLine ZnHeaders) from: 'ZnServer'.
 

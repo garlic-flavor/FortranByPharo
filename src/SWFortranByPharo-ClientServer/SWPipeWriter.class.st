@@ -10,3 +10,8 @@ SWPipeWriter >> nextPut: anObject [
 		self collection add: anObject
 	]
 ]
+
+{ #category : #writing }
+SWPipeWriter >> writeStream [
+	^ self
+]
