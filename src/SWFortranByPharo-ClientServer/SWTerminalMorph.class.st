@@ -6,27 +6,30 @@ Class {
 		'inputMorph',
 		'reader',
 		'writer',
-		'std'
+		'std',
+		'commandSemaphore'
 	],
 	#category : #'SWFortranByPharo-ClientServer-Shell'
 }
 
 { #category : #'tests - execution' }
 SWTerminalMorph class >> start [
+
 	<script>
-	|m|
+	| m |
 	m := self new openInWorld.
 	m do: [ :std |
 		std >> [ :val |
-			std << (Behavior evaluate: val) asString; done
-		]
-	] | [ :std |
+		std
+			<< (Behavior compiler evaluate: val) asString;
+			done ] ] | [ :std |
 		std >> [ :val |
-			std << 'hoge! '; << val; << ' hoge!'; done
-		]
-	].
+		std
+			<< 'hoge! ';
+			<< val;
+			<< ' hoge!';
+			done ] ].
 	^ m
-
 ]
 
 { #category : #'tests - execution' }
@@ -45,6 +48,7 @@ SWTerminalMorph >> contents [
 { #category : #'open/close' }
 SWTerminalMorph >> delete [
 
+	commandSemaphore terminateProcess.
 	reader close.
 	writer close.
 	std ifNotNil: [ std close ].
@@ -53,7 +57,11 @@ SWTerminalMorph >> delete [
 
 { #category : #enumerating }
 SWTerminalMorph >> do: aBlock [
-	^ aBlock value: self std.
+	|ret|
+	commandSemaphore wait.
+	ret := aBlock value: self std.
+	commandSemaphore wait.
+	^ ret
 
 ]
 
@@ -61,12 +69,14 @@ SWTerminalMorph >> do: aBlock [
 SWTerminalMorph >> initialize [
 	super initialize.
 
+	commandSemaphore := Semaphore forMutualExclusion.
 	reader := SWPipe new.
 	writer := SWPipe new.
 	writer >> [ :buf |
 		outputMorph
 			appendText: buf;
-			appendText: String cr
+			appendText: String cr.
+		commandSemaphore signal.
 	].
 
 	outputMorph := (self newTextEditorFor: NewValueHolder new getText: #value setText: #value:)
@@ -84,9 +94,17 @@ SWTerminalMorph >> initialize [
 				topOffset: 45).
 ]
 
+{ #category : #accessing }
+SWTerminalMorph >> input: aText [
+	inputMorph setText: aText.
+	self onEnter.
+
+]
+
 { #category : #'as yet unclassified' }
 SWTerminalMorph >> onEnter [
 	|text|
+	commandSemaphore wait.
 	text := inputMorph text.
 	outputMorph
 		appendText: ' % ';
@@ -102,6 +120,7 @@ SWTerminalMorph >> onEnter [
 		<< text;
 		done.
 	inputMorph setText: ''.
+	commandSemaphore wait.
 ]
 
 { #category : #accessing }

@@ -59,7 +59,6 @@ SWPipeTest >> test_pipe [
 		std << std upToEnd; << 'world'; ln.
 		(std err) << 'this is not an error.'; done.
 	].
-	Processor yield.
 	self assert: tm contents asString equals: ('hello, world', String cr, 'this is not an error.', String cr)
 
 ]

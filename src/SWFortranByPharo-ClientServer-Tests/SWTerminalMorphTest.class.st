@@ -18,7 +18,7 @@ SWTerminalMorphTest >> setUp [
 { #category : #tests }
 SWTerminalMorphTest >> test_run_calc [
 	terminal input: '3+4'.
-
+	self assert: terminal contents asString equals: (' % 3+4', String cr, 'hoge! 7 hoge!', String cr)
 ]
 
 { #category : #tests }
