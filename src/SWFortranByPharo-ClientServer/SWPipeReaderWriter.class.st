@@ -40,7 +40,7 @@ SWPipeReaderWriter >> atEnd [
 SWPipeReaderWriter >> close [
 	semaphoreForDone initSignals.
 	semaphoreForWait initSignals.
-	semaphoreForAccess initSignals.
+	semaphoreForAccess ifNotNil: [ semaphoreForAccess initSignals ].
 	collection := nil.
 	semaphoreForAccess := nil. "flag for closed."
 ]

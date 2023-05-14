@@ -6,7 +6,7 @@ Class {
 		'inputMorph',
 		'reader',
 		'writer',
-		'io'
+		'std'
 	],
 	#category : #'SWFortranByPharo-ClientServer-Shell'
 }
@@ -16,20 +16,15 @@ SWTerminalMorph class >> start [
 	<script>
 	|m|
 	m := self new openInWorld.
-	SWShell new
-		< m;
-		> m;
-		| [ :io |
-			io >> [ :val |
-				io << (Behavior evaluate: val) asString; done
-			]
-		];
-		| [ :io |
-			io >> [ :val |
-				io << 'hoge! '; << val; << ' hoge!'; done
-			]
-		];
-		run.
+	m do: [ :std |
+		std >> [ :val |
+			std << (Behavior evaluate: val) asString; done
+		]
+	] | [ :std |
+		std >> [ :val |
+			std << 'hoge! '; << val; << ' hoge!'; done
+		]
+	].
 	^ m
 
 ]
@@ -52,7 +47,14 @@ SWTerminalMorph >> delete [
 
 	reader close.
 	writer close.
+	std ifNotNil: [ std close ].
 	super delete
+]
+
+{ #category : #enumerating }
+SWTerminalMorph >> do: aBlock [
+	^ aBlock value: self std.
+
 ]
 
 { #category : #initialization }
@@ -60,13 +62,12 @@ SWTerminalMorph >> initialize [
 	super initialize.
 
 	reader := SWPipe new.
-	writer := SWPipe new
-		>> [ :buf |
-			outputMorph
-				appendText: buf;
-				appendText: String cr
-		];
-		yourself.
+	writer := SWPipe new.
+	writer >> [ :buf |
+		outputMorph
+			appendText: buf;
+			appendText: String cr
+	].
 
 	outputMorph := (self newTextEditorFor: NewValueHolder new getText: #value setText: #value:)
 		beReadOnly.
@@ -81,21 +82,6 @@ SWTerminalMorph >> initialize [
 			(LayoutFrame identity
 				topFraction: 0.5;
 				topOffset: 45).
-]
-
-{ #category : #'as yet unclassified' }
-SWTerminalMorph >> io [
-	^ io ifNil: [ io := SWStd new
-		in: reader readStream;
-		out: writer writeStream;
-		err: writer writeStream;
-		yourself
-	]
-]
-
-{ #category : #accessing }
-SWTerminalMorph >> io: anObject [
-	io := anObject
 ]
 
 { #category : #'as yet unclassified' }
@@ -121,6 +107,21 @@ SWTerminalMorph >> onEnter [
 { #category : #accessing }
 SWTerminalMorph >> readStream [
 	^ reader
+]
+
+{ #category : #'as yet unclassified' }
+SWTerminalMorph >> std [
+	^ std ifNil: [ std := SWStd new
+		in: reader readStream;
+		out: writer writeStream;
+		err: writer writeStream;
+		yourself
+	]
+]
+
+{ #category : #accessing }
+SWTerminalMorph >> std: anObject [
+	std := anObject
 ]
 
 { #category : #writing }

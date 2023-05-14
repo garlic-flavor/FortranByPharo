@@ -4,6 +4,14 @@ Class {
 	#category : #'SWFortranByPharo-ClientServer-Shell'
 }
 
+{ #category : #'instance creation' }
+SWPipeWriter >> ln [
+	^ self
+		nextPut: String cr;
+		done;
+		yourself
+]
+
 { #category : #accessing }
 SWPipeWriter >> nextPut: anObject [
 	semaphoreForAccess critical: [

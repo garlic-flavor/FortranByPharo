@@ -6,12 +6,12 @@ Class {
 
 { #category : #'bit manipulation' }
 SWPipeReader >> >> aBlock [
-	[[
+	[ [
 		self wait.
 		aBlock value: (String streamContents: [:s | s << self upToEnd ]).
 		self waitDone.
 		self closed.
-	] whileFalse ] fork
+	] whileFalse ] fork.
 ]
 
 { #category : #accessing }

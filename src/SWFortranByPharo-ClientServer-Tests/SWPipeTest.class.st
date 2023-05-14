@@ -52,16 +52,14 @@ SWPipeTest >> test_BasicsForked [
 SWPipeTest >> test_pipe [
 	|tm|
 	tm := SWTerminalMorph new openInWorld.
-	[ :std |
+	tm do: [ :std |
 		std << 'hello, '; done
 	] | [ :std |
 		std in wait.
-		std << std upToEnd; << 'world'; done.
-"		stderr << 'this is not an error.'; cr."
-	] value: tm io.
-	tm io wait.
+		std << std upToEnd; << 'world'; ln.
+		(std err) << 'this is not an error.'; done.
+	].
 	Processor yield.
-	Processor yield.
-	self assert: tm contents asString equals: ('hello, world', String cr)
+	self assert: tm contents asString equals: ('hello, world', String cr, 'this is not an error.', String cr)
 
 ]

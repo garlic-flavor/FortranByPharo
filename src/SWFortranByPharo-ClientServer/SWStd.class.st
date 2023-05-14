@@ -3,8 +3,7 @@ Class {
 	#superclass : #Stream,
 	#instVars : [
 		'streams',
-		'pipes',
-		'semaphore'
+		'pipes'
 	],
 	#category : #'SWFortranByPharo-ClientServer-Shell'
 }
@@ -14,6 +13,16 @@ SWStd class >> new [
 	^ self basicNew
 		initialize;
 		yourself
+]
+
+{ #category : #comparing }
+SWStd >> < inputStream [
+	self in: inputStream
+]
+
+{ #category : #comparing }
+SWStd >> > outputStream [
+	self out: outputStream
 ]
 
 { #category : #'bit manipulation' }
@@ -33,12 +42,28 @@ SWStd >> atEnd [
 	^ self in ifNil: [ true ] ifNotNil: [ self in atEnd ]
 ]
 
+{ #category : #'open/close' }
+SWStd >> close [
+	streams replace: [ :s | s ifNotNil: [ s close ]. nil ].
+	self closePipes
+
+]
+
+{ #category : #'as yet unclassified' }
+SWStd >> closePipes [
+	pipes ifNotNil: [
+		pipes do: [ :p | p close ].
+		pipes := nil
+	]
+]
+
 { #category : #testing }
 SWStd >> closed [
 	self in ifNil: [ ^ true ].
 	self in closed ifTrue: [ ^ true ].
 	self out ifNil: [ ^ true ].
 	self out closed ifTrue: [ ^ true ].
+	^ false
 ]
 
 { #category : #accessing }
@@ -78,6 +103,11 @@ SWStd >> initialize [
 	super initialize.
 	streams := OrderedCollection newFrom: { nil. nil. nil }.
 
+]
+
+{ #category : #running }
+SWStd >> ln [
+	self out ifNotNil: [ self out ln ]
 ]
 
 { #category : #'instance creation' }
@@ -128,25 +158,13 @@ SWStd >> readStream [
 ]
 
 { #category : #accessing }
-SWStd >> semaphore [
-	^ semaphore ifNil: [ semaphore := Semaphore new ]
-]
-
-{ #category : #accessing }
 SWStd >> sub [
 	^ self class new
 		pipes: self pipes;
+		in: self in;
+		out: self out;
+		err: self err;
 		yourself.
-]
-
-{ #category : #waiting }
-SWStd >> wait [
-	0 < self pipes size ifTrue: [
-		(self pipes size + 1) timesRepeat: [
-			self semaphore wait
-		]
-	]
-
 ]
 
 { #category : #writing }
