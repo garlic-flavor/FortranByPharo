@@ -4,8 +4,6 @@ Class {
 	#instVars : [
 		'outputMorph',
 		'inputMorph',
-		'reader',
-		'writer',
 		'std',
 		'commandSemaphore'
 	],
@@ -18,6 +16,7 @@ SWTerminalMorph class >> start [
 	<script>
 	| m |
 	m := self new openInWorld.
+"
 	m do: [ :std |
 		std >> [ :val |
 		std
@@ -29,6 +28,7 @@ SWTerminalMorph class >> start [
 			<< val;
 			<< ' hoge!';
 			done ] ].
+"
 	^ m
 ]
 
@@ -42,6 +42,7 @@ SWTerminalMorph class >> startThenInspect [
 
 { #category : #accessing }
 SWTerminalMorph >> contents [
+
 	^ outputMorph text
 ]
 
@@ -49,14 +50,13 @@ SWTerminalMorph >> contents [
 SWTerminalMorph >> delete [
 
 	commandSemaphore terminateProcess.
-	reader close.
-	writer close.
-	std ifNotNil: [ std close ].
+	self std close.
 	super delete
 ]
 
 { #category : #enumerating }
 SWTerminalMorph >> do: aBlock [
+	self halt. self flag: #toRewrite.
 	commandSemaphore critical: [
 		^ aBlock value: self std.
 	].
@@ -67,17 +67,7 @@ SWTerminalMorph >> do: aBlock [
 { #category : #initialization }
 SWTerminalMorph >> initialize [
 	super initialize.
-
 	commandSemaphore := Semaphore forMutualExclusion.
-	reader := SWPipe new.
-	writer := SWPipe new.
-	writer >> [ :buf |
-		outputMorph
-			appendText: buf;
-			appendText: String cr.
-		commandSemaphore signal.
-	].
-
 	outputMorph := (self newTextEditorFor: NewValueHolder new getText: #value setText: #value:)
 		beReadOnly.
 	inputMorph := (self newTextEditorFor: NewValueHolder new getText: #value setText: #value).
@@ -95,6 +85,7 @@ SWTerminalMorph >> initialize [
 
 { #category : #accessing }
 SWTerminalMorph >> input: aText [
+
 	inputMorph setText: aText.
 	self onEnter.
 
@@ -109,42 +100,36 @@ SWTerminalMorph >> onEnter [
 		appendText: ' % ';
 		appendText: text;
 		appendText: String cr.
-"
-	writer writeStream
-		<< ' % ';
-		<< text;
-		done.
-"
-	reader writeStream
+	(self std writeStream)
 		<< text;
 		done.
 	inputMorph setText: ''.
-	commandSemaphore
-		wait;
-		signal.
-]
 
-{ #category : #accessing }
-SWTerminalMorph >> readStream [
-	^ reader
 ]
 
 { #category : #'as yet unclassified' }
 SWTerminalMorph >> std [
-	^ std ifNil: [ std := SWStd new
-		in: reader readStream;
-		out: writer writeStream;
-		err: writer writeStream;
-		yourself
+	^ std ifNil: [
+		std := SWStd new.
+		std readStream >> [ :txt |
+			outputMorph
+				appendText: txt;
+				appendText: String cr.
+			commandSemaphore signal.
+		].
+		std in: (SWPipeReader new
+			>> [ :txt |
+				(std out)
+					nextPutAll: ([Behavior compiler evaluate: txt] on: CodeError do: [ nil ]) asString;
+					done
+			];
+			yourself).
+		std
 	]
 ]
 
 { #category : #accessing }
 SWTerminalMorph >> std: anObject [
-	std := anObject
-]
 
-{ #category : #writing }
-SWTerminalMorph >> writeStream [
-	^ writer
+	std := anObject
 ]

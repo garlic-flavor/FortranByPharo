@@ -65,11 +65,12 @@ SWStd >> close [
 	self err close.
 	self readStream close.
 	self writeStream close.
-	self closePipes
+	self closePipes.
+
 
 ]
 
-{ #category : #'as yet unclassified' }
+{ #category : #'open/close' }
 SWStd >> closePipes [
 
 	pipes ifNotNil: [
@@ -103,7 +104,7 @@ SWStd >> done [
 { #category : #accessing }
 SWStd >> err [
 
-	^ err ifNil: [ err := SWPipeWriter ]
+	^ err ifNil: [ err := SWPipeWriter new ]
 ]
 
 { #category : #accessing }
@@ -114,7 +115,10 @@ SWStd >> err: aStream [
 
 { #category : #accessing }
 SWStd >> in [
-	^ in ifNil: [ in := SWPipeReader new ]
+	^ in ifNil: [ in := SWPipeReader new
+		>> [ :txt | (self out) nextPutAll: txt; done ];
+		yourself
+	]
 ]
 
 { #category : #accessing }

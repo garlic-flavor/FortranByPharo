@@ -1,16 +1,29 @@
 Class {
 	#name : #SWPipeReader,
 	#superclass : #SWPipeReaderWriter,
+	#instVars : [
+		'process'
+	],
 	#category : #'SWFortranByPharo-ClientServer-Shell'
 }
 
 { #category : #'bit manipulation' }
 SWPipeReader >> >> aBlock [
-	[ [
+	process ifNotNil: [ process terminate ].
+	process := [ [
 		self wait.
-		aBlock value: (String streamContents: [:s | s << self upToEnd ]).
+		aBlock value: (String readFrom: self).
 		self closed.
 	] whileFalse ] fork.
+]
+
+{ #category : #'open/close' }
+SWPipeReader >> close [
+	process ifNotNil: [
+		process terminate.
+		process := nil.
+	].
+	super close.
 ]
 
 { #category : #accessing }
