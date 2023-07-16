@@ -2,8 +2,13 @@ Class {
 	#name : #SWStd,
 	#superclass : #Stream,
 	#instVars : [
-		'streams',
-		'pipes'
+		'in',
+		'out',
+		'err',
+		'pipes',
+		'args',
+		'readStream',
+		'writeStream'
 	],
 	#category : #'SWFortranByPharo-ClientServer-Shell'
 }
@@ -17,127 +22,146 @@ SWStd class >> new [
 
 { #category : #comparing }
 SWStd >> < inputStream [
+
 	self in: inputStream
 ]
 
 { #category : #comparing }
 SWStd >> > outputStream [
+
 	self out: outputStream
 ]
 
 { #category : #'bit manipulation' }
 SWStd >> >> aBlock [
+
 	^ self in >> aBlock
 ]
 
 { #category : #accessing }
-SWStd >> at: anInteger [
-	^ streams at: anInteger
+SWStd >> args [
+
+	^ args ifNil: [ args := OrderedCollection new ]
+]
+
+{ #category : #accessing }
+SWStd >> args: anObject [
+
+	args := anObject
 ]
 
 { #category : #testing }
 SWStd >> atEnd [
 	"Answer whether the receiver can access any more objects."
 
-	^ self in ifNil: [ true ] ifNotNil: [ self in atEnd ]
+	^ self readStream atEnd
 ]
 
 { #category : #'open/close' }
 SWStd >> close [
-	streams replace: [ :s | s ifNotNil: [ s close ]. nil ].
+
+	self in close.
+	self out close.
+	self err close.
+	self readStream close.
+	self writeStream close.
 	self closePipes
 
 ]
 
 { #category : #'as yet unclassified' }
 SWStd >> closePipes [
+
 	pipes ifNotNil: [
 		pipes do: [ :p | p close ].
 		pipes := nil
-	]
+	].
+
 ]
 
 { #category : #testing }
 SWStd >> closed [
-	self in ifNil: [ ^ true ].
-	self in closed ifTrue: [ ^ true ].
-	self out ifNil: [ ^ true ].
-	self out closed ifTrue: [ ^ true ].
-	^ false
+
+	^ self readStream closed and: [ self writeStream closed ]
 ]
 
 { #category : #accessing }
 SWStd >> contents [
 	"Answer all of the contents of the receiver."
 
-	^ self in ifNil: [ nil ] ifNotNil: [ self in contents ]
+	^ self readStream contents
 ]
 
 { #category : #running }
 SWStd >> done [
-	self out ifNotNil: [ self out done ]
+	(self out respondsTo: #done) ifTrue: [
+		self out done.
+	]
+
 ]
 
 { #category : #accessing }
 SWStd >> err [
-	^ streams at: 3
+
+	^ err ifNil: [ err := SWPipeWriter ]
 ]
 
 { #category : #accessing }
 SWStd >> err: aStream [
-	streams at: 3 put: aStream
+
+	err := aStream
 ]
 
 { #category : #accessing }
 SWStd >> in [
-	^ streams at: 1
+	^ in ifNil: [ in := SWPipeReader new ]
 ]
 
 { #category : #accessing }
 SWStd >> in: aStream [
-	streams at: 1 put: aStream
-]
 
-{ #category : #initialization }
-SWStd >> initialize [
-	super initialize.
-	streams := OrderedCollection newFrom: { nil. nil. nil }.
-
+	in := aStream
 ]
 
 { #category : #running }
 SWStd >> ln [
-	self out ifNotNil: [ self out ln ]
+	(self out respondsTo: #ln) ifTrue: [
+		self out ln
+	] ifFalse: [
+		self out nextPut: String cr
+	]
+
 ]
 
 { #category : #'instance creation' }
 SWStd >> newPipe [
+
 	^ self pipes add: SWPipe new
 ]
 
 { #category : #accessing }
 SWStd >> next [
 	"Answer the next object accessible by the receiver."
-
-	^ self in ifNil: [ nil ] ifNotNil: [ self in next ]
+	^ self readStream next
 ]
 
 { #category : #accessing }
 SWStd >> nextPut: anObject [
 	"Insert the argument, anObject, as the next object accessible by the
 	receiver. Answer anObject."
-
-	self out ifNotNil: [ self out nextPut: anObject ]
+	^ self writeStream nextPut: anObject
 ]
 
 { #category : #accessing }
 SWStd >> out [
-	^ streams at: 2
+
+	^ out ifNil: [ out := SWPipeWriter new ]
 ]
 
 { #category : #accessing }
 SWStd >> out: aStream [
-	streams at: 2 put: aStream
+
+	out := aStream
 ]
 
 { #category : #accessing }
@@ -154,20 +178,22 @@ SWStd >> pipes: anObject [
 
 { #category : #accessing }
 SWStd >> readStream [
-	^ self in
+	^ readStream ifNil: [ readStream := self out readStream ]
+
 ]
 
 { #category : #accessing }
-SWStd >> sub [
-	^ self class new
-		pipes: self pipes;
-		in: self in;
-		out: self out;
-		err: self err;
-		yourself.
+SWStd >> readStream: aStream [
+	readStream := aStream
 ]
 
 { #category : #writing }
 SWStd >> writeStream [
-	^ self out
+
+	^ writeStream ifNil: [ writeStream := self in writeStream ]
+]
+
+{ #category : #accessing }
+SWStd >> writeStream: aStream [
+	writeStream := aStream
 ]

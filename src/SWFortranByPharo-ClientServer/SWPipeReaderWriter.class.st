@@ -5,7 +5,8 @@ Class {
 		'collection',
 		'semaphoreForWait',
 		'semaphoreForDone',
-		'semaphoreForAccess'
+		'semaphoreForAccess',
+		'closed'
 	],
 	#classInstVars : [
 		'lineSep'
@@ -26,7 +27,8 @@ SWPipeReaderWriter class >> lineSep [
 { #category : #'instance creation' }
 SWPipeReaderWriter class >> new [
 	^ self basicNew
-
+		initialize;
+		yourself
 ]
 
 { #category : #testing }
@@ -38,16 +40,14 @@ SWPipeReaderWriter >> atEnd [
 
 { #category : #'open/close' }
 SWPipeReaderWriter >> close [
-	semaphoreForDone initSignals.
-	semaphoreForWait initSignals.
-	semaphoreForAccess ifNotNil: [ semaphoreForAccess initSignals ].
-	collection := nil.
-	semaphoreForAccess := nil. "flag for closed."
+	self done.
+	closed := true.
+
 ]
 
 { #category : #testing }
 SWPipeReaderWriter >> closed [
-	^ collection isNil or: [ semaphoreForAccess isNil ]
+	^ closed isNotNil
 ]
 
 { #category : #accessing }
@@ -65,23 +65,23 @@ SWPipeReaderWriter >> collection: anObject [
 { #category : #accessing }
 SWPipeReaderWriter >> contents [
 	"Answer all of the contents of the receiver."
-
-	^ self collection copy
+	closed ifNotNil: [ ^ nil ].
+	^ self semaphoreForAccess critical: [ self collection copy ]
 ]
 
 { #category : #running }
 SWPipeReaderWriter >> done [
-	semaphoreForDone ifNotNil: [
-		semaphoreForDone signal
-	].
-	semaphoreForWait ifNotNil: [
-		semaphoreForWait initSignals
-	]
+	self semaphoreForDone isSignaled ifTrue: [ ^ self ].
+	self semaphoreForDone signal.
+	self semaphoreForWait initSignals.
+
+
 ]
 
 { #category : #testing }
 SWPipeReaderWriter >> isEmpty [
-	^ semaphoreForAccess critical: [ self collection isEmpty ]
+	closed ifNotNil: [ ^ true ].
+	^ self semaphoreForAccess critical: [ self collection isEmpty ]
 ]
 
 { #category : #accessing }
@@ -100,15 +100,30 @@ SWPipeReaderWriter >> nextPut: anObject [
 ]
 
 { #category : #accessing }
+SWPipeReaderWriter >> semaphoreForAccess [
+	^ semaphoreForAccess ifNil: [ semaphoreForAccess := Semaphore forMutualExclusion ]
+]
+
+{ #category : #accessing }
 SWPipeReaderWriter >> semaphoreForAccess: anObject [
 
 	semaphoreForAccess := anObject
 ]
 
 { #category : #accessing }
+SWPipeReaderWriter >> semaphoreForDone [
+	^ self subclassResponsibility
+]
+
+{ #category : #accessing }
 SWPipeReaderWriter >> semaphoreForDone: anObject [
 
 	semaphoreForDone := anObject
+]
+
+{ #category : #accessing }
+SWPipeReaderWriter >> semaphoreForWait [
+	^ self subclassResponsibility 
 ]
 
 { #category : #accessing }
@@ -119,21 +134,13 @@ SWPipeReaderWriter >> semaphoreForWait: anObject [
 
 { #category : #waiting }
 SWPipeReaderWriter >> wait [
-	semaphoreForWait ifNotNil: [
-		semaphoreForWait wait
-	].
-	semaphoreForDone ifNotNil: [
-		semaphoreForDone initSignals
-	]
+	self semaphoreForWait wait.
+	self semaphoreForDone initSignals.
+
 ]
 
-{ #category : #'as yet unclassified' }
+{ #category : #waiting }
 SWPipeReaderWriter >> waitDone [
-	semaphoreForDone ifNotNil: [
-		semaphoreForDone wait
-	].
-	semaphoreForWait ifNotNil: [
-		semaphoreForWait initSignals
-	].
+	self semaphoreForDone wait.
 
 ]

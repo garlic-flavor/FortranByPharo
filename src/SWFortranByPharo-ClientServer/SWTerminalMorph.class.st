@@ -57,11 +57,10 @@ SWTerminalMorph >> delete [
 
 { #category : #enumerating }
 SWTerminalMorph >> do: aBlock [
-	|ret|
-	commandSemaphore wait.
-	ret := aBlock value: self std.
-	commandSemaphore wait.
-	^ ret
+	commandSemaphore critical: [
+		^ aBlock value: self std.
+	].
+
 
 ]
 
@@ -120,7 +119,9 @@ SWTerminalMorph >> onEnter [
 		<< text;
 		done.
 	inputMorph setText: ''.
-	commandSemaphore wait.
+	commandSemaphore
+		wait;
+		signal.
 ]
 
 { #category : #accessing }

@@ -26,7 +26,7 @@ SWPipeTest >> test_Basics [
 	w := p writeStream.
 	r := p readStream.
 	w << msg; done.
-	self assert: (String streamContents: [:s | s << r upToEnd ]) equals: msg
+	self assert: (String readFrom: r) equals: msg
 ]
 
 { #category : #tests }
@@ -59,6 +59,24 @@ SWPipeTest >> test_pipe [
 		std << std upToEnd; << 'world'; ln.
 		(std err) << 'this is not an error.'; done.
 	].
-	self assert: tm contents asString equals: ('hello, world', String cr, 'this is not an error.', String cr)
+	tm std out wait.
+	self assert: tm contents asString equals: ('hello, world', String cr, 'this is not an error.')
+
+]
+
+{ #category : #tests }
+SWPipeTest >> test_pipeToFile [
+	|filepath file std|
+	filepath := SWShell filePathOf: 'hoge.txt'.
+	file := File openForWriteFileNamed: filepath pathString.
+	std := SWStd new
+		> file;
+		yourself.
+	std << 'hello, world'.
+	std close.
+	file close.
+	file := File openForReadFileNamed: filepath pathString.
+	self assert: file upToEnd asString equals: 'hello, world'.
+	File deleteFile: filepath pathString.
 
 ]

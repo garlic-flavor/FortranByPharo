@@ -15,6 +15,11 @@ SWTerminalMorphTest >> setUp [
 	"Put here a common initialization logic for tests"
 ]
 
+{ #category : #running }
+SWTerminalMorphTest >> tearDown [
+	terminal close
+]
+
 { #category : #tests }
 SWTerminalMorphTest >> test_run_calc [
 	terminal input: '3+4'.
@@ -23,6 +28,7 @@ SWTerminalMorphTest >> test_run_calc [
 
 { #category : #tests }
 SWTerminalMorphTest >> test_run_ls [
+	
 	terminal execute: 'ls -l'.
 
 ]

@@ -7,7 +7,7 @@ Class {
 		'semaphoreForRead',
 		'semaphoreForWrite',
 		'semaphoreForAccess',
-		'stdStream'
+		'collection'
 	],
 	#category : #'SWFortranByPharo-ClientServer-Shell'
 }
@@ -34,17 +34,30 @@ SWPipe >> atEnd [
 
 { #category : #'open/close' }
 SWPipe >> close [
-	reader ifNotNil: [ reader close ].
-	writer ifNotNil: [ writer close ].
-	semaphoreForRead terminateProcess.
-	semaphoreForWrite terminateProcess.
+	self closed ifTrue: [ ^ self ].
 	semaphoreForAccess terminateProcess.
-	semaphoreForAccess := nil. "flag for closing."
+	semaphoreForWrite terminateProcess.
+	semaphoreForRead terminateProcess.
+	self readStream close.
+	self writeStream close.
+
 ]
 
 { #category : #testing }
 SWPipe >> closed [
-	^ semaphoreForAccess isNil
+	^ self readStream closed and: [ self writeStream closed ]
+]
+
+{ #category : #accessing }
+SWPipe >> collection [
+
+	^ collection ifNil: [ collection := OrderedCollection new ]
+]
+
+{ #category : #accessing }
+SWPipe >> collection: anObject [
+
+	collection := anObject
 ]
 
 { #category : #accessing }
@@ -84,7 +97,7 @@ SWPipe >> readStream [
 
 	^ reader ifNil: [
 		reader := SWPipeReader new
-			collection: self stdStream;
+			collection: self collection;
 			semaphoreForWait: semaphoreForRead;
 			semaphoreForDone: semaphoreForWrite;
 			semaphoreForAccess: semaphoreForAccess;
@@ -93,23 +106,11 @@ SWPipe >> readStream [
 ]
 
 { #category : #accessing }
-SWPipe >> stdStream [
-
-	^ stdStream ifNil: [ stdStream := OrderedCollection new ]
-]
-
-{ #category : #accessing }
-SWPipe >> stdStream: anObject [
-
-	stdStream := anObject
-]
-
-{ #category : #accessing }
 SWPipe >> writeStream [
 
 	^ writer ifNil: [
 		writer := SWPipeWriter new
-			collection: self stdStream;
+			collection: self collection;
 			semaphoreForWait: semaphoreForWrite;
 			semaphoreForDone: semaphoreForRead;
 			semaphoreForAccess: semaphoreForAccess;
