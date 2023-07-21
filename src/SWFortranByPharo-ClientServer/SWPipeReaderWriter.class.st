@@ -40,6 +40,7 @@ SWPipeReaderWriter >> atEnd [
 
 { #category : #'open/close' }
 SWPipeReaderWriter >> close [
+	closed ifTrue: [ ^ self ].
 	self done.
 	closed := true.
 
@@ -47,7 +48,7 @@ SWPipeReaderWriter >> close [
 
 { #category : #testing }
 SWPipeReaderWriter >> closed [
-	^ closed isNotNil
+	^ closed
 ]
 
 { #category : #accessing }
@@ -65,22 +66,28 @@ SWPipeReaderWriter >> collection: anObject [
 { #category : #accessing }
 SWPipeReaderWriter >> contents [
 	"Answer all of the contents of the receiver."
-	closed ifNotNil: [ ^ nil ].
+	closed ifTrue: [ ^ nil ].
 	^ self semaphoreForAccess critical: [ self collection copy ]
 ]
 
 { #category : #running }
 SWPipeReaderWriter >> done [
+	self semaphoreForWait initSignals.
 	self semaphoreForDone isSignaled ifTrue: [ ^ self ].
 	self semaphoreForDone signal.
-	self semaphoreForWait initSignals.
 
 
 ]
 
+{ #category : #initialization }
+SWPipeReaderWriter >> initialize [
+	super initialize.
+	closed := false
+]
+
 { #category : #testing }
 SWPipeReaderWriter >> isEmpty [
-	closed ifNotNil: [ ^ true ].
+	closed ifTrue: [ ^ true ].
 	^ self semaphoreForAccess critical: [ self collection isEmpty ]
 ]
 
@@ -141,6 +148,16 @@ SWPipeReaderWriter >> wait [
 
 { #category : #waiting }
 SWPipeReaderWriter >> waitDone [
-	self semaphoreForDone wait.
+	self semaphoreForDone
+		wait;
+		signal
 
+
+]
+
+{ #category : #waiting }
+SWPipeReaderWriter >> waitReady [
+	self semaphoreForWait
+		wait;
+		signal
 ]

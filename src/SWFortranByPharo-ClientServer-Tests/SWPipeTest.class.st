@@ -41,7 +41,7 @@ SWPipeTest >> test_BasicsForked [
 		done signal.
 	] fork.
 	[
-		w << msg; done.
+		w << msg; ln.
 	] fork.
 	
 	done wait.
@@ -49,19 +49,38 @@ SWPipeTest >> test_BasicsForked [
 ]
 
 { #category : #tests }
+SWPipeTest >> test_BasicsForked2 [
+	|msg w r readed|
+	msg := 'hello, world'.
+	w := p writeStream.
+	r := p readStream.
+	[
+		r wait.
+		readed := String streamContents: [:s | s << r upToEnd ].
+	] fork.
+	[
+		w << msg; ln.
+	] fork.
+
+	Processor yield.
+	w waitReady.
+
+	self assert: readed equals: msg.
+]
+
+{ #category : #tests }
 SWPipeTest >> test_pipe [
 	|tm|
 	tm := SWTerminalMorph new openInWorld.
-	tm do: [ :std |
-		std << 'hello, '; done
-	] | [ :std |
-		std in wait.
-		std << std upToEnd; << 'world'; ln.
-		(std err) << 'this is not an error.'; done.
+	tm do: [ :io |
+		io << 'hello, '; ln
+	] | [ :io |
+		io in wait.
+		io << io upToEnd; << 'world'; ln.
+		(io err) << 'this is not an error.'; ln.
 	].
-	tm std out wait.
-	self assert: tm contents asString equals: ('hello, world', String cr, 'this is not an error.')
-
+	self assert: tm contents asString equals:
+		('hello, world', String cr, 'this is not an error.', String cr)
 ]
 
 { #category : #tests }
@@ -69,14 +88,14 @@ SWPipeTest >> test_pipeToFile [
 	|filepath file std|
 	filepath := SWShell filePathOf: 'hoge.txt'.
 	file := File openForWriteFileNamed: filepath pathString.
-	std := SWStd new
+	std := SWIO new
 		> file;
 		yourself.
-	std << 'hello, world'.
+	std << 'hello, world'; ln.
 	std close.
 	file close.
 	file := File openForReadFileNamed: filepath pathString.
-	self assert: file upToEnd asString equals: 'hello, world'.
+	self assert: file upToEnd asString equals: ('hello, world', String cr).
 	File deleteFile: filepath pathString.
 
 ]

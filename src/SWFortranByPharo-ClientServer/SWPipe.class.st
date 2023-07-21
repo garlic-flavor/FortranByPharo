@@ -1,3 +1,13 @@
+"
+Stream Layout
+
+           ============== Data Flow ==============>
+
+    +--------+        +------- SWPipe ----+         +----+
+    |previous| = writeStream ======== readStream => |next|
+    |  pipe  |        |    (same entity)  |         |pipe|
+    +--------+        +-------------------+         +----+
+"
 Class {
 	#name : #SWPipe,
 	#superclass : #Stream,

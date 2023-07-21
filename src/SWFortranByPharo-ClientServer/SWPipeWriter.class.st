@@ -6,17 +6,22 @@ Class {
 
 { #category : #'instance creation' }
 SWPipeWriter >> ln [
-	^ self
-		nextPut: String cr;
-		done;
-		yourself
+	self nextPut: self class lineSep
+
 ]
 
 { #category : #accessing }
 SWPipeWriter >> nextPut: anObject [
+	anObject isCharacter ifFalse: [
+		^ self nextPutAll: anObject asString
+	].
+	anObject = self class lineSep ifTrue: [
+		^ self done; waitReady
+	].
 	self semaphoreForAccess critical: [
 		self collection add: anObject
 	]
+
 ]
 
 { #category : #accessing }

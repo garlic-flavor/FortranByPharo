@@ -2,23 +2,24 @@ Extension { #name : #BlockClosure }
 
 { #category : #'*SWFortranByPharo-ClientServer' }
 BlockClosure >> | rightBlock [
-	^ [ :std |
+	^ [ :io |
 		|pipe semaphore|
-		pipe := std newPipe.
+		pipe := SWPipe new.
 		semaphore := Semaphore new.
 		[
-			self value: (std sub
+			self value: (io clone
 				out: pipe writeStream;
 				yourself).
 			semaphore signal.
 		] fork.
 		[
-			rightBlock value: (std sub
+			rightBlock value: (io clone
 				in: pipe readStream;
 				yourself).
 			semaphore signal.
 		] fork.
 		semaphore wait.
 		semaphore wait.
+		pipe close.
 	]
 ]

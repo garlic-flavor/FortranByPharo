@@ -4,8 +4,10 @@ Class {
 	#instVars : [
 		'outputMorph',
 		'inputMorph',
-		'std',
-		'commandSemaphore'
+		'leftMostPipe',
+		'rightMostPipe',
+		'errPipe',
+		'io'
 	],
 	#category : #'SWFortranByPharo-ClientServer-Shell'
 }
@@ -46,28 +48,49 @@ SWTerminalMorph >> contents [
 	^ outputMorph text
 ]
 
+{ #category : #'private - creation' }
+SWTerminalMorph >> createOutputPipe [
+	^ SWPipe new
+		>> [ :txt |
+			outputMorph
+				appendText: txt;
+				appendText: String cr.
+		];
+		yourself
+]
+
 { #category : #'open/close' }
 SWTerminalMorph >> delete [
 
-	commandSemaphore terminateProcess.
-	self std close.
+	leftMostPipe ifNotNil: [ leftMostPipe close ].
+	rightMostPipe ifNotNil: [ rightMostPipe close ].
 	super delete
 ]
 
 { #category : #enumerating }
 SWTerminalMorph >> do: aBlock [
-	self halt. self flag: #toRewrite.
-	commandSemaphore critical: [
-		^ aBlock value: self std.
-	].
+
+	^ aBlock value: self io clone
+	
 
 
+]
+
+{ #category : #accessing }
+SWTerminalMorph >> errPipe [
+
+	^ errPipe ifNil: [ errPipe := self createOutputPipe ]
+]
+
+{ #category : #accessing }
+SWTerminalMorph >> errPipe: anObject [
+
+	errPipe := anObject
 ]
 
 { #category : #initialization }
 SWTerminalMorph >> initialize [
 	super initialize.
-	commandSemaphore := Semaphore forMutualExclusion.
 	outputMorph := (self newTextEditorFor: NewValueHolder new getText: #value setText: #value:)
 		beReadOnly.
 	inputMorph := (self newTextEditorFor: NewValueHolder new getText: #value setText: #value).
@@ -91,45 +114,68 @@ SWTerminalMorph >> input: aText [
 
 ]
 
-{ #category : #'as yet unclassified' }
-SWTerminalMorph >> onEnter [
-	|text|
-	commandSemaphore wait.
-	text := inputMorph text.
-	outputMorph
-		appendText: ' % ';
-		appendText: text;
-		appendText: String cr.
-	(self std writeStream)
-		<< text;
-		done.
-	inputMorph setText: ''.
+{ #category : #accessing }
+SWTerminalMorph >> io [
 
-]
-
-{ #category : #'as yet unclassified' }
-SWTerminalMorph >> std [
-	^ std ifNil: [
-		std := SWStd new.
-		std readStream >> [ :txt |
-			outputMorph
-				appendText: txt;
-				appendText: String cr.
-			commandSemaphore signal.
-		].
-		std in: (SWPipeReader new
-			>> [ :txt |
-				(std out)
-					nextPutAll: ([Behavior compiler evaluate: txt] on: CodeError do: [ nil ]) asString;
-					done
-			];
-			yourself).
-		std
+	^ io ifNil: [
+		io := SWIO new
+			in: self leftMostPipe readStream;
+			out: self rightMostPipe writeStream;
+			err: self errPipe writeStream;
+			yourself
 	]
 ]
 
 { #category : #accessing }
-SWTerminalMorph >> std: anObject [
+SWTerminalMorph >> io: anObject [
 
-	std := anObject
+	io := anObject
+]
+
+{ #category : #accessing }
+SWTerminalMorph >> leftMostPipe [
+
+	^ leftMostPipe ifNil: [
+		leftMostPipe := SWPipe new
+			>> [ :txt |
+				(self rightMostPipe)
+					nextPutAll: ([Behavior compiler evaluate: txt] on: CodeError do: [ nil ]) asString;
+					done;
+					waitReady
+			];
+			yourself
+	]
+]
+
+{ #category : #accessing }
+SWTerminalMorph >> leftMostPipe: anObject [
+
+	leftMostPipe := anObject
+]
+
+{ #category : #'as yet unclassified' }
+SWTerminalMorph >> onEnter [
+	|text|
+	text := inputMorph text.
+	inputMorph setText: ''.
+ 	outputMorph
+		appendText: ' % ';
+		appendText: text;
+		appendText: String cr.
+	(self leftMostPipe)
+		<< text;
+		done.
+
+]
+
+{ #category : #accessing }
+SWTerminalMorph >> rightMostPipe [
+
+	^ rightMostPipe ifNil: [	rightMostPipe := self createOutputPipe ]
+]
+
+{ #category : #accessing }
+SWTerminalMorph >> rightMostPipe: anObject [
+
+	rightMostPipe := anObject
 ]
