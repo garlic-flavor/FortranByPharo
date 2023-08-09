@@ -9,7 +9,9 @@ Class {
 		'objFileExtension',
 		'fortranCompilerAdapterClass',
 		'localDirectory',
-		'packageName'
+		'packageName',
+		'shellPath',
+		'lineSep'
 	],
 	#classInstVars : [
 		'default'
@@ -52,6 +54,8 @@ SWOS class >> newMacDefault [
 		fortranCompilerAdapterClass: SWGFortranCompilerAdapter;
 		exeFileExtension: #out;
 		objFileExtension: #o;
+		shellPath: '/bin/zsh';
+		lineSep: String cr;
 		yourself.
 ]
 
@@ -118,6 +122,18 @@ SWOS >> fortranCompilerAdapterClass: anObject [
 	fortranCompilerAdapterClass := anObject
 ]
 
+{ #category : #accessing }
+SWOS >> lineSep [
+
+	^ lineSep
+]
+
+{ #category : #accessing }
+SWOS >> lineSep: anObject [
+
+	lineSep := anObject
+]
+
 { #category : #origins }
 SWOS >> localDirectory [
 	^ localDirectory ifNil: [
@@ -150,4 +166,16 @@ SWOS >> packageName: anObject [
 
 	packageName := anObject.
 	localDirectory := nil
+]
+
+{ #category : #accessing }
+SWOS >> shellPath [
+
+	^ shellPath
+]
+
+{ #category : #accessing }
+SWOS >> shellPath: anObject [
+
+	shellPath := anObject
 ]

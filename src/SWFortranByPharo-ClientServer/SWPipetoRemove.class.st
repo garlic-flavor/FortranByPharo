@@ -9,7 +9,7 @@ Stream Layout
     +--------+        +-------------------+         +----+
 "
 Class {
-	#name : #SWPipe,
+	#name : #SWPipetoRemove,
 	#superclass : #Stream,
 	#instVars : [
 		'reader',
@@ -19,31 +19,31 @@ Class {
 		'semaphoreForAccess',
 		'collection'
 	],
-	#category : #'SWFortranByPharo-ClientServer-Shell'
+	#category : #'SWFortranByPharo-ClientServer-toRemove'
 }
 
 { #category : #'instance creation' }
-SWPipe class >> new [
+SWPipetoRemove class >> new [
 	^ self basicNew
 		initialize;
 		yourself
 ]
 
 { #category : #'bit manipulation' }
-SWPipe >> >> aBlock [
+SWPipetoRemove >> >> aBlock [
 	self readStream >> aBlock
 
 ]
 
 { #category : #testing }
-SWPipe >> atEnd [
+SWPipetoRemove >> atEnd [
 	"Answer whether the receiver can access any more objects."
 
 	^ self readStream atEnd
 ]
 
 { #category : #'open/close' }
-SWPipe >> close [
+SWPipetoRemove >> close [
 	self closed ifTrue: [ ^ self ].
 	semaphoreForAccess terminateProcess.
 	semaphoreForWrite terminateProcess.
@@ -54,31 +54,31 @@ SWPipe >> close [
 ]
 
 { #category : #testing }
-SWPipe >> closed [
+SWPipetoRemove >> closed [
 	^ self readStream closed and: [ self writeStream closed ]
 ]
 
 { #category : #accessing }
-SWPipe >> collection [
+SWPipetoRemove >> collection [
 
 	^ collection ifNil: [ collection := OrderedCollection new ]
 ]
 
 { #category : #accessing }
-SWPipe >> collection: anObject [
+SWPipetoRemove >> collection: anObject [
 
 	collection := anObject
 ]
 
 { #category : #accessing }
-SWPipe >> contents [
+SWPipetoRemove >> contents [
 	"Answer all of the contents of the receiver."
 
 	^ self readStream contents
 ]
 
 { #category : #initialization }
-SWPipe >> initialize [
+SWPipetoRemove >> initialize [
 	super initialize.
 
 	semaphoreForRead := Semaphore new.
@@ -88,14 +88,14 @@ SWPipe >> initialize [
 ]
 
 { #category : #accessing }
-SWPipe >> next [
+SWPipetoRemove >> next [
 	"Answer the next object accessible by the receiver."
 
 	^ self readStream next
 ]
 
 { #category : #accessing }
-SWPipe >> nextPut: anObject [
+SWPipetoRemove >> nextPut: anObject [
 	"Insert the argument, anObject, as the next object accessible by the
 	receiver. Answer anObject."
 
@@ -103,10 +103,10 @@ SWPipe >> nextPut: anObject [
 ]
 
 { #category : #accessing }
-SWPipe >> readStream [
+SWPipetoRemove >> readStream [
 
 	^ reader ifNil: [
-		reader := SWPipeReader new
+		reader := SWPipeReadertoRemove new
 			collection: self collection;
 			semaphoreForWait: semaphoreForRead;
 			semaphoreForDone: semaphoreForWrite;
@@ -116,10 +116,10 @@ SWPipe >> readStream [
 ]
 
 { #category : #accessing }
-SWPipe >> writeStream [
+SWPipetoRemove >> writeStream [
 
 	^ writer ifNil: [
-		writer := SWPipeWriter new
+		writer := SWPipeWritertoRemove new
 			collection: self collection;
 			semaphoreForWait: semaphoreForWrite;
 			semaphoreForDone: semaphoreForRead;

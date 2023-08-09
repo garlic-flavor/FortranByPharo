@@ -8,14 +8,14 @@ Class {
 		'p',
 		'done'
 	],
-	#category : #'SWFortranByPharo-ClientServer-Tests-Shell'
+	#category : #'SWFortranByPharo-ClientServer-toRemove'
 }
 
 { #category : #running }
 SWPipeTest >> setUp [
 	super setUp.
 
-	p := SWPipe new.
+	p := SWPipetoRemove new.
 	done := Semaphore new.
 ]
 
@@ -71,7 +71,7 @@ SWPipeTest >> test_BasicsForked2 [
 { #category : #tests }
 SWPipeTest >> test_pipe [
 	|tm|
-	tm := SWTerminalMorph new openInWorld.
+	tm := SWTerminalMorphtoRemove new openInWorld.
 	tm do: [ :io |
 		io << 'hello, '; ln
 	] | [ :io |

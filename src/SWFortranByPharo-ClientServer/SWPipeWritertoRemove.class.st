@@ -1,17 +1,17 @@
 Class {
-	#name : #SWPipeWriter,
-	#superclass : #SWPipeReaderWriter,
-	#category : #'SWFortranByPharo-ClientServer-Shell'
+	#name : #SWPipeWritertoRemove,
+	#superclass : #SWPipeReaderWritertoRemove,
+	#category : #'SWFortranByPharo-ClientServer-toRemove'
 }
 
 { #category : #'instance creation' }
-SWPipeWriter >> ln [
+SWPipeWritertoRemove >> ln [
 	self nextPut: self class lineSep
 
 ]
 
 { #category : #accessing }
-SWPipeWriter >> nextPut: anObject [
+SWPipeWritertoRemove >> nextPut: anObject [
 	anObject isCharacter ifFalse: [
 		^ self nextPutAll: anObject asString
 	].
@@ -25,8 +25,8 @@ SWPipeWriter >> nextPut: anObject [
 ]
 
 { #category : #accessing }
-SWPipeWriter >> readStream [
-	^ SWPipeReader new
+SWPipeWritertoRemove >> readStream [
+	^ SWPipeReadertoRemove new
 		collection: self collection;
 		semaphoreForAccess: self semaphoreForAccess;
 		semaphoreForWait: self semaphoreForDone;
@@ -35,16 +35,16 @@ SWPipeWriter >> readStream [
 ]
 
 { #category : #accessing }
-SWPipeWriter >> semaphoreForDone [
+SWPipeWritertoRemove >> semaphoreForDone [
 	^ semaphoreForDone ifNil: [ semaphoreForDone := Semaphore new ]
 ]
 
 { #category : #accessing }
-SWPipeWriter >> semaphoreForWait [
+SWPipeWritertoRemove >> semaphoreForWait [
 	^ semaphoreForWait ifNil: [ semaphoreForWait := Semaphore forMutualExclusion ]
 ]
 
 { #category : #writing }
-SWPipeWriter >> writeStream [
+SWPipeWritertoRemove >> writeStream [
 	^ self
 ]

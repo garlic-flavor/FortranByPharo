@@ -42,13 +42,17 @@ BaselineOfSWFortranByPharo >> setUpDependencies: spec [
 	spec 
 		baseline: 'OSSubprocess'
 			with: [spec repository: 'github://pharo-contributions/OSSubprocess:master/repository'];
+"
 		baseline: 'ZincHTTPComponents'
  			with: [ spec repository: 'github://svenvc/zinc/repository' ];
 		baseline: 'NeoUniversalBinaryJSON'
 			with: [ spec repository: 'github://svenvc/NeoUniversalBinaryJSON'  ];
-
+"
+		baseline: 'MessagePack'
+			with: [ spec repository: 'github://msgpack/msgpack-smalltalk/repository' ]
+";
 		package: 'Zinc-WebSocket-Core' with: [
 			spec
 				repository: 'github://svenvc/zinc' ].
-
+"
 ]

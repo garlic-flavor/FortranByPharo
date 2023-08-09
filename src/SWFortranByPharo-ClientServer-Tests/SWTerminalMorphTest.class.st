@@ -10,7 +10,7 @@ Class {
 { #category : #initialization }
 SWTerminalMorphTest >> setUp [
 	super setUp.
-	terminal := 	SWTerminalMorph start.
+	terminal := 	SWTerminalMorphtoRemove start.
 
 	"Put here a common initialization logic for tests"
 ]

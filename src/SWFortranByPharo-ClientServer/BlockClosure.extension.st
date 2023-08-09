@@ -4,17 +4,17 @@ Extension { #name : #BlockClosure }
 BlockClosure >> | rightBlock [
 	^ [ :io |
 		|pipe semaphore|
-		pipe := SWPipe new.
+		pipe := SWShell makeNonBlockingPipe.
 		semaphore := Semaphore new.
 		[
 			self value: (io clone
-				out: pipe writeStream;
+				out: pipe;
 				yourself).
 			semaphore signal.
 		] fork.
 		[
 			rightBlock value: (io clone
-				in: pipe readStream;
+				in: (SWWaitableStream newOn: pipe);
 				yourself).
 			semaphore signal.
 		] fork.

@@ -109,6 +109,16 @@ SWShell class >> lsr: path [
 
 ]
 
+{ #category : #pipes }
+SWShell class >> makeBlockingPipe [
+	^ OSSVMProcess vmProcess systemAccessor makeBlockingPipe
+]
+
+{ #category : #pipes }
+SWShell class >> makeNonBlockingPipe [
+	^ OSSVMProcess vmProcess systemAccessor makeNonBlockingPipe
+]
+
 { #category : #requesting }
 SWShell class >> put: target contents: contents [
 	|file|

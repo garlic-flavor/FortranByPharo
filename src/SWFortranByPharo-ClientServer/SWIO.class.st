@@ -79,7 +79,7 @@ SWIO >> close [
 { #category : #testing }
 SWIO >> closed [
 
-	^ self in closed and: [ self out closed ]
+	^ self out closed
 ]
 
 { #category : #accessing }
@@ -92,7 +92,7 @@ SWIO >> contents [
 { #category : #accessing }
 SWIO >> err [
 
-	^ err ifNil: [ err := SWPipeWriter new ]
+	^ err ifNil: [ err := SWWaitableStream newOnPipe ]
 ]
 
 { #category : #accessing }
@@ -103,10 +103,7 @@ SWIO >> err: aStream [
 
 { #category : #accessing }
 SWIO >> in [
-	^ in ifNil: [ in := SWPipeReader new
-		>> [ :txt | (self out) nextPutAll: txt; ln ];
-		yourself
-	]
+	^ in ifNil: [ in := SWWaitableStream newOnPipe ]
 ]
 
 { #category : #accessing }
@@ -117,7 +114,9 @@ SWIO >> in: aStream [
 
 { #category : #running }
 SWIO >> ln [
-	self out nextPut: SWPipeReaderWriter lineSep
+	(self out)
+		nextPutAll: SWOS default lineSep;
+		flush
 
 ]
 
@@ -137,7 +136,7 @@ SWIO >> nextPut: anObject [
 { #category : #accessing }
 SWIO >> out [
 
-	^ out ifNil: [ out := SWPipeWriter new ]
+	^ out ifNil: [ out := SWWaitableStream newOnPipe ]
 ]
 
 { #category : #accessing }

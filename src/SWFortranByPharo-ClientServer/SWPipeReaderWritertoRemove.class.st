@@ -1,5 +1,5 @@
 Class {
-	#name : #SWPipeReaderWriter,
+	#name : #SWPipeReaderWritertoRemove,
 	#superclass : #Stream,
 	#instVars : [
 		'collection',
@@ -11,35 +11,35 @@ Class {
 	#classInstVars : [
 		'lineSep'
 	],
-	#category : #'SWFortranByPharo-ClientServer-Shell'
+	#category : #'SWFortranByPharo-ClientServer-toRemove'
 }
 
 { #category : #'as yet unclassified' }
-SWPipeReaderWriter class >> clearLineSep [
+SWPipeReaderWritertoRemove class >> clearLineSep [
 	lineSep := nil
 ]
 
 { #category : #accessing }
-SWPipeReaderWriter class >> lineSep [
+SWPipeReaderWritertoRemove class >> lineSep [
 	^ lineSep ifNil: [ lineSep := Character cr ]
 ]
 
 { #category : #'instance creation' }
-SWPipeReaderWriter class >> new [
+SWPipeReaderWritertoRemove class >> new [
 	^ self basicNew
 		initialize;
 		yourself
 ]
 
 { #category : #testing }
-SWPipeReaderWriter >> atEnd [
+SWPipeReaderWritertoRemove >> atEnd [
 	"Answer whether the receiver can access any more objects."
 
 	^ self isEmpty
 ]
 
 { #category : #'open/close' }
-SWPipeReaderWriter >> close [
+SWPipeReaderWritertoRemove >> close [
 	closed ifTrue: [ ^ self ].
 	self done.
 	closed := true.
@@ -47,31 +47,31 @@ SWPipeReaderWriter >> close [
 ]
 
 { #category : #testing }
-SWPipeReaderWriter >> closed [
+SWPipeReaderWritertoRemove >> closed [
 	^ closed
 ]
 
 { #category : #accessing }
-SWPipeReaderWriter >> collection [
+SWPipeReaderWritertoRemove >> collection [
 
 	^ collection ifNil: [ collection := OrderedCollection new ]
 ]
 
 { #category : #accessing }
-SWPipeReaderWriter >> collection: anObject [
+SWPipeReaderWritertoRemove >> collection: anObject [
 
 	collection := anObject
 ]
 
 { #category : #accessing }
-SWPipeReaderWriter >> contents [
+SWPipeReaderWritertoRemove >> contents [
 	"Answer all of the contents of the receiver."
 	closed ifTrue: [ ^ nil ].
 	^ self semaphoreForAccess critical: [ self collection copy ]
 ]
 
 { #category : #running }
-SWPipeReaderWriter >> done [
+SWPipeReaderWritertoRemove >> done [
 	self semaphoreForWait initSignals.
 	self semaphoreForDone isSignaled ifTrue: [ ^ self ].
 	self semaphoreForDone signal.
@@ -80,26 +80,26 @@ SWPipeReaderWriter >> done [
 ]
 
 { #category : #initialization }
-SWPipeReaderWriter >> initialize [
+SWPipeReaderWritertoRemove >> initialize [
 	super initialize.
 	closed := false
 ]
 
 { #category : #testing }
-SWPipeReaderWriter >> isEmpty [
+SWPipeReaderWritertoRemove >> isEmpty [
 	closed ifTrue: [ ^ true ].
 	^ self semaphoreForAccess critical: [ self collection isEmpty ]
 ]
 
 { #category : #accessing }
-SWPipeReaderWriter >> next [
+SWPipeReaderWritertoRemove >> next [
 	"Answer the next object accessible by the receiver."
 
 	self error: 'I should not be called.'
 ]
 
 { #category : #accessing }
-SWPipeReaderWriter >> nextPut: anObject [
+SWPipeReaderWritertoRemove >> nextPut: anObject [
 	"Insert the argument, anObject, as the next object accessible by the
 	receiver. Answer anObject."
 
@@ -107,47 +107,47 @@ SWPipeReaderWriter >> nextPut: anObject [
 ]
 
 { #category : #accessing }
-SWPipeReaderWriter >> semaphoreForAccess [
+SWPipeReaderWritertoRemove >> semaphoreForAccess [
 	^ semaphoreForAccess ifNil: [ semaphoreForAccess := Semaphore forMutualExclusion ]
 ]
 
 { #category : #accessing }
-SWPipeReaderWriter >> semaphoreForAccess: anObject [
+SWPipeReaderWritertoRemove >> semaphoreForAccess: anObject [
 
 	semaphoreForAccess := anObject
 ]
 
 { #category : #accessing }
-SWPipeReaderWriter >> semaphoreForDone [
+SWPipeReaderWritertoRemove >> semaphoreForDone [
 	^ self subclassResponsibility
 ]
 
 { #category : #accessing }
-SWPipeReaderWriter >> semaphoreForDone: anObject [
+SWPipeReaderWritertoRemove >> semaphoreForDone: anObject [
 
 	semaphoreForDone := anObject
 ]
 
 { #category : #accessing }
-SWPipeReaderWriter >> semaphoreForWait [
+SWPipeReaderWritertoRemove >> semaphoreForWait [
 	^ self subclassResponsibility 
 ]
 
 { #category : #accessing }
-SWPipeReaderWriter >> semaphoreForWait: anObject [
+SWPipeReaderWritertoRemove >> semaphoreForWait: anObject [
 
 	semaphoreForWait := anObject
 ]
 
 { #category : #waiting }
-SWPipeReaderWriter >> wait [
+SWPipeReaderWritertoRemove >> wait [
 	self semaphoreForWait wait.
 	self semaphoreForDone initSignals.
 
 ]
 
 { #category : #waiting }
-SWPipeReaderWriter >> waitDone [
+SWPipeReaderWritertoRemove >> waitDone [
 	self semaphoreForDone
 		wait;
 		signal
@@ -156,7 +156,7 @@ SWPipeReaderWriter >> waitDone [
 ]
 
 { #category : #waiting }
-SWPipeReaderWriter >> waitReady [
+SWPipeReaderWritertoRemove >> waitReady [
 	self semaphoreForWait
 		wait;
 		signal

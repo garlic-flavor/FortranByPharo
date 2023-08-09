@@ -1,18 +1,19 @@
 Class {
-	#name : #SWTerminalMorph,
+	#name : #SWTerminalMorphtoRemove,
 	#superclass : #StandardWindow,
 	#instVars : [
 		'outputMorph',
 		'inputMorph',
 		'leftMostPipe',
 		'rightMostPipe',
-		'errPipe'
+		'errPipe',
+		'io'
 	],
-	#category : #'SWFortranByPharo-ClientServer-Shell'
+	#category : #'SWFortranByPharo-ClientServer-toRemove'
 }
 
 { #category : #'tests - execution' }
-SWTerminalMorph class >> start [
+SWTerminalMorphtoRemove class >> start [
 
 	<script>
 	| m |
@@ -34,7 +35,7 @@ SWTerminalMorph class >> start [
 ]
 
 { #category : #'tests - execution' }
-SWTerminalMorph class >> startThenInspect [
+SWTerminalMorphtoRemove class >> startThenInspect [
 	<script>
 	self new
 		openInWorld;
@@ -42,66 +43,53 @@ SWTerminalMorph class >> startThenInspect [
 ]
 
 { #category : #accessing }
-SWTerminalMorph >> contents [
+SWTerminalMorphtoRemove >> contents [
 
 	^ outputMorph text
 ]
 
+{ #category : #'private - creation' }
+SWTerminalMorphtoRemove >> createOutputPipe [
+	^ SWPipetoRemove new
+		>> [ :txt |
+			outputMorph
+				appendText: txt;
+				appendText: String cr.
+		];
+		yourself
+]
+
 { #category : #'open/close' }
-SWTerminalMorph >> delete [
+SWTerminalMorphtoRemove >> delete [
 
-	leftMostPipe ifNotNil: [
-		leftMostPipe close.
-		leftMostPipe := nil
-	].
-
-	rightMostPipe ifNotNil: [
-		rightMostPipe close.
-		rightMostPipe := nil
-	].
-
-	errPipe ifNotNil: [
-		errPipe close.
-		errPipe := nil
-	].
-
+	leftMostPipe ifNotNil: [ leftMostPipe close ].
+	rightMostPipe ifNotNil: [ rightMostPipe close ].
 	super delete
 ]
 
 { #category : #enumerating }
-SWTerminalMorph >> do: aBlock [
-	^ aBlock value: (SWIO new
-		in: (SWWaitableStream newOn: self leftMostPipe stream);
-		out: self rightMostPipe;
-		err: self errPipe;
-		yourself)
+SWTerminalMorphtoRemove >> do: aBlock [
 
+	^ aBlock value: self io clone
+	
 
 
 ]
 
 { #category : #accessing }
-SWTerminalMorph >> errPipe [
+SWTerminalMorphtoRemove >> errPipe [
 
-	^ errPipe ifNil: [
-		errPipe := SWStreamListener newOnPipe
-			callback: [ :txt |
-				outputMorph
-					appendText: txt;
-					appendText: String cr
-			];
-			yourself
-	]
+	^ errPipe ifNil: [ errPipe := self createOutputPipe ]
 ]
 
 { #category : #accessing }
-SWTerminalMorph >> errPipe: anObject [
+SWTerminalMorphtoRemove >> errPipe: anObject [
 
 	errPipe := anObject
 ]
 
 { #category : #initialization }
-SWTerminalMorph >> initialize [
+SWTerminalMorphtoRemove >> initialize [
 	super initialize.
 	outputMorph := (self newTextEditorFor: NewValueHolder new getText: #value setText: #value:)
 		beReadOnly.
@@ -119,7 +107,7 @@ SWTerminalMorph >> initialize [
 ]
 
 { #category : #accessing }
-SWTerminalMorph >> input: aText [
+SWTerminalMorphtoRemove >> input: aText [
 
 	inputMorph setText: aText.
 	self onEnter.
@@ -127,56 +115,67 @@ SWTerminalMorph >> input: aText [
 ]
 
 { #category : #accessing }
-SWTerminalMorph >> leftMostPipe [
+SWTerminalMorphtoRemove >> io [
+
+	^ io ifNil: [
+		io := SWIO new
+			in: self leftMostPipe readStream;
+			out: self rightMostPipe writeStream;
+			err: self errPipe writeStream;
+			yourself
+	]
+]
+
+{ #category : #accessing }
+SWTerminalMorphtoRemove >> io: anObject [
+
+	io := anObject
+]
+
+{ #category : #accessing }
+SWTerminalMorphtoRemove >> leftMostPipe [
 
 	^ leftMostPipe ifNil: [
-		leftMostPipe := SWStreamListener newOnPipe
-			callback: [ :txt |
-				self rightMostPipe
-					nextPutAll: (Behavior evaluate: txt) asString;
-					nextPut: SWStreamListener lineSep;
-					flush
+		leftMostPipe := SWPipetoRemove new
+			>> [ :txt |
+				(self rightMostPipe)
+					nextPutAll: ([Behavior compiler evaluate: txt] on: CodeError do: [ nil ]) asString;
+					done;
+					waitReady
 			];
 			yourself
 	]
 ]
 
 { #category : #accessing }
-SWTerminalMorph >> leftMostPipe: anObject [
+SWTerminalMorphtoRemove >> leftMostPipe: anObject [
 
 	leftMostPipe := anObject
 ]
 
 { #category : #'as yet unclassified' }
-SWTerminalMorph >> onEnter [
+SWTerminalMorphtoRemove >> onEnter [
 	|text|
-
 	text := inputMorph text.
+	inputMorph setText: ''.
  	outputMorph
 		appendText: ' % ';
 		appendText: text;
 		appendText: String cr.
 	(self leftMostPipe)
-		nextPutAll: text;
-		flush.
-	inputMorph setText: ''.
+		<< text;
+		done.
 
 ]
 
 { #category : #accessing }
-SWTerminalMorph >> rightMostPipe [
+SWTerminalMorphtoRemove >> rightMostPipe [
 
-	^ rightMostPipe ifNil: [
-		rightMostPipe := SWStreamListener newOnPipe
-			callback: [ :txt |
-				outputMorph appendText: txt
-			];
-			yourself
-	]
+	^ rightMostPipe ifNil: [	rightMostPipe := self createOutputPipe ]
 ]
 
 { #category : #accessing }
-SWTerminalMorph >> rightMostPipe: anObject [
+SWTerminalMorphtoRemove >> rightMostPipe: anObject [
 
 	rightMostPipe := anObject
 ]

@@ -1,14 +1,14 @@
 Class {
-	#name : #SWPipeReader,
-	#superclass : #SWPipeReaderWriter,
+	#name : #SWPipeReadertoRemove,
+	#superclass : #SWPipeReaderWritertoRemove,
 	#instVars : [
 		'process'
 	],
-	#category : #'SWFortranByPharo-ClientServer-Shell'
+	#category : #'SWFortranByPharo-ClientServer-toRemove'
 }
 
 { #category : #'bit manipulation' }
-SWPipeReader >> >> aBlock [
+SWPipeReadertoRemove >> >> aBlock [
 	process ifNotNil: [ process terminate ].
 	process := [ [
 		self wait.
@@ -18,7 +18,7 @@ SWPipeReader >> >> aBlock [
 ]
 
 { #category : #'open/close' }
-SWPipeReader >> close [
+SWPipeReadertoRemove >> close [
 	process ifNotNil: [
 		process terminate.
 		process := nil.
@@ -27,7 +27,7 @@ SWPipeReader >> close [
 ]
 
 { #category : #accessing }
-SWPipeReader >> next [
+SWPipeReadertoRemove >> next [
 	self closed ifTrue: [ ^ nil ].
 	^ self semaphoreForAccess critical: [
 		self collection ifEmpty: [
@@ -42,22 +42,22 @@ SWPipeReader >> next [
 ]
 
 { #category : #accessing }
-SWPipeReader >> readStream [
+SWPipeReadertoRemove >> readStream [
 	^ self
 ]
 
 { #category : #accessing }
-SWPipeReader >> semaphoreForDone [
+SWPipeReadertoRemove >> semaphoreForDone [
 	^ semaphoreForDone ifNil: [ semaphoreForDone := Semaphore forMutualExclusion ]
 ]
 
 { #category : #accessing }
-SWPipeReader >> semaphoreForWait [
+SWPipeReadertoRemove >> semaphoreForWait [
 	^ semaphoreForWait ifNil: [semaphoreForWait := Semaphore new ]
 ]
 
 { #category : #positioning }
-SWPipeReader >> skipTo: anObject [
+SWPipeReadertoRemove >> skipTo: anObject [
 	|pos|
 	pos := collection indexOf: anObject.
 	^ pos = 0 ifTrue: [ false ] ifFalse: [
@@ -67,8 +67,8 @@ SWPipeReader >> skipTo: anObject [
 ]
 
 { #category : #writing }
-SWPipeReader >> writeStream [
-	^ SWPipeWriter new
+SWPipeReadertoRemove >> writeStream [
+	^ SWPipeWritertoRemove new
 		collection: self collection;
 		semaphoreForAccess: self semaphoreForAccess;
 		semaphoreForWait: self semaphoreForDone;
