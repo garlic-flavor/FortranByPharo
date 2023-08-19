@@ -29,6 +29,10 @@ SWType class >> declare: aName as: aType [
 
 ]
 
+{ #category : #api }
+SWType class >> declareReturnAs: aType [
+]
+
 { #category : #constants }
 SWType class >> defaultPriority [
 	^ 0
