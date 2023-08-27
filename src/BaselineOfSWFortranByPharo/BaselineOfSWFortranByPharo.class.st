@@ -28,7 +28,9 @@ BaselineOfSWFortranByPharo >> baseline: spec [
 			package: 'SWFortranByPharo-ClientServer-Tests' with: [ spec requires: #('SWFortranByPharo-Tests') ];
 			package: 'SWFortranByPharo-Analyzer-Tests' with: [ spec requires: #('SWFortranByPharo-Tests') ];
 			package: 'SWFortranByPharo-Transpiler-Tests' with: [ spec requires: #('SWFortranByPharo-Tests') ];
-			package: 'SWFortranByPharo-FFCaller'.
+			package: 'SWFortranByPharo-FFCaller' with: [spec requires: #('SWFortranByPharo-ClientServer') ];
+			package: 'SWFortranByPharo-FFCaller-Tests' with: [ spec requires:
+				#('SWFortranByPharo-FFCaller')	]
 		"Groups"
 	]
 ]

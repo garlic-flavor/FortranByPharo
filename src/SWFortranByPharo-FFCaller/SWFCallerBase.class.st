@@ -74,11 +74,7 @@ SWFCallerBase >> buildTargetExt [
 
 { #category : #'private - accessing' }
 SWFCallerBase >> buildTargetName [
-	^ (self name endsWith: self id asString) ifTrue: [
-		self name, self buildTargetExt
-	] ifFalse: [
-		self name, '-', self id asString, self buildTargetExt
-	]
+	^ self name, '-', self id asString, self buildTargetExt
 
 ]
 
@@ -109,7 +105,7 @@ SWFCallerBase >> id: anObject [
 { #category : #accessing }
 SWFCallerBase >> name [
 
-	^ name ifNil: [ name := 'anonymous-', (self id asString) ]
+	^ name ifNil: [ name := 'anonymous' ]
 ]
 
 { #category : #accessing }
@@ -161,9 +157,6 @@ SWFCallerBase >> sourceTarget: anObject [
 
 { #category : #'private - accessing' }
 SWFCallerBase >> sourceTargetName [
-	^ (self name endsWith: self id asString) ifTrue: [
-		self name, self sourceExt
-	] ifFalse: [
-		self name, '-', self id asString, self sourceExt
-	]
+	^ self name, '-', self id asString, self sourceExt
+
 ]
