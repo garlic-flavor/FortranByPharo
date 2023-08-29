@@ -32,17 +32,23 @@ SWFPlayroom class >> test1 [
 { #category : #tests }
 SWFPlayroom class >> test2 [
 	<script>
-	|script mbt|
+	|script pool exp mbt|
 	script := [ :arg1 |
-	          SWType declareReturnAs: #double.
-	          SWType declare: #arg1 as: #double.
+	          SWType declareReturnAs: Float.
+	          SWType declare: #arg1 as: Float.
 	          arg1 * 2.0 ].
-	
+
+	pool := SWPoolOfF90 new.
+	exp := (SWExpression new
+			pool: pool global;
+			node: script sourceNode;
+			decode;
+			yourself).
 	mbt := SWMBTofF90 new
-		expression: (SWExpression new
-			method: script method;
-			yourself);
-		yourself.
-	mbt transpile.
+		pool: pool;
+		expression: exp;
+		transpileAsMain.
+	self halt.
 	^ mbt
+	
 ]
