@@ -31,24 +31,17 @@ SWFPlayroom class >> test1 [
 
 { #category : #tests }
 SWFPlayroom class >> test2 [
-	<script>
-	|script pool exp mbt|
+	<sampleInstance>
+	|script mt|
 	script := [ :arg1 |
-	          SWType declareReturnAs: Float.
+	          SWType declare: #return as: Float.
 	          SWType declare: #arg1 as: Float.
 	          arg1 * 2.0 ].
+	mt := SWMTofF90 new
+		script: script;
+		yourself.
+	mt transpileAsBindCFunc: 'hoge'.
 
-	pool := SWPoolOfF90 new.
-	exp := (SWExpression new
-			pool: pool global;
-			node: script sourceNode;
-			decode;
-			yourself).
-	mbt := SWMBTofF90 new
-		pool: pool;
-		expression: exp;
-		transpileAsMain.
-	self halt.
-	^ mbt
+	^ mt stream contents
 	
 ]

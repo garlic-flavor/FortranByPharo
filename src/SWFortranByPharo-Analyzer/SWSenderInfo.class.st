@@ -89,6 +89,7 @@ SWSenderInfo >> putOn: aStream [
 
 { #category : #accessing }
 SWSenderInfo >> receiverClass [
+	self operands isEmptyOrNil ifTrue: [ ^ nil ].
 	^ self operands first value
 ]
 

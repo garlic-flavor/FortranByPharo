@@ -58,3 +58,31 @@ SWMTofF90 >> transpile [
 	self putBasenameOn: self stream.
 	self stream putLine
 ]
+
+{ #category : #'as yet unclassified' }
+SWMTofF90 >> transpileAsBindCFunc: aName [
+	self solveDependencies.
+	
+	self stream
+		<< 'module '; << aName; << '_module'; putLine;
+		incIndent;
+		<< 'use iso_c_binding'; putLine;
+		<< 'implicit none'; putLine;
+		decIndent;
+		<< 'contains'; putLine;
+		incIndent;
+		<< 'function '; << aName; << '_f ('.
+	self stream
+		<< ') bind(c, Name=';
+		<< (Character value: 39); << aName; << (Character value: 39); << ')'; putLine;
+		incIndent.
+	self mainTranspiler transpileAsMain.
+	self stream
+		decIndent;
+		<< 'end function ';
+		<< aName; << '_f'; putLine;
+		decIndent;
+		<< 'end module ';
+		<< aName;
+		<< '_module'; putLine
+]

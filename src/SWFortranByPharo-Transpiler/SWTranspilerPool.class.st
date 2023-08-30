@@ -156,3 +156,16 @@ SWTranspilerPool >> transpilerFor: aMethod with: operands [
 		yourself
 
 ]
+
+{ #category : #'as yet unclassified' }
+SWTranspilerPool >> transpilerForAScript: aScript [
+
+	^ self class methodBodyTranspilerClass new
+		pool: self;
+		expression: (SWExpression new
+			pool: self global;
+			node: aScript sourceNode;
+			decode;
+			yourself);
+		yourself
+]

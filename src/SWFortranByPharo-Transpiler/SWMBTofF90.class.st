@@ -32,10 +32,10 @@ SWMBTofF90 >> putMessageWithSelector: aSelector [
 		self expression messageInfo isSubroutine ifTrue: [
 			self put: 'call '; put: aSelector; putArguments: self children allButFirst
 		] ifFalse: [
-			self halt
+			self error
 		]
 	] ifFalse: [
-		self halt
+		self error
 	]
 ]
 

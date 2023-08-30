@@ -105,6 +105,11 @@ SWModuleTranspiler >> putFilenameOn: aStream [
 ]
 
 { #category : #accessing }
+SWModuleTranspiler >> script: aScript [
+	self mainTranspiler: (self pool transpilerForAScript: aScript)
+]
+
+{ #category : #accessing }
 SWModuleTranspiler >> senderInfo [
 
 	^ self mainTranspiler expression senderInfo
@@ -112,11 +117,13 @@ SWModuleTranspiler >> senderInfo [
 
 { #category : #analyzing }
 SWModuleTranspiler >> solveDependencies [
-	|rClass|
-	rClass := self mainTranspiler receiverClass instanceSide.
-	(rClass respondsTo: #solveDependencies:) ifTrue: [
-		rClass solveDependencies: self
-	].
+	|rClass riClass|
+	rClass := self mainTranspiler receiverClass.
+	rClass ifNil: [ ^ self ].
+	riClass := rClass instanceSide.
+	(rClass respondsTo: #solveDependencies:) ifFalse: [ ^ self ].
+	rClass solveDependencies: self
+
 
 ]
 
