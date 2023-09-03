@@ -37,14 +37,6 @@ SWMBTofJS >> atLiteralArray: aLiteralArray [
 	self atArray: aLiteralArray
 ]
 
-{ #category : #accessing }
-SWMBTofJS >> atSymbol: aSymbol [
-	self
-		put: '"';
-		put: aSymbol asString;
-		put: '"'
-]
-
 { #category : #'as yet unclassified' }
 SWMBTofJS >> putArgsAndBody: anExpression [
 	self putArgumentDeclaration: anExpression arguments;
@@ -593,20 +585,6 @@ SWMBTofJS >> putSelfDeclaration [
 	(self node allVariables anySatisfy: [ :each | each name = 'self' ]) ifFalse: [ ^ self ].
 
 	self put: 'var self = this;'; cr
-]
-
-{ #category : #'as yet unclassified' }
-SWMBTofJS >> putSequenceAndReturn [
-	|lastchild|
-	self children allButLastDo: [ :child |
-		self putStatement: child
-	].
-	lastchild := (self statementChild: self expression)
-		putReturnKeyword; put: ' '; transpileChildWithoutBracket: self children last;
-		putStatementDelimiter; cr;
-		yourself.
-	self stream append: lastchild stream
-
 ]
 
 { #category : #'as yet unclassified' }

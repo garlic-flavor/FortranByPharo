@@ -135,6 +135,13 @@ SWTranspilerPool >> transpile_ProtoObject: ct [
 ]
 
 { #category : #'as yet unclassified' }
+SWTranspilerPool >> transpile_SWTypeClass: cdt [
+	cdt
+		senderTranspilerOf: #declare:as: is: [ :mbt |  mbt preventStatementDelimiter; preventNewline ];
+		senderTranspilerOf: #declareReturnAs: is: [ :mbt |  mbt preventStatementDelimiter; preventNewline ]
+]
+
+{ #category : #'as yet unclassified' }
 SWTranspilerPool >> transpile_Stream: ct [
 	ct
 		senderTranspilerOf: #<< is: [ :mbt | mbt putMessageWithSelector: 'write' ]
@@ -159,7 +166,6 @@ SWTranspilerPool >> transpilerFor: aMethod with: operands [
 
 { #category : #'as yet unclassified' }
 SWTranspilerPool >> transpilerForAScript: aScript [
-
 	^ self class methodBodyTranspilerClass new
 		pool: self;
 		expression: (SWExpression new

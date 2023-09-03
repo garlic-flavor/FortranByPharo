@@ -21,3 +21,10 @@ SWPoolOfF90 class >> mangleClass [
 SWPoolOfF90 class >> methodBodyTranspilerClass [
 	^ SWMBTofF90
 ]
+
+{ #category : #'as yet unclassified' }
+SWPoolOfF90 >> transpile_SWTypeClass: cdt [
+	cdt senderTranspilerOf: #declare:as: is: [ :mbt |
+		mbt putTypeDeclarationOf: mbt children second as: mbt children third.
+	]
+]

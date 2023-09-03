@@ -21,7 +21,9 @@ SWMBTofF90 >> atMethod: aMethodNode [
 { #category : #'as yet unclassified' }
 SWMBTofF90 >> putArgumentDeclaration: anArrayOfVariable [
 	anArrayOfVariable do: [ :var |
-		self put: (self pool class mangleClass transpiledTypeNameOf: var value); put: ' '; put: var name; cr
+		self stream put: var name
+	] separatedBy: [
+		self stream put: ', '
 	]
 
 ]
@@ -37,6 +39,11 @@ SWMBTofF90 >> putMessageWithSelector: aSelector [
 	] ifFalse: [
 		self error
 	]
+]
+
+{ #category : #'code generation' }
+SWMBTofF90 >> putReturnKeyword [
+	self put: 'return ='
 ]
 
 { #category : #'as yet unclassified' }

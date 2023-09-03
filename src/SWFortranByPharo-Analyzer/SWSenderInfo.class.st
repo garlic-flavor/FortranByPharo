@@ -55,6 +55,11 @@ SWSenderInfo >> method: anObject [
 ]
 
 { #category : #accessing }
+SWSenderInfo >> name [
+	^ self method selector
+]
+
+{ #category : #accessing }
 SWSenderInfo >> operands [
 
 	^ operands
@@ -75,7 +80,7 @@ SWSenderInfo >> printOn: aStream [
 SWSenderInfo >> putBasenameOn: aStream [
 	aStream
 		<< self receiverClass instanceSide name;
-		<< self method selector  asCamelCase
+		<< self method selector asCamelCase
 ]
 
 { #category : #streaming }

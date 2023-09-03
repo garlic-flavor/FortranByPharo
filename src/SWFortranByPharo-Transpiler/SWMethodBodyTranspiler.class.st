@@ -138,6 +138,14 @@ SWMethodBodyTranspiler >> atString: aString [
 		put: '"'
 ]
 
+{ #category : #accessing }
+SWMethodBodyTranspiler >> atSymbol: aSymbol [
+	self
+		put: '"';
+		put: aSymbol asString;
+		put: '"'
+]
+
 { #category : #'dispatching-callback' }
 SWMethodBodyTranspiler >> atVariable: aVariableNode [
 	(self pool haltList includes: aVariableNode name) ifTrue: [ self halt ].
@@ -539,6 +547,20 @@ SWMethodBodyTranspiler >> putSequence [
 
 ]
 
+{ #category : #'as yet unclassified' }
+SWMethodBodyTranspiler >> putSequenceAndReturn [
+	|lastchild|
+	self children allButLastDo: [ :child |
+		self putStatement: child
+	].
+	lastchild := (self statementChild: self expression)
+		putReturnKeyword; put: ' '; transpileChildWithoutBracket: self children last;
+		putStatementDelimiter; cr;
+		yourself.
+	self stream append: lastchild stream
+
+]
+
 { #category : #'code generation' }
 SWMethodBodyTranspiler >> putStatement: anExpression [
 	|child|
@@ -554,6 +576,15 @@ SWMethodBodyTranspiler >> putStatement: anExpression [
 { #category : #'code generation' }
 SWMethodBodyTranspiler >> putStatementDelimiter [
 	self stream putDelimiter
+]
+
+{ #category : #'as yet unclassified' }
+SWMethodBodyTranspiler >> putTypeDeclarationOf: aVariable as: aType [
+	self
+		put: (self pool class mangleClass transpiledTypeNameOf: aType result value);
+		put: ' :: ';
+		put: aVariable node value.
+
 ]
 
 { #category : #'code generation' }

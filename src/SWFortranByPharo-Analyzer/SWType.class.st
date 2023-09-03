@@ -73,13 +73,6 @@ SWType class >> new: aClass with: aPriority [
 		yourself
 ]
 
-{ #category : #'as yet unclassified' }
-SWType class >> transpile_selfClass: cdt [
-	cdt
-		senderTranspilerOf: #declare:as: is: [ :mbt |  mbt preventStatementDelimiter; preventNewline ];
-		senderTranspilerOf: #declareReturnAs: is: [ :mbt |  mbt preventStatementDelimiter; preventNewline ]
-]
-
 { #category : #constants }
 SWType class >> userSpecifyingPriority [
 	^ 100

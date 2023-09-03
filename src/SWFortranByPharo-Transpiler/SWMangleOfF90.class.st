@@ -33,5 +33,8 @@ SWMangleOfF90 class >> transpiledTypeNameOf: aType [
 	aType = SmallInteger ifTrue: [
 		^ 'Integer'
 	].
+	(aType = Float or: [aType = Float class]) ifTrue: [
+		^ 'double precision'
+	].
 	self error; flag: #toImplement.
 ]

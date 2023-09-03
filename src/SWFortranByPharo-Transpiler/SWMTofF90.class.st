@@ -71,16 +71,18 @@ SWMTofF90 >> transpileAsBindCFunc: aName [
 		decIndent;
 		<< 'contains'; putLine;
 		incIndent;
-		<< 'function '; << aName; << '_f ('.
+		<< 'function '; << aName; << ' ('.
+	self mainTranspiler putArgumentDeclaration: self mainTranspiler expression arguments.
+
 	self stream
-		<< ') bind(c, Name=';
-		<< (Character value: 39); << aName; << (Character value: 39); << ')'; putLine;
+		<< ') result(return) bind(c, Name=';
+		<< (Character value: 39); << aName; << '_c'; << (Character value: 39); << ')'; putLine;
 		incIndent.
-	self mainTranspiler transpileAsMain.
+	self mainTranspiler putSequenceAndReturn.
 	self stream
 		decIndent;
 		<< 'end function ';
-		<< aName; << '_f'; putLine;
+		<< aName; putLine;
 		decIndent;
 		<< 'end module ';
 		<< aName;
