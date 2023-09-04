@@ -4,6 +4,9 @@ SWMBTofF90 is an implementation of SWMethodBodyTranspiler for Fortran 90.
 Class {
 	#name : #SWMBTofF90,
 	#superclass : #SWMethodBodyTranspiler,
+	#instVars : [
+		'bindC'
+	],
 	#category : #'SWFortranByPharo-Transpiler-F90'
 }
 
@@ -16,6 +19,18 @@ SWMBTofF90 >> atMethod: aMethodNode [
 		putSequence.
 	self append: child.
 
+]
+
+{ #category : #accessing }
+SWMBTofF90 >> bindC [
+
+	^ bindC ifNil: [ bindC := false ]
+]
+
+{ #category : #accessing }
+SWMBTofF90 >> bindC: anObject [
+
+	bindC := anObject
 ]
 
 { #category : #'as yet unclassified' }
@@ -56,6 +71,26 @@ SWMBTofF90 >> putStdOut [
 	] ifFalse: [
 		self put: 'print *, '; transpileChildWithoutBracket: self children second
 	]
+
+]
+
+{ #category : #'as yet unclassified' }
+SWMBTofF90 >> putTypeDeclarationOf: aVariable as: aType [
+	|name typeSpecs|
+	name := aVariable node value.
+	typeSpecs := OrderedCollection new.
+	self bindC ifTrue: [
+		typeSpecs add: (self pool class mangleClass transpiledBindCTypeNameOf: aType result value).
+		self expression arguments detect: [ :each | each name = name ] ifFound: [ :found |
+			typeSpecs add: 'Value'; add: 'Intent(In)'
+		]
+	] ifFalse: [
+		self error; flag: #toImplement	
+	].
+	typeSpecs do: [ :spec |
+		self put: spec
+	] separatedBy: [ self put: ', ' ].
+	self put: ' :: '; put: name
 
 ]
 

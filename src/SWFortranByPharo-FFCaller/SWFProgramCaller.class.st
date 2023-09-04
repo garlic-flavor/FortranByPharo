@@ -1,5 +1,5 @@
 Class {
 	#name : #SWFProgramCaller,
-	#superclass : #SWFCallerBase,
+	#superclass : #SWFCaller,
 	#category : #'SWFortranByPharo-FFCaller'
 }

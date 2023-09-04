@@ -13,6 +13,18 @@ SWMTofF90 class >> poolClass [
 ]
 
 { #category : #accessing }
+SWMTofF90 >> bindC [
+
+	^ self mainTranspiler bindC
+]
+
+{ #category : #accessing }
+SWMTofF90 >> bindC: anObject [
+
+	self mainTranspiler bindC: anObject
+]
+
+{ #category : #accessing }
 SWMTofF90 >> exeFilename [
 	^ String streamContents: [ :s | self putExeFilenameOn: s ]
 ]
@@ -61,6 +73,7 @@ SWMTofF90 >> transpile [
 
 { #category : #'as yet unclassified' }
 SWMTofF90 >> transpileAsBindCFunc: aName [
+	self bindC: true.
 	self solveDependencies.
 	
 	self stream

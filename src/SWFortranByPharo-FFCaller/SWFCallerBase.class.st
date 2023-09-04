@@ -2,10 +2,12 @@ Class {
 	#name : #SWFCallerBase,
 	#superclass : #Object,
 	#instVars : [
+		'referenceMode',
 		'id',
 		'name',
 		'script',
 		'baseDir',
+		'transpiler',
 		'sourceTarget',
 		'buildTarget',
 		'readyToCall'
@@ -23,10 +25,17 @@ SWFCallerBase class >> osProperty [
 	^ SWOS default
 ]
 
+{ #category : #'as yet unclassified' }
+SWFCallerBase class >> transpilerClass [
+	^ self subclassResponsibility 
+]
+
 { #category : #'private - accessing' }
 SWFCallerBase >> baseDir [
 
-	^ baseDir ifNil: [ baseDir := self class localDirectory / self name ]
+	^ baseDir ifNil: [
+		baseDir := self class localDirectory / 'mods' / (self name, '-', self id asString)
+	]
 ]
 
 { #category : #'private - accessing' }
@@ -74,20 +83,24 @@ SWFCallerBase >> buildTargetExt [
 
 { #category : #'private - accessing' }
 SWFCallerBase >> buildTargetName [
-	^ self name, '-', self id asString, self buildTargetExt
+	^ self name, self buildTargetExt
+
+]
+
+{ #category : #api }
+SWFCallerBase >> call: arg1 [
+	^ self referenceMode ifTrue: [
+		self script value: arg1
+	] ifFalse: [
+		(self readyToCall) ifFalse: [ self build ].
+		self callBuildedWith: arg1
+	]
 
 ]
 
 { #category : #'private - running' }
-SWFCallerBase >> callBuildedWith: args [
+SWFCallerBase >> callBuildedWith: arg1 [
 	^ self subclassResponsibility 
-]
-
-{ #category : #api }
-SWFCallerBase >> callWith: args [
-	(self readyToCall) ifFalse: [ self build ].
-	^ self callBuildedWith: args
-
 ]
 
 { #category : #'private - accessing' }
@@ -127,6 +140,18 @@ SWFCallerBase >> readyToCall: anObject [
 ]
 
 { #category : #accessing }
+SWFCallerBase >> referenceMode [
+
+	^ referenceMode ifNil: [ referenceMode := false ]
+]
+
+{ #category : #accessing }
+SWFCallerBase >> referenceMode: anObject [
+
+	referenceMode := anObject
+]
+
+{ #category : #accessing }
 SWFCallerBase >> script [
 
 	^ script ifNil: [ script := [ ] ]
@@ -146,7 +171,7 @@ SWFCallerBase >> sourceExt [
 { #category : #'private - accessing' }
 SWFCallerBase >> sourceTarget [
 
-	^ sourceTarget ifNil: [ sourceTarget := self sourceTargetName ]
+	^ sourceTarget ifNil: [ sourceTarget := self baseDir / self sourceTargetName ]
 ]
 
 { #category : #'private - accessing' }
@@ -157,6 +182,22 @@ SWFCallerBase >> sourceTarget: anObject [
 
 { #category : #'private - accessing' }
 SWFCallerBase >> sourceTargetName [
-	^ self name, '-', self id asString, self sourceExt
+	^ self name, self sourceExt
 
+]
+
+{ #category : #accessing }
+SWFCallerBase >> transpiler [
+
+	^ transpiler ifNil: [
+		transpiler := self class transpilerClass new
+			script: self script;
+			yourself
+	]
+]
+
+{ #category : #accessing }
+SWFCallerBase >> transpiler: anObject [
+
+	transpiler := anObject
 ]

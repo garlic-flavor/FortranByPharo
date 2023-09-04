@@ -26,6 +26,20 @@ SWMangleOfF90 class >> mangle: anExpression [
 ]
 
 { #category : #'as yet unclassified' }
+SWMangleOfF90 class >> transpiledBindCTypeNameOf: aType [
+	aType = Integer ifTrue: [
+		^ 'Integer'
+	].
+	aType = SmallInteger ifTrue: [
+		^ 'Integer'
+	].
+	(aType = Float or: [aType = Float class]) ifTrue: [
+		^ 'Real(c_double)'
+	].
+	self error; flag: #toImplement.
+]
+
+{ #category : #'as yet unclassified' }
 SWMangleOfF90 class >> transpiledTypeNameOf: aType [
 	aType = Integer ifTrue: [
 		^ 'Integer'

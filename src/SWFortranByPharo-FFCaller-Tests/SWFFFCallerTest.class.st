@@ -9,14 +9,13 @@ Class {
 
 { #category : #tests }
 SWFFFCallerTest >> test_0010_basics [
-	|arg1|
-	arg1 := 0.0.
 	self assert: (SWFFCaller new
 		script: [ :arg1|
-			SWType declareReturnAs: #double.
-			SWType declare: #arg1 as: #double.
-			arg1 sin.
+			SWType declare: #return as: Float.
+			SWType declare: #arg1 as: Float.
+			arg1 * 2.
 		];
-		callWith: { 0.0 }) equals: 0.0
+		referenceMode: false;
+		call: 2.0) equals: 4.0
 
 ]

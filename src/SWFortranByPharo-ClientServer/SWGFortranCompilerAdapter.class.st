@@ -17,6 +17,17 @@ Class {
 	#category : #'SWFortranByPharo-ClientServer-Shell'
 }
 
+{ #category : #'as yet unclassified' }
+SWGFortranCompilerAdapter class >> buildDynamiclib: aTarget from: sources with: options [
+
+	^ SWShell execute: self compilerName arguments: (OrderedCollection new
+		add: '-dynamiclib';
+		addAll: (sources collect: [:one | one fullName]);
+		add: '-J', (aTarget parent fullName);
+		add: '-o'; add: aTarget fullName;
+		yourself)
+]
+
 { #category : #compiling }
 SWGFortranCompilerAdapter class >> compile: srcs to: exe [
 	^ SWShell execute: self compilerName arguments: (self compilingOptionsFor: srcs to: exe).

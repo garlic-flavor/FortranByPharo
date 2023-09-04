@@ -578,15 +578,6 @@ SWMethodBodyTranspiler >> putStatementDelimiter [
 	self stream putDelimiter
 ]
 
-{ #category : #'as yet unclassified' }
-SWMethodBodyTranspiler >> putTypeDeclarationOf: aVariable as: aType [
-	self
-		put: (self pool class mangleClass transpiledTypeNameOf: aType result value);
-		put: ' :: ';
-		put: aVariable node value.
-
-]
-
 { #category : #'code generation' }
 SWMethodBodyTranspiler >> putVariable [
 
