@@ -22,11 +22,22 @@ Class {
 	#category : #'SWFortranByPharo-ClientServer-Shell'
 }
 
+{ #category : #initialization }
+SWIO class >> decode_self: cdt [
+	cdt
+		declareMethod: #out asReturn: SWAsyncStream
+]
+
 { #category : #'instance creation' }
 SWIO class >> new [
 	^ self basicNew
 		initialize;
 		yourself
+]
+
+{ #category : #'as yet unclassified' }
+SWIO class >> transpile_self: cdt [
+	cdt senderTranspilerOf: #out is: [ :mbt | ]
 ]
 
 { #category : #comparing }

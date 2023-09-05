@@ -4,7 +4,6 @@ Class {
 	#instVars : [
 		'referenceMode',
 		'id',
-		'name',
 		'script',
 		'baseDir',
 		'transpiler',
@@ -118,13 +117,13 @@ SWFCallerBase >> id: anObject [
 { #category : #accessing }
 SWFCallerBase >> name [
 
-	^ name ifNil: [ name := 'anonymous' ]
+	^ self transpiler name
 ]
 
 { #category : #accessing }
 SWFCallerBase >> name: anObject [
 
-	name := anObject
+	self transpiler name: anObject
 ]
 
 { #category : #'private - accessing' }

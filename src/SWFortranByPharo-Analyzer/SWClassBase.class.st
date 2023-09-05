@@ -30,7 +30,7 @@ SWClassBase >> printOn: aStream [
 
 { #category : #streaming }
 SWClassBase >> putOn: aStream [
-	aStream << self targetClass name
+	aStream << 'info: '; << self targetClass name
 ]
 
 { #category : #accessing }

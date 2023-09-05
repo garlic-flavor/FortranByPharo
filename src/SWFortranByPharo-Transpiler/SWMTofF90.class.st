@@ -4,6 +4,9 @@ SWMTofF90 is an implementation of SWModuleTranspiler for Fortran 90.
 Class {
 	#name : #SWMTofF90,
 	#superclass : #SWModuleTranspiler,
+	#instVars : [
+		'name'
+	],
 	#category : #'SWFortranByPharo-Transpiler-F90'
 }
 
@@ -27,6 +30,23 @@ SWMTofF90 >> bindC: anObject [
 { #category : #accessing }
 SWMTofF90 >> exeFilename [
 	^ String streamContents: [ :s | self putExeFilenameOn: s ]
+]
+
+{ #category : #accessing }
+SWMTofF90 >> name [
+
+	^ name ifNil: [ name := 'anonymous' ]
+]
+
+{ #category : #accessing }
+SWMTofF90 >> name: anObject [
+
+	name := anObject
+]
+
+{ #category : #streaming }
+SWMTofF90 >> putBasenameOn: aStream [
+	aStream << self name
 ]
 
 { #category : #streaming }
@@ -60,44 +80,43 @@ SWMTofF90 >> stream [
 SWMTofF90 >> transpile [
 	self solveDependencies.
 
-	self stream put: 'program '.
-	self putBasenameOn: self stream.
-	self stream putLine; incIndent; put: 'implicit none'; putLine.
+	self stream
+		<< 'program '; << self name; << '_program'; putLine; incIndent;
+		<< 'implicit none'; putLine.
+
 	self mainTranspiler transpileAsMain.
-	self stream decIndent; putLine: 'contains'; incIndent.
-	self transpile: self mainTranspiler expression method methodClass.
-	self stream decIndent; put: 'end program '.
-	self putBasenameOn: self stream.
-	self stream putLine
+
+	self stream decIndent; << 'end program '; << self name; << '_program'; putLine.
+
 ]
 
 { #category : #'as yet unclassified' }
-SWMTofF90 >> transpileAsBindCFunc: aName [
+SWMTofF90 >> transpileAsBindCFunc [
 	self bindC: true.
 	self solveDependencies.
 	
 	self stream
-		<< 'module '; << aName; << '_module'; putLine;
+		<< 'module '; << self name; << '_module'; putLine;
 		incIndent;
 		<< 'use iso_c_binding'; putLine;
 		<< 'implicit none'; putLine;
 		decIndent;
 		<< 'contains'; putLine;
 		incIndent;
-		<< 'function '; << aName; << ' ('.
+		<< 'function '; << self name; << ' ('.
 	self mainTranspiler putArgumentDeclaration: self mainTranspiler expression arguments.
 
 	self stream
 		<< ') result(return) bind(c, Name=';
-		<< (Character value: 39); << aName; << '_c'; << (Character value: 39); << ')'; putLine;
+		<< (Character value: 39); << self name; << '_c'; << (Character value: 39); << ')'; putLine;
 		incIndent.
 	self mainTranspiler putSequenceAndReturn.
 	self stream
 		decIndent;
 		<< 'end function ';
-		<< aName; putLine;
+		<< self name; putLine;
 		decIndent;
 		<< 'end module ';
-		<< aName;
+		<< self name;
 		<< '_module'; putLine
 ]

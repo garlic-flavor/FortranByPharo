@@ -18,7 +18,7 @@ SWFFCaller >> buildSourceTarget [
 		ensureCreateFile;
 		writeStreamDo: [ :s |
 			self transpiler stream payload: s.
-			self transpiler transpileAsBindCFunc: self name.
+			self transpiler transpileAsBindCFunc.
 		].
 
 ]

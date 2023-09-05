@@ -28,7 +28,11 @@ SWExpression >> addToSlot: aName as: aType [
 { #category : #accessing }
 SWExpression >> arguments [
 
-	^ arguments
+	^ arguments ifNil: [
+		arguments := self node argumentNames collect: [ :name |
+			SWVariable named: name
+		]
+	]
 ]
 
 { #category : #accessing }
@@ -125,7 +129,7 @@ SWExpression >> atMessage: aMessageNode [
 	(aMessageNode selector = #declare:as: and: [ self children first result = SWType class ])ifTrue: [
 		self userSpecifyVariableType: aMessageNode
 	].
-
+	(self pool haltList includes: aMessageNode selector) ifTrue: [ self halt ].
 	self messageInfo: (self pool decode: aMessageNode selector with: (self children collect: [ :each | each result ])) messageInfo.
 	self result << self messageInfo result
 
@@ -237,7 +241,11 @@ SWExpression >> expression [
 { #category : #accessing }
 SWExpression >> locals [
 
-	^ locals
+	^ locals ifNil: [
+		locals := self node temporaryNames collect: [ :name |
+			SWVariable named: name
+		]
+	]
 ]
 
 { #category : #accessing }
@@ -283,6 +291,7 @@ SWExpression >> node: anObject [
 
 { #category : #modifying }
 SWExpression >> operands: operands [
+
 	self messageInfo operands: operands.
 	self readySlot.
 
@@ -302,12 +311,6 @@ SWExpression >> pool: anObject [
 
 { #category : #private }
 SWExpression >> readyArgsAndLocals [
-	self arguments: (self node argumentNames collect: [ :name |
-		SWVariable named: name
-	]).
-	self locals: (self node temporaryNames collect: [ :name |
-		SWVariable named: name
-	]).
 	self slot
 		addAllLast: self arguments;
 		addAllLast: self locals
@@ -323,7 +326,8 @@ SWExpression >> readySlot [
 		readyArgsAndLocals.
 	self arguments with: self messageInfo operands allButFirst do: [ :arg :type |
 		arg << type
-	]
+	].
+
 ]
 
 { #category : #accessing }

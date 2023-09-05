@@ -21,6 +21,11 @@ Class {
 	#category : #'SWFortranByPharo-Transpiler-Common'
 }
 
+{ #category : #initialization }
+SWTranspilerStream class >> decode_self: cdt [
+	self halt.
+]
+
 { #category : #streaming }
 SWTranspilerStream >> << anObject [
 	self put: anObject asString

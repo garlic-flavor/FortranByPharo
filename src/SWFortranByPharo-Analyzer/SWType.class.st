@@ -46,7 +46,7 @@ SWType class >> exactTypePriority [
 { #category : #'private - utilities' }
 SWType class >> nameOfPriority: aPriority [
 	^ ((SWType class methodDict values select: [ :m |
-		m protocol = #constants
+		m protocolName = #constants
 	] thenCollect: [ :m |
 		(m valueWithReceiver: self arguments: #()) -> m
 	]) sort: [ :a :b | b key < a key ]) detect: [ :m | m key <= aPriority ] ifFound: [ :m |

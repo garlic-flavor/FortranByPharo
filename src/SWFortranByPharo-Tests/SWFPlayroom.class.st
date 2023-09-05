@@ -39,9 +39,47 @@ SWFPlayroom class >> test2 [
 	          arg1 * 2.0 ].
 	mt := SWMTofF90 new
 		script: script;
+		name: 'hoge';
 		yourself.
-	mt transpileAsBindCFunc: 'hoge'.
+	mt transpileAsBindCFunc.
 
 	^ mt stream contents
+	
+]
+
+{ #category : #tests }
+SWFPlayroom class >> test3 [
+	<sampleInstance>
+	|script mt|
+	script := [ :io |
+		io out << 'Hello, world!'
+	].
+	mt := SWMTofF90 new.
+	mt pool global haltAt: #<<.
+	mt
+		main: script;
+		name: 'hoge';
+		yourself.
+	mt transpile.
+
+	^ mt stream contents
+	
+]
+
+{ #category : #tests }
+SWFPlayroom class >> test4 [
+	<sampleInstance>
+	|script exp pool|
+	script := [ :io |
+		5 + 3
+	].
+	pool := SWPoolOfF90 new.
+	exp := SWExpression new
+		pool: pool global;
+		node: script sourceNode;
+		operands: { Object. SWIO };
+		decode;
+		yourself.
+	^ exp
 	
 ]

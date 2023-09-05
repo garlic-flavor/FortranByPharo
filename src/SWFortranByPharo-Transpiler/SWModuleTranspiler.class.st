@@ -49,8 +49,8 @@ SWModuleTranspiler >> import: anArray from: basename [
 ]
 
 { #category : #accessing }
-SWModuleTranspiler >> main: aClass [
-	^ self method: (self class poolClass search: #main in: aClass classSide) with: { aClass classSide }
+SWModuleTranspiler >> main: aScript [
+	self mainTranspiler: (self pool transpilerForMain: aScript)
 ]
 
 { #category : #accessing }

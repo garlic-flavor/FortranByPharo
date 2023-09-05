@@ -86,7 +86,7 @@ SWSenderInfo >> putBasenameOn: aStream [
 { #category : #streaming }
 SWSenderInfo >> putOn: aStream [
 	method ifNil: [
-		aStream << 'nil'
+		aStream << 'no method'
 	] ifNotNil: [
 		aStream << method selector
 	]
