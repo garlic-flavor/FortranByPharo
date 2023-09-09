@@ -17,7 +17,8 @@ Class {
 		'in',
 		'out',
 		'err',
-		'args'
+		'args',
+		'exitCode'
 	],
 	#category : #'SWFortranByPharo-ClientServer-Shell'
 }
@@ -110,6 +111,18 @@ SWIO >> err [
 SWIO >> err: aStream [
 
 	err := aStream
+]
+
+{ #category : #accessing }
+SWIO >> exitCode [
+
+	^ exitCode
+]
+
+{ #category : #accessing }
+SWIO >> exitCode: anObject [
+
+	exitCode := anObject
 ]
 
 { #category : #accessing }

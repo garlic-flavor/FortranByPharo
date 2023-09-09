@@ -9,6 +9,12 @@ Class {
 	#category : #'SWFortranByPharo-ClientServer-Shell'
 }
 
+{ #category : #initialization }
+SWAsyncStream class >> decode_self: cdt [
+	cdt
+		declareMethodReturnsReceiver: #<<
+]
+
 { #category : #accessing }
 SWAsyncStream class >> lineSep [
 	^ Character lf

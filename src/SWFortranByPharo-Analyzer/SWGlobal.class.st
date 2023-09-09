@@ -47,7 +47,7 @@ SWGlobal >> atPragma [
 { #category : #api }
 SWGlobal >> decode: aSenderInfo [
 
-	^ (self getClassInfo: aSenderInfo method methodClass)
+	^ (self getClassInfo: aSenderInfo receiverClass)
 		decode: aSenderInfo
 
 ]

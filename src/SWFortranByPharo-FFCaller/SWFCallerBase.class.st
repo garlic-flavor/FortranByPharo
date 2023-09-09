@@ -86,6 +86,11 @@ SWFCallerBase >> buildTargetName [
 
 ]
 
+{ #category : #'as yet unclassified' }
+SWFCallerBase >> call [
+	^ self call: {  }
+]
+
 { #category : #api }
 SWFCallerBase >> call: arg1 [
 	^ self referenceMode ifTrue: [
