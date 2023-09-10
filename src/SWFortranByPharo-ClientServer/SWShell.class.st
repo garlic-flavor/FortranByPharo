@@ -41,6 +41,19 @@ SWShell class >> execute: exe arguments: list [
 
 ]
 
+{ #category : #'as yet unclassified' }
+SWShell class >> execute: exe redirectTo: io [
+	^ OSSUnixSubprocess new
+		command: exe;
+		arguments: io args;
+		workingDirectory: SWOS default localDirectory fullName;
+		redirectStdinTo: io in;
+		redirectStdoutTo: io out;
+		redirectStderrTo: io err;
+		runAndWait;
+		yourself.
+]
+
 { #category : #execution }
 SWShell class >> executeProcess: process [
 	"I execute 'exe' with 'list', then return its result."

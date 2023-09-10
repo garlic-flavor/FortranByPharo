@@ -55,7 +55,6 @@ SWFPlayroom class >> test3 [
 		io out << 'Hello, world!'
 	].
 	mt := SWMTofF90 new.
-	mt pool global haltAt: #<<.
 	mt
 		main: script;
 		name: 'hoge';

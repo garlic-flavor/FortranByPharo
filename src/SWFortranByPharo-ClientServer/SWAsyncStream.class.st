@@ -54,6 +54,16 @@ SWAsyncStream >> close [
 	super close
 ]
 
+{ #category : #closing }
+SWAsyncStream >> closeReader [
+	^ self stream closeReader
+]
+
+{ #category : #closing }
+SWAsyncStream >> closeWriter [
+	^ self stream closeWriter
+]
+
 { #category : #accessing }
 SWAsyncStream >> contents [
 	"Answer all of the contents of the receiver."
@@ -106,6 +116,21 @@ SWAsyncStream >> on: aStream [
 	stream := aStream
 ]
 
+{ #category : #testing }
+SWAsyncStream >> ossIsPipe [
+	^ self stream ossIsPipe
+]
+
+{ #category : #options }
+SWAsyncStream >> reader [
+	^ self stream reader
+]
+
+{ #category : #positioning }
+SWAsyncStream >> skipTo: aChar [
+	^ self stream skipTo: aChar
+]
+
 { #category : #stepping }
 SWAsyncStream >> step [
 	(Delay forMilliseconds: self delay) wait
@@ -115,4 +140,9 @@ SWAsyncStream >> step [
 SWAsyncStream >> stream [
 
 	^ stream
+]
+
+{ #category : #accessing }
+SWAsyncStream >> writer [
+	^ self stream writer
 ]

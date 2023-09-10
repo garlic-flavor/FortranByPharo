@@ -192,12 +192,9 @@ SWFCallerBase >> sourceTargetName [
 
 { #category : #accessing }
 SWFCallerBase >> transpiler [
+	^ self subclassResponsibility 
 
-	^ transpiler ifNil: [
-		transpiler := self class transpilerClass new
-			script: self script;
-			yourself
-	]
+
 ]
 
 { #category : #accessing }

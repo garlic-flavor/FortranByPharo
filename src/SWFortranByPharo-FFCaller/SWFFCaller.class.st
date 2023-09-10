@@ -57,3 +57,13 @@ SWFFCaller >> scriptSpec [
 	^ result asArray
 
 ]
+
+{ #category : #accessing }
+SWFFCaller >> transpiler [
+
+	^ transpiler ifNil: [
+		transpiler := self class transpilerClass new
+			script: self script;
+			yourself
+	]
+]

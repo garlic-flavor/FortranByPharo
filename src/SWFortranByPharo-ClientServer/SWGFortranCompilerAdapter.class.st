@@ -28,6 +28,15 @@ SWGFortranCompilerAdapter class >> buildDynamiclib: aTarget from: sources with: 
 		yourself)
 ]
 
+{ #category : #'as yet unclassified' }
+SWGFortranCompilerAdapter class >> buildExe: aTarget from: sources with: options [
+	^ SWShell execute: self compilerName arguments: (OrderedCollection new
+		addAll: (sources collect: [:one | one fullName]);
+		add: '-J', (aTarget parent fullName);
+		add: '-o'; add: aTarget fullName;
+		yourself)
+]
+
 { #category : #compiling }
 SWGFortranCompilerAdapter class >> compile: srcs to: exe [
 	^ SWShell execute: self compilerName arguments: (self compilingOptionsFor: srcs to: exe).
