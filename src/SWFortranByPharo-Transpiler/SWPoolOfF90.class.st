@@ -23,11 +23,18 @@ SWPoolOfF90 class >> methodBodyTranspilerClass [
 ]
 
 { #category : #'as yet unclassified' }
-SWPoolOfF90 >> transpile_SWAsyncStream: cdt [
+SWPoolOfF90 >> transpile_SWIO: cdt [
 	cdt
 		senderTranspilerOf: #<< is: [ :mbt |
-			mbt put: 'print *, '.
-			mbt transpileChild: mbt children second.
+			mbt put: 'write (*, *, advance="no") ';
+				transpileChild: mbt children second.
+		];
+		senderTranspilerOf: #ln is: [ :mbt |
+			mbt put: 'write (*, *)'
+		];
+		senderTranspilerOf: #ln: is: [ :mbt |
+			mbt put: 'print *, ';
+				transpileChild: mbt children second.
 		]
 ]
 

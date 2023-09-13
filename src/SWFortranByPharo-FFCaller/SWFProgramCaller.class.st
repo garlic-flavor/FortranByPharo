@@ -49,6 +49,11 @@ SWFProgramCaller >> callBuildedWith: args [
 
 ]
 
+{ #category : #'open/close' }
+SWFProgramCaller >> close [
+	io ifNotNil: [ io close. io := nil ]
+]
+
 { #category : #accessing }
 SWFProgramCaller >> io [
 

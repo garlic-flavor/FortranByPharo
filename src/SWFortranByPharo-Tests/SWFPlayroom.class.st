@@ -52,10 +52,9 @@ SWFPlayroom class >> test3 [
 	<sampleInstance>
 	|script mt|
 	script := [ :io |
-		io out << 'Hello, world!'
+		io << 'Hello, world!'
 	].
-	mt := SWMTofF90 new.
-	mt
+	mt := SWMTofF90 new
 		main: script;
 		name: 'hoge';
 		yourself.
@@ -68,17 +67,35 @@ SWFPlayroom class >> test3 [
 { #category : #tests }
 SWFPlayroom class >> test4 [
 	<sampleInstance>
-	|script exp pool|
+	|script mt|
 	script := [ :io |
-		5 + 3
+		io ln: 'Hello, world!';
+			ln: 'Good-bye, heaven.'
 	].
-	pool := SWPoolOfF90 new.
-	exp := SWExpression new
-		pool: pool global;
-		node: script sourceNode;
-		operands: { Object. SWIO };
-		decode;
+	mt := SWMTofF90 new
+		main: script;
+		name: 'hoge';
 		yourself.
-	^ exp
+	mt transpile.
+
+	^ mt stream contents
+	
+]
+
+{ #category : #tests }
+SWFPlayroom class >> test5 [
+	<sampleInstance>
+	|script pc|
+	script := [ :io |
+		io ln: 'Hello, world!';
+			ln: 'Good-bye, heaven.'
+	].
+	pc := SWFProgramCaller new
+		script: script;
+		name: 'hoge';
+		yourself.
+	pc call.
+
+	^ pc io getStdoutAsString
 	
 ]

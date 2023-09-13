@@ -26,7 +26,9 @@ Class {
 { #category : #initialization }
 SWIO class >> decode_self: cdt [
 	cdt
-		declareMethod: #out asReturn: SWAsyncStream
+		declareMethodReturnsReceiver: #<<;
+		declareMethodReturnsReceiver: #ln;
+		declareMethodReturnsReceiver: #ln:
 ]
 
 { #category : #'instance creation' }
@@ -34,11 +36,6 @@ SWIO class >> new [
 	^ self basicNew
 		initialize;
 		yourself
-]
-
-{ #category : #'as yet unclassified' }
-SWIO class >> transpile_self: cdt [
-	cdt senderTranspilerOf: #out is: [ :mbt | ]
 ]
 
 { #category : #comparing }
@@ -125,6 +122,11 @@ SWIO >> exitCode: anObject [
 	exitCode := anObject
 ]
 
+{ #category : #'as yet unclassified' }
+SWIO >> getStdoutAsString [
+	^ String streamContents: [ :s | s << self out upToEnd ]
+]
+
 { #category : #accessing }
 SWIO >> in [
 	^ in ifNil: [ in := SWWaitableStream newOnPipe ]
@@ -139,6 +141,15 @@ SWIO >> in: aStream [
 { #category : #running }
 SWIO >> ln [
 	(self out)
+		nextPutAll: SWOS default lineSep;
+		flush
+
+]
+
+{ #category : #running }
+SWIO >> ln: aString [
+	(self out)
+		nextPutAll: aString;
 		nextPutAll: SWOS default lineSep;
 		flush
 

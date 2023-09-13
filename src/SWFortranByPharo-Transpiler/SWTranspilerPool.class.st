@@ -137,8 +137,7 @@ SWTranspilerPool >> transpile_ProtoObject: ct [
 { #category : #'as yet unclassified' }
 SWTranspilerPool >> transpile_SWTypeClass: cdt [
 	cdt
-		senderTranspilerOf: #declare:as: is: [ :mbt |  mbt preventStatementDelimiter; preventNewline ];
-		senderTranspilerOf: #declareReturnAs: is: [ :mbt |  mbt preventStatementDelimiter; preventNewline ]
+		senderTranspilerOf: #declare:as: is: [ :mbt |  mbt preventStatementDelimiter; preventNewline ]
 ]
 
 { #category : #'as yet unclassified' }

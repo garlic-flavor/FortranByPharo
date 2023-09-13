@@ -13,12 +13,11 @@ SWFProgramCallerTest >> test_0010_basics [
 
 	fpc := SWFProgramCaller new
 		script: [ :io |
-			io out << 'Hello, world!'
+			io ln: 'Hello, world!'
 		];
 		referenceMode: false;
 		call;
 		yourself.
-	self assert: (String streamContents: [:s| s << fpc io out upToEnd])
-		equals: (' Hello, world!', String lf).
-
+	self assert: fpc io getStdoutAsString equals: (' Hello, world!', String lf).
+	fpc close.
 ]
