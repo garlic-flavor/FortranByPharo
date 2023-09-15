@@ -149,7 +149,7 @@ SWIO >> ln [
 { #category : #running }
 SWIO >> ln: aString [
 	(self out)
-		nextPutAll: aString;
+		nextPutAll: aString asString;
 		nextPutAll: SWOS default lineSep;
 		flush
 

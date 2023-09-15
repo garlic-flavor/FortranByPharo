@@ -151,7 +151,7 @@ SWClassDefinitionTranspiler >> putMethodDefinition: anExpression [
 		pre cull: mbt.
 		self putPredefinedMethodFooter: mbt
 	] ifNone: [ 
-		mbt transpile
+		mbt transpileAsMain
 	].
 	self putMethodFooter: mbt.
 

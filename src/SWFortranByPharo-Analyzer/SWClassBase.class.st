@@ -1,5 +1,5 @@
 "
-baseclass of SWClassInfo and SWClassDefinitionTranspiler
+This carries informations about a target class.
 "
 Class {
 	#name : #SWClassBase,

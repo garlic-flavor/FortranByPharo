@@ -32,9 +32,9 @@ SWFProgramCaller >> buildTargetExt [
 SWFProgramCaller >> call: args [
 	self referenceMode ifTrue: [
 		self io args: args.
-		self script value: self io.
+		self callReferenced.
 		io out flush.
-		io out done.
+		io out closeWriter.
 	] ifFalse: [
 		(self readyToCall) ifFalse: [ self build ].
 		self callBuildedWith: args
@@ -47,6 +47,19 @@ SWFProgramCaller >> callBuildedWith: args [
 	self io args: args.
 	subprocess := SWShell execute: self buildTarget fullName redirectTo: self io.
 
+]
+
+{ #category : #'as yet unclassified' }
+SWFProgramCaller >> callReferenced [
+	(self script class includesBehavior: FullBlockClosure) ifTrue: [
+		^ self script value: self io.
+	].
+	(self script includesBehavior: SWFProgram) ifTrue: [
+		^ self script new
+			io: self io;
+			main
+	].
+	self error.
 ]
 
 { #category : #'open/close' }

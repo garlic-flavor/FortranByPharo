@@ -163,6 +163,11 @@ SWClassInfo >> declareMethodReturnsSecondArgumentsElement: aName [
 
 ]
 
+{ #category : #'as yet unclassified' }
+SWClassInfo >> declareSlot: aName as: aType [
+	self slot detect: [ :type | type name = aName ] ifFound: [ :type | type << aType ]
+]
+
 { #category : #api }
 SWClassInfo >> decode: aSenderInfo [
 	^ self methods at: aSenderInfo ifAbsent: [

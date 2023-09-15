@@ -41,6 +41,8 @@ SWPoolOfF90 >> transpile_SWIO: cdt [
 { #category : #'as yet unclassified' }
 SWPoolOfF90 >> transpile_SWTypeClass: cdt [
 	cdt senderTranspilerOf: #declare:as: is: [ :mbt |
+"
 		mbt putTypeDeclarationOf: mbt children second as: mbt children third.
+"
 	]
 ]

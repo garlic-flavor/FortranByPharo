@@ -1,5 +1,5 @@
 "
-a base class of SWGlobal and SWTranspilerPool.
+This payload is SWClassInfo.
 "
 Class {
 	#name : #SWPoolBase,
@@ -93,8 +93,8 @@ SWPoolBase >> initialize: ci [
 	initializer := self class
 		initializerSelectorTrailed: 'self'
 		with: (targetClass isClassSide ifTrue: [ 'Class' ] ifFalse: [ '' ]).
-	targetClass classSide methodDict at: initializer ifPresent: [ :init | 
-		init valueWithReceiver: targetClass instanceSide arguments: { ci }
+	(targetClass respondsTo: initializer) ifTrue: [
+		targetClass perform: initializer with: ci
 	].
 	^ ci
 

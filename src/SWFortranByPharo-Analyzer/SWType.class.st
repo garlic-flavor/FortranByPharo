@@ -156,7 +156,7 @@ SWType >> superclass [
 		yourself
 ]
 
-{ #category : #accessing }
+{ #category : #evaluating }
 SWType >> value [
 	^ self payload
 

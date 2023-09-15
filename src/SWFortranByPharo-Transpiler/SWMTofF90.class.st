@@ -80,11 +80,21 @@ SWMTofF90 >> stream [
 SWMTofF90 >> transpile [
 	self solveDependencies.
 
+	self transpile: self mainTranspiler expression method methodClass instanceSide.
+	self transpile: self mainTranspiler receiverClass instanceSide.
+
 	self stream
-		<< 'program '; << self name; << '_program'; putLine; incIndent;
+		<< 'program '; << self name; << '_program'; putLine; incIndent.
+	self pool payload keysDo: [ :aClass |
+		(aClass includesBehavior: SWFProgram) ifTrue: [
+			self stream << 'use '; << aClass name; << '_module'; putLine.
+		]
+	].
+	self stream
 		<< 'implicit none'; putLine.
 
 	self mainTranspiler transpileAsMain.
+	
 
 	self stream decIndent; << 'end program '; << self name; << '_program'; putLine.
 

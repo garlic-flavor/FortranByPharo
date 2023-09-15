@@ -1,3 +1,6 @@
+"
+This abstracts Asynchronous streaming IO.
+"
 Class {
 	#name : #SWAsyncStream,
 	#superclass : #Stream,
@@ -55,7 +58,7 @@ SWAsyncStream >> closeReader [
 
 { #category : #closing }
 SWAsyncStream >> closeWriter [
-	^ self stream closeWriter
+	self stream closeWriter
 ]
 
 { #category : #accessing }

@@ -94,7 +94,14 @@ SWFCallerBase >> call [
 { #category : #api }
 SWFCallerBase >> call: arg1 [
 	^ self referenceMode ifTrue: [
-		self script value: arg1
+		(self script class includesBehavior: FullBlockClosure) ifTrue: [
+			self script value: arg1
+		] ifFalse: [	
+			(self script includesBehavior: SWFProgram) ifFalse: [ ^ self error ].
+			self script new
+				io: SWIO new;
+				main
+		]
 	] ifFalse: [
 		(self readyToCall) ifFalse: [ self build ].
 		self callBuildedWith: arg1

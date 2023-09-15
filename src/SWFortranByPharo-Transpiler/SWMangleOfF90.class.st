@@ -19,7 +19,7 @@ SWMangleOfF90 class >> mangle: anExpression [
 		].
 		s
 			<< (self safeSelectorNameOf: anExpression method selector);
-			<< (anExpression messageInfo operands collect: [ :v |
+			<< (anExpression messageInfo operands allButFirst collect: [ :v |
 				self typeNameOf: v type value
 			])
 	]
@@ -41,10 +41,10 @@ SWMangleOfF90 class >> transpiledBindCTypeNameOf: aType [
 
 { #category : #'as yet unclassified' }
 SWMangleOfF90 class >> transpiledTypeNameOf: aType [
-	aType = Integer ifTrue: [
+	(aType = Integer or: [ aType = Integer class ]) ifTrue: [
 		^ 'Integer'
 	].
-	aType = SmallInteger ifTrue: [
+	(aType = SmallInteger or: [ aType = SmallInteger class ]) ifTrue: [
 		^ 'Integer'
 	].
 	(aType = Float or: [aType = Float class]) ifTrue: [

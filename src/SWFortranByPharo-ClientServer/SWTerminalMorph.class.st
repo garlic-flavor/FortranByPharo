@@ -1,3 +1,6 @@
+"
+A test implementation of shell like something.
+"
 Class {
 	#name : #SWTerminalMorph,
 	#superclass : #StandardWindow,

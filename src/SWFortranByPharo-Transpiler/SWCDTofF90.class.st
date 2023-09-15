@@ -23,6 +23,31 @@ SWCDTofF90 >> initialize_ThreadSafeTranscript [
 ]
 
 { #category : #'code generation' }
+SWCDTofF90 >> putClassFooter [
+	self stream << 'end module '; << self targetClass name; << '_module'; putLine
+]
+
+{ #category : #'code generation' }
+SWCDTofF90 >> putClassHeader [
+	self stream << 'module '; << targetClass name; << '_module'; putLine;
+		<< 'contains'; putLine.
+]
+
+{ #category : #'code generation' }
+SWCDTofF90 >> putMember [
+"
+	self targetClass slots do: [ :each |
+		self classInfo slot detect: [ :one | one name = each name ] ifFound: [ :found |
+			(found isNotNil and: [ found name isEmptyOrNil not ]) ifTrue: [
+				self putMemberDeclarationOf: found
+			]
+		]
+	].
+"
+	self putMethods.
+]
+
+{ #category : #'code generation' }
 SWCDTofF90 >> putMethodFooter: mbt [
 	mbt node containsReturn ifTrue: [
 		self halt.
@@ -47,5 +72,13 @@ SWCDTofF90 >> putMethodHeader: mbt [
 
 { #category : #private }
 SWCDTofF90 >> transpileAsInstanceSide [
+	self stream putComment: self targetClass comment.
+	self putClassHeader.
+	self stream incIndent.
+
+	self putMember.
+
+	self stream decIndent.
+	self putClassFooter.
 
 ]

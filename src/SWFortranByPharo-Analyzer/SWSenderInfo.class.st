@@ -76,7 +76,7 @@ SWSenderInfo >> printOn: aStream [
 	self putOn: aStream
 ]
 
-{ #category : #'as yet unclassified' }
+{ #category : #streaming }
 SWSenderInfo >> putBasenameOn: aStream [
 	aStream
 		<< self receiverClass instanceSide name;

@@ -50,7 +50,16 @@ SWModuleTranspiler >> import: anArray from: basename [
 
 { #category : #accessing }
 SWModuleTranspiler >> main: aScript [
-	self mainTranspiler: (self pool transpilerForMain: aScript)
+	(aScript class includesBehavior: FullBlockClosure) ifTrue: [
+		^ self mainTranspiler: (self pool transpilerForMain: aScript)
+	].
+	(aScript includesBehavior: SWFProgram) ifTrue: [
+		^ self mainTranspiler:
+			(self pool transpilerFor: (aScript methodDict at: #main) with: { aScript })
+	].
+	self error.
+
+
 ]
 
 { #category : #accessing }
@@ -152,6 +161,6 @@ SWModuleTranspiler >> transpile: aClass [
 	|cdt|
 	cdt := (self pool getClassInfo: aClass).
 	cdt isTranspiled ifTrue: [ ^ self ].
-	cdt transpile
+	cdt transpile.
 
 ]

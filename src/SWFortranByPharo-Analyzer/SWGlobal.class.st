@@ -1,5 +1,5 @@
 "
-I am a pool of SWClassInfo.
+This is a pool for decoding.
 "
 Class {
 	#name : #SWGlobal,

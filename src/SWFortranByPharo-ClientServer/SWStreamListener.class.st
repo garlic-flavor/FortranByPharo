@@ -1,3 +1,6 @@
+"
+This is a listener styled asynchronous stream.
+"
 Class {
 	#name : #SWStreamListener,
 	#superclass : #SWAsyncStream,

@@ -105,7 +105,7 @@ SWValue >> type: anObject [
 
 ]
 
-{ #category : #accessing }
+{ #category : #evaluating }
 SWValue >> value [
 	^ self type value
 ]

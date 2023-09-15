@@ -4,7 +4,7 @@ Class {
 	#classInstVars : [
 		'moduleTranspiler'
 	],
-	#category : #'SWFortranByPharo-ClientServer-Client'
+	#category : #'SWFortranByPharo-ClientServer-Tests-Common'
 }
 
 { #category : #building }

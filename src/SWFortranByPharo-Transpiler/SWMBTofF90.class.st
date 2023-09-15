@@ -77,6 +77,7 @@ SWMBTofF90 >> putStdOut [
 { #category : #'as yet unclassified' }
 SWMBTofF90 >> putTypeDeclarationOf: aVariable as: aType [
 	|name typeSpecs|
+	self halt; flag: #toRemove.
 	name := aVariable node value.
 	typeSpecs := OrderedCollection new.
 	self bindC ifTrue: [
@@ -85,7 +86,7 @@ SWMBTofF90 >> putTypeDeclarationOf: aVariable as: aType [
 			typeSpecs add: 'Value'; add: 'Intent(In)'
 		]
 	] ifFalse: [
-		self error; flag: #toImplement	
+		typeSpecs add: (self pool class mangleClass transpiledTypeNameOf: aType result value).
 	].
 	typeSpecs do: [ :spec |
 		self put: spec
@@ -96,12 +97,34 @@ SWMBTofF90 >> putTypeDeclarationOf: aVariable as: aType [
 
 { #category : #'code generation' }
 SWMBTofF90 >> putVariableDeclarationOf: aName [
-	|typeName|
+	|typeName typeSpecs|
+	typeSpecs := OrderedCollection new.
 	typeName := self expression slot detect: [ :each | each name = aName ] ifFound: [ :found |
-		self pool class mangleClass transpiledTypeNameOf: found value
+		found = SWIO ifTrue: [ ^ self ].
+		self bindC ifTrue: [
+			typeSpecs add: (self pool class mangleClass transpiledBindCTypeNameOf: found value).
+			self expression arguments detect: [ :each | each name = aName ] ifFound: [ :f |
+				typeSpecs add: 'Value'; add: 'Intent(In)'
+			]
+		] ifFalse: [
+			typeSpecs add: (self pool class mangleClass transpiledTypeNameOf: found value).
+		].
 	] ifNone: [
-		'Integer'
+		typeSpecs add: 'Integer'
 	].
-	self put: typeName; put: ' '; put: aName; cr.
+	typeSpecs do: [ :spec |
+		self put: spec
+	] separatedBy: [ self put: ', ' ].
+	self put: ' :: '; put: aName; cr
+
+]
+
+{ #category : #'code generation' }
+SWMBTofF90 >> putVariableDeclarations [
+
+	self expression arguments do: [ :loc |
+		self putVariableDeclarationOf: loc name
+	].
+	super putVariableDeclarations.
 
 ]

@@ -586,6 +586,7 @@ SWMethodBodyTranspiler >> putVariable [
 
 { #category : #'code generation' }
 SWMethodBodyTranspiler >> putVariableDeclaration [
+	self halt; flag: #toRemove.
 	self
 		putVariableDeclarationOf: self node name;
 		preventStatementDelimiter; preventNewline
@@ -600,7 +601,7 @@ SWMethodBodyTranspiler >> putVariableDeclarationOf: aName [
 SWMethodBodyTranspiler >> putVariableDeclarations [
 	self expression locals do: [ :loc |
 		self putVariableDeclarationOf: loc name
-	]
+	].
 
 ]
 

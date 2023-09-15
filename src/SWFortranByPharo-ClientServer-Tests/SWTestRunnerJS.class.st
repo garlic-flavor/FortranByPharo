@@ -1,7 +1,7 @@
 Class {
 	#name : #SWTestRunnerJS,
 	#superclass : #SWTestRunner,
-	#category : #'SWFortranByPharo-ClientServer-Client'
+	#category : #'SWFortranByPharo-ClientServer-Tests-Common'
 }
 
 { #category : #constants }

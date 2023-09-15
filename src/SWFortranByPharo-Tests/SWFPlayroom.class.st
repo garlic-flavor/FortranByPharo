@@ -93,9 +93,52 @@ SWFPlayroom class >> test5 [
 	pc := SWFProgramCaller new
 		script: script;
 		name: 'hoge';
+		referenceMode: true;
 		yourself.
 	pc call.
 
+	^ pc io getStdoutAsString
+	
+]
+
+{ #category : #tests }
+SWFPlayroom class >> test6 [
+	<sampleInstance>
+	|mt|
+	mt := SWMTofF90 new
+		main: SWTestP1;
+		name: 'hoge';
+		yourself.
+	mt transpile.
+
+	^ mt stream contents
+	
+]
+
+{ #category : #tests }
+SWFPlayroom class >> test7 [
+	<sampleInstance>
+	|mt|
+	mt := SWMTofF90 new
+		main: SWTestP2;
+		name: 'hoge';
+		yourself.
+	mt transpile.
+
+	^ mt stream contents
+	
+]
+
+{ #category : #tests }
+SWFPlayroom class >> test8 [
+	<sampleInstance>
+	|pc|
+	pc := SWFProgramCaller new
+		script: SWTestP2;
+		name: 'hoge';
+		referenceMode: false;
+		yourself.
+	pc call.
 	^ pc io getStdoutAsString
 	
 ]

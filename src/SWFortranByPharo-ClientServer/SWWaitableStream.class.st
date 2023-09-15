@@ -1,3 +1,6 @@
+"
+This is a waiting styled asynchronous stream.
+"
 Class {
 	#name : #SWWaitableStream,
 	#superclass : #SWAsyncStream,

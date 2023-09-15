@@ -181,7 +181,7 @@ SWVariable >> type: anObject [
 
 ]
 
-{ #category : #accessing }
+{ #category : #evaluating }
 SWVariable >> value [
 	^ self payload value
 ]
