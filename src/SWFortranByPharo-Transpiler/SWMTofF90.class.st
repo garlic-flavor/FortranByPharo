@@ -33,6 +33,14 @@ SWMTofF90 >> exeFilename [
 ]
 
 { #category : #accessing }
+SWMTofF90 >> main: aScript [
+	(aScript includesBehavior: SWFProgram) ifTrue: [
+		self name: aScript name
+	].
+	^ super main: aScript
+]
+
+{ #category : #accessing }
 SWMTofF90 >> name [
 
 	^ name ifNil: [ name := 'anonymous' ]
@@ -80,21 +88,28 @@ SWMTofF90 >> stream [
 SWMTofF90 >> transpile [
 	self solveDependencies.
 
-	self transpile: self mainTranspiler expression method methodClass instanceSide.
-	self transpile: self mainTranspiler receiverClass instanceSide.
-
 	self stream
 		<< 'program '; << self name; << '_program'; putLine; incIndent.
 	self pool payload keysDo: [ :aClass |
-		(aClass includesBehavior: SWFProgram) ifTrue: [
-			self stream << 'use '; << aClass name; << '_module'; putLine.
+		aClass = self mainTranspiler receiverClass ifFalse: [
+			(aClass includesBehavior: SWFProgram) ifTrue: [
+				self stream << 'use '; << aClass name; << '_module'; putLine.
+			]
 		]
 	].
-	self stream
-		<< 'implicit none'; putLine.
-
+	self stream << 'implicit none'; putLine.
 	self mainTranspiler transpileAsMain.
-	
+	self stream decIndent; << 'contains'; putLine; incIndent.
+
+	(self pool getClassInfo: self mainTranspiler receiverClass instanceSide) putMember.
+"
+	cdt := (self pool getClassInfo: aClass).
+	cdt isTranspiled ifTrue: [ ^ self ].
+	cdt transpile.
+
+	self transpile: self mainTranspiler expression method methodClass instanceSide.
+	self transpile: self mainTranspiler receiverClass instanceSide.
+"	
 
 	self stream decIndent; << 'end program '; << self name; << '_program'; putLine.
 

@@ -257,7 +257,7 @@ SWExpression >> locals: anObject [
 { #category : #accessing }
 SWExpression >> messageInfo [
 
-	^ messageInfo ifNil: [ messageInfo := SWMessageInfo new ]
+	^ messageInfo ifNil: [ messageInfo := self pool class messageInfoClass new ]
 ]
 
 { #category : #accessing }

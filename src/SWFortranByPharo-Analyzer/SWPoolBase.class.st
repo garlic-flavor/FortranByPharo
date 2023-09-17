@@ -17,6 +17,11 @@ SWPoolBase class >> classInfoClass [
 	^ self subclassResponsibility 
 ]
 
+{ #category : #constants }
+SWPoolBase class >> expressionClass [
+	^ SWExpression
+]
+
 { #category : #private }
 SWPoolBase class >> initializerFor: aClass [
 	^ self
@@ -35,6 +40,11 @@ SWPoolBase class >> initializerSelectorTrailed: trailer with: trailer2 [
 { #category : #constants }
 SWPoolBase class >> initializersHeader [
 	^ self subclassResponsibility 
+]
+
+{ #category : #'as yet unclassified' }
+SWPoolBase class >> messageInfoClass [
+	^ SWMessageInfo
 ]
 
 { #category : #utils }

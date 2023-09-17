@@ -12,9 +12,19 @@ SWPoolOfF90 class >> classInfoClass [
 	^ SWCDTofF90
 ]
 
+{ #category : #'as yet unclassified' }
+SWPoolOfF90 class >> globalClass [
+	^ SWGofF90
+]
+
 { #category : #constants }
 SWPoolOfF90 class >> mangleClass [
 	^ SWMangleOfF90
+]
+
+{ #category : #constants }
+SWPoolOfF90 class >> messageInfoClass [
+	^ SWMIofF90
 ]
 
 { #category : #constants }

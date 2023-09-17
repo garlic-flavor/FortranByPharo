@@ -11,6 +11,11 @@ Class {
 	#category : #'SWFortranByPharo-Transpiler-Common'
 }
 
+{ #category : #'as yet unclassified' }
+SWTranspilerPool class >> globalClass [
+	^ SWGlobal
+]
+
 { #category : #constants }
 SWTranspilerPool class >> initializersHeader [
 	^ 'transpile_'
@@ -29,7 +34,7 @@ SWTranspilerPool class >> methodBodyTranspilerClass [
 { #category : #accessing }
 SWTranspilerPool >> global [
 
-	^ global ifNil: [ global := SWGlobal new ]
+	^ global ifNil: [ global := self class globalClass new ]
 ]
 
 { #category : #accessing }

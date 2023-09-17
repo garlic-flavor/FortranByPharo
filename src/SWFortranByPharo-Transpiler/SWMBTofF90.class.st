@@ -103,11 +103,14 @@ SWMBTofF90 >> putVariableDeclarationOf: aName [
 		found = SWIO ifTrue: [ ^ self ].
 		self bindC ifTrue: [
 			typeSpecs add: (self pool class mangleClass transpiledBindCTypeNameOf: found value).
-			self expression arguments detect: [ :each | each name = aName ] ifFound: [ :f |
+			(self expression arguments anySatisfy: [ :each | each name = aName ]) ifTrue: [
 				typeSpecs add: 'Value'; add: 'Intent(In)'
 			]
 		] ifFalse: [
 			typeSpecs add: (self pool class mangleClass transpiledTypeNameOf: found value).
+			(self expression messageInfo mayWriteTo: found name) ifFalse: [
+				typeSpecs add: 'Intent(in)'
+			].
 		].
 	] ifNone: [
 		typeSpecs add: 'Integer'

@@ -60,11 +60,12 @@ SWCDTofF90 >> putMethodFooter: mbt [
 SWCDTofF90 >> putMethodHeader: mbt [
 	mbt node containsReturn ifTrue: [
 		self halt.
-	] ifFalse: [
+	] ifFalse: [|args|
+		args := OrderedCollection new.
 		mbt put: 'subroutine '; put: mbt mangle; put: '('.
-		mbt expression arguments do: [ :arg |
-			mbt put: arg name
-		] separatedBy: [ mbt put: ', ' ].
+		mbt expression messageInfo needsSelf ifTrue: [ args add: #self ].
+		args addAll: (mbt expression arguments collect: [ :each | each name ]).
+		args do: [ :arg | mbt put: arg ] separatedBy: [ mbt put: ', ' ].
 		mbt put: ')'; cr; incIndent
 	]
 

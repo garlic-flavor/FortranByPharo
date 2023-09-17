@@ -64,7 +64,7 @@ SWGlobal >> decode: aSelector with: operands [
 	] ifNone: [
 		(self haltList includes: aSelector) ifTrue: [ self halt ].
 		(self haltList includes: self class unresolvedSelectorKey)  ifTrue: [ self halt ].
-		SWMessageInfo new
+		self class messageInfoClass new
 			operands: operands;
 			yourself
 	]

@@ -121,7 +121,6 @@ SWFPlayroom class >> test7 [
 	|mt|
 	mt := SWMTofF90 new
 		main: SWTestP2;
-		name: 'hoge';
 		yourself.
 	mt transpile.
 

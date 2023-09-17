@@ -13,11 +13,6 @@ Class {
 	#category : #'SWFortranByPharo-Analyzer-Analyzer'
 }
 
-{ #category : #constants }
-SWClassInfo class >> expressionClass [
-	^ SWExpression
-]
-
 { #category : #private }
 SWClassInfo >> addSlotAbout: aClass [
 	aClass ifNil: [ ^ self ].
@@ -172,7 +167,7 @@ SWClassInfo >> declareSlot: aName as: aType [
 SWClassInfo >> decode: aSenderInfo [
 	^ self methods at: aSenderInfo ifAbsent: [
 		self predefined at: aSenderInfo method selector ifPresent: [ :pre | |messageInfo|
-			messageInfo := SWMessageInfo newFrom: aSenderInfo.
+			messageInfo := self pool class messageInfoClass newFrom: aSenderInfo.
 			messageInfo result << (pre cull: aSenderInfo operands).
 			self methods at: aSenderInfo put: messageInfo.
 		] ifAbsent: [ |methodInfo|
@@ -200,7 +195,7 @@ SWClassInfo >> methods: anObject [
 
 { #category : #private }
 SWClassInfo >> newExpression: aSenderInfo [
-	^ self class expressionClass new
+	^ self pool class expressionClass new
 		pool: self pool;
 		slot: self slot copy;
 		method: aSenderInfo method;
